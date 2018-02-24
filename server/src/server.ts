@@ -56,7 +56,9 @@ connection.onInitialize((params): InitializeResult => {
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent((change) => {
   connection.console.log('Invoked onDidChangeContent');
-  const diagnostics = Analyser.analyze(change.document)
+  const uri = change.document.uri
+  const contents = change.document.getText();
+  const diagnostics = Analyser.analyze(uri, contents)
   connection.sendDiagnostics({
     uri: change.document.uri,
     diagnostics

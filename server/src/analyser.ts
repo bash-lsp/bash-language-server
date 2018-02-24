@@ -1,146 +1,135 @@
-import { TextDocument, Range, Location, SymbolInformation, SymbolKind, Diagnostic, DiagnosticSeverity } from "vscode-languageserver/lib/main";
-import {Document} from "tree-sitter"
+import { Range, Location, SymbolInformation, SymbolKind, Diagnostic, DiagnosticSeverity } from "vscode-languageserver/lib/main";
+import {Document, ASTNode} from "tree-sitter"
 const bash = require("tree-sitter-bash")
 
-
-// hack.
-function forEach(node, cb) {
-  cb(node)
-  if (node.children.length) {
-    node.children.forEach(n => forEach(n, cb))
-  }
+// Global mapping from tree-sitter node type to vscode SymbolKind
+type Kinds = { [type: string]: SymbolKind }
+const kinds: Kinds = {
+  'environment_variable_assignment': SymbolKind.Variable,
+  'function_definition': SymbolKind.Function
 }
 
-type Declarations = {
-  [name: string]: [SymbolInformation]
-}
+// Global map of all the declarations that we've seen, indexed by file
+// and then name.
+type Declarations = { [name: string]: SymbolInformation[] }
+type FileDeclarations = { [uri: string]: Declarations }
+const declarations: FileDeclarations = {}
 
-type State = {
-  [uri: string]: Declarations
-}
-
-type Documents = {
-  [uri: string]: Document
-}
-
-type Texts = {
-  [uri: string]: string
-}
-
-const state: State = {}
+// Global map from uri to the tree-sitter document.
+type Documents = { [uri: string]: Document }
 const documents: Documents = {}
+
+// Global mapping from uri to the contents of the file at that uri.
+// We need this to find the word at a given point etc.
+type Texts = { [uri: string]: string }
 const texts: Texts = {}
 
-export function analyze(document: TextDocument): Diagnostic[] {
-
-  const uri = document.uri
-  const contents = document.getText();
+/**
+ * Analyze the given document, cache the tree-sitter AST, and iterate over the
+ * tree to find declarations.
+ *
+ * Returns all, if any, syntax errors that occurred while parsing the file.
+ *
+ */
+export function analyze(uri: string, contents: string): Diagnostic[] {
 
   const d = new Document();
   d.setLanguage(bash);
   d.setInputString(contents);
   d.parse()
 
-  documents[document.uri] = d
-  state[document.uri] = {}
-  texts[document.uri] = contents
+  documents[uri] = d
+  declarations[uri] = {}
+  texts[uri] = contents
 
   const problems = []
 
+
   forEach(d.rootNode, (n) => {
-    if (n.type == 'environment_variable_assignment') {
+    if (n.type == 'ERROR') {
+      problems.push(
+        Diagnostic.create(
+          range(n),
+          'Failed to parse expression',
+          DiagnosticSeverity.Error
+        )
+      )
+      return
+    }
+    else if (isDefinition(n)) {
       const named = n.firstNamedChild
       const name = contents.slice(named.startIndex, named.endIndex)
-      const v = SymbolInformation.create(
+      const namedDeclarations = declarations[uri][name] || []
+
+      namedDeclarations.push(SymbolInformation.create(
         name,
-        SymbolKind.Variable,
-        Range.create(
-          named.startPosition.row,
-          named.startPosition.column,
-          named.endPosition.row,
-          named.endPosition.column
-        ),
+        kinds[n.type],
+        range(named),
         uri,
-      )
-
-      const decls = state[document.uri] || []
-      const forName = decls[name] || []
-      forName.push(v)
-      state[document.uri][name] = forName
-
-    } else if (n.type === 'function_definition') {
-      const named = n.firstNamedChild
-      const name = contents.slice(named.startIndex, named.endIndex)
-      const f = SymbolInformation.create(
-        name,
-        SymbolKind.Function,
-        Range.create(
-          named.startPosition.row,
-          named.startPosition.column,
-          named.endPosition.row,
-          named.endPosition.column
-        ),
-        uri,
-      )
-
-      const decls = state[document.uri] || []
-      const forName = decls[name] || []
-      forName.push(f)
-      state[document.uri][name] = forName
-    } else if (n.type == 'ERROR') {
-      const r = Range.create(
-        n.startPosition.row,
-        n.startPosition.column,
-        n.endPosition.row,
-        n.endPosition.column
-      )
-      problems.push(Diagnostic.create(r, 'Failed to parse expression', DiagnosticSeverity.Error))
+      ))
+      declarations[uri][name] = namedDeclarations
     }
   });
 
   return problems
 }
 
+/**
+ * Find all the locations where something named name has been defined.
+ */
 export function findDefinition(uri: string, name: string): Location[] {
-  const declarations = state[uri][name]
-  return declarations.map(d => d.location)
+  return (declarations[uri][name] || []).map(d => d.location)
 }
 
-export function findOccurrences(uri: string, name: string): Location[] {
+/**
+ * Find all occurrences of name in the given file.
+ * It's currently not scope-aware.
+ */
+export function findOccurrences(uri: string, query: string): Location[] {
   const doc = documents[uri]
   const contents = texts[uri]
 
   const locations = []
 
   forEach(doc.rootNode, (n) => {
-    if (n.type === 'variable_name') {
-      const nodeName = contents.slice(n.startIndex, n.endIndex)
-      if (nodeName == name) {
-        locations.push(Location.create(
-          uri,
-          Range.create(
-            n.startPosition.row,
-            n.startPosition.column,
-            n.endPosition.row,
-            n.endPosition.column
-          )
-        ))
-      }
+
+    var name: string = null
+    var rng: Range = null
+
+    if (isReference(n)) {
+      const node = n.firstNamedChild || n
+      name = contents.slice(node.startIndex, node.endIndex)
+      rng = range(node)
+    } else if (isDefinition(n)) {
+      const namedNode = n.firstNamedChild
+      name = contents.slice(namedNode.startIndex, namedNode.endIndex)
+      rng = range(n.firstNamedChild)
     }
+
+    if (name == query) {
+      locations.push(Location.create(uri, rng))
+    }
+
   })
 
   return locations
 }
 
+/**
+ * Find all symbol definitions in the given file.
+ */
 export function findSymbols(uri: string): SymbolInformation[] {
-  const declarations: Declarations = state[uri]
+  const declarationsInFile = declarations[uri] || []
   const ds = []
-  Object.keys(declarations).forEach(n => {
-    declarations[n].forEach(d => ds.push(d))
+  Object.keys(declarationsInFile).forEach(n => {
+    declarationsInFile[n].forEach(d => ds.push(d))
   })
   return ds
 }
 
+/**
+ * Find the full word at the given point.
+ */
 export function wordAtPoint(uri: string, line: number, column: number): string | null {
   const document = documents[uri]
   const contents = texts[uri]
@@ -157,4 +146,45 @@ export function wordAtPoint(uri: string, line: number, column: number): string |
   }
 
   return name
+}
+
+//
+// Tree sitter utility functions.
+//
+
+function forEach(node: ASTNode, cb: (n: ASTNode) => void) {
+  cb(node)
+  if (node.children.length) {
+    node.children.forEach(n => forEach(n, cb))
+  }
+}
+
+function range(n: ASTNode): Range {
+  return Range.create(
+    n.startPosition.row,
+    n.startPosition.column,
+    n.endPosition.row,
+    n.endPosition.column
+  )
+}
+
+function isDefinition(n: ASTNode): boolean {
+  switch (n.type) {
+    case 'environment_variable_assignment':
+    case 'local_variable_declaration':
+    case 'function_definition':
+        return true
+      default:
+        return false
+  }
+}
+
+function isReference(n: ASTNode): boolean {
+  switch (n.type) {
+    case 'variable_name':
+    case 'command_name':
+        return true
+      default:
+        return false
+  }
 }
