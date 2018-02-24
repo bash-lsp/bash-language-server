@@ -1,4 +1,4 @@
-import { TextDocument, Range, Location, SymbolInformation, SymbolKind } from "vscode-languageserver/lib/main";
+import { TextDocument, Range, Location, SymbolInformation, SymbolKind, Diagnostic, DiagnosticSeverity } from "vscode-languageserver/lib/main";
 import {Document} from "tree-sitter"
 const bash = require("tree-sitter-bash")
 
@@ -31,7 +31,7 @@ const state: State = {}
 const documents: Documents = {}
 const texts: Texts = {}
 
-export function analyze(document: TextDocument): void {
+export function analyze(document: TextDocument): Diagnostic[] {
 
   const uri = document.uri
   const contents = document.getText();
@@ -44,6 +44,8 @@ export function analyze(document: TextDocument): void {
   documents[document.uri] = d
   state[document.uri] = {}
   texts[document.uri] = contents
+
+  const problems = []
 
   forEach(d.rootNode, (n) => {
     if (n.type == 'environment_variable_assignment') {
@@ -85,8 +87,20 @@ export function analyze(document: TextDocument): void {
       const forName = decls[name] || []
       forName.push(f)
       state[document.uri][name] = forName
+    } else if (n.hasError()) {
+      if (n.startPosition.row > 1) {
+        const r = Range.create(
+          n.startPosition.row,
+          n.startPosition.column,
+          n.endPosition.row,
+          n.endPosition.column
+        )
+        problems.push(Diagnostic.create(r, 'Failed to parse expression', DiagnosticSeverity.Error))
+      }
     }
   });
+
+  return problems
 }
 
 export function findDefinition(uri: string, name: string): Location[] {

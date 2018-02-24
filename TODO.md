@@ -6,4 +6,3 @@
   in those files on every search? That would be less state and I doubt people
   have HUGE bash files.
 - [ ] Look up man pages / --help to show inline help
-- [ ] Show parse errors.

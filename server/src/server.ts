@@ -14,7 +14,8 @@ import {
   DocumentSymbolParams,
   Location,
   DocumentHighlight,
-  ReferenceParams
+  ReferenceParams,
+  Diagnostic
 } from 'vscode-languageserver';
 
 import * as Analyser from './analyser';
@@ -57,7 +58,11 @@ connection.onInitialize((params): InitializeResult => {
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent((change) => {
   connection.console.log('Invoked onDidChangeContent');
-  Analyser.analyze(change.document);
+  const diagnostics = Analyser.analyze(change.document)
+  connection.sendDiagnostics({
+    uri: change.document.uri,
+    diagnostics
+  })
 });
 
 connection.onDidChangeWatchedFiles((_change) => {
