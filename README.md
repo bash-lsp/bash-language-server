@@ -1,7 +1,8 @@
 # Bash Language Server
 
-Bash language server implementation based on the [Tree Sitter][tree-sitter]
-[grammar for Bash][tree-sitter-bash]
+Bash language server implementation based.
+
+Uses [Tree Sitter][tree-sitter] and it's [grammar for Bash][tree-sitter-bash].
 
 ## How to run locally
 
