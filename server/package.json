@@ -1,0 +1,25 @@
+{
+	"name": "bash-language-server",
+	"description": "A language server for Bash",
+	"author": "Mads Hartmann",
+	"license": "MIT",
+	"version": "1.0.0",
+	"publisher": "mads-hartmann",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/mads-hartmann/bash-language-server"
+	},
+	"engines": {
+		"node": "*"
+	},
+	"dependencies": {
+		"tree-sitter": "^0.9.2",
+		"tree-sitter-bash": "^0.5.0",
+		"vscode-languageserver": "^3.5.0"
+	},
+	"scripts": {
+		"installServer": "installServerIntoExtension ../vscode-client ./package.json ./tsconfig.json",
+		"compile": "installServerIntoExtension ../vscode-client ./package.json ./tsconfig.json && tsc -p .",
+		"watch": "installServerIntoExtension ../vscode-client ./package.json ./tsconfig.json && tsc -w -p ."
+	}
+}

@@ -1,0 +1,4 @@
+**/node_modules
+
+vscode-client/out
+vscode-client/server
