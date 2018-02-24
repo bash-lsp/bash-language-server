@@ -11,8 +11,9 @@ Uses [Tree Sitter][tree-sitter] and it's [grammar for Bash][tree-sitter-bash].
 
 - [x] Jump to declaration
 - [x] Find references
-- [ ] Code Outline & Show Symbols
-- [ ] Code completion
+- [x] Code Outline & Show Symbols
+- [x] Code completion
+- [x] Simple diagnostics reporting
 
 ## How to run locally
 

@@ -14,9 +14,7 @@ import {
   DocumentSymbolParams,
   Location,
   DocumentHighlight,
-  ReferenceParams,
-  Diagnostic
-} from 'vscode-languageserver';
+  ReferenceParams} from 'vscode-languageserver';
 
 import * as Analyser from './analyser';
 

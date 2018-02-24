@@ -87,16 +87,14 @@ export function analyze(document: TextDocument): Diagnostic[] {
       const forName = decls[name] || []
       forName.push(f)
       state[document.uri][name] = forName
-    } else if (n.hasError()) {
-      if (n.startPosition.row > 1) {
-        const r = Range.create(
-          n.startPosition.row,
-          n.startPosition.column,
-          n.endPosition.row,
-          n.endPosition.column
-        )
-        problems.push(Diagnostic.create(r, 'Failed to parse expression', DiagnosticSeverity.Error))
-      }
+    } else if (n.type == 'ERROR') {
+      const r = Range.create(
+        n.startPosition.row,
+        n.startPosition.column,
+        n.endPosition.row,
+        n.endPosition.column
+      )
+      problems.push(Diagnostic.create(r, 'Failed to parse expression', DiagnosticSeverity.Error))
     }
   });
 
