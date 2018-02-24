@@ -1,8 +1,7 @@
-import { TextDocument, Range, Location } from "vscode-languageserver/lib/main";
+import { TextDocument, Range, Location, SymbolInformation, SymbolKind } from "vscode-languageserver/lib/main";
 import {Document} from "tree-sitter"
 const bash = require("tree-sitter-bash")
 
-import * as Ast from "./ast";
 
 // hack.
 function forEach(node, cb) {
@@ -13,7 +12,7 @@ function forEach(node, cb) {
 }
 
 type Declarations = {
-  [name: string]: [Ast.Declaration]
+  [name: string]: [SymbolInformation]
 }
 
 type State = {
@@ -34,6 +33,7 @@ const texts: Texts = {}
 
 export function analyze(document: TextDocument): void {
 
+  const uri = document.uri
   const contents = document.getText();
 
   const d = new Document();
@@ -49,12 +49,16 @@ export function analyze(document: TextDocument): void {
     if (n.type == 'environment_variable_assignment') {
       const named = n.firstNamedChild
       const name = contents.slice(named.startIndex, named.endIndex)
-      const v = Ast.Variable(
+      const v = SymbolInformation.create(
         name,
-        named.startPosition.row,
-        named.startPosition.column,
-        named.endPosition.row,
-        named.endPosition.column
+        SymbolKind.Variable,
+        Range.create(
+          named.startPosition.row,
+          named.startPosition.column,
+          named.endPosition.row,
+          named.endPosition.column
+        ),
+        uri,
       )
 
       const decls = state[document.uri] || []
@@ -65,12 +69,16 @@ export function analyze(document: TextDocument): void {
     } else if (n.type === 'function_definition') {
       const named = n.firstNamedChild
       const name = contents.slice(named.startIndex, named.endIndex)
-      const f = Ast.Function(
+      const f = SymbolInformation.create(
         name,
-        named.startPosition.row,
-        named.startPosition.column,
-        named.endPosition.row,
-        named.endPosition.column
+        SymbolKind.Function,
+        Range.create(
+          named.startPosition.row,
+          named.startPosition.column,
+          named.endPosition.row,
+          named.endPosition.column
+        ),
+        uri,
       )
 
       const decls = state[document.uri] || []
@@ -83,10 +91,42 @@ export function analyze(document: TextDocument): void {
 
 export function findDefinition(uri: string, name: string): Location[] {
   const declarations = state[uri][name]
-  return declarations.map(d => Location.create(
-    uri,
-    Range.create(d.startLine, d.startColumn, d.endLine, d.endColumn)
-  ))
+  return declarations.map(d => d.location)
+}
+
+export function findOccurrences(uri: string, name: string): Location[] {
+  const doc = documents[uri]
+  const contents = texts[uri]
+
+  const locations = []
+
+  forEach(doc.rootNode, (n) => {
+    if (n.type === 'variable_name') {
+      const nodeName = contents.slice(n.startIndex, n.endIndex)
+      if (nodeName == name) {
+        locations.push(Location.create(
+          uri,
+          Range.create(
+            n.startPosition.row,
+            n.startPosition.column,
+            n.endPosition.row,
+            n.endPosition.column
+          )
+        ))
+      }
+    }
+  })
+
+  return locations
+}
+
+export function findSymbols(uri: string): SymbolInformation[] {
+  const declarations: Declarations = state[uri]
+  const ds = []
+  Object.keys(declarations).forEach(n => {
+    declarations[n].forEach(d => ds.push(d))
+  })
+  return ds
 }
 
 export function wordAtPoint(uri: string, line: number, column: number): string | null {
@@ -98,6 +138,11 @@ export function wordAtPoint(uri: string, line: number, column: number): string |
   const start = node.startIndex
   const end = node.endIndex
   const name = contents.slice(start, end)
+
+  // Hack. Might be a problem with the grammar.
+  if (name.endsWith('=')) {
+    return name.slice(0, name.length - 1)
+  }
 
   return name
 }

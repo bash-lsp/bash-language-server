@@ -7,41 +7,48 @@ import {
   InitializeResult,
   TextDocumentPositionParams,
   CompletionItem,
-	CompletionItemKind,
-  Definition,
+	Definition,
   StreamMessageReader,
-  StreamMessageWriter
+  StreamMessageWriter,
+  SymbolInformation,
+  DocumentSymbolParams,
+  Location,
+  DocumentHighlight,
+  ReferenceParams
 } from 'vscode-languageserver';
 
 import * as Analyser from './analyser';
 
-// Create a connection for the server. The connection uses stdin/stdout for
-// communication.
-let connection: IConnection = createConnection(
+// Create a connection for the server.
+// The connection uses stdin/stdout for communication.
+const connection: IConnection = createConnection(
   new StreamMessageReader(process.stdin),
   new StreamMessageWriter(process.stdout)
 );
 
 // Create a simple text document manager. The text document manager
 // supports full document sync only
-let documents: TextDocuments = new TextDocuments();
+const documents: TextDocuments = new TextDocuments();
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
 documents.listen(connection);
 
-// After the server has started the client sends an initialize request. The server receives
-// in the passed params the rootPath of the workspace plus the client capabilities.
-connection.onInitialize((_params): InitializeResult => {
-	// workspaceRoot = params.rootPath;
+connection.onInitialize((params): InitializeResult => {
+  connection.console.log(`Initialized for ${params.rootUri}, ${params.rootPath}`)
+
 	return {
 		capabilities: {
-			// Tell the client that the server works in FULL text document sync mode
+			// For now we're using full-sync even though tree-sitter has great support
+			// for partial updates.
 			textDocumentSync: documents.syncKind,
 			completionProvider: {
 				resolveProvider: true
       },
-      definitionProvider: true
+      documentHighlightProvider: true,
+      definitionProvider: true,
+      documentSymbolProvider: true,
+      referencesProvider: true
 		}
 	}
 });
@@ -49,7 +56,6 @@ connection.onInitialize((_params): InitializeResult => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent((change) => {
-  // validateTextDocument(change.document);
   connection.console.log('Invoked onDidChangeContent');
   Analyser.analyze(change.document);
 });
@@ -72,35 +78,66 @@ connection.onDefinition((textDocumentPosition: TextDocumentPositionParams): Defi
   );
 });
 
-// This handler provides the initial list of the completion items.
-connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
-	// The pass parameter contains the position of the text document in
-	// which code complete got requested. For the example we ignore this
-	// info and always provide the same completion items.
-	return [
-		{
-			label: 'TypeScript',
-			kind: CompletionItemKind.Text,
-			data: 1
-		},
-		{
-			label: 'JavaScript',
-			kind: CompletionItemKind.Text,
-			data: 2
-		}
-	]
+connection.onDocumentSymbol((params: DocumentSymbolParams): SymbolInformation[] => {
+  return Analyser.findSymbols(params.textDocument.uri)
+})
+
+connection.onDocumentHighlight((textDocumentPosition: TextDocumentPositionParams): DocumentHighlight[] => {
+  const word = Analyser.wordAtPoint(
+    textDocumentPosition.textDocument.uri,
+    textDocumentPosition.position.line,
+    textDocumentPosition.position.character
+  )
+
+  connection.console.log(`Asked for highlight for ${word}`);
+
+  const locs = Analyser.findOccurrences(textDocumentPosition.textDocument.uri, word)
+
+  connection.console.log(`Found ${locs.length} occurrences`);
+
+  return locs.map(n => ({range: n.range}))
+})
+
+connection.onReferences((params: ReferenceParams): Location[] => {
+  const word = Analyser.wordAtPoint(
+    params.textDocument.uri,
+    params.position.line,
+    params.position.character
+  )
+
+  connection.console.log(`Asked for references to ${word}`);
+
+  const locs = Analyser.findOccurrences(params.textDocument.uri, word)
+
+  connection.console.log(`Found ${locs.length} occurrences`);
+
+  return locs
+})
+
+connection.onCompletion((textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
+  connection.console.log(`Asked for completions at ${textDocumentPosition.position.line}:${textDocumentPosition.position.character}`);
+  const symbols = Analyser.findSymbols(textDocumentPosition.textDocument.uri)
+  return symbols.map((s: SymbolInformation) => {
+    return {
+			label: s.name,
+			kind: s.kind,
+      data: s.name // Used for later resolving more info.
+    }
+  })
 });
 
 // This handler resolve additional information for the item selected in
 // the completion list.
 connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
-	if (item.data === 1) {
-		item.detail = 'TypeScript details',
-			item.documentation = 'TypeScript documentation'
-	} else if (item.data === 2) {
-		item.detail = 'JavaScript details',
-			item.documentation = 'JavaScript documentation'
-	}
+  // TODO: Look up man pages for commands
+  // TODO: For builtins look up the docs.
+  // TODO: For functions, parse their comments?
+
+	// if (item.data === 1) {
+	// 	item.detail = 'TypeScript details',
+	// 	item.documentation = 'TypeScript documentation'
+  // }
+
 	return item;
 });
 

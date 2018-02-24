@@ -1,9 +1,11 @@
 {
 	"files.exclude": {
-		"out": false // set this to true to hide the "out" folder with the compiled JS files
+		"vscode-client/out": true,
+		"vscode-client/server": true
 	},
 	"search.exclude": {
-		"out": true // set this to false to include "out" folder in search results
+		"out": true,
+		"vscode-client/server": true
 	},
 	"typescript.tsdk": "./node_modules/typescript/lib",
 	"typescript.tsc.autoDetect": "off"
