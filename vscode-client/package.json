@@ -4,7 +4,7 @@
     "description": "A language server for Bash",
     "author": "Mads Hartmann",
     "license": "MIT",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "publisher": "mads-hartmann",
     "repository": {
         "type": "git",
@@ -13,6 +13,7 @@
     "engines": {
         "vscode": "^1.17.0"
     },
+    "icon": "assets/bash-logo.png",
     "categories": [
         "Other"
     ],
