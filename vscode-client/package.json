@@ -4,7 +4,7 @@
     "description": "A language server for Bash",
     "author": "Mads Hartmann",
     "license": "MIT",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "publisher": "mads-hartmann",
     "repository": {
         "type": "git",
@@ -15,8 +15,8 @@
     },
     "categories": [
         "Other"
-	],
-	"keywords": [
+    ],
+    "keywords": [
         "shell script",
         "bash script",
         "bash"
