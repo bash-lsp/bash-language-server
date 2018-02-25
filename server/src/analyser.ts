@@ -77,8 +77,23 @@ export function analyze(uri: string, contents: string): Diagnostic[] {
 /**
  * Find all the locations where something named name has been defined.
  */
-export function findDefinition(uri: string, name: string): Location[] {
-  return (declarations[uri][name] || []).map(d => d.location)
+export function findDefinition(name: string): Location[] {
+  const symbols: SymbolInformation[] = []
+  Object.keys(declarations).forEach(uri => {
+    (declarations[uri][name] || []).forEach(d => symbols.push(d))
+  })
+  return symbols.map(s => s.location)
+}
+
+/**
+ * Find all the locations where something named name has been defined.
+ */
+export function findReferences(name: string): Location[] {
+  const locations = []
+  Object.keys(documents).forEach(uri => {
+    findOccurrences(uri, name).forEach(l => locations.push(l))
+  })
+  return locations
 }
 
 /**

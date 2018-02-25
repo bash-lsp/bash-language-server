@@ -1,8 +1,14 @@
 # TODO
 
-- [ ] Parse all files in the repo on init
-- [ ] Perform incremental updates instead
-- [ ] Maybe just use an index of identifier => uri and then run through the AST
-  in those files on every search? That would be less state and I doubt people
-  have HUGE bash files.
+- [ ] Perform initial bulk analysis in the background (it's sync now)
+- [ ] Listen for incremental buffer changes instead of whole files.
 - [ ] Look up man pages / --help to show inline help
+- [ ] Support multi root workspaces
+      https://github.com/Microsoft/vscode/wiki/Extension-Authoring:-Adopting-Multi-Root-Workspace-APIs
+- [ ] Code completion
+  - [x] Based on symbols in the file
+  - [ ] Based on all symbols in the workspace
+  - [ ] Based on programs in your PATH
+- [ ] Code Outline
+  - [x] Flat list of symbols
+  - [ ] Implement proper hierarchy by providing parent names for nodes

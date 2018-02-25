@@ -31,14 +31,14 @@ export function activate(context: ExtensionContext) {
     }],
 		synchronize: {
 			// Synchronize the setting section 'languageServerExample' to the server
-			configurationSection: 'lspSample',
+			configurationSection: 'Bash IDE',
 			// Notify the server about file changes to '.clientrc files contain in the workspace
 			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
 		}
 	}
 
 	// Create the language client and start the client.
-	let disposable = new LanguageClient('lspSample', 'Language Server Example', serverOptions, clientOptions).start();
+	let disposable = new LanguageClient('Bash IDE', 'Bash IDE', serverOptions, clientOptions).start();
 
 	// Push the disposable to the context's subscriptions so that the
 	// client can be deactivated on extension deactivation

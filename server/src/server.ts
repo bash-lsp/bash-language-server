@@ -16,6 +16,9 @@ import {
   DocumentHighlight,
   ReferenceParams} from 'vscode-languageserver';
 
+const glob = require('glob')
+const fs = require('fs')
+import * as Path from 'path'
 import * as Analyser from './analyser';
 
 // Create a connection for the server.
@@ -35,6 +38,23 @@ documents.listen(connection);
 
 connection.onInitialize((params): InitializeResult => {
   connection.console.log(`Initialized for ${params.rootUri}, ${params.rootPath}`)
+
+  glob(
+    "**/*.sh",
+    {cwd: params.rootPath, },
+    (err, paths) => {
+      if (err != null) {
+        connection.console.error(err)
+      } else {
+        paths.forEach(p => {
+          const absolute = Path.join(params.rootPath, p)
+          const uri = 'file://' + absolute
+          connection.console.log('Analyzing ' + uri)
+          Analyser.analyze(uri, fs.readFileSync(absolute, 'utf8'))
+        })
+      }
+    }
+  )
 
 	return {
 		capabilities: {
@@ -77,10 +97,7 @@ connection.onDefinition((textDocumentPosition: TextDocumentPositionParams): Defi
     textDocumentPosition.position.line,
     textDocumentPosition.position.character
   )
-  return Analyser.findDefinition(
-    textDocumentPosition.textDocument.uri,
-    word
-  );
+  return Analyser.findDefinition(word);
 });
 
 connection.onDocumentSymbol((params: DocumentSymbolParams): SymbolInformation[] => {
@@ -93,14 +110,9 @@ connection.onDocumentHighlight((textDocumentPosition: TextDocumentPositionParams
     textDocumentPosition.position.line,
     textDocumentPosition.position.character
   )
-
-  connection.console.log(`Asked for highlight for ${word}`);
-
-  const locs = Analyser.findOccurrences(textDocumentPosition.textDocument.uri, word)
-
-  connection.console.log(`Found ${locs.length} occurrences`);
-
-  return locs.map(n => ({range: n.range}))
+  return Analyser
+    .findOccurrences(textDocumentPosition.textDocument.uri, word)
+    .map(n => ({range: n.range}))
 })
 
 connection.onReferences((params: ReferenceParams): Location[] => {
@@ -109,14 +121,7 @@ connection.onReferences((params: ReferenceParams): Location[] => {
     params.position.line,
     params.position.character
   )
-
-  connection.console.log(`Asked for references to ${word}`);
-
-  const locs = Analyser.findOccurrences(params.textDocument.uri, word)
-
-  connection.console.log(`Found ${locs.length} occurrences`);
-
-  return locs
+  return Analyser.findReferences(word)
 })
 
 connection.onCompletion((textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
@@ -146,29 +151,5 @@ connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
 	return item;
 });
 
-/*
-connection.onDidSaveTextDocument((params) => {
-  connection.console.log(`You saved the document ${params}`)
-})
-
-connection.onDidOpenTextDocument((params) => {
-	// A text document got opened in VSCode.
-	// params.uri uniquely identifies the document. For documents store on disk this is a file URI.
-	// params.text the initial full content of the document.
-	connection.console.log(`${params.textDocument.uri} opened.`);
-});
-
-connection.onDidChangeTextDocument((params) => {
-	// The content of a text document did change in VSCode.
-	// params.uri uniquely identifies the document.
-	// params.contentChanges describe the content changes to the document.
-	connection.console.log(`${params.textDocument.uri} changed: ${JSON.stringify(params.contentChanges)}`);
-});
-connection.onDidCloseTextDocument((params) => {
-	// A text document got closed in VSCode.
-	// params.uri uniquely identifies the document.
-	connection.console.log(`${params.textDocument.uri} closed.`);
-});
-*/
 // Listen on the connection
 connection.listen();
