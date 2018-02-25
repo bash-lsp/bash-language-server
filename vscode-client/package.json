@@ -1,58 +1,40 @@
 {
-	"name": "bash-ide-vscode",
-	"description": "Bash IDE",
-	"author": "Mads Hartmann",
-	"license": "MIT",
-	"version": "1.0.0",
-	"publisher": "mads-hartmann",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/mads-hartmann/bash-language-server"
-	},
-	"engines": {
-		"vscode": "^1.17.0"
-	},
-	"categories": [
-		"Other"
+    "name": "bash-ide-vscode",
+    "displayName": "Bash IDE",
+    "description": "A language server for Bash",
+    "author": "Mads Hartmann",
+    "license": "MIT",
+    "version": "1.0.1",
+    "publisher": "mads-hartmann",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mads-hartmann/bash-language-server"
+    },
+    "engines": {
+        "vscode": "^1.17.0"
+    },
+    "categories": [
+        "Other"
 	],
-	"activationEvents": [
-		"onLanguage:shellscript"
+	"keywords": [
+        "shell script",
+        "bash script",
+        "bash"
 	],
-	"main": "./out/src/extension",
-	"contributes": {
-		"configuration": {
-			"type": "object",
-			"title": "Example configuration",
-			"properties": {
-				"lspSample.maxNumberOfProblems": {
-					"scope": "resource",
-					"type": "number",
-					"default": 100,
-					"description": "Controls the maximum number of problems produced by the server."
-				},
-				"lspSample.trace.server": {
-					"scope": "window",
-					"type": "string",
-					"enum": [
-						"off",
-						"messages",
-						"verbose"
-					],
-					"default": "off",
-					"description": "Traces the communication between VSCode and the language server."
-				}
-			}
-		}
-	},
-	"scripts": {
-		"vscode:prepublish": "tsc -p ./",
-		"compile": "tsc -p ./",
-		"watch": "tsc -w -p ./",
-		"update-vscode": "node ./node_modules/vscode/bin/install",
-		"postinstall": "node ./node_modules/vscode/bin/install"
-	},
-	"dependencies": {
-		"vscode": "^1.1.10",
-		"vscode-languageclient": "^3.5.0"
-	}
+    "activationEvents": [
+        "onLanguage:shellscript"
+    ],
+    "main": "./out/src/extension",
+    "contributes": {},
+    "scripts": {
+        "vscode:prepublish": "tsc -p ./",
+        "compile": "tsc -p ./",
+        "watch": "tsc -w -p ./",
+        "update-vscode": "node ./node_modules/vscode/bin/install",
+        "postinstall": "node ./node_modules/vscode/bin/install"
+    },
+    "dependencies": {
+        "vscode": "^1.1.10",
+        "vscode-languageclient": "^3.5.0"
+    }
 }
