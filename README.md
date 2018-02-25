@@ -1,8 +1,5 @@
 # Bash Language Server
 
-**WIP: This is still very much under development. I don't expect it to work on
-other computers than mine**
-
 Bash language server implementation based.
 
 Uses [Tree Sitter][tree-sitter] and it's [grammar for Bash][tree-sitter-bash].
