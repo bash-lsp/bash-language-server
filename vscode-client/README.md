@@ -1,6 +1,6 @@
 # Bash IDE
 
-Bash language server. Uses [Tree Sitter][tree-sitter] and it's
+Bash language server. Uses [Tree Sitter][tree-sitter] and its
 [grammar for Bash][tree-sitter-bash].
 
 ## Features
