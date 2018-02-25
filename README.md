@@ -1,6 +1,6 @@
 # Bash Language Server
 
-Bash language server implementation based on [Tree Sitter][tree-sitter] and it's
+Bash language server implementation based on [Tree Sitter][tree-sitter] and its
 [grammar for Bash][tree-sitter-bash].
 
 ## Features
