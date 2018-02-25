@@ -4,7 +4,7 @@
     "description": "A language server for Bash",
     "author": "Mads Hartmann",
     "license": "MIT",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "publisher": "mads-hartmann",
     "repository": {
         "type": "git",
@@ -20,7 +20,7 @@
         "shell script",
         "bash script",
         "bash"
-	],
+    ],
     "activationEvents": [
         "onLanguage:shellscript"
     ],
@@ -35,6 +35,7 @@
     },
     "dependencies": {
         "vscode": "^1.1.10",
-        "vscode-languageclient": "^3.5.0"
+        "vscode-languageclient": "^3.5.0",
+        "glob": "^7.1.2"
     }
 }
