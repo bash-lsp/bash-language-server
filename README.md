@@ -20,6 +20,9 @@ install it from the marketplace (It's called [Bash IDE][vscode-marketplace]).
 
 ## Development guide
 
+**prerequisite:** The extension is using [node-gyp][node-gyp] to build the bash
+tree-sitter parser. See node-gyps [system requirements][node-gyp-installation].
+
 Install the dependencies:
 
     npm install
@@ -37,3 +40,5 @@ Launch the extension using `Launch Client` from within vscode.
 [tree-sitter]: https://github.com/tree-sitter/tree-sitter
 [tree-sitter-bash]: https://github.com/tree-sitter/tree-sitter-bash
 [vscode-marketplace]: https://marketplace.visualstudio.com/items?itemName=mads-hartmann.bash-ide-vscode
+[node-gyp]: https://github.com/nodejs/node-gyp
+[node-gyp-installation]: https://github.com/nodejs/node-gyp#installation
