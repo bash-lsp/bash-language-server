@@ -185,8 +185,9 @@ function range(n: ASTNode): Range {
 
 function isDefinition(n: ASTNode): boolean {
   switch (n.type) {
-    case 'environment_variable_assignment':
-    case 'local_variable_declaration':
+    // For now. Later we'll have a command_declaration take precedence over
+    // variable_assignment
+    case 'variable_assignment':
     case 'function_definition':
         return true
       default:
