@@ -16,29 +16,17 @@ Bash language server implementation based on [Tree Sitter][tree-sitter] and its
 ## Installation
 
 Currently the client has only been implemented for Visual Studio Code. You can
-install it from the marketplace (It's called [Bash IDE][vscode-marketplace]).
+install it from the marketplace - It's called [Bash IDE][vscode-marketplace].
 
-## Development guide
-
-**prerequisite:** The extension is using [node-gyp][node-gyp] to build the bash
+**prerequisite:** The extension is using [node-gyp][node-gyp] to build the Bash
 tree-sitter parser. See node-gyps [system requirements][node-gyp-installation].
 
-Install the dependencies:
+## Development Guide
 
-    npm install
-
-Compile the server and vscode extension
-
-    npm run compile
-
-Continuously compile the server using
-
-    npm run watch:server
-
-Launch the extension using `Launch Client` from within vscode.
+Please see [docs/development-guide][dev-guide] for more information.
 
 [tree-sitter]: https://github.com/tree-sitter/tree-sitter
 [tree-sitter-bash]: https://github.com/tree-sitter/tree-sitter-bash
 [vscode-marketplace]: https://marketplace.visualstudio.com/items?itemName=mads-hartmann.bash-ide-vscode
-[node-gyp]: https://github.com/nodejs/node-gyp
+[dev-guide]: https://github.com/mads-hartmann/bash-language-server/blob/master/docs/development-guide.md
 [node-gyp-installation]: https://github.com/nodejs/node-gyp#installation

@@ -7,7 +7,12 @@ import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-lan
 
 export function activate(context: ExtensionContext) {
 
-	const serverModule = context.asAbsolutePath(path.join('server', 'server.js'));
+	const serverModule = context.asAbsolutePath(path.join(
+    'node_modules',
+    'bash-language-server',
+    'out',
+    'server.js'
+  ));
 
 	let serverOptions: ServerOptions = {
 		run : {

@@ -1,11 +1,10 @@
 {
 	"files.exclude": {
 		"vscode-client/out": true,
-		"vscode-client/server": true
+		"server/out": true
 	},
 	"search.exclude": {
-		"out": true,
-		"vscode-client/server": true
+		"out": true
 	},
 	"typescript.tsdk": "./node_modules/typescript/lib",
 	"typescript.tsc.autoDetect": "off"

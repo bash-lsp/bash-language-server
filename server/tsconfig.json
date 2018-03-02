@@ -9,7 +9,7 @@
 		"moduleResolution": "node",
 		"sourceMap": true,
 		"lib" : [ "es2016" ],
-		"outDir": "../vscode-client/server"
+		"outDir": "out"
 	},
 	"exclude": [
 		"node_modules"

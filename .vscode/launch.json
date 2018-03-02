@@ -15,17 +15,6 @@
 				"${workspaceRoot}/vscode-client/out/**/*.js"
 			],
 			"preLaunchTask": "watch:client"
-		},
-		{
-			"name": "Attach to Server",
-			"type": "node",
-			"request": "attach",
-			"port": 6009,
-			"sourceMaps": true,
-			"outFiles": [
-				"${workspaceRoot}/vscode-client/server/**/*.js"
-			],
-			"preLaunchTask": "watch:server"
 		}
 	]
 }
