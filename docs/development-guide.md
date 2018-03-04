@@ -1,8 +1,11 @@
 # Development guide
 
+**Note:** This is outdated until I figure out how to distribute this extension
+in a way that actually works on other peoples computers.
+
 This guide will help you set up your local development environment.
 
-There are two moving parts. 
+There are two moving parts.
 
 - **Server**: A node server written in Typescript that implements the
   [Language Server Protocol (LSP)][lsp].

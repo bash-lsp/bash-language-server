@@ -5,8 +5,12 @@ Bash language server. Uses [Tree Sitter][tree-sitter] and its
 
 ## System Requirements
 
-The extension is using [node-gyp][node-gyp] to build the bash tree-sitter parser
-during installation. See node-gyps [system requirements][node-gyp-installation].
+You need to install that language server separately as it depends on native node
+modules.
+
+```bash
+npm i -g bash-language-server
+```
 
 ## Features
 
@@ -20,5 +24,3 @@ during installation. See node-gyps [system requirements][node-gyp-installation].
 
 [tree-sitter]: https://github.com/tree-sitter/tree-sitter
 [tree-sitter-bash]: https://github.com/tree-sitter/tree-sitter-bash
-[node-gyp]: https://github.com/nodejs/node-gyp
-[node-gyp-installation]: https://github.com/nodejs/node-gyp#installation

@@ -24,4 +24,3 @@ Usage:
   const command = args.join(' ')
   console.error(`Unknown command '${command}'. Run with -h for help.`)
 }
-

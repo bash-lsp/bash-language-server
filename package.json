@@ -10,7 +10,7 @@
 		"url": "https://github.com/mads-hartmann/bash-language-server"
 	},
 	"scripts": {
-		"postinstall": "cd server && npm install && npm link && cd ../vscode-client && npm install && npm link bash-language-server && cd ..",
+		"postinstall": "cd server && npm install && cd ../vscode-client && npm install && cd ..",
 		"compile": "cd server && npm run compile && cd ../vscode-client && npm run compile && cd ..",
 		"compile:client": "cd vscode-client && npm run compile  && cd ..",
 		"watch:client": "cd vscode-client && npm run compile:watch  && cd ..",
