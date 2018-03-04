@@ -1,48 +1,58 @@
 # Development guide
 
-**Note:** This is outdated until I figure out how to distribute this extension
-in a way that actually works on other peoples computers.
-
-This guide will help you set up your local development environment.
-
 There are two moving parts.
 
 - **Server**: A node server written in Typescript that implements the
-  [Language Server Protocol (LSP)][lsp].
-- **Client**: A super tiny vscode extension which basically just tells vscode
-  how to launch the LSP server.
+  [Language Server Protocol (LSP)][LSP].
+
+- **Client**: A super tiny Visual Studio Code (vscode) extension which basically
+  just tells vscode how to launch the LSP server.
 
 The project has a root `package.json` file which is really just there for
 convenience - it proxies to the `package.json` files in the `vscode-client` and
 `server` folders.
 
-To **install all the required dependencies** run
+## Initial setup
+
+Run the following in the root of the project
 
 ```
 npm install
 ```
 
 This uses the `postinstall` hook to install the dependencies in each of the
-sub-projects as well as using [npm link][npm-link] to get your local client to
-use your local version of the server.
+sub-projects.
 
-To **compile everything** run
+To make sure that everything is configured correctly run the following command
+to compile both the client and the server once
 
 ```
 npm run compile
 ```
 
-Now, as most of the interesting things are happening in the server you'll probably want to
-re-compile it whenever you make a change to any of the source files:
+Now, depending on which part you want to work on follow the relevant section
+below.
+
+## Working on the client
+
+Working on the client is simply a matter of starting vscode and using the Debug
+View to launch the `Launch Client` task. This will open a new vscode window with the
+extension loaded. It also looks for changes to your client code and recompiles
+it whenever you save your changes.
+
+## Working on the server
+
+The easiest way right now is to simple compile and install the server globally
+whenever you've made a change, and then reload you vscode window to re-launch
+the server.
 
 ```
-npm run watch:server
+cd server
+npm run compile
+npm i -g .
+# Reload vscode window.
 ```
 
-Finally Launch the extension using `Launch Client` task from within vscode. For
-now you'll have to re-launch the extension whenever you've made any changes to
-the source.
+I'm open to suggestions on how to improve this workflow.
 
-[lsp]: https://microsoft.github.io/language-server-protocol/
-[node-gyp]: https://github.com/nodejs/node-gyp
-[npm-link]: https://docs.npmjs.com/cli/link
+[LSP]: https://microsoft.github.io/language-server-protocol/
