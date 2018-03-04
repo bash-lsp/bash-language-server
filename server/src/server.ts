@@ -21,6 +21,7 @@ const glob = require("glob");
 const fs = require("fs");
 import * as Path from "path";
 
+const pkg = require('../package')
 import * as Analyser from "./analyser";
 
 export function listen() {
@@ -40,22 +41,25 @@ export function listen() {
   documents.listen(connection);
 
   connection.onInitialize((params): InitializeResult => {
+
     connection.console.log(
-      `Initialized for ${params.rootUri}, ${params.rootPath}`
+      `Initialized server v. ${pkg.version} for ${params.rootUri}`
     );
 
-    glob("**/*.sh", { cwd: params.rootPath }, (err, paths) => {
-      if (err != null) {
-        connection.console.error(err);
-      } else {
-        paths.forEach(p => {
-          const absolute = Path.join(params.rootPath, p);
-          const uri = "file://" + absolute;
-          connection.console.log("Analyzing " + uri);
-          Analyser.analyze(uri, fs.readFileSync(absolute, "utf8"));
-        });
-      }
-    });
+    if (params.rootPath) {
+      glob("**/*.sh", { cwd: params.rootPath }, (err, paths) => {
+        if (err != null) {
+          connection.console.error(err);
+        } else {
+          paths.forEach(p => {
+            const absolute = Path.join(params.rootPath, p);
+            const uri = "file://" + absolute;
+            connection.console.log("Analyzing " + uri);
+            Analyser.analyze(uri, fs.readFileSync(absolute, "utf8"));
+          });
+        }
+      });
+    }
 
     return {
       capabilities: {
