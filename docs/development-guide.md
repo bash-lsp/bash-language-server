@@ -35,10 +35,17 @@ below.
 
 ## Working on the client
 
+### Visual Studio Code
+
 Working on the client is simply a matter of starting vscode and using the Debug
 View to launch the `Launch Client` task. This will open a new vscode window with the
 extension loaded. It also looks for changes to your client code and recompiles
 it whenever you save your changes.
+
+### Atom
+
+See the [ide-bash][ide-bash] package for Atom. Due to how Atom packages are
+published the client lives in a separate repository.
 
 ## Working on the server
 
@@ -56,3 +63,4 @@ npm i -g .
 I'm open to suggestions on how to improve this workflow.
 
 [LSP]: https://microsoft.github.io/language-server-protocol/
+[ide-bash]: https://github.com/mads-hartmann/ide-bash
