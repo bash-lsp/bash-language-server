@@ -1,5 +1,7 @@
 import FIXTURES from '../../../testing/fixtures'
-import * as analyzer from '../analyser'
+import { Analyzer } from '../analyser'
+
+const analyzer = new Analyzer()
 
 const CURRENT_URI = 'dummy-uri.sh'
 beforeEach(() => {

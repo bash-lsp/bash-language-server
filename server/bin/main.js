@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const server = require('../out/server')
+const server = require('../out/index')
 const package = require('../package')
 
 const args = process.argv

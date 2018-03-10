@@ -1,173 +1,195 @@
-'use strict'
-// tslint:disable:no-var-requires
+import * as LSP from 'vscode-languageserver'
 
-import {
-  CompletionItem,
-  createConnection,
-  Definition,
-  DocumentHighlight,
-  DocumentSymbolParams,
-  IConnection,
-  InitializeResult,
-  Location,
-  ReferenceParams,
-  StreamMessageReader,
-  StreamMessageWriter,
-  SymbolInformation,
-  TextDocumentPositionParams,
-  TextDocuments,
-} from 'vscode-languageserver'
+import { Analyzer } from './analyser'
+import { Executables } from './executables'
 
-const glob = require('glob')
-const fs = require('fs')
-import * as Path from 'path'
-
-const pkg = require('../package')
-import * as Analyser from './analyser'
-
-export function listen() {
-  // Create a connection for the server.
-  // The connection uses stdin/stdout for communication.
-  const connection: IConnection = createConnection(
-    new StreamMessageReader(process.stdin),
-    new StreamMessageWriter(process.stdout),
-  )
-
-  // Create a simple text document manager. The text document manager
-  // supports full document sync only
-  const documents: TextDocuments = new TextDocuments()
-
-  // Make the text document manager listen on the connection
-  // for open, change and close text document events
-  documents.listen(connection)
-
-  connection.onInitialize((params): InitializeResult => {
-    connection.console.log(`Initialized server v. ${pkg.version} for ${params.rootUri}`)
-
-    if (params.rootPath) {
-      glob('**/*.sh', { cwd: params.rootPath }, (err, paths) => {
-        if (err != null) {
-          connection.console.error(err)
-        } else {
-          paths.forEach(p => {
-            const absolute = Path.join(params.rootPath, p)
-            const uri = 'file://' + absolute
-            connection.console.log('Analyzing ' + uri)
-            Analyser.analyze(uri, fs.readFileSync(absolute, 'utf8'))
-          })
-        }
-      })
-    }
-
-    return {
-      capabilities: {
-        // For now we're using full-sync even though tree-sitter has great support
-        // for partial updates.
-        textDocumentSync: documents.syncKind,
-        completionProvider: {
-          resolveProvider: true,
-        },
-        documentHighlightProvider: true,
-        definitionProvider: true,
-        documentSymbolProvider: true,
-        referencesProvider: true,
-      },
-    }
-  })
-
-  // The content of a text document has changed. This event is emitted
-  // when the text document first opened or when its content has changed.
-  documents.onDidChangeContent(change => {
-    connection.console.log('Invoked onDidChangeContent')
-    const uri = change.document.uri
-    const contents = change.document.getText()
-    const diagnostics = Analyser.analyze(uri, contents)
-    connection.sendDiagnostics({
-      uri: change.document.uri,
-      diagnostics,
+/**
+ * The BashServer glues together the separate components to implement
+ * the various parts of the Language Server Protocol.
+ */
+export class BashServer {
+  /**
+   * Initialize the server based on a connection to the client and the protocols
+   * initialization paramters.
+   */
+  public static initialize(
+    connection: LSP.Connection,
+    params: LSP.InitializeParams,
+  ): Promise<BashServer> {
+    return Promise.all([
+      Executables.fromPath(process.env.PATH),
+      Analyzer.fromRoot(connection, params.rootPath),
+    ]).then(xs => {
+      const executables = xs[0]
+      const analyzer = xs[1]
+      return new BashServer(connection, executables, analyzer)
     })
-  })
+  }
 
-  connection.onDidChangeWatchedFiles(() => {
-    // Monitored files have change in VSCode
-    connection.console.log('We received an file change event')
-  })
+  private executables: Executables
+  private analyzer: Analyzer
 
-  connection.onDefinition(
-    (textDocumentPosition: TextDocumentPositionParams): Definition => {
-      connection.console.log(
-        `Asked for definition at ${textDocumentPosition.position.line}:${
-          textDocumentPosition.position.character
-        }`,
-      )
-      const word = Analyser.wordAtPoint(
-        textDocumentPosition.textDocument.uri,
-        textDocumentPosition.position.line,
-        textDocumentPosition.position.character,
-      )
-      return Analyser.findDefinition(word)
-    },
-  )
+  private documents: LSP.TextDocuments = new LSP.TextDocuments()
+  private connection: LSP.Connection
 
-  connection.onDocumentSymbol((params: DocumentSymbolParams): SymbolInformation[] => {
-    return Analyser.findSymbols(params.textDocument.uri)
-  })
+  private constructor(
+    connection: LSP.Connection,
+    executables: Executables,
+    analyzer: Analyzer,
+  ) {
+    this.connection = connection
+    this.executables = executables
+    this.analyzer = analyzer
+  }
 
-  connection.onDocumentHighlight(
-    (textDocumentPosition: TextDocumentPositionParams): DocumentHighlight[] => {
-      const word = Analyser.wordAtPoint(
-        textDocumentPosition.textDocument.uri,
-        textDocumentPosition.position.line,
-        textDocumentPosition.position.character,
-      )
-      return Analyser.findOccurrences(textDocumentPosition.textDocument.uri, word).map(
-        n => ({ range: n.range }),
-      )
-    },
-  )
+  /**
+   * Register handlers for the events from the Language Server Protocol that we
+   * care about.
+   */
+  public register(connection: LSP.Connection): void {
+    // The content of a text document has changed. This event is emitted
+    // when the text document first opened or when its content has changed.
+    this.documents.listen(this.connection)
+    this.documents.onDidChangeContent(change => {
+      const uri = change.document.uri
+      const contents = change.document.getText()
+      const diagnostics = this.analyzer.analyze(uri, contents)
+      connection.sendDiagnostics({
+        uri: change.document.uri,
+        diagnostics,
+      })
+    })
 
-  connection.onReferences((params: ReferenceParams): Location[] => {
-    const word = Analyser.wordAtPoint(
+    // Register all the handlers for the LSP events.
+    connection.onHover(this.onHover.bind(this))
+    connection.onDefinition(this.onDefinition.bind(this))
+    connection.onDocumentSymbol(this.onDocumentSymbol.bind(this))
+    connection.onDocumentHighlight(this.onDocumentHighlight.bind(this))
+    connection.onReferences(this.onReferences.bind(this))
+    connection.onCompletion(this.onCompletion.bind(this))
+    connection.onCompletionResolve(this.onCompletionResolve.bind(this))
+  }
+
+  /**
+   * The parts of the Language Server Protocol that we are currently supporting.
+   */
+  public capabilities(): LSP.ServerCapabilities {
+    return {
+      // For now we're using full-sync even though tree-sitter has great support
+      // for partial updates.
+      textDocumentSync: this.documents.syncKind,
+      completionProvider: {
+        resolveProvider: true,
+      },
+      hoverProvider: true,
+      documentHighlightProvider: true,
+      definitionProvider: true,
+      documentSymbolProvider: true,
+      referencesProvider: true,
+    }
+  }
+
+  private onHover(pos: LSP.TextDocumentPositionParams): Promise<LSP.Hover> {
+    this.connection.console.log(
+      `Hovering over ${pos.position.line}:${pos.position.character}`,
+    )
+
+    const word = this.analyzer.wordAtPoint(
+      pos.textDocument.uri,
+      pos.position.line,
+      pos.position.character,
+    )
+
+    return this.executables.isExecutableOnPATH(word)
+      ? this.executables.documentation(word).then(doc => ({
+          contents: {
+            language: 'plaintext',
+            value: doc,
+          },
+        }))
+      : null
+  }
+
+  private onDefinition(pos: LSP.TextDocumentPositionParams): LSP.Definition {
+    this.connection.console.log(
+      `Asked for definition at ${pos.position.line}:${pos.position.character}`,
+    )
+    const word = this.analyzer.wordAtPoint(
+      pos.textDocument.uri,
+      pos.position.line,
+      pos.position.character,
+    )
+    return this.analyzer.findDefinition(word)
+  }
+
+  private onDocumentSymbol(params: LSP.DocumentSymbolParams): LSP.SymbolInformation[] {
+    return this.analyzer.findSymbols(params.textDocument.uri)
+  }
+
+  private onDocumentHighlight(
+    pos: LSP.TextDocumentPositionParams,
+  ): LSP.DocumentHighlight[] {
+    const word = this.analyzer.wordAtPoint(
+      pos.textDocument.uri,
+      pos.position.line,
+      pos.position.character,
+    )
+    return this.analyzer
+      .findOccurrences(pos.textDocument.uri, word)
+      .map(n => ({ range: n.range }))
+  }
+
+  private onReferences(params: LSP.ReferenceParams): LSP.Location[] {
+    const word = this.analyzer.wordAtPoint(
       params.textDocument.uri,
       params.position.line,
       params.position.character,
     )
-    return Analyser.findReferences(word)
-  })
+    return this.analyzer.findReferences(word)
+  }
 
-  connection.onCompletion(
-    (textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
-      connection.console.log(
-        `Asked for completions at ${textDocumentPosition.position.line}:${
-          textDocumentPosition.position.character
-        }`,
-      )
-      const symbols = Analyser.findSymbols(textDocumentPosition.textDocument.uri)
-      return symbols.map((s: SymbolInformation) => {
-        return {
-          label: s.name,
-          kind: s.kind,
-          data: s.name, // Used for later resolving more info.
-        }
-      })
-    },
-  )
+  private onCompletion(pos: LSP.TextDocumentPositionParams): LSP.CompletionItem[] {
+    this.connection.console.log(
+      `Asked for completions at ${pos.position.line}:${pos.position.character}`,
+    )
+    const symbols = this.analyzer.findSymbols(pos.textDocument.uri)
 
-  // This handler resolve additional information for the item selected in
-  // the completion list.
-  connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
-    // TODO: Look up man pages for commands
-    // TODO: For builtins look up the docs.
-    // TODO: For functions, parse their comments?
+    const symbolCompletions = symbols.map((s: LSP.SymbolInformation) => {
+      return {
+        label: s.name,
+        kind: s.kind,
+        data: {
+          name: s.name,
+          type: 'function',
+        },
+      }
+    })
 
-    // if (item.data === 1) {
-    // 	item.detail = 'TypeScript details',
-    // 	item.documentation = 'TypeScript documentation'
-    // }
+    const programCompletions = this.executables.list().map((s: string) => {
+      return {
+        label: s,
+        kind: LSP.SymbolKind.Function,
+        data: {
+          name: s,
+          type: 'executable',
+        },
+      }
+    })
 
-    return item
-  })
+    return symbolCompletions.concat(programCompletions)
+  }
 
-  // Listen on the connection
-  connection.listen()
+  private onCompletionResolve(item: LSP.CompletionItem): Promise<LSP.CompletionItem> {
+    if (item.data.type === 'executable') {
+      return this.executables
+        .documentation(item.data.name)
+        .then(doc => ({
+          ...item,
+          detail: doc,
+        }))
+        .catch(() => item)
+    } else {
+      return Promise.resolve(item)
+    }
+  }
 }
