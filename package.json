@@ -1,28 +1,28 @@
 {
-	"name": "bash-language-server",
-	"description": "A language server for Bash",
-	"author": "Mads Hartmann",
-	"license": "MIT",
-	"version": "1.0.0",
-	"publisher": "mads-hartmann",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/mads-hartmann/bash-language-server"
-	},
-	"scripts": {
-		"postinstall": "cd server && npm install && cd ../vscode-client && npm install && cd ..",
-		"compile": "cd server && npm run compile && cd ../vscode-client && npm run compile && cd ..",
-		"compile:client": "cd vscode-client && npm run compile  && cd ..",
-		"watch:client": "cd vscode-client && npm run compile:watch  && cd ..",
-		"compile:server": "cd server && npm run compile  && cd ..",
-		"watch:server": "cd server && npm run compile:watch  && cd .."
-	},
-	"devDependencies": {
-		"@types/node": "^9.4.6",
-		"electron-rebuild": "^1.7.3",
-		"typescript": "^2.7.2"
-	},
-	"dependencies": {
-		"remove": "^0.1.5"
-	}
+  "name": "bash-language-server",
+  "description": "A language server for Bash",
+  "author": "Mads Hartmann",
+  "license": "MIT",
+  "version": "1.0.0",
+  "publisher": "mads-hartmann",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mads-hartmann/bash-language-server"
+  },
+  "scripts": {
+    "postinstall": "cd server && npm install && cd ../vscode-client && npm install && cd ..",
+    "compile": "cd server && npm run compile && cd ../vscode-client && npm run compile && cd ..",
+    "compile:client": "cd vscode-client && npm run compile  && cd ..",
+    "watch:client": "cd vscode-client && npm run compile:watch  && cd ..",
+    "compile:server": "cd server && npm run compile  && cd ..",
+    "watch:server": "cd server && npm run compile:watch  && cd .."
+  },
+  "devDependencies": {
+    "@types/node": "^9.4.6",
+    "electron-rebuild": "^1.7.3",
+    "typescript": "^2.7.2"
+  },
+  "dependencies": {
+    "remove": "^0.1.5"
+  }
 }
