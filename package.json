@@ -21,8 +21,5 @@
     "@types/node": "^9.4.6",
     "electron-rebuild": "^1.7.3",
     "typescript": "^2.7.2"
-  },
-  "dependencies": {
-    "remove": "^0.1.5"
   }
 }
