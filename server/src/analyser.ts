@@ -1,12 +1,20 @@
-import { Range, Location, SymbolInformation, SymbolKind, Diagnostic, DiagnosticSeverity } from "vscode-languageserver/lib/main";
-import {Document, ASTNode} from "tree-sitter"
-const bash = require("tree-sitter-bash")
+// tslint:disable:no-submodule-imports
+import { ASTNode, Document } from 'tree-sitter'
+import * as bash from 'tree-sitter-bash'
+import {
+  Diagnostic,
+  DiagnosticSeverity,
+  Location,
+  Range,
+  SymbolInformation,
+  SymbolKind,
+} from 'vscode-languageserver/lib/main'
 
 // Global mapping from tree-sitter node type to vscode SymbolKind
 type Kinds = { [type: string]: SymbolKind }
 const kinds: Kinds = {
-  'environment_variable_assignment': SymbolKind.Variable,
-  'function_definition': SymbolKind.Function
+  environment_variable_assignment: SymbolKind.Variable,
+  function_definition: SymbolKind.Function,
 }
 
 // Global map of all the declarations that we've seen, indexed by file
@@ -32,10 +40,9 @@ const texts: Texts = {}
  *
  */
 export function analyze(uri: string, contents: string): Diagnostic[] {
-
-  const d = new Document();
-  d.setLanguage(bash);
-  d.setInputString(contents);
+  const d = new Document()
+  d.setLanguage(bash)
+  d.setInputString(contents)
   d.parse()
 
   documents[uri] = d
@@ -44,32 +51,27 @@ export function analyze(uri: string, contents: string): Diagnostic[] {
 
   const problems = []
 
-
-  forEach(d.rootNode, (n) => {
+  forEach(d.rootNode, n => {
     if (n.type == 'ERROR') {
       problems.push(
         Diagnostic.create(
           range(n),
           'Failed to parse expression',
-          DiagnosticSeverity.Error
-        )
+          DiagnosticSeverity.Error,
+        ),
       )
       return
-    }
-    else if (isDefinition(n)) {
+    } else if (isDefinition(n)) {
       const named = n.firstNamedChild
       const name = contents.slice(named.startIndex, named.endIndex)
       const namedDeclarations = declarations[uri][name] || []
 
-      namedDeclarations.push(SymbolInformation.create(
-        name,
-        kinds[n.type],
-        range(named),
-        uri,
-      ))
+      namedDeclarations.push(
+        SymbolInformation.create(name, kinds[n.type], range(named), uri),
+      )
       declarations[uri][name] = namedDeclarations
     }
-  });
+  })
 
   return problems
 }
@@ -80,7 +82,7 @@ export function analyze(uri: string, contents: string): Diagnostic[] {
 export function findDefinition(name: string): Location[] {
   const symbols: SymbolInformation[] = []
   Object.keys(declarations).forEach(uri => {
-    (declarations[uri][name] || []).forEach(d => symbols.push(d))
+    ;(declarations[uri][name] || []).forEach(d => symbols.push(d))
   })
   return symbols.map(s => s.location)
 }
@@ -106,10 +108,9 @@ export function findOccurrences(uri: string, query: string): Location[] {
 
   const locations = []
 
-  forEach(doc.rootNode, (n) => {
-
-    var name: string = null
-    var rng: Range = null
+  forEach(doc.rootNode, n => {
+    let name: string = null
+    let rng: Range = null
 
     if (isReference(n)) {
       const node = n.firstNamedChild || n
@@ -124,7 +125,6 @@ export function findOccurrences(uri: string, query: string): Location[] {
     if (name == query) {
       locations.push(Location.create(uri, rng))
     }
-
   })
 
   return locations
@@ -149,7 +149,7 @@ export function wordAtPoint(uri: string, line: number, column: number): string |
   const document = documents[uri]
   const contents = texts[uri]
 
-  const node = document.rootNode.namedDescendantForPosition({row: line, column: column})
+  const node = document.rootNode.namedDescendantForPosition({ row: line, column })
 
   const start = node.startIndex
   const end = node.endIndex
@@ -179,7 +179,7 @@ function range(n: ASTNode): Range {
     n.startPosition.row,
     n.startPosition.column,
     n.endPosition.row,
-    n.endPosition.column
+    n.endPosition.column,
   )
 }
 
@@ -189,9 +189,9 @@ function isDefinition(n: ASTNode): boolean {
     // variable_assignment
     case 'variable_assignment':
     case 'function_definition':
-        return true
-      default:
-        return false
+      return true
+    default:
+      return false
   }
 }
 
@@ -199,8 +199,8 @@ function isReference(n: ASTNode): boolean {
   switch (n.type) {
     case 'variable_name':
     case 'command_name':
-        return true
-      default:
-        return false
+      return true
+    default:
+      return false
   }
 }

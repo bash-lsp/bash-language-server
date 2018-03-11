@@ -16,8 +16,8 @@
     "watch:client": "cd vscode-client && npm run compile:watch  && cd ..",
     "compile:server": "cd server && npm run compile  && cd ..",
     "watch:server": "cd server && npm run compile:watch  && cd ..",
-    "lint": "tslint --project vscode-client --fix",
-    "lint:bail": "tslint --project vscode-client"
+    "lint": "tslint --project vscode-client --fix && tslint --project server --fix",
+    "lint:bail": "tslint --project vscode-client && tslint --project server"
   },
   "devDependencies": {
     "@types/node": "^9.4.6",
