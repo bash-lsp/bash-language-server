@@ -52,7 +52,7 @@ export function analyze(uri: string, contents: string): Diagnostic[] {
   const problems = []
 
   forEach(d.rootNode, n => {
-    if (n.type == 'ERROR') {
+    if (n.type === 'ERROR') {
       problems.push(
         Diagnostic.create(
           range(n),
@@ -122,7 +122,7 @@ export function findOccurrences(uri: string, query: string): Location[] {
       rng = range(n.firstNamedChild)
     }
 
-    if (name == query) {
+    if (name === query) {
       locations.push(Location.create(uri, rng))
     }
   })
