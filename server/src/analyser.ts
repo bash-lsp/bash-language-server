@@ -82,7 +82,8 @@ export function analyze(uri: string, contents: string): Diagnostic[] {
 export function findDefinition(name: string): Location[] {
   const symbols: SymbolInformation[] = []
   Object.keys(declarations).forEach(uri => {
-    ;(declarations[uri][name] || []).forEach(d => symbols.push(d))
+    const declarationNames = declarations[uri][name] || []
+    declarationNames.forEach(d => symbols.push(d))
   })
   return symbols.map(s => s.location)
 }
