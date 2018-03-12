@@ -1,41 +1,41 @@
 {
-    "name": "bash-ide-vscode",
-    "displayName": "Bash IDE",
-    "description": "A language server for Bash",
-    "author": "Mads Hartmann",
-    "license": "MIT",
-    "version": "1.2.0",
-    "publisher": "mads-hartmann",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/mads-hartmann/bash-language-server"
-    },
-    "engines": {
-        "vscode": "^1.17.0"
-    },
-    "icon": "assets/bash-logo.png",
-    "categories": [
-        "Other"
-    ],
-    "keywords": [
-        "shell script",
-        "bash script",
-        "bash"
-    ],
-    "activationEvents": [
-        "onLanguage:shellscript"
-    ],
-    "main": "./out/src/extension",
-    "contributes": {},
-    "scripts": {
-        "vscode:prepublish": "tsc -p ./",
-        "compile": "tsc -p ./",
-        "compile:watch": "tsc -w -p ./",
-        "update-vscode": "node ./node_modules/vscode/bin/install",
-        "postinstall": "node ./node_modules/vscode/bin/install"
-    },
-    "dependencies": {
-        "vscode": "^1.1.10",
-        "vscode-languageclient": "^3.5.0"
-    }
+  "name": "bash-ide-vscode",
+  "displayName": "Bash IDE",
+  "description": "A language server for Bash",
+  "author": "Mads Hartmann",
+  "license": "MIT",
+  "version": "1.2.0",
+  "publisher": "mads-hartmann",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mads-hartmann/bash-language-server"
+  },
+  "engines": {
+    "vscode": "^1.17.0"
+  },
+  "icon": "assets/bash-logo.png",
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "shell script",
+    "bash script",
+    "bash"
+  ],
+  "activationEvents": [
+    "onLanguage:shellscript"
+  ],
+  "main": "./out/src/extension",
+  "contributes": {},
+  "scripts": {
+    "vscode:prepublish": "tsc -p ./",
+    "compile": "tsc -p ./",
+    "compile:watch": "tsc -w -p ./",
+    "update-vscode": "node ./node_modules/vscode/bin/install",
+    "postinstall": "node ./node_modules/vscode/bin/install"
+  },
+  "dependencies": {
+    "vscode": "^1.1.10",
+    "vscode-languageclient": "^3.5.0"
+  }
 }
