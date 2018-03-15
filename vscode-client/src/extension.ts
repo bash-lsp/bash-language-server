@@ -55,7 +55,7 @@ function start(context: ExtensionContext, command: string) {
 }
 
 function handleMissingExecutable() {
-  const message = `Can't find bash-langauge-server on your PATH. Please install it using npm i -g bash-language-server.`
+  const message = `Can't find bash-language-server on your PATH. Please install it using npm i -g bash-language-server.`
   const options = {
     modal: false,
   }
