@@ -11,7 +11,7 @@
     "url": "https://github.com/mads-hartmann/bash-language-server"
   },
   "engines": {
-    "vscode": "^1.17.0"
+    "vscode": "^1.18.x"
   },
   "icon": "assets/bash-logo.png",
   "categories": [
@@ -35,7 +35,7 @@
     "postinstall": "node ./node_modules/vscode/bin/install"
   },
   "dependencies": {
-    "vscode": "^1.1.10",
-    "vscode-languageclient": "^3.5.0"
+    "vscode": "^1.1.13",
+    "vscode-languageclient": "^4.0.0"
   }
 }
