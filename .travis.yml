@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - '4'
+script:
+  - npm run check:bail
+notifications:
+  email:
+    on_failure: always
+    on_success: never
