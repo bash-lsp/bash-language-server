@@ -2,3 +2,6 @@
 
 vscode-client/out
 server/out
+.DS_Store
+*.log
+coverage
