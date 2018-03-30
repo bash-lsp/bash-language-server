@@ -1,0 +1,912 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`analyze returns a list of errors for a file with errors 1`] = `
+Array [
+  Object {
+    "message": "Failed to parse expression",
+    "range": Object {
+      "end": Object {
+        "character": 0,
+        "line": 10,
+      },
+      "start": Object {
+        "character": 0,
+        "line": 7,
+      },
+    },
+    "severity": 1,
+  },
+]
+`;
+
+exports[`findDefinition returns a list of locations if parameter is found 1`] = `
+Array [
+  Object {
+    "range": Object {
+      "end": Object {
+        "character": 12,
+        "line": 148,
+      },
+      "start": Object {
+        "character": 0,
+        "line": 148,
+      },
+    },
+    "uri": "dummy-uri.sh",
+  },
+]
+`;
+
+exports[`findReferences returns a list of locations if parameter is found 1`] = `
+Array [
+  Object {
+    "range": Object {
+      "end": Object {
+        "character": 12,
+        "line": 148,
+      },
+      "start": Object {
+        "character": 0,
+        "line": 148,
+      },
+    },
+    "uri": "dummy-uri.sh",
+  },
+  Object {
+    "range": Object {
+      "end": Object {
+        "character": 12,
+        "line": 148,
+      },
+      "start": Object {
+        "character": 0,
+        "line": 148,
+      },
+    },
+    "uri": "dummy-uri.sh",
+  },
+  Object {
+    "range": Object {
+      "end": Object {
+        "character": 45,
+        "line": 152,
+      },
+      "start": Object {
+        "character": 33,
+        "line": 152,
+      },
+    },
+    "uri": "dummy-uri.sh",
+  },
+  Object {
+    "range": Object {
+      "end": Object {
+        "character": 20,
+        "line": 162,
+      },
+      "start": Object {
+        "character": 8,
+        "line": 162,
+      },
+    },
+    "uri": "dummy-uri.sh",
+  },
+  Object {
+    "range": Object {
+      "end": Object {
+        "character": 31,
+        "line": 165,
+      },
+      "start": Object {
+        "character": 19,
+        "line": 165,
+      },
+    },
+    "uri": "dummy-uri.sh",
+  },
+]
+`;
+
+exports[`findSymbols returns a list of SymbolInformation if uri is found 1`] = `
+Array [
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 5,
+          "line": 21,
+        },
+        "start": Object {
+          "character": 2,
+          "line": 21,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 5,
+          "line": 30,
+        },
+        "start": Object {
+          "character": 2,
+          "line": 30,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 3,
+          "line": 54,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 54,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 3,
+          "line": 83,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 83,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 5,
+          "line": 90,
+        },
+        "start": Object {
+          "character": 2,
+          "line": 90,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 5,
+          "line": 97,
+        },
+        "start": Object {
+          "character": 2,
+          "line": 97,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 3,
+          "line": 149,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 149,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 3,
+          "line": 181,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 181,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 5,
+          "line": 183,
+        },
+        "start": Object {
+          "character": 2,
+          "line": 183,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 5,
+          "line": 188,
+        },
+        "start": Object {
+          "character": 2,
+          "line": 188,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 7,
+          "line": 190,
+        },
+        "start": Object {
+          "character": 4,
+          "line": 190,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 9,
+          "line": 220,
+        },
+        "start": Object {
+          "character": 6,
+          "line": 220,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 13,
+          "line": 230,
+        },
+        "start": Object {
+          "character": 10,
+          "line": 230,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 13,
+          "line": 233,
+        },
+        "start": Object {
+          "character": 10,
+          "line": 233,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 13,
+          "line": 236,
+        },
+        "start": Object {
+          "character": 10,
+          "line": 236,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 3,
+          "line": 265,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 265,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ret",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 10,
+          "line": 38,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 38,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "configures",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 19,
+          "line": 40,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 40,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "npm_config_loglevel",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 21,
+          "line": 48,
+        },
+        "start": Object {
+          "character": 2,
+          "line": 48,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "npm_config_loglevel",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 4,
+          "line": 53,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 53,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "node",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 3,
+          "line": 69,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 69,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "TMP",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 5,
+          "line": 71,
+        },
+        "start": Object {
+          "character": 2,
+          "line": 71,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "TMP",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 3,
+          "line": 73,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 73,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "TMP",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 4,
+          "line": 81,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 81,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "BACK",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 3,
+          "line": 84,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 84,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "tar",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 5,
+          "line": 86,
+        },
+        "start": Object {
+          "character": 2,
+          "line": 86,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "tar",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 5,
+          "line": 89,
+        },
+        "start": Object {
+          "character": 2,
+          "line": 89,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "tar",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 4,
+          "line": 116,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 116,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "MAKE",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 6,
+          "line": 119,
+        },
+        "start": Object {
+          "character": 2,
+          "line": 119,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "make",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 8,
+          "line": 123,
+        },
+        "start": Object {
+          "character": 4,
+          "line": 123,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "make",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 10,
+          "line": 127,
+        },
+        "start": Object {
+          "character": 6,
+          "line": 127,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "make",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 6,
+          "line": 131,
+        },
+        "start": Object {
+          "character": 2,
+          "line": 131,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "make",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 6,
+          "line": 138,
+        },
+        "start": Object {
+          "character": 2,
+          "line": 138,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "make",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 12,
+          "line": 255,
+        },
+        "start": Object {
+          "character": 8,
+          "line": 255,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "make",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 7,
+          "line": 145,
+        },
+        "start": Object {
+          "character": 2,
+          "line": 145,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "clean",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 15,
+          "line": 225,
+        },
+        "start": Object {
+          "character": 10,
+          "line": 225,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "clean",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 12,
+          "line": 148,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 148,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "node_version",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 1,
+          "line": 158,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 158,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "t",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 7,
+          "line": 170,
+        },
+        "start": Object {
+          "character": 6,
+          "line": 170,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "t",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 3,
+          "line": 177,
+        },
+        "start": Object {
+          "character": 0,
+          "line": 177,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "url",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 5,
+          "line": 185,
+        },
+        "start": Object {
+          "character": 2,
+          "line": 185,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "url",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 9,
+          "line": 205,
+        },
+        "start": Object {
+          "character": 6,
+          "line": 205,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "ver",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 13,
+          "line": 206,
+        },
+        "start": Object {
+          "character": 6,
+          "line": 206,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "isnpm10",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 19,
+          "line": 211,
+        },
+        "start": Object {
+          "character": 12,
+          "line": 211,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "isnpm10",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 19,
+          "line": 215,
+        },
+        "start": Object {
+          "character": 12,
+          "line": 215,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "isnpm10",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 14,
+          "line": 232,
+        },
+        "start": Object {
+          "character": 10,
+          "line": 232,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "NODE",
+  },
+  Object {
+    "kind": undefined,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 14,
+          "line": 235,
+        },
+        "start": Object {
+          "character": 10,
+          "line": 235,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "NODE",
+  },
+]
+`;
