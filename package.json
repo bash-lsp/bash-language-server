@@ -20,7 +20,9 @@
     "lint:bail": "tslint --project vscode-client && tslint --project server",
     "test": "jest --runInBand --forceExit",
     "test:coverage": "npm run test -- --coverage",
-    "test:watch": "npm run test -- --watch"
+    "test:watch": "npm run test -- --watch",
+    "check": "npm run lint && npm run test",
+    "check:bail": "npm run lint:bail && npm run test"
   },
   "devDependencies": {
     "@types/jest": "^22.2.2",

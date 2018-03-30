@@ -33,6 +33,15 @@ npm run compile
 Now, depending on which part you want to work on follow the relevant section
 below.
 
+## Development Tools
+
+To support a good develop workflow we set up [TSLint][tslint], [Prettier][prettier] and integration tests using [Jest][jest]:
+
+    yarn run check  # (runs lint, prettier and tests)
+    yarn run lint
+    yarn run test
+    yarn run test:coverage
+
 ## Working on the client
 
 ### Visual Studio Code
@@ -64,3 +73,6 @@ I'm open to suggestions on how to improve this workflow.
 
 [LSP]: https://microsoft.github.io/language-server-protocol/
 [ide-bash]: https://github.com/mads-hartmann/ide-bash
+[jest]: https://facebook.github.io/jest/
+[prettier]: https://prettier.io/
+[tslint]: https://palantir.github.io/tslint/
