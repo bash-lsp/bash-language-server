@@ -1,14 +1,5 @@
 {
-  "name": "bash-language-server",
-  "description": "A language server for Bash",
-  "author": "Mads Hartmann",
-  "license": "MIT",
-  "version": "1.0.0",
-  "publisher": "mads-hartmann",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mads-hartmann/bash-language-server"
-  },
+  "private": true,
   "scripts": {
     "postinstall": "cd server && npm install && cd ../vscode-client && npm install && cd ..",
     "compile": "cd server && npm run compile && cd ../vscode-client && npm run compile && cd ..",
