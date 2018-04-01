@@ -13,7 +13,8 @@
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
     "check": "npm run lint && npm run test",
-    "check:bail": "npm run lint:bail && npm run test"
+    "check:bail": "npm run lint:bail && npm run test",
+    "reinstall-server": "npm run compile && npm i -g ./server"
   },
   "devDependencies": {
     "@types/jest": "^22.2.2",
@@ -63,5 +64,6 @@
       "text-summary",
       "html"
     ]
-  }
+  },
+  "dependencies": {}
 }
