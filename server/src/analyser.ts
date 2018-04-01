@@ -18,7 +18,7 @@ type Documents = { [uri: string]: Document }
 type Texts = { [uri: string]: string }
 
 /**
- * The Analyzer uses the Abstract Syntax Trees (ASTs) that are provdied by
+ * The Analyzer uses the Abstract Syntax Trees (ASTs) that are provided by
  * tree-sitter to find definitions, reference, etc.
  */
 export class Analyzer {
@@ -26,7 +26,7 @@ export class Analyzer {
    * Initialize the Analyzer based on a connection to the client and an optional
    * root path.
    *
-   * If the rootPath is provided it will iniailize all *.sh files it can find
+   * If the rootPath is provided it will initialize all *.sh files it can find
    * anywhere on that path.
    */
   public static fromRoot(
