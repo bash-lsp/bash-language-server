@@ -70,6 +70,7 @@ export class Analyzer {
 
   // Global mapping from tree-sitter node type to vscode SymbolKind
   private kinds: Kinds = {
+    // These keys are using underscores as that's the naming convention in tree-sitter.
     environment_variable_assignment: LSP.SymbolKind.Variable,
     function_definition: LSP.SymbolKind.Function,
   }
