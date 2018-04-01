@@ -1,6 +1,8 @@
 'use strict'
-// tslint:disable:no-var-requires
 
+import * as fs from 'fs'
+import * as glob from 'glob'
+import * as Path from 'path'
 import {
   CompletionItem,
   createConnection,
@@ -18,12 +20,10 @@ import {
   TextDocuments,
 } from 'vscode-languageserver'
 
-const glob = require('glob')
-const fs = require('fs')
-import * as Path from 'path'
-
-const pkg = require('../package')
 import * as Analyser from './analyser'
+
+// tslint:disable-next-line:no-var-requires
+const pkg = require('../package')
 
 export function listen() {
   // Create a connection for the server.
