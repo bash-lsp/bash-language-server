@@ -8,6 +8,7 @@ import * as bash from 'tree-sitter-bash'
 import * as LSP from 'vscode-languageserver'
 
 import { uniqueBasedOnHash } from './util/array'
+import { flattenArray, flattenObjectValues } from './util/flatten'
 import * as TreeSitterUtil from './util/tree-sitter'
 
 type Kinds = { [type: string]: LSP.SymbolKind }
@@ -87,11 +88,8 @@ export default class Analyzer {
    * Find all the locations where something named name has been defined.
    */
   public findReferences(name: string): LSP.Location[] {
-    const locations = []
-    Object.keys(this.uriToTreeSitterDocument).forEach(uri => {
-      this.findOccurrences(uri, name).forEach(l => locations.push(l))
-    })
-    return locations
+    const uris = Object.keys(this.uriToTreeSitterDocument)
+    return flattenArray(uris.map(uri => this.findOccurrences(uri, name)))
   }
 
   /**
@@ -130,12 +128,8 @@ export default class Analyzer {
    * Find all symbol definitions in the given file.
    */
   public findSymbols(uri: string): LSP.SymbolInformation[] {
-    const declarationsInFile = this.uriToDeclarations[uri] || []
-    const ds = []
-    Object.keys(declarationsInFile).forEach(n => {
-      declarationsInFile[n].forEach(d => ds.push(d))
-    })
-    return ds
+    const declarationsInFile = this.uriToDeclarations[uri] || {}
+    return flattenObjectValues(declarationsInFile)
   }
 
   /**
