@@ -77,7 +77,7 @@ export function analyze(uri: string, contents: string): Diagnostic[] {
 }
 
 /**
- * Find all the locations where something named name has been defined.
+ * Find all the locations where `name` has been defined.
  */
 export function findDefinition(name: string): Location[] {
   const symbols: SymbolInformation[] = []
@@ -89,7 +89,7 @@ export function findDefinition(name: string): Location[] {
 }
 
 /**
- * Find all the locations where something named name has been defined.
+ * Find all the locations where `name` has been referenced.
  */
 export function findReferences(name: string): Location[] {
   const locations = []
@@ -100,7 +100,7 @@ export function findReferences(name: string): Location[] {
 }
 
 /**
- * Find all occurrences of name in the given file.
+ * Find all occurrences of `query` in the given file `uri`.
  * It's currently not scope-aware.
  */
 export function findOccurrences(uri: string, query: string): Location[] {
@@ -132,7 +132,7 @@ export function findOccurrences(uri: string, query: string): Location[] {
 }
 
 /**
- * Find all symbol definitions in the given file.
+ * Find all symbol definitions in the given file `uri`.
  */
 export function findSymbols(uri: string): SymbolInformation[] {
   const declarationsInFile = declarations[uri] || []
