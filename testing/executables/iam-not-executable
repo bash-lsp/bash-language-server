@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# I don't have my executable bit set.
+echo "Hello"
