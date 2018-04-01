@@ -63,9 +63,7 @@ whenever you've made a change, and then reload you vscode window to re-launch
 the server.
 
 ```
-cd server
-npm run compile
-npm i -g .
+npm run reinstall-server
 # Reload vscode window.
 ```
 

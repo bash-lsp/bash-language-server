@@ -23,7 +23,7 @@
     "vscode-languageserver": "^3.5.0"
   },
   "scripts": {
-    "compile": "tsc -p ./",
+    "compile": "rm -rf out && tsc -p ./",
     "compile:watch": "tsc -w -p ./"
   }
 }
