@@ -1,16 +1,13 @@
-import * as Process from 'child_process'
+import { execFile } from 'child_process'
 import * as Path from 'path'
 
 function isWindows() {
   return process.platform === 'win32'
 }
 
-/**
- *
- */
-export function base(): Promise<string> {
+function getBasePath(): Promise<string> {
   return new Promise((resolve, reject) => {
-    Process.execFile('npm', ['bin', '-g'], (err, stdout) => {
+    execFile('npm', ['bin', '-g'], (err, stdout) => {
       if (err) {
         reject(err)
       }
@@ -20,12 +17,14 @@ export function base(): Promise<string> {
   })
 }
 
-export function executable(basePath: string): Promise<string> {
+export async function getServerCommand(): Promise<string> {
+  const basePath = await getBasePath()
   const name = isWindows() ? 'bash-language-server.cmd' : 'bash-language-server'
   const command = Path.join(basePath, name)
-  return new Promise((resolve, reject) => {
+
+  return new Promise<string>((resolve, reject) => {
     // Simply check if the bash-language-server is installed.
-    Process.execFile(command, ['-v'], err => {
+    execFile(command, ['-v'], err => {
       if (err) {
         reject(err)
       }
