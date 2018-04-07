@@ -28,7 +28,7 @@
   "main": "./out/src/extension",
   "contributes": {},
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "yarn run compile",
     "compile": "rm -rf out && tsc -p ./",
     "compile:watch": "tsc -w -p ./",
     "update-vscode": "node ./node_modules/vscode/bin/install",
