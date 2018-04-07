@@ -30,6 +30,5 @@ export function listen() {
       }))
   })
 
-  // Listen on the connection
   connection.listen()
 }

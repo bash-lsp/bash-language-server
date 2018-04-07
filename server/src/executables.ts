@@ -14,7 +14,7 @@ export default class Executables {
    */
   public static fromPath(path: string): Promise<Executables> {
     const paths = path.split(':')
-    const promises = paths.map(x => _executables(x))
+    const promises = paths.map(x => findExecutablesInPath(x))
     return Promise.all(promises)
       .then(ArrayUtil.flatten)
       .then(ArrayUtil.uniq)
@@ -47,7 +47,7 @@ export default class Executables {
    * For now it simply tries to look up the MAN documentation.
    */
   public documentation(executable: string): Promise<string> {
-    return ShUtil.exec(`man ${executable} | col -b`).then(doc => {
+    return ShUtil.execShellScript(`man ${executable} | col -b`).then(doc => {
       return !doc
         ? Promise.resolve(`No MAN page for ${executable}`)
         : Promise.resolve(doc)
@@ -56,10 +56,9 @@ export default class Executables {
 }
 
 /**
- * Find all the executables on the given path.
  * Only returns direct children, or the path itself if it's an executable.
  */
-function _executables(path: string): Promise<string[]> {
+function findExecutablesInPath(path: string): Promise<string[]> {
   return new Promise((resolve, _) => {
     Fs.lstat(path, (err, stat) => {
       if (err) {

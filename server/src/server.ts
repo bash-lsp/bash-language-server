@@ -10,7 +10,7 @@ import Executables from './executables'
 export default class BashServer {
   /**
    * Initialize the server based on a connection to the client and the protocols
-   * initialization paramters.
+   * initialization parameters.
    */
   public static initialize(
     connection: LSP.Connection,

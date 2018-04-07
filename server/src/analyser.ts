@@ -57,19 +57,14 @@ export default class Analyzer {
     })
   }
 
-  // Global map from uri to the tree-sitter document.
-  private documents: Documents = {}
+  private uriToTreeSitterDocument: Documents = {}
 
-  // Global mapping from uri to the contents of the file at that uri.
   // We need this to find the word at a given point etc.
-  private texts: Texts = {}
+  private uriToFileContent: Texts = {}
 
-  // Global map of all the declarations that we've seen, indexed by file
-  // and then name.
-  private declarations: FileDeclarations = {}
+  private uriToDeclarations: FileDeclarations = {}
 
-  // Global mapping from tree-sitter node type to vscode SymbolKind
-  private kinds: Kinds = {
+  private treeSitterTypeToLSPKind: Kinds = {
     // These keys are using underscores as that's the naming convention in tree-sitter.
     environment_variable_assignment: LSP.SymbolKind.Variable,
     function_definition: LSP.SymbolKind.Function,
@@ -80,8 +75,8 @@ export default class Analyzer {
    */
   public findDefinition(name: string): LSP.Location[] {
     const symbols: LSP.SymbolInformation[] = []
-    Object.keys(this.declarations).forEach(uri => {
-      const declarationNames = this.declarations[uri][name] || []
+    Object.keys(this.uriToDeclarations).forEach(uri => {
+      const declarationNames = this.uriToDeclarations[uri][name] || []
       declarationNames.forEach(d => symbols.push(d))
     })
     return symbols.map(s => s.location)
@@ -92,7 +87,7 @@ export default class Analyzer {
    */
   public findReferences(name: string): LSP.Location[] {
     const locations = []
-    Object.keys(this.documents).forEach(uri => {
+    Object.keys(this.uriToTreeSitterDocument).forEach(uri => {
       this.findOccurrences(uri, name).forEach(l => locations.push(l))
     })
     return locations
@@ -103,8 +98,8 @@ export default class Analyzer {
    * It's currently not scope-aware.
    */
   public findOccurrences(uri: string, query: string): LSP.Location[] {
-    const doc = this.documents[uri]
-    const contents = this.texts[uri]
+    const doc = this.uriToTreeSitterDocument[uri]
+    const contents = this.uriToFileContent[uri]
 
     const locations = []
 
@@ -134,7 +129,7 @@ export default class Analyzer {
    * Find all symbol definitions in the given file.
    */
   public findSymbols(uri: string): LSP.SymbolInformation[] {
-    const declarationsInFile = this.declarations[uri] || []
+    const declarationsInFile = this.uriToDeclarations[uri] || []
     const ds = []
     Object.keys(declarationsInFile).forEach(n => {
       declarationsInFile[n].forEach(d => ds.push(d))
@@ -155,9 +150,9 @@ export default class Analyzer {
     d.setInputString(contents)
     d.parse()
 
-    this.documents[uri] = d
-    this.declarations[uri] = {}
-    this.texts[uri] = contents
+    this.uriToTreeSitterDocument[uri] = d
+    this.uriToDeclarations[uri] = {}
+    this.uriToFileContent[uri] = contents
 
     const problems = []
 
@@ -174,17 +169,17 @@ export default class Analyzer {
       } else if (TreeSitterUtil.isDefinition(n)) {
         const named = n.firstNamedChild
         const name = contents.slice(named.startIndex, named.endIndex)
-        const namedDeclarations = this.declarations[uri][name] || []
+        const namedDeclarations = this.uriToDeclarations[uri][name] || []
 
         namedDeclarations.push(
           LSP.SymbolInformation.create(
             name,
-            this.kinds[n.type],
+            this.treeSitterTypeToLSPKind[n.type],
             TreeSitterUtil.range(named),
             uri,
           ),
         )
-        this.declarations[uri][name] = namedDeclarations
+        this.uriToDeclarations[uri][name] = namedDeclarations
       }
     })
 
@@ -195,8 +190,8 @@ export default class Analyzer {
    * Find the full word at the given point.
    */
   public wordAtPoint(uri: string, line: number, column: number): string | null {
-    const document = this.documents[uri]
-    const contents = this.texts[uri]
+    const document = this.uriToTreeSitterDocument[uri]
+    const contents = this.uriToFileContent[uri]
 
     const node = document.rootNode.namedDescendantForPosition({ row: line, column })
 
