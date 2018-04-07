@@ -107,6 +107,139 @@ Array [
 ]
 `;
 
+exports[`findSymbolCompletions return a list of symbols 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "name": "ret",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "ret",
+  },
+  Object {
+    "data": Object {
+      "name": "configures",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "configures",
+  },
+  Object {
+    "data": Object {
+      "name": "npm_config_loglevel",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "npm_config_loglevel",
+  },
+  Object {
+    "data": Object {
+      "name": "node",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "node",
+  },
+  Object {
+    "data": Object {
+      "name": "TMP",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "TMP",
+  },
+  Object {
+    "data": Object {
+      "name": "BACK",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "BACK",
+  },
+  Object {
+    "data": Object {
+      "name": "tar",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "tar",
+  },
+  Object {
+    "data": Object {
+      "name": "MAKE",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "MAKE",
+  },
+  Object {
+    "data": Object {
+      "name": "make",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "make",
+  },
+  Object {
+    "data": Object {
+      "name": "clean",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "clean",
+  },
+  Object {
+    "data": Object {
+      "name": "node_version",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "node_version",
+  },
+  Object {
+    "data": Object {
+      "name": "t",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "t",
+  },
+  Object {
+    "data": Object {
+      "name": "url",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "url",
+  },
+  Object {
+    "data": Object {
+      "name": "ver",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "ver",
+  },
+  Object {
+    "data": Object {
+      "name": "isnpm10",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "isnpm10",
+  },
+  Object {
+    "data": Object {
+      "name": "NODE",
+      "type": "function",
+    },
+    "kind": undefined,
+    "label": "NODE",
+  },
+]
+`;
+
 exports[`findSymbols returns a list of SymbolInformation if uri is found 1`] = `
 Array [
   Object {

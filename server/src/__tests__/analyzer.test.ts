@@ -1,5 +1,7 @@
 import FIXTURES from '../../../testing/fixtures'
-import * as analyzer from '../analyser'
+import Analyzer from '../analyser'
+
+const analyzer = new Analyzer()
 
 const CURRENT_URI = 'dummy-uri.sh'
 beforeEach(() => {
@@ -63,5 +65,11 @@ describe('wordAtPoint', () => {
     expect(analyzer.wordAtPoint(CURRENT_URI, 25, 5)).toEqual('rm')
     // FIXME: seems like there is an issue here:
     // expect(analyzer.wordAtPoint(CURRENT_URI, 24, 4)).toEqual('else')
+  })
+})
+
+describe('findSymbolCompletions', () => {
+  it('return a list of symbols', () => {
+    expect(analyzer.findSymbolCompletions(CURRENT_URI)).toMatchSnapshot()
   })
 })

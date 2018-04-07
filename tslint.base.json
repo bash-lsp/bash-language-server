@@ -16,7 +16,7 @@
         "semi": false
       }
     ],
-
+    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
     "ordered-imports": true,
     "object-literal-sort-keys": false,
     "interface-over-type-literal": false,
