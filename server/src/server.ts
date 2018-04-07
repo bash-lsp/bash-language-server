@@ -1,13 +1,13 @@
 import * as LSP from 'vscode-languageserver'
 
-import { Analyzer } from './analyser'
-import { Executables } from './executables'
+import Analyzer from './analyser'
+import Executables from './executables'
 
 /**
  * The BashServer glues together the separate components to implement
  * the various parts of the Language Server Protocol.
  */
-export class BashServer {
+export default class BashServer {
   /**
    * Initialize the server based on a connection to the client and the protocols
    * initialization paramters.

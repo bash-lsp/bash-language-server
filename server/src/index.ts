@@ -2,7 +2,7 @@
 
 import * as LSP from 'vscode-languageserver'
 
-import { BashServer } from './server'
+import BashServer from './server'
 
 // tslint:disable-next-line:no-var-requires
 const pkg = require('../package')

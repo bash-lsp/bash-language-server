@@ -1,5 +1,5 @@
 import * as path from 'path'
-import { Executables } from '../executables'
+import Executables from '../executables'
 
 const executablesPromise = Executables.fromPath(
   path.resolve(__dirname, '..', '..', '..', 'testing', 'executables'),

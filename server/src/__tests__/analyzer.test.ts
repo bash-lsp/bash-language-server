@@ -1,5 +1,5 @@
 import FIXTURES from '../../../testing/fixtures'
-import { Analyzer } from '../analyser'
+import Analyzer from '../analyser'
 
 const analyzer = new Analyzer()
 

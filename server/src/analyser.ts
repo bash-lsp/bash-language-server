@@ -21,7 +21,7 @@ type Texts = { [uri: string]: string }
  * The Analyzer uses the Abstract Syntax Trees (ASTs) that are provided by
  * tree-sitter to find definitions, reference, etc.
  */
-export class Analyzer {
+export default class Analyzer {
   /**
    * Initialize the Analyzer based on a connection to the client and an optional
    * root path.

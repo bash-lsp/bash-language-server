@@ -8,7 +8,7 @@ import * as ShUtil from './util/sh'
 /**
  * Provides information based on the programs on your PATH
  */
-export class Executables {
+export default class Executables {
   /**
    * @param path is expected to to be a ':' separated list of paths.
    */
