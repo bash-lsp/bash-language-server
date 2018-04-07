@@ -34,46 +34,6 @@
 			"problemMatcher": [
 				"$tsc"
 			]
-		},
-		{
-			"taskName": "watch",
-			"dependsOn": [
-				"watch:client",
-				"watch:server"
-			],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"problemMatcher": []
-		},
-		{
-			"label": "watch:client",
-			"type": "npm",
-			"script": "watch:client",
-			"isBackground": true,
-			"group": "build",
-			"presentation": {
-				"panel": "dedicated",
-				"reveal": "never"
-			},
-			"problemMatcher": [
-				"$tsc-watch"
-			]
-		},
-		{
-			"label": "watch:server",
-			"type": "npm",
-			"script": "watch:server",
-			"isBackground": true,
-			"group": "build",
-			"presentation": {
-				"panel": "dedicated",
-				"reveal": "never"
-			},
-			"problemMatcher": [
-				"$tsc-watch"
-			]
 		}
 	]
 }
