@@ -146,18 +146,7 @@ export default class BashServer {
     this.connection.console.log(
       `Asked for completions at ${pos.position.line}:${pos.position.character}`,
     )
-    const symbols = this.analyzer.findSymbols(pos.textDocument.uri)
-
-    const symbolCompletions = symbols.map((s: LSP.SymbolInformation) => {
-      return {
-        label: s.name,
-        kind: s.kind,
-        data: {
-          name: s.name,
-          type: 'function',
-        },
-      }
-    })
+    const symbolCompletions = this.analyzer.findSymbolCompletions(pos.textDocument.uri)
 
     const programCompletions = this.executables.list().map((s: string) => {
       return {

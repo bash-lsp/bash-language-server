@@ -7,6 +7,7 @@ import { Document } from 'tree-sitter'
 import * as bash from 'tree-sitter-bash'
 import * as LSP from 'vscode-languageserver'
 
+import { uniqueBasedOnHash } from './util/array'
 import * as TreeSitterUtil from './util/tree-sitter'
 
 type Kinds = { [type: string]: LSP.SymbolKind }
@@ -135,6 +136,24 @@ export default class Analyzer {
       declarationsInFile[n].forEach(d => ds.push(d))
     })
     return ds
+  }
+
+  /**
+   * Find unique symbol completions for the given file.
+   */
+  public findSymbolCompletions(uri: string): LSP.CompletionItem[] {
+    const hashFunction = ({ name, kind }) => `${name}${kind}`
+
+    return uniqueBasedOnHash(this.findSymbols(uri), hashFunction).map(
+      (symbol: LSP.SymbolInformation) => ({
+        label: symbol.name,
+        kind: symbol.kind,
+        data: {
+          name: symbol.name,
+          type: 'function',
+        },
+      }),
+    )
   }
 
   /**

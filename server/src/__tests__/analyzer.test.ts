@@ -67,3 +67,9 @@ describe('wordAtPoint', () => {
     // expect(analyzer.wordAtPoint(CURRENT_URI, 24, 4)).toEqual('else')
   })
 })
+
+describe('findSymbolCompletions', () => {
+  it('return a list of symbols', () => {
+    expect(analyzer.findSymbolCompletions(CURRENT_URI)).toMatchSnapshot()
+  })
+})
