@@ -3,6 +3,7 @@
 
 import {
   CompletionItem,
+  CompletionItemKind,
   createConnection,
   Definition,
   DocumentHighlight,
@@ -14,6 +15,7 @@ import {
   StreamMessageReader,
   StreamMessageWriter,
   SymbolInformation,
+  SymbolKind,
   TextDocumentPositionParams,
   TextDocuments,
 } from 'vscode-languageserver'
@@ -24,6 +26,58 @@ import * as Path from 'path'
 
 const pkg = require('../package')
 import * as Analyser from './analyser'
+
+function symbolKindToCompletionKind(s: SymbolKind): CompletionItemKind {
+  switch (s) {
+    case SymbolKind.File:
+      return CompletionItemKind.File
+    case SymbolKind.Module:
+    case SymbolKind.Namespace:
+    case SymbolKind.Package:
+      return CompletionItemKind.Module
+    case SymbolKind.Class:
+      return CompletionItemKind.Class
+    case SymbolKind.Method:
+      return CompletionItemKind.Method
+    case SymbolKind.Property:
+      return CompletionItemKind.Property
+    case SymbolKind.Field:
+      return CompletionItemKind.Field
+    case SymbolKind.Constructor:
+      return CompletionItemKind.Constructor
+    case SymbolKind.Enum:
+      return CompletionItemKind.Enum
+    case SymbolKind.Interface:
+      return CompletionItemKind.Interface
+    case SymbolKind.Function:
+      return CompletionItemKind.Function
+    case SymbolKind.Variable:
+      return CompletionItemKind.Variable
+    case SymbolKind.Constant:
+      return CompletionItemKind.Constant
+    case SymbolKind.String:
+    case SymbolKind.Number:
+    case SymbolKind.Boolean:
+    case SymbolKind.Array:
+    case SymbolKind.Key:
+    case SymbolKind.Null:
+      return CompletionItemKind.Text
+    case SymbolKind.Object:
+      return CompletionItemKind.Module
+    case SymbolKind.EnumMember:
+      return CompletionItemKind.EnumMember
+    case SymbolKind.Struct:
+      return CompletionItemKind.Struct
+    case SymbolKind.Event:
+      return CompletionItemKind.Event
+    case SymbolKind.Operator:
+      return CompletionItemKind.Operator
+    case SymbolKind.TypeParameter:
+      return CompletionItemKind.TypeParameter
+    default:
+      return CompletionItemKind.Text
+  }
+}
 
 export function listen() {
   // Create a connection for the server.
@@ -146,7 +200,7 @@ export function listen() {
       return symbols.map((s: SymbolInformation) => {
         return {
           label: s.name,
-          kind: s.kind,
+          kind: symbolKindToCompletionKind(s.kind),
           data: s.name, // Used for later resolving more info.
         }
       })
