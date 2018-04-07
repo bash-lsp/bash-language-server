@@ -12,12 +12,16 @@ The project has a root `package.json` file which is really just there for
 convenience - it proxies to the `package.json` files in the `vscode-client` and
 `server` folders.
 
+## Prerequisites
+
+You need to have [`yarn` installed][yarn].
+
 ## Initial setup
 
 Run the following in the root of the project
 
 ```
-npm install
+yarn install
 ```
 
 This uses the `postinstall` hook to install the dependencies in each of the
@@ -27,7 +31,7 @@ To make sure that everything is configured correctly run the following command
 to compile both the client and the server once
 
 ```
-npm run compile
+yarn run compile
 ```
 
 Now, depending on which part you want to work on follow the relevant section
@@ -63,7 +67,7 @@ whenever you've made a change, and then reload you vscode window to re-launch
 the server.
 
 ```
-npm run reinstall-server
+yarn run reinstall-server
 # Reload vscode window.
 ```
 
@@ -74,3 +78,4 @@ I'm open to suggestions on how to improve this workflow.
 [jest]: https://facebook.github.io/jest/
 [prettier]: https://prettier.io/
 [tslint]: https://palantir.github.io/tslint/
+[yarn]: https://yarnpkg.com/lang/en/docs/install/

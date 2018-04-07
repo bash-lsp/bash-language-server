@@ -1,8 +1,9 @@
 language: node_js
 node_js:
-  - '4'
+  - '6'
+cache: yarn
 script:
-  - npm run check:bail
+  - yarn run check:bail
 notifications:
   email:
     on_failure: always
