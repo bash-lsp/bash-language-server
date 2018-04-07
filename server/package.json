@@ -18,9 +18,9 @@
   },
   "dependencies": {
     "glob": "^7.1.2",
-    "tree-sitter": "^0.10.0",
-    "tree-sitter-bash": "^0.6.0",
-    "vscode-languageserver": "^3.5.0"
+    "tree-sitter": "^0.11.0",
+    "tree-sitter-bash": "^0.11.0",
+    "vscode-languageserver": "^4.1.1"
   },
   "scripts": {
     "compile": "rm -rf out && tsc -p ./",
