@@ -14,7 +14,7 @@
 			"outFiles": [
 				"${workspaceRoot}/vscode-client/out/**/*.js"
 			],
-			"preLaunchTask": "watch:client"
+			"preLaunchTask": "compile:client"
 		}
 	]
 }
