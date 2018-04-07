@@ -26,6 +26,15 @@ Clients have been implemented for:
 - Visual Studio Code ([Bash IDE][vscode-marketplace])
 - Atom ([ide-bash][ide-bash]).
 
+#### Neovim
+Install the plugin [autozimu/LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim) and add the following configuration to ``init.vim``:
+
+```vim
+let g:LanguageClient_serverCommands = {
+    \ 'sh': ['bash-language-server', 'start']
+    \ }
+```
+
 ## Development Guide
 
 Please see [docs/development-guide][dev-guide] for more information.
