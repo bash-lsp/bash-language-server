@@ -9,6 +9,7 @@ import {
   SymbolInformation,
   SymbolKind,
 } from 'vscode-languageserver/lib/main'
+import { flattenArray, flattenObjectValues } from './utilities/flatten'
 
 // Global mapping from tree-sitter node type to vscode SymbolKind
 type Kinds = { [type: string]: SymbolKind }
@@ -77,7 +78,7 @@ export function analyze(uri: string, contents: string): Diagnostic[] {
 }
 
 /**
- * Find all the locations where something named name has been defined.
+ * Find all the locations where `name` has been defined.
  */
 export function findDefinition(name: string): Location[] {
   const symbols: SymbolInformation[] = []
@@ -89,18 +90,15 @@ export function findDefinition(name: string): Location[] {
 }
 
 /**
- * Find all the locations where something named name has been defined.
+ * Find all the locations where `name` has been referenced.
  */
 export function findReferences(name: string): Location[] {
-  const locations = []
-  Object.keys(documents).forEach(uri => {
-    findOccurrences(uri, name).forEach(l => locations.push(l))
-  })
-  return locations
+  const uris = Object.keys(documents)
+  return flattenArray(uris.map(uri => findOccurrences(uri, name)))
 }
 
 /**
- * Find all occurrences of name in the given file.
+ * Find all occurrences of `query` in the given file `uri`.
  * It's currently not scope-aware.
  */
 export function findOccurrences(uri: string, query: string): Location[] {
@@ -132,15 +130,11 @@ export function findOccurrences(uri: string, query: string): Location[] {
 }
 
 /**
- * Find all symbol definitions in the given file.
+ * Find all symbol definitions in the given file `uri`.
  */
 export function findSymbols(uri: string): SymbolInformation[] {
-  const declarationsInFile = declarations[uri] || []
-  const ds = []
-  Object.keys(declarationsInFile).forEach(n => {
-    declarationsInFile[n].forEach(d => ds.push(d))
-  })
-  return ds
+  const declarationsInFile = declarations[uri] || {}
+  return flattenObjectValues(declarationsInFile)
 }
 
 /**
