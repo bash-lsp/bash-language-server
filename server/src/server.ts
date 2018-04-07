@@ -89,16 +89,22 @@ export default class BashServer {
     }
   }
 
+  private getWordAtPoint(
+    params: LSP.ReferenceParams | LSP.TextDocumentPositionParams,
+  ): string | null {
+    return this.analyzer.wordAtPoint(
+      params.textDocument.uri,
+      params.position.line,
+      params.position.character,
+    )
+  }
+
   private onHover(pos: LSP.TextDocumentPositionParams): Promise<LSP.Hover> {
     this.connection.console.log(
       `Hovering over ${pos.position.line}:${pos.position.character}`,
     )
 
-    const word = this.analyzer.wordAtPoint(
-      pos.textDocument.uri,
-      pos.position.line,
-      pos.position.character,
-    )
+    const word = this.getWordAtPoint(pos)
 
     return this.executables.isExecutableOnPATH(word)
       ? this.executables.documentation(word).then(doc => ({
@@ -114,11 +120,7 @@ export default class BashServer {
     this.connection.console.log(
       `Asked for definition at ${pos.position.line}:${pos.position.character}`,
     )
-    const word = this.analyzer.wordAtPoint(
-      pos.textDocument.uri,
-      pos.position.line,
-      pos.position.character,
-    )
+    const word = this.getWordAtPoint(pos)
     return this.analyzer.findDefinition(word)
   }
 
@@ -129,22 +131,14 @@ export default class BashServer {
   private onDocumentHighlight(
     pos: LSP.TextDocumentPositionParams,
   ): LSP.DocumentHighlight[] {
-    const word = this.analyzer.wordAtPoint(
-      pos.textDocument.uri,
-      pos.position.line,
-      pos.position.character,
-    )
+    const word = this.getWordAtPoint(pos)
     return this.analyzer
       .findOccurrences(pos.textDocument.uri, word)
       .map(n => ({ range: n.range }))
   }
 
   private onReferences(params: LSP.ReferenceParams): LSP.Location[] {
-    const word = this.analyzer.wordAtPoint(
-      params.textDocument.uri,
-      params.position.line,
-      params.position.character,
-    )
+    const word = this.getWordAtPoint(params)
     return this.analyzer.findReferences(word)
   }
 
