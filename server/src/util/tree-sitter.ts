@@ -40,3 +40,17 @@ export function isReference(n: ASTNode): boolean {
       return false
   }
 }
+
+export function findParent(
+  start: ASTNode,
+  predicate: (n: ASTNode) => boolean,
+): ASTNode | null {
+  let node = start.parent
+  while (node !== null) {
+    if (predicate(node)) {
+      return node
+    }
+    node = node.parent
+  }
+  return null
+}

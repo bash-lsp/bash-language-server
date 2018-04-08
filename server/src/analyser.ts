@@ -190,12 +190,21 @@ export default class Analyzer {
         const name = contents.slice(named.startIndex, named.endIndex)
         const namedDeclarations = this.uriToDeclarations[uri][name] || []
 
+        const parent = TreeSitterUtil.findParent(n, p => p.type === 'function_definition')
+        const parentName = parent
+          ? contents.slice(
+              parent.firstNamedChild.startIndex,
+              parent.firstNamedChild.endIndex,
+            )
+          : null
+
         namedDeclarations.push(
           LSP.SymbolInformation.create(
             name,
             this.treeSitterTypeToLSPKind[n.type],
-            TreeSitterUtil.range(named),
+            TreeSitterUtil.range(n),
             uri,
+            parentName,
           ),
         )
         this.uriToDeclarations[uri][name] = namedDeclarations
