@@ -7,11 +7,10 @@ import {
   ServerOptions,
 } from 'vscode-languageclient'
 
-import * as Util from './util'
+import { getServerCommand } from './util'
 
 export function activate(context: ExtensionContext) {
-  Util.base()
-    .then(base => Util.executable(base))
+  getServerCommand()
     .then(command => start(context, command))
     .catch(_ => handleMissingExecutable())
 }
