@@ -1,6 +1,7 @@
 import * as LSP from 'vscode-languageserver'
 
 import Analyzer from './analyser'
+import * as Builtins from './builtins'
 import Executables from './executables'
 
 /**
@@ -159,13 +160,31 @@ export default class BashServer {
       }
     })
 
-    return symbolCompletions.concat(programCompletions)
+    const builtinsCompletions = Builtins.LIST.map(builtin => ({
+      label: builtin,
+      kind: LSP.SymbolKind.Method, // ??
+      data: {
+        name: builtin,
+        type: 'builtin',
+      },
+    }))
+
+    return [...symbolCompletions, ...programCompletions, ...builtinsCompletions]
   }
 
   private onCompletionResolve(item: LSP.CompletionItem): Promise<LSP.CompletionItem> {
+    // TODO: async await would be nice I guess
     if (item.data.type === 'executable') {
       return this.executables
         .documentation(item.data.name)
+        .then(doc => ({
+          ...item,
+          detail: doc,
+        }))
+        .catch(() => item)
+    } else if (item.data.type === 'builtin') {
+      //
+      return Builtins.documentation(item.data.name)
         .then(doc => ({
           ...item,
           detail: doc,
