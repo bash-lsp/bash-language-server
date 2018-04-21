@@ -24,7 +24,7 @@ Array [
   Object {
     "range": Object {
       "end": Object {
-        "character": 12,
+        "character": 37,
         "line": 148,
       },
       "start": Object {
@@ -247,7 +247,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 5,
+          "character": 8,
           "line": 21,
         },
         "start": Object {
@@ -264,7 +264,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 5,
+          "character": 8,
           "line": 30,
         },
         "start": Object {
@@ -281,7 +281,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 3,
+          "character": 6,
           "line": 54,
         },
         "start": Object {
@@ -298,7 +298,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 3,
+          "character": 5,
           "line": 83,
         },
         "start": Object {
@@ -315,7 +315,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 5,
+          "character": 8,
           "line": 90,
         },
         "start": Object {
@@ -332,7 +332,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 5,
+          "character": 8,
           "line": 97,
         },
         "start": Object {
@@ -349,7 +349,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 3,
+          "character": 6,
           "line": 149,
         },
         "start": Object {
@@ -366,7 +366,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 3,
+          "character": 6,
           "line": 181,
         },
         "start": Object {
@@ -383,7 +383,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 5,
+          "character": 9,
           "line": 183,
         },
         "start": Object {
@@ -400,7 +400,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 5,
+          "character": 8,
           "line": 188,
         },
         "start": Object {
@@ -417,7 +417,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 7,
+          "character": 11,
           "line": 190,
         },
         "start": Object {
@@ -434,7 +434,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 9,
+          "character": 11,
           "line": 220,
         },
         "start": Object {
@@ -451,7 +451,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 13,
+          "character": 15,
           "line": 230,
         },
         "start": Object {
@@ -468,7 +468,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 13,
+          "character": 16,
           "line": 233,
         },
         "start": Object {
@@ -485,7 +485,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 13,
+          "character": 16,
           "line": 236,
         },
         "start": Object {
@@ -502,7 +502,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 3,
+          "character": 6,
           "line": 265,
         },
         "start": Object {
@@ -519,7 +519,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 10,
+          "character": 68,
           "line": 38,
         },
         "start": Object {
@@ -536,7 +536,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 19,
+          "character": 27,
           "line": 40,
         },
         "start": Object {
@@ -553,7 +553,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 21,
+          "character": 31,
           "line": 48,
         },
         "start": Object {
@@ -570,7 +570,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 4,
+          "character": 22,
           "line": 53,
         },
         "start": Object {
@@ -587,7 +587,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 3,
+          "character": 15,
           "line": 69,
         },
         "start": Object {
@@ -604,7 +604,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 5,
+          "character": 12,
           "line": 71,
         },
         "start": Object {
@@ -621,7 +621,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 3,
+          "character": 19,
           "line": 73,
         },
         "start": Object {
@@ -638,7 +638,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 4,
+          "character": 11,
           "line": 81,
         },
         "start": Object {
@@ -655,7 +655,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 3,
+          "character": 12,
           "line": 84,
         },
         "start": Object {
@@ -672,7 +672,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 5,
+          "character": 25,
           "line": 86,
         },
         "start": Object {
@@ -689,7 +689,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 5,
+          "character": 22,
           "line": 89,
         },
         "start": Object {
@@ -706,7 +706,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 4,
+          "character": 11,
           "line": 116,
         },
         "start": Object {
@@ -723,7 +723,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 6,
+          "character": 25,
           "line": 119,
         },
         "start": Object {
@@ -740,7 +740,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 8,
+          "character": 26,
           "line": 123,
         },
         "start": Object {
@@ -757,7 +757,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 10,
+          "character": 17,
           "line": 127,
         },
         "start": Object {
@@ -774,7 +774,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 6,
+          "character": 14,
           "line": 131,
         },
         "start": Object {
@@ -791,7 +791,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 6,
+          "character": 13,
           "line": 138,
         },
         "start": Object {
@@ -808,7 +808,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 12,
+          "character": 21,
           "line": 255,
         },
         "start": Object {
@@ -825,7 +825,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 7,
+          "character": 12,
           "line": 145,
         },
         "start": Object {
@@ -842,7 +842,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 15,
+          "character": 18,
           "line": 225,
         },
         "start": Object {
@@ -859,7 +859,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 12,
+          "character": 37,
           "line": 148,
         },
         "start": Object {
@@ -876,7 +876,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 1,
+          "character": 18,
           "line": 158,
         },
         "start": Object {
@@ -893,7 +893,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 7,
+          "character": 16,
           "line": 170,
         },
         "start": Object {
@@ -910,8 +910,8 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 3,
-          "line": 177,
+          "character": 25,
+          "line": 179,
         },
         "start": Object {
           "character": 0,
@@ -927,8 +927,8 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 5,
-          "line": 185,
+          "character": 24,
+          "line": 187,
         },
         "start": Object {
           "character": 2,
@@ -944,7 +944,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 9,
+          "character": 65,
           "line": 205,
         },
         "start": Object {
@@ -961,7 +961,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 13,
+          "character": 15,
           "line": 206,
         },
         "start": Object {
@@ -978,7 +978,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 19,
+          "character": 21,
           "line": 211,
         },
         "start": Object {
@@ -995,7 +995,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 19,
+          "character": 21,
           "line": 215,
         },
         "start": Object {
@@ -1012,7 +1012,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 14,
+          "character": 22,
           "line": 232,
         },
         "start": Object {
@@ -1029,7 +1029,7 @@ Array [
     "location": Object {
       "range": Object {
         "end": Object {
-          "character": 14,
+          "character": 22,
           "line": 235,
         },
         "start": Object {
