@@ -107,14 +107,23 @@ export default class BashServer {
 
     const word = this.getWordAtPoint(pos)
 
-    return this.executables.isExecutableOnPATH(word)
-      ? this.executables.documentation(word).then(doc => ({
-          contents: {
-            language: 'plaintext',
-            value: doc,
-          },
-        }))
-      : null
+    if (Builtins.isBuiltin(word)) {
+      return Builtins.documentation(word).then(doc => ({
+        contents: {
+          language: 'plaintext',
+          value: doc,
+        },
+      }))
+    } else if (this.executables.isExecutableOnPATH(word)) {
+      return this.executables.documentation(word).then(doc => ({
+        contents: {
+          language: 'plaintext',
+          value: doc,
+        },
+      }))
+    } else {
+      return null
+    }
   }
 
   private onDefinition(pos: LSP.TextDocumentPositionParams): LSP.Definition {

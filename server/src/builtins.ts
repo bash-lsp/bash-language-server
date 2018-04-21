@@ -62,6 +62,10 @@ export const LIST = [
   'wait',
 ]
 
+export function isBuiltin(word: string): boolean {
+  return LIST.find(builtin => builtin === word) !== undefined
+}
+
 export async function documentation(builtin: string): Promise<string> {
   const errorMessage = `No help page for ${builtin}`
   try {
