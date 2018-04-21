@@ -8,6 +8,7 @@ describe('documentation', () => {
 
   it('returns documentation string an known builtin', async () => {
     const result = await Builtins.documentation('exit')
-    expect(result).toMatchSnapshot()
+    const firstLine = result.split('\n')[0]
+    expect(firstLine).toEqual('exit: exit [n]')
   })
 })

@@ -1,8 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`documentation returns documentation string an known builtin 1`] = `
-"exit: exit [n]
-    Exit the shell with a status of N.  If N is omitted, the exit status
-    is that of the last command executed.
-"
-`;
