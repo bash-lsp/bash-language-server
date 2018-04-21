@@ -1,5 +1,6 @@
 'use strict'
 
+import semverCompare = require('semver-compare')
 import { ExtensionContext, window, workspace } from 'vscode'
 import {
   LanguageClient,
@@ -7,12 +8,20 @@ import {
   ServerOptions,
 } from 'vscode-languageclient'
 
-import { getServerCommand } from './util'
+import { getServerInfo } from './util'
 
-export function activate(context: ExtensionContext) {
-  getServerCommand()
-    .then(command => start(context, command))
-    .catch(_ => handleMissingExecutable())
+const MINIMUM_SERVER_VERSION = '1.1.2'
+
+export async function activate(context: ExtensionContext) {
+  try {
+    const { command, version } = await getServerInfo()
+    if (semverCompare(version, MINIMUM_SERVER_VERSION) === -1) {
+      return handleOutdatedExecutable()
+    }
+    start(context, command)
+  } catch (error) {
+    handleMissingExecutable()
+  }
 }
 
 function start(context: ExtensionContext, command: string) {
@@ -53,11 +62,12 @@ function start(context: ExtensionContext, command: string) {
   context.subscriptions.push(disposable)
 }
 
-function handleMissingExecutable() {
-  const message = `Can't find bash-language-server on your PATH. Please install it using npm i -g bash-language-server.`
-  const options = {
-    modal: false,
-  }
+function handleOutdatedExecutable() {
+  const message = `Outdated bash server. Please upgrade by running "npm i -g bash-language-server".`
+  window.showErrorMessage(message, { modal: false })
+}
 
-  window.showErrorMessage(message, options)
+function handleMissingExecutable() {
+  const message = `Can't find bash-language-server on your PATH. Please install it using "npm i -g bash-language-server".`
+  window.showErrorMessage(message, { modal: false })
 }

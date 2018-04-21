@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@types/semver-compare@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/semver-compare/-/semver-compare-1.0.0.tgz#b6e39ec7d0d3f03e5e74ec654bfbbfbc3bbe1b19"
+
 ajv@^5.1.0:
   version "5.5.2"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-5.5.2.tgz#73b5eeca3fab653e3d3f9422b341ad42205dc965"
@@ -1376,6 +1380,10 @@ rimraf@2:
 safe-buffer@^5.0.1, safe-buffer@^5.1.1, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
+
+semver-compare@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/semver-compare/-/semver-compare-1.0.0.tgz#0dee216a1c941ab37e9efb1788f6afc5ff5537fc"
 
 semver@^5.4.1:
   version "5.5.0"
