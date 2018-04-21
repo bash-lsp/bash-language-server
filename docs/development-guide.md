@@ -14,7 +14,12 @@ convenience - it proxies to the `package.json` files in the `vscode-client` and
 
 ## Prerequisites
 
-You need to have [`yarn` installed][yarn].
+This guide presumes you have the following dependencies installed:
+
+- [`yarn`][yarn].
+- [`node`][node] (v6 or newer)
+- `g++`
+- `make`
 
 ## Initial setup
 
@@ -79,3 +84,4 @@ I'm open to suggestions on how to improve this workflow.
 [prettier]: https://prettier.io/
 [tslint]: https://palantir.github.io/tslint/
 [yarn]: https://yarnpkg.com/lang/en/docs/install/
+[node]: https://nodejs.org/en/download/
