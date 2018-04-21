@@ -1,6 +1,7 @@
 import * as LSP from 'vscode-languageserver'
 
 import Analyzer from './analyser'
+import * as Builtins from './builtins'
 import Executables from './executables'
 
 /**
@@ -106,14 +107,23 @@ export default class BashServer {
 
     const word = this.getWordAtPoint(pos)
 
-    return this.executables.isExecutableOnPATH(word)
-      ? this.executables.documentation(word).then(doc => ({
-          contents: {
-            language: 'plaintext',
-            value: doc,
-          },
-        }))
-      : null
+    if (Builtins.isBuiltin(word)) {
+      return Builtins.documentation(word).then(doc => ({
+        contents: {
+          language: 'plaintext',
+          value: doc,
+        },
+      }))
+    } else if (this.executables.isExecutableOnPATH(word)) {
+      return this.executables.documentation(word).then(doc => ({
+        contents: {
+          language: 'plaintext',
+          value: doc,
+        },
+      }))
+    } else {
+      return null
+    }
   }
 
   private onDefinition(pos: LSP.TextDocumentPositionParams): LSP.Definition {
@@ -159,20 +169,40 @@ export default class BashServer {
       }
     })
 
-    return symbolCompletions.concat(programCompletions)
+    const builtinsCompletions = Builtins.LIST.map(builtin => ({
+      label: builtin,
+      kind: LSP.SymbolKind.Method, // ??
+      data: {
+        name: builtin,
+        type: 'builtin',
+      },
+    }))
+
+    return [...symbolCompletions, ...programCompletions, ...builtinsCompletions]
   }
 
-  private onCompletionResolve(item: LSP.CompletionItem): Promise<LSP.CompletionItem> {
-    if (item.data.type === 'executable') {
-      return this.executables
-        .documentation(item.data.name)
-        .then(doc => ({
+  private async onCompletionResolve(
+    item: LSP.CompletionItem,
+  ): Promise<LSP.CompletionItem> {
+    const { data: { name, type } } = item
+    try {
+      if (type === 'executable') {
+        const doc = await this.executables.documentation(name)
+        return {
           ...item,
           detail: doc,
-        }))
-        .catch(() => item)
-    } else {
-      return Promise.resolve(item)
+        }
+      } else if (type === 'builtin') {
+        const doc = await Builtins.documentation(name)
+        return {
+          ...item,
+          detail: doc,
+        }
+      } else {
+        return item
+      }
+    } catch (error) {
+      return item
     }
   }
 }
