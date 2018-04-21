@@ -1,5 +1,6 @@
 import * as ShUtil from './util/sh'
 
+// You can generate this list by running `compgen -b` in a bash session
 export const LIST = [
   '.',
   ':',
