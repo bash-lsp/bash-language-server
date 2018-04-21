@@ -114,7 +114,7 @@ Array [
       "name": "ret",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "ret",
   },
   Object {
@@ -122,7 +122,7 @@ Array [
       "name": "configures",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "configures",
   },
   Object {
@@ -130,7 +130,7 @@ Array [
       "name": "npm_config_loglevel",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "npm_config_loglevel",
   },
   Object {
@@ -138,7 +138,7 @@ Array [
       "name": "node",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "node",
   },
   Object {
@@ -146,7 +146,7 @@ Array [
       "name": "TMP",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "TMP",
   },
   Object {
@@ -154,7 +154,7 @@ Array [
       "name": "BACK",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "BACK",
   },
   Object {
@@ -162,7 +162,7 @@ Array [
       "name": "tar",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "tar",
   },
   Object {
@@ -170,7 +170,7 @@ Array [
       "name": "MAKE",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "MAKE",
   },
   Object {
@@ -178,7 +178,7 @@ Array [
       "name": "make",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "make",
   },
   Object {
@@ -186,7 +186,7 @@ Array [
       "name": "clean",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "clean",
   },
   Object {
@@ -194,7 +194,7 @@ Array [
       "name": "node_version",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "node_version",
   },
   Object {
@@ -202,7 +202,7 @@ Array [
       "name": "t",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "t",
   },
   Object {
@@ -210,7 +210,7 @@ Array [
       "name": "url",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "url",
   },
   Object {
@@ -218,7 +218,7 @@ Array [
       "name": "ver",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "ver",
   },
   Object {
@@ -226,7 +226,7 @@ Array [
       "name": "isnpm10",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "isnpm10",
   },
   Object {
@@ -234,7 +234,7 @@ Array [
       "name": "NODE",
       "type": "function",
     },
-    "kind": undefined,
+    "kind": 1,
     "label": "NODE",
   },
 ]
