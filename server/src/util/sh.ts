@@ -5,7 +5,7 @@ import * as ChildProcess from 'child_process'
  */
 export function execShellScript(body: string): Promise<string> {
   const args = ['-c', body]
-  const process = ChildProcess.spawn('sh', args)
+  const process = ChildProcess.spawn('bash', args)
 
   return new Promise((resolve, reject) => {
     let output = ''
