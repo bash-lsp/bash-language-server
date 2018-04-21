@@ -172,26 +172,28 @@ export default class BashServer {
     return [...symbolCompletions, ...programCompletions, ...builtinsCompletions]
   }
 
-  private onCompletionResolve(item: LSP.CompletionItem): Promise<LSP.CompletionItem> {
-    // TODO: async await would be nice I guess
-    if (item.data.type === 'executable') {
-      return this.executables
-        .documentation(item.data.name)
-        .then(doc => ({
+  private async onCompletionResolve(
+    item: LSP.CompletionItem,
+  ): Promise<LSP.CompletionItem> {
+    const { data: { name, type } } = item
+    try {
+      if (type === 'executable') {
+        const doc = await this.executables.documentation(name)
+        return {
           ...item,
           detail: doc,
-        }))
-        .catch(() => item)
-    } else if (item.data.type === 'builtin') {
-      //
-      return Builtins.documentation(item.data.name)
-        .then(doc => ({
+        }
+      } else if (type === 'builtin') {
+        const doc = await Builtins.documentation(name)
+        return {
           ...item,
           detail: doc,
-        }))
-        .catch(() => item)
-    } else {
-      return Promise.resolve(item)
+        }
+      } else {
+        return item
+      }
+    } catch (error) {
+      return item
     }
   }
 }
