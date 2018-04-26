@@ -7,7 +7,8 @@ function isWindows() {
 
 function getBasePath(): Promise<string> {
   return new Promise((resolve, reject) => {
-    execFile('npm', ['bin', '-g'], (err, stdout) => {
+    const npmBin = isWindows() ? 'npm.cmd' : 'npm'
+    execFile(npmBin, ['bin', '-g'], (err, stdout) => {
       if (err) {
         reject(err)
       }
