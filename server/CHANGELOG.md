@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 1.3.1
+
+- More reliable NPM command execution on Windows [#40][40]
+
 ## 1.3.0
 
 - Improved completions by adding support for
@@ -25,3 +29,4 @@ information following the progress on this issue over at
 [28]: https://github.com/mads-hartmann/bash-language-server/pull/28
 [31]: https://github.com/mads-hartmann/bash-language-server/pull/31
 [33]: https://github.com/mads-hartmann/bash-language-server/pull/33
+[40]: https://github.com/mads-hartmann/bash-language-server/pull/40
