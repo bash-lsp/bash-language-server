@@ -18,21 +18,36 @@ export async function activate(context: ExtensionContext) {
     if (semverCompare(version, MINIMUM_SERVER_VERSION) === -1) {
       return handleOutdatedExecutable()
     }
-    start(context, command)
+    start(
+      context,
+      command,
+      workspace.getConfiguration('bash').get('explainshellEndpoint', ''),
+    )
   } catch (error) {
     handleMissingExecutable()
   }
 }
 
-function start(context: ExtensionContext, command: string) {
+function start(context: ExtensionContext, command: string, explainshellEndpoint: string) {
+  const env: any = {
+    ...process.env,
+    EXPLAINSHELL_ENDPOINT: explainshellEndpoint,
+  }
+
   const serverOptions: ServerOptions = {
     run: {
       command,
       args: ['start'],
+      options: {
+        env,
+      },
     },
     debug: {
       command,
       args: ['start'],
+      options: {
+        env,
+      },
     },
   }
 

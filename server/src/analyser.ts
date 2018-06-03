@@ -91,9 +91,13 @@ export default class Analyzer {
     return symbols.map(s => s.location)
   }
 
-  public async getExplainshellDocumentation(
-    pos: LSP.TextDocumentPositionParams,
-  ): Promise<string> {
+  public async getExplainshellDocumentation({
+    pos,
+    endpoint,
+  }: {
+    pos: LSP.TextDocumentPositionParams
+    endpoint: string
+  }): Promise<string> {
     const commandNode = TreeSitterUtil.findParent(
       this.uriToTreeSitterDocument[pos.textDocument.uri].rootNode.descendantForPosition({
         row: pos.position.line,
@@ -112,7 +116,8 @@ export default class Analyzer {
     )
 
     const explainshellResponse = await request({
-      uri: URI('http://localhost:5000/api/explain')
+      uri: URI(endpoint)
+        .path('/api/explain')
         .addQuery('cmd', command)
         .toString(),
       json: true,

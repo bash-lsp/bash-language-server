@@ -125,9 +125,12 @@ export default class BashServer {
           value: doc,
         },
       }))
-    } else {
+    } else if (process.env.EXPLAINSHELL_ENDPOINT !== '') {
       try {
-        const explainshellDoc = await this.analyzer.getExplainshellDocumentation(pos)
+        const explainshellDoc = await this.analyzer.getExplainshellDocumentation({
+          pos,
+          endpoint: process.env.EXPLAINSHELL_ENDPOINT,
+        })
 
         if (!explainshellDoc) {
           return null
@@ -143,6 +146,8 @@ export default class BashServer {
         this.log('Encountered an error from explainshell: ' + e)
         return null
       }
+    } else {
+      return null
     }
   }
 
