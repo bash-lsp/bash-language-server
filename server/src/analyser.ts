@@ -3,8 +3,10 @@ import * as fs from 'fs'
 import * as glob from 'glob'
 import * as Path from 'path'
 
+import * as request from 'request-promise-native'
 import { Document } from 'tree-sitter'
 import * as bash from 'tree-sitter-bash'
+import * as URI from 'urijs'
 import * as LSP from 'vscode-languageserver'
 
 import { uniqueBasedOnHash } from './util/array'
@@ -51,13 +53,18 @@ export default class Analyzer {
             const absolute = Path.join(rootPath, p)
             const uri = 'file://' + absolute
             connection.console.log('Analyzing ' + uri)
-            analyzer.analyze(uri, fs.readFileSync(absolute, 'utf8'))
+            analyzer.analyze(
+              uri,
+              LSP.TextDocument.create(uri, 'shell', 1, fs.readFileSync(absolute, 'utf8')),
+            )
           })
           resolve(analyzer)
         }
       })
     })
   }
+
+  private uriToTextDocument: { [uri: string]: LSP.TextDocument } = {}
 
   private uriToTreeSitterDocument: Documents = {}
 
@@ -82,6 +89,48 @@ export default class Analyzer {
       declarationNames.forEach(d => symbols.push(d))
     })
     return symbols.map(s => s.location)
+  }
+
+  public async getExplainshellDocumentation(
+    pos: LSP.TextDocumentPositionParams,
+  ): Promise<string> {
+    const commandNode = TreeSitterUtil.findParent(
+      this.uriToTreeSitterDocument[pos.textDocument.uri].rootNode.descendantForPosition({
+        row: pos.position.line,
+        column: pos.position.character,
+      }),
+      n => n.type === 'command',
+    )
+
+    if (!commandNode) {
+      return null
+    }
+
+    const command = this.uriToFileContent[pos.textDocument.uri].slice(
+      commandNode.startIndex,
+      commandNode.endIndex,
+    )
+
+    const explainshellResponse = await request({
+      uri: URI('http://localhost:5000/explain')
+        .addQuery('json', true)
+        .addQuery('cmd', command)
+        .toString(),
+      json: true,
+    })
+
+    if (explainshellResponse.error) {
+      throw explainshellResponse.error
+    } else {
+      const offsetOfMousePointerInCommand =
+        this.uriToTextDocument[pos.textDocument.uri].offsetAt(pos.position) -
+        commandNode.startIndex
+      return explainshellResponse.find(
+        helpItem =>
+          helpItem.start <= offsetOfMousePointerInCommand &&
+          offsetOfMousePointerInCommand <= helpItem.end,
+      ).helpHTML
+    }
   }
 
   /**
@@ -157,12 +206,15 @@ export default class Analyzer {
    * Returns all, if any, syntax errors that occurred while parsing the file.
    *
    */
-  public analyze(uri: string, contents: string): LSP.Diagnostic[] {
+  public analyze(uri: string, document: LSP.TextDocument): LSP.Diagnostic[] {
+    const contents = document.getText()
+
     const d = new Document()
     d.setLanguage(bash)
     d.setInputString(contents)
     d.parse()
 
+    this.uriToTextDocument[uri] = document
     this.uriToTreeSitterDocument[uri] = d
     this.uriToDeclarations[uri] = {}
     this.uriToFileContent[uri] = contents
