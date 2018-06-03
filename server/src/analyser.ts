@@ -112,8 +112,7 @@ export default class Analyzer {
     )
 
     const explainshellResponse = await request({
-      uri: URI('http://localhost:5000/explain')
-        .addQuery('json', true)
+      uri: URI('http://localhost:5000/api/explain')
         .addQuery('cmd', command)
         .toString(),
       json: true,
@@ -125,10 +124,10 @@ export default class Analyzer {
       const offsetOfMousePointerInCommand =
         this.uriToTextDocument[pos.textDocument.uri].offsetAt(pos.position) -
         commandNode.startIndex
-      return explainshellResponse.find(
+      return explainshellResponse.matches.find(
         helpItem =>
           helpItem.start <= offsetOfMousePointerInCommand &&
-          offsetOfMousePointerInCommand <= helpItem.end,
+          offsetOfMousePointerInCommand < helpItem.end,
       ).helpHTML
     }
   }
