@@ -25,7 +25,13 @@ npm i -g bash-language-server
 
 ## Configuration
 
-<lsp-adapter>
+To get documentation for flags on hover (thanks to explainshell), add this to your VS Code settings:
+
+```
+    "bash.explainshellEndpoint": "http://localhost:5000",
+```
+
+It defaults to `""`, which disables explainshell integration. When set, this extension will send requests to the endpoint and display documentation for flags.
 
 [tree-sitter]: https://github.com/tree-sitter/tree-sitter
 [tree-sitter-bash]: https://github.com/tree-sitter/tree-sitter-bash
