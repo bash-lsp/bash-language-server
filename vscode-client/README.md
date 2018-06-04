@@ -1,7 +1,7 @@
 # Bash IDE
 
 Bash language server. Uses [Tree Sitter][tree-sitter] and its
-[grammar for Bash][tree-sitter-bash].
+[grammar for Bash][tree-sitter-bash] with [explainshell][explainshell] integration.
 
 ## System Requirements
 
@@ -20,7 +20,13 @@ npm i -g bash-language-server
 - [x] Highlight occurrences
 - [x] Code completion
 - [x] Simple diagnostics reporting
+- [x] Documentation for flags on hover
 - [ ] Rename symbol
+
+## Configuration
+
+<lsp-adapter>
 
 [tree-sitter]: https://github.com/tree-sitter/tree-sitter
 [tree-sitter-bash]: https://github.com/tree-sitter/tree-sitter-bash
+[explainshell]: https://explainshell.com/
