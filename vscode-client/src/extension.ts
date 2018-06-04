@@ -21,7 +21,7 @@ export async function activate(context: ExtensionContext) {
     start(
       context,
       command,
-      workspace.getConfiguration('bash').get('explainshellEndpoint', ''),
+      workspace.getConfiguration('bashIde').get('explainshellEndpoint', ''),
     )
   } catch (error) {
     handleMissingExecutable()
