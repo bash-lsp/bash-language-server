@@ -100,10 +100,6 @@ export default class BashServer {
     )
   }
 
-  private log(...things) {
-    this.connection.console.log(JSON.stringify([...things]))
-  }
-
   private async onHover(pos: LSP.TextDocumentPositionParams): Promise<LSP.Hover> {
     this.connection.console.log(
       `Hovering over ${pos.position.line}:${pos.position.character}`,
@@ -126,25 +122,24 @@ export default class BashServer {
         },
       }))
     } else if (process.env.EXPLAINSHELL_ENDPOINT !== '') {
-      try {
-        const explainshellDoc = await this.analyzer.getExplainshellDocumentation({
-          pos,
-          endpoint: process.env.EXPLAINSHELL_ENDPOINT,
-        })
+      const response = await this.analyzer.getExplainshellDocumentation({
+        pos,
+        endpoint: process.env.EXPLAINSHELL_ENDPOINT,
+      })
 
-        if (!explainshellDoc) {
-          return null
-        }
+      if (response.status === 'error') {
+        this.connection.console.log(
+          'getExplainshellDocumentation returned: ' + JSON.stringify(response, null, 4),
+        )
 
-        return {
-          contents: {
-            kind: 'markdown',
-            value: new TurndownService().turndown(explainshellDoc),
-          },
-        }
-      } catch (e) {
-        this.log('Encountered an error from explainshell: ' + e)
         return null
+      }
+
+      return {
+        contents: {
+          kind: 'markdown',
+          value: new TurndownService().turndown(response.helpHTML),
+        },
       }
     } else {
       return null

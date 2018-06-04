@@ -97,43 +97,60 @@ export default class Analyzer {
   }: {
     pos: LSP.TextDocumentPositionParams
     endpoint: string
-  }): Promise<string> {
-    const commandNode = TreeSitterUtil.findParent(
-      this.uriToTreeSitterDocument[pos.textDocument.uri].rootNode.descendantForPosition({
-        row: pos.position.line,
-        column: pos.position.character,
-      }),
-      n => n.type === 'command',
-    )
+  }): Promise<any> {
+    const leafNode = this.uriToTreeSitterDocument[
+      pos.textDocument.uri
+    ].rootNode.descendantForPosition({
+      row: pos.position.line,
+      column: pos.position.character,
+    })
 
-    if (!commandNode) {
-      return null
-    }
+    // explainshell needs the whole command, not just the "word" (tree-sitter
+    // parlance) that the user hovered over. A relatively successful heuristic
+    // is to simply go up one level in the AST. If you go up too far, you'll
+    // start to include newlines, and explainshell completely balks when it
+    // encounters newlines.
+    const interestingNode = leafNode.type === 'word' ? leafNode.parent : leafNode
 
-    const command = this.uriToFileContent[pos.textDocument.uri].slice(
-      commandNode.startIndex,
-      commandNode.endIndex,
+    const cmd = this.uriToFileContent[pos.textDocument.uri].slice(
+      interestingNode.startIndex,
+      interestingNode.endIndex,
     )
 
     const explainshellResponse = await request({
       uri: URI(endpoint)
         .path('/api/explain')
-        .addQuery('cmd', command)
+        .addQuery('cmd', cmd)
         .toString(),
       json: true,
     })
 
-    if (explainshellResponse.error) {
-      throw explainshellResponse.error
+    // Attaches debugging information to the return value (useful for logging to
+    // VS Code output).
+    const response = { ...explainshellResponse, cmd, cmdType: interestingNode.type }
+
+    if (explainshellResponse.status === 'error') {
+      return response
+    } else if (!explainshellResponse.matches) {
+      return { ...response, status: 'error' }
     } else {
       const offsetOfMousePointerInCommand =
         this.uriToTextDocument[pos.textDocument.uri].offsetAt(pos.position) -
-        commandNode.startIndex
-      return explainshellResponse.matches.find(
+        interestingNode.startIndex
+
+      const match = explainshellResponse.matches.find(
         helpItem =>
           helpItem.start <= offsetOfMousePointerInCommand &&
           offsetOfMousePointerInCommand < helpItem.end,
-      ).helpHTML
+      )
+
+      const helpHTML = match && match.helpHTML
+
+      if (!helpHTML) {
+        return { ...response, status: 'error' }
+      }
+
+      return { ...response, helpHTML }
     }
   }
 
