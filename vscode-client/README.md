@@ -25,14 +25,21 @@ npm i -g bash-language-server
 
 ## Configuration
 
-To get documentation for flags on hover (thanks to explainshell), add this to your VS Code settings:
+To get documentation for flags on hover (thanks to explainshell), run the [explainshell Docker container][codeintel-bash-with-explainshell]:
+
+```
+docker run --rm --name bash-explainshell -p 5000:5000 chrismwendt/codeintel-bash-with-explainshell
+```
+
+And add this to your VS Code settings:
 
 ```
     "bash.explainshellEndpoint": "http://localhost:5000",
 ```
 
-It defaults to `""`, which disables explainshell integration. When set, this extension will send requests to the endpoint and display documentation for flags.
+It defaults to `""`, which disables explainshell integration. When set, this extension will send requests to the endpoint and displays documentation for flags.
 
 [tree-sitter]: https://github.com/tree-sitter/tree-sitter
 [tree-sitter-bash]: https://github.com/tree-sitter/tree-sitter-bash
 [explainshell]: https://explainshell.com/
+[codeintel-bash-with-explainshell]: https://hub.docker.com/r/chrismwendt/codeintel-bash-with-explainshell/
