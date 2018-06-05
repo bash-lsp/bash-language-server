@@ -34,7 +34,7 @@ docker run --rm --name bash-explainshell -p 5000:5000 chrismwendt/codeintel-bash
 And add this to your VS Code settings:
 
 ```
-    "bash.explainshellEndpoint": "http://localhost:5000",
+    "bashIde.explainshellEndpoint": "http://localhost:5000",
 ```
 
 It defaults to `""`, which disables explainshell integration. When set, this extension will send requests to the endpoint and displays documentation for flags.
