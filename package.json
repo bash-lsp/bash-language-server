@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "postinstall": "cd server && yarn install && cd ../vscode-client && yarn install && cd ..",
+    "postinstall": "cd server && yarn install && cd ../vscode-client && yarn install && cd ../testing && yarn install && cd ..",
     "compile": "yarn run compile:server && yarn run compile:client",
     "compile:client": "cd vscode-client && yarn run compile",
     "compile:server": "cd server && yarn run compile",
