@@ -39,6 +39,8 @@ And add this to your VS Code settings:
 
 It defaults to `""`, which disables explainshell integration. When set, this extension will send requests to the endpoint and displays documentation for flags.
 
+Once https://github.com/idank/explainshell/pull/125 is merged in, you'll be able to set this to `"https://explainshell.com"`.
+
 [tree-sitter]: https://github.com/tree-sitter/tree-sitter
 [tree-sitter-bash]: https://github.com/tree-sitter/tree-sitter-bash
 [explainshell]: https://explainshell.com/
