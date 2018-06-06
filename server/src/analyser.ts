@@ -3,8 +3,10 @@ import * as fs from 'fs'
 import * as glob from 'glob'
 import * as Path from 'path'
 
+import * as request from 'request-promise-native'
 import { Document } from 'tree-sitter'
 import * as bash from 'tree-sitter-bash'
+import * as URI from 'urijs'
 import * as LSP from 'vscode-languageserver'
 
 import { uniqueBasedOnHash } from './util/array'
@@ -51,13 +53,18 @@ export default class Analyzer {
             const absolute = Path.join(rootPath, p)
             const uri = 'file://' + absolute
             connection.console.log('Analyzing ' + uri)
-            analyzer.analyze(uri, fs.readFileSync(absolute, 'utf8'))
+            analyzer.analyze(
+              uri,
+              LSP.TextDocument.create(uri, 'shell', 1, fs.readFileSync(absolute, 'utf8')),
+            )
           })
           resolve(analyzer)
         }
       })
     })
   }
+
+  private uriToTextDocument: { [uri: string]: LSP.TextDocument } = {}
 
   private uriToTreeSitterDocument: Documents = {}
 
@@ -82,6 +89,69 @@ export default class Analyzer {
       declarationNames.forEach(d => symbols.push(d))
     })
     return symbols.map(s => s.location)
+  }
+
+  public async getExplainshellDocumentation({
+    pos,
+    endpoint,
+  }: {
+    pos: LSP.TextDocumentPositionParams
+    endpoint: string
+  }): Promise<any> {
+    const leafNode = this.uriToTreeSitterDocument[
+      pos.textDocument.uri
+    ].rootNode.descendantForPosition({
+      row: pos.position.line,
+      column: pos.position.character,
+    })
+
+    // explainshell needs the whole command, not just the "word" (tree-sitter
+    // parlance) that the user hovered over. A relatively successful heuristic
+    // is to simply go up one level in the AST. If you go up too far, you'll
+    // start to include newlines, and explainshell completely balks when it
+    // encounters newlines.
+    const interestingNode = leafNode.type === 'word' ? leafNode.parent : leafNode
+
+    const cmd = this.uriToFileContent[pos.textDocument.uri].slice(
+      interestingNode.startIndex,
+      interestingNode.endIndex,
+    )
+
+    const explainshellResponse = await request({
+      uri: URI(endpoint)
+        .path('/api/explain')
+        .addQuery('cmd', cmd)
+        .toString(),
+      json: true,
+    })
+
+    // Attaches debugging information to the return value (useful for logging to
+    // VS Code output).
+    const response = { ...explainshellResponse, cmd, cmdType: interestingNode.type }
+
+    if (explainshellResponse.status === 'error') {
+      return response
+    } else if (!explainshellResponse.matches) {
+      return { ...response, status: 'error' }
+    } else {
+      const offsetOfMousePointerInCommand =
+        this.uriToTextDocument[pos.textDocument.uri].offsetAt(pos.position) -
+        interestingNode.startIndex
+
+      const match = explainshellResponse.matches.find(
+        helpItem =>
+          helpItem.start <= offsetOfMousePointerInCommand &&
+          offsetOfMousePointerInCommand < helpItem.end,
+      )
+
+      const helpHTML = match && match.helpHTML
+
+      if (!helpHTML) {
+        return { ...response, status: 'error' }
+      }
+
+      return { ...response, helpHTML }
+    }
   }
 
   /**
@@ -157,12 +227,15 @@ export default class Analyzer {
    * Returns all, if any, syntax errors that occurred while parsing the file.
    *
    */
-  public analyze(uri: string, contents: string): LSP.Diagnostic[] {
+  public analyze(uri: string, document: LSP.TextDocument): LSP.Diagnostic[] {
+    const contents = document.getText()
+
     const d = new Document()
     d.setLanguage(bash)
     d.setInputString(contents)
     d.parse()
 
+    this.uriToTextDocument[uri] = document
     this.uriToTreeSitterDocument[uri] = d
     this.uriToDeclarations[uri] = {}
     this.uriToFileContent[uri] = contents

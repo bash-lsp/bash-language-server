@@ -1,5 +1,6 @@
 import * as LSP from 'vscode-languageserver'
 
+import * as TurndownService from 'turndown'
 import Analyzer from './analyser'
 import * as Builtins from './builtins'
 import Executables from './executables'
@@ -53,8 +54,7 @@ export default class BashServer {
     this.documents.listen(this.connection)
     this.documents.onDidChangeContent(change => {
       const uri = change.document.uri
-      const contents = change.document.getText()
-      const diagnostics = this.analyzer.analyze(uri, contents)
+      const diagnostics = this.analyzer.analyze(uri, change.document)
       connection.sendDiagnostics({
         uri: change.document.uri,
         diagnostics,
@@ -100,7 +100,7 @@ export default class BashServer {
     )
   }
 
-  private onHover(pos: LSP.TextDocumentPositionParams): Promise<LSP.Hover> {
+  private async onHover(pos: LSP.TextDocumentPositionParams): Promise<LSP.Hover> {
     this.connection.console.log(
       `Hovering over ${pos.position.line}:${pos.position.character}`,
     )
@@ -121,6 +121,26 @@ export default class BashServer {
           value: doc,
         },
       }))
+    } else if (process.env.EXPLAINSHELL_ENDPOINT !== '') {
+      const response = await this.analyzer.getExplainshellDocumentation({
+        pos,
+        endpoint: process.env.EXPLAINSHELL_ENDPOINT,
+      })
+
+      if (response.status === 'error') {
+        this.connection.console.log(
+          'getExplainshellDocumentation returned: ' + JSON.stringify(response, null, 4),
+        )
+
+        return null
+      }
+
+      return {
+        contents: {
+          kind: 'markdown',
+          value: new TurndownService().turndown(response.helpHTML),
+        },
+      }
     } else {
       return null
     }

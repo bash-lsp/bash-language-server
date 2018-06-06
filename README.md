@@ -1,7 +1,7 @@
 # Bash Language Server
 
 Bash language server implementation based on [Tree Sitter][tree-sitter] and its
-[grammar for Bash][tree-sitter-bash].
+[grammar for Bash][tree-sitter-bash] with [explainshell][explainshell] integration.
 
 ## Features
 
@@ -11,6 +11,7 @@ Bash language server implementation based on [Tree Sitter][tree-sitter] and its
 - [x] Highlight occurrences
 - [x] Code completion
 - [x] Simple diagnostics reporting
+- [x] Documentation for flags on hover
 - [ ] Rename symbol
 
 ## Installation
@@ -44,3 +45,4 @@ Please see [docs/development-guide][dev-guide] for more information.
 [vscode-marketplace]: https://marketplace.visualstudio.com/items?itemName=mads-hartmann.bash-ide-vscode
 [dev-guide]: https://github.com/mads-hartmann/bash-language-server/blob/master/docs/development-guide.md
 [ide-bash]: https://atom.io/packages/ide-bash
+[explainshell]: https://explainshell.com/
