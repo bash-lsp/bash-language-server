@@ -67,8 +67,8 @@ published the client lives in a separate repository.
 
 ## Working on the server
 
-The easiest way right now is to simple compile and install the server globally
-whenever you've made a change, and then reload you vscode window to re-launch
+The easiest way right now is to simply compile and install the server globally
+whenever you've made a change, and then reload your vscode window to re-launch
 the server.
 
 ```
