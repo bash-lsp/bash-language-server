@@ -1,5 +1,6 @@
 import { execFile } from 'child_process'
 import * as Path from 'path'
+import { workspace } from 'vscode'
 
 function isWindows() {
   return process.platform === 'win32'
@@ -21,9 +22,12 @@ function getBasePath(): Promise<string> {
 type ServerInfo = { command: string; version: string }
 
 export async function getServerInfo(): Promise<ServerInfo> {
-  const basePath = await getBasePath()
-  const name = isWindows() ? 'bash-language-server.cmd' : 'bash-language-server'
-  const command = Path.join(basePath, name)
+  let command: string = workspace.getConfiguration('bashIde').get('path') || ''
+  if (!command) {
+    const basePath = await getBasePath()
+    const name = isWindows() ? 'bash-language-server.cmd' : 'bash-language-server'
+    command = Path.join(basePath, name)
+  }
 
   return new Promise<ServerInfo>((resolve, reject) => {
     execFile(command, ['-v'], (err, stdout) => {
