@@ -14,30 +14,23 @@
     "vscode": "^1.18.x"
   },
   "icon": "assets/bash-logo.png",
-  "categories": [
-    "Other"
-  ],
-  "keywords": [
-    "shell script",
-    "bash script",
-    "bash"
-  ],
-  "activationEvents": [
-    "onLanguage:shellscript"
-  ],
+  "categories": ["Other"],
+  "keywords": ["shell script", "bash script", "bash"],
+  "activationEvents": ["onLanguage:shellscript"],
   "main": "./out/src/extension",
   "contributes": {
-      "configuration": {
-          "type": "object",
-          "title": "Bash IDE configuration",
-          "properties": {
-              "bashIde.explainshellEndpoint": {
-                  "type": "string",
-                  "default": "",
-                  "description": "Set this to https://explainshell.com (once https://github.com/idank/explainshell/pull/125 is merged in) in order to get hover documentation on flags and options."
-              }
-          }
+    "configuration": {
+      "type": "object",
+      "title": "Bash IDE configuration",
+      "properties": {
+        "bashIde.explainshellEndpoint": {
+          "type": "string",
+          "default": "",
+          "description":
+            "Set this to https://explainshell.com (once https://github.com/idank/explainshell/pull/125 is merged in) in order to get hover documentation on flags and options."
+        }
       }
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
