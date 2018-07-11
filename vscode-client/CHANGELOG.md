@@ -4,6 +4,8 @@
 
 * Added new configuration option `bashIde.path` for specifying the exact
   location of the binary.
+* Added new configuration option `bashIde.explainshellEndpoint` that you can use
+  to enable explainshell integration.
 
 ## 1.3.0
 
