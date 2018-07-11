@@ -107,21 +107,7 @@ export default class BashServer {
 
     const word = this.getWordAtPoint(pos)
 
-    if (Builtins.isBuiltin(word)) {
-      return Builtins.documentation(word).then(doc => ({
-        contents: {
-          language: 'plaintext',
-          value: doc,
-        },
-      }))
-    } else if (this.executables.isExecutableOnPATH(word)) {
-      return this.executables.documentation(word).then(doc => ({
-        contents: {
-          language: 'plaintext',
-          value: doc,
-        },
-      }))
-    } else if (process.env.EXPLAINSHELL_ENDPOINT !== '') {
+    if (process.env.EXPLAINSHELL_ENDPOINT !== '') {
       const response = await this.analyzer.getExplainshellDocumentation({
         pos,
         endpoint: process.env.EXPLAINSHELL_ENDPOINT,
@@ -131,19 +117,35 @@ export default class BashServer {
         this.connection.console.log(
           'getExplainshellDocumentation returned: ' + JSON.stringify(response, null, 4),
         )
-
-        return null
+      } else {
+        return {
+          contents: {
+            kind: 'markdown',
+            value: new TurndownService().turndown(response.helpHTML),
+          },
+        }
       }
-
-      return {
-        contents: {
-          kind: 'markdown',
-          value: new TurndownService().turndown(response.helpHTML),
-        },
-      }
-    } else {
-      return null
     }
+
+    if (Builtins.isBuiltin(word)) {
+      return Builtins.documentation(word).then(doc => ({
+        contents: {
+          language: 'plaintext',
+          value: doc,
+        },
+      }))
+    }
+
+    if (this.executables.isExecutableOnPATH(word)) {
+      return this.executables.documentation(word).then(doc => ({
+        contents: {
+          language: 'plaintext',
+          value: doc,
+        },
+      }))
+    }
+
+    return null
   }
 
   private onDefinition(pos: LSP.TextDocumentPositionParams): LSP.Definition {
