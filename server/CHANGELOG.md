@@ -1,22 +1,28 @@
 # Bash Language Server
 
+## 1.4.0
+
+* Add support for explainshell implemented by [@chrismwendt][chrismwendt] [#45][45]
+* Prefer explainshell output if it's enabled by [@maximbaz][maximbaz] [#58][58]
+
 ## 1.3.1
 
-- More reliable NPM command execution on Windows [#40][40]
+* More reliable NPM command execution on Windows [#40][40]
 
 ## 1.3.0
 
-- Improved completions by adding support for
-  - Suggestions based on the programs on your PATH [#17][17]
-  - Suggestions based on the bash builtins [#33][33]
+* Improved completions by adding support for
 
-- Implemented the `onHover` message that now shows documentation for programs
+  * Suggestions based on the programs on your PATH [#17][17]
+  * Suggestions based on the bash builtins [#33][33]
+
+* Implemented the `onHover` message that now shows documentation for programs
   and builtins when you hover your cursor over words in the document. [#17][17]
   [#33][33]
 
-- Improved outline hierarchy [#31][31]
+* Improved outline hierarchy [#31][31]
 
-- Upgraded tree-sitter bash and other libraries. [#28][28]
+* Upgraded tree-sitter bash and other libraries. [#28][28]
 
 ## 1.1.2
 
@@ -30,3 +36,7 @@ information following the progress on this issue over at
 [31]: https://github.com/mads-hartmann/bash-language-server/pull/31
 [33]: https://github.com/mads-hartmann/bash-language-server/pull/33
 [40]: https://github.com/mads-hartmann/bash-language-server/pull/40
+[45]: https://github.com/mads-hartmann/bash-language-server/pull/45
+[58]: https://github.com/mads-hartmann/bash-language-server/pull/58
+[chrismwendt]: https://github.com/chrismwendt
+[maximbaz]: https://github.com/maximbaz
