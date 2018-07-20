@@ -28,6 +28,7 @@ The following editors and IDEs have available clients:
 - Atom ([ide-bash][ide-bash])
 - Vim (see below)
 - Neovim (see below)
+- [Oni](https://github.com/onivim/oni) (see below)
 
 #### Vim
 
@@ -52,6 +53,15 @@ Install the plugin [autozimu/LanguageClient-neovim][languageclient-neovim] and a
 let g:LanguageClient_serverCommands = {
     \ 'sh': ['bash-language-server', 'start']
     \ }
+```
+
+#### Oni
+
+On the config file (`File -> Preferences -> Edit Oni config`) add the following configuration:
+
+```javascript
+"language.bash.languageServer.command": "bash-language-server",
+"language.bash.languageServer.arguments": ["start"],
 ```
 
 ## Development Guide
