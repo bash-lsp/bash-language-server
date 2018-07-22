@@ -44,6 +44,15 @@ if executable('bash-language-server')
 endif
 ```
 
+For Vim 8 or NeoVim using [w0rp/ale][vim-ale] add the following
+configuration to your `.vimrc`:
+
+```vim
+let g:ale_linters = {
+    \ 'sh': ['language_server'],
+    \ }
+```
+
 #### Neovim
 
 Install the plugin [autozimu/LanguageClient-neovim][languageclient-neovim] and add the following configuration to
@@ -76,3 +85,4 @@ Please see [docs/development-guide][dev-guide] for more information.
 [explainshell]: https://explainshell.com/
 [languageclient-neovim]: https://github.com/autozimu/LanguageClient-neovim
 [vim-lsp]: https://github.com/prabirshrestha/vim-lsp
+[vim-ale]: https://github.com/w0rp/ale
