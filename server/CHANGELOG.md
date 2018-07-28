@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 1.4.1
+
+* It's now possible to disable error reporting by setting the environment variable
+  `HIGHLIGHT_PARSING_ERRORS` to `false`.
+
 ## 1.4.0
 
 * Add support for explainshell implemented by [@chrismwendt][chrismwendt] [#45][45]

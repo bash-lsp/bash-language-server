@@ -4,7 +4,7 @@
   "description": "A language server for Bash",
   "author": "Mads Hartmann",
   "license": "MIT",
-  "version": "1.3.0",
+  "version": "1.3.2",
   "publisher": "mads-hartmann",
   "repository": {
     "type": "git",
@@ -28,6 +28,12 @@
           "default": null,
           "description":
             "The path to the bash language server binary (example: /usr/local/bin/bash-language-server)"
+        },
+        "bashIde.highlightParsingErrors": {
+          "type": "boolean",
+          "default": true,
+          "description":
+            "If enabled parsing errors will be highlighted as 'problems' "
         },
         "bashIde.explainshellEndpoint": {
           "type": "string",

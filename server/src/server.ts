@@ -55,10 +55,12 @@ export default class BashServer {
     this.documents.onDidChangeContent(change => {
       const uri = change.document.uri
       const diagnostics = this.analyzer.analyze(uri, change.document)
-      connection.sendDiagnostics({
-        uri: change.document.uri,
-        diagnostics,
-      })
+      if (process.env.HIGHLIGHT_PARSING_ERRORS !== 'false') {
+        connection.sendDiagnostics({
+          uri: change.document.uri,
+          diagnostics,
+        })
+      }
     })
 
     // Register all the handlers for the LSP events.

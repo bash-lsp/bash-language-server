@@ -1,5 +1,12 @@
 # Bash IDE
 
+## 1.3.2
+
+* Added a new configuraiton option `bashIde.highlightParsingErrors` which defaults
+  to `true`. When enabled it will report parsing errors as 'problems'. This means you
+  can now disable the error reporting which is convenient as `shellcheck` performs a
+  better job of linting and our parser still has many issues.
+
 ## 1.3.1
 
 * Added new configuration option `bashIde.path` for specifying the exact
