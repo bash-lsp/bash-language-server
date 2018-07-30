@@ -18,20 +18,31 @@ export async function activate(context: ExtensionContext) {
     if (semverCompare(version, MINIMUM_SERVER_VERSION) === -1) {
       return handleOutdatedExecutable()
     }
-    start(
-      context,
-      command,
-      workspace.getConfiguration('bashIde').get('explainshellEndpoint') || '',
-    )
+
+    const explainshellEndpoint = workspace
+      .getConfiguration('bashIde')
+      .get('explainshellEndpoint', '')
+
+    const highlightParsingErrors = workspace
+      .getConfiguration('bashIde')
+      .get('highlightParsingErrors', false)
+
+    start(context, command, explainshellEndpoint, highlightParsingErrors)
   } catch (error) {
     handleMissingExecutable()
   }
 }
 
-function start(context: ExtensionContext, command: string, explainshellEndpoint: string) {
+function start(
+  context: ExtensionContext,
+  command: string,
+  explainshellEndpoint: string,
+  highlightParsingErrors: boolean,
+) {
   const env: any = {
     ...process.env,
     EXPLAINSHELL_ENDPOINT: explainshellEndpoint,
+    HIGHLIGHT_PARSING_ERRORS: highlightParsingErrors,
   }
 
   const serverOptions: ServerOptions = {

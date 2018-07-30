@@ -15,4 +15,4 @@ vsce publish x.x.x
 To release a new version of the server
 
 - Bump the version in package.json
-- Upload to NPM: `npm publish`
+- Run the script: `./scripts/release-server.sh`
