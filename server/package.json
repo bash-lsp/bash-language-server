@@ -3,7 +3,7 @@
   "description": "A language server for Bash",
   "author": "Mads Hartmann",
   "license": "MIT",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "publisher": "mads-hartmann",
   "main": "out/server.js",
   "bin": {
@@ -27,7 +27,8 @@
     "vscode-languageserver": "^4.1.1"
   },
   "scripts": {
-    "compile": "rm -rf out && tsc -p ./",
-    "compile:watch": "tsc -w -p ./"
+    "compile": "rm -rf out && ../node_modules/.bin/tsc -p ./",
+    "compile:watch": "../node_modules/.bin/tsc -w -p ./",
+    "prepublishOnly": "yarn run compile"
   }
 }
