@@ -67,6 +67,7 @@ export default class BashServer {
     connection.onHover(this.onHover.bind(this))
     connection.onDefinition(this.onDefinition.bind(this))
     connection.onDocumentSymbol(this.onDocumentSymbol.bind(this))
+    connection.onWorkspaceSymbol(this.onWorkspaceSymbol.bind(this))
     connection.onDocumentHighlight(this.onDocumentHighlight.bind(this))
     connection.onReferences(this.onReferences.bind(this))
     connection.onCompletion(this.onCompletion.bind(this))
@@ -88,6 +89,7 @@ export default class BashServer {
       documentHighlightProvider: true,
       definitionProvider: true,
       documentSymbolProvider: true,
+      workspaceSymbolProvider: true,
       referencesProvider: true,
     }
   }
@@ -160,6 +162,11 @@ export default class BashServer {
 
   private onDocumentSymbol(params: LSP.DocumentSymbolParams): LSP.SymbolInformation[] {
     return this.analyzer.findSymbols(params.textDocument.uri)
+  }
+
+  private onWorkspaceSymbol(params: LSP.WorkspaceSymbolParams): LSP.SymbolInformation[] {
+    this.connection.console.log('Asking for workspace symbols')
+    return this.analyzer.search(params.query)
   }
 
   private onDocumentHighlight(
