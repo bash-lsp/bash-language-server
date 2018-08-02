@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 1.5.1
+
+* Upgrade `tree-sitter` and `tree-sitter-bash`
+* Fixed build issue with 1.5.0
+
 ## 1.5.0
 
 * Upgrade `tree-sitter` and `tree-sitter-bash`
