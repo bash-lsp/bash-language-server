@@ -287,6 +287,30 @@ export default class Analyzer {
   }
 
   /**
+   * Find all the appropriate folding locations by traversing the
+   * tree-sitter AST.
+   */
+  public foldLocations(uri: string): LSP.FoldingRange[] {
+    const tree = this.uriToTreeSitterTrees[uri]
+
+    const ranges = []
+
+    TreeSitterUtil.forEach(tree.rootNode, n => {
+      if (n.isNamed) {
+        ranges.push({
+          startLine: n.startPosition.row,
+          startCharacter: n.startPosition.column,
+          endLine: n.endPosition.row,
+          endCharacter: n.endPosition.column,
+          kind: 'region',
+        })
+      }
+    })
+
+    return ranges
+  }
+
+  /**
    * Analyze the given document, cache the tree-sitter AST, and iterate over the
    * tree to find declarations.
    *
