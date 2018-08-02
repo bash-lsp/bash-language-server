@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 1.5.0
+
+* Upgrade `tree-sitter` and `tree-sitter-bash`
+
 ## 1.4.1
 
 * It's now possible to disable error reporting by setting the environment variable
