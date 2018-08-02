@@ -4,7 +4,7 @@ import * as glob from 'glob'
 import * as Path from 'path'
 
 import * as request from 'request-promise-native'
-import { Document } from 'tree-sitter'
+import * as Parser from 'tree-sitter'
 import * as bash from 'tree-sitter-bash'
 import * as URI from 'urijs'
 import * as LSP from 'vscode-languageserver'
@@ -18,7 +18,7 @@ type Kinds = { [type: string]: LSP.SymbolKind }
 type Declarations = { [name: string]: LSP.SymbolInformation[] }
 type FileDeclarations = { [uri: string]: Declarations }
 
-type Documents = { [uri: string]: Document }
+type Trees = { [uri: string]: Parser.Tree }
 type Texts = { [uri: string]: string }
 
 /**
@@ -66,7 +66,7 @@ export default class Analyzer {
 
   private uriToTextDocument: { [uri: string]: LSP.TextDocument } = {}
 
-  private uriToTreeSitterDocument: Documents = {}
+  private uriToTreeSitterTrees: Trees = {}
 
   // We need this to find the word at a given point etc.
   private uriToFileContent: Texts = {}
@@ -98,7 +98,7 @@ export default class Analyzer {
     pos: LSP.TextDocumentPositionParams
     endpoint: string
   }): Promise<any> {
-    const leafNode = this.uriToTreeSitterDocument[
+    const leafNode = this.uriToTreeSitterTrees[
       pos.textDocument.uri
     ].rootNode.descendantForPosition({
       row: pos.position.line,
@@ -158,7 +158,7 @@ export default class Analyzer {
    * Find all the locations where something named name has been defined.
    */
   public findReferences(name: string): LSP.Location[] {
-    const uris = Object.keys(this.uriToTreeSitterDocument)
+    const uris = Object.keys(this.uriToTreeSitterTrees)
     return flattenArray(uris.map(uri => this.findOccurrences(uri, name)))
   }
 
@@ -167,12 +167,12 @@ export default class Analyzer {
    * It's currently not scope-aware.
    */
   public findOccurrences(uri: string, query: string): LSP.Location[] {
-    const doc = this.uriToTreeSitterDocument[uri]
+    const tree = this.uriToTreeSitterTrees[uri]
     const contents = this.uriToFileContent[uri]
 
     const locations = []
 
-    TreeSitterUtil.forEach(doc.rootNode, n => {
+    TreeSitterUtil.forEach(tree.rootNode, n => {
       let name: string = null
       let rng: LSP.Range = null
 
@@ -230,19 +230,18 @@ export default class Analyzer {
   public analyze(uri: string, document: LSP.TextDocument): LSP.Diagnostic[] {
     const contents = document.getText()
 
-    const d = new Document()
-    d.setLanguage(bash)
-    d.setInputString(contents)
-    d.parse()
+    const parser = new Parser()
+    parser.setLanguage(bash)
+    const tree = parser.parse(contents)
 
     this.uriToTextDocument[uri] = document
-    this.uriToTreeSitterDocument[uri] = d
+    this.uriToTreeSitterTrees[uri] = tree
     this.uriToDeclarations[uri] = {}
     this.uriToFileContent[uri] = contents
 
     const problems = []
 
-    TreeSitterUtil.forEach(d.rootNode, n => {
+    TreeSitterUtil.forEach(tree.rootNode, n => {
       if (n.type === 'ERROR') {
         problems.push(
           LSP.Diagnostic.create(
@@ -285,7 +284,7 @@ export default class Analyzer {
    * Find the full word at the given point.
    */
   public wordAtPoint(uri: string, line: number, column: number): string | null {
-    const document = this.uriToTreeSitterDocument[uri]
+    const document = this.uriToTreeSitterTrees[uri]
     const contents = this.uriToFileContent[uri]
 
     const node = document.rootNode.namedDescendantForPosition({ row: line, column })

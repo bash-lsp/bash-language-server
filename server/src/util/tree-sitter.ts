@@ -1,16 +1,16 @@
 // tslint:disable:no-submodule-imports
 
-import { ASTNode } from 'tree-sitter'
+import { SyntaxNode } from 'tree-sitter'
 import { Range } from 'vscode-languageserver/lib/main'
 
-export function forEach(node: ASTNode, cb: (n: ASTNode) => void) {
+export function forEach(node: SyntaxNode, cb: (n: SyntaxNode) => void) {
   cb(node)
   if (node.children.length) {
     node.children.forEach(n => forEach(n, cb))
   }
 }
 
-export function range(n: ASTNode): Range {
+export function range(n: SyntaxNode): Range {
   return Range.create(
     n.startPosition.row,
     n.startPosition.column,
@@ -19,7 +19,7 @@ export function range(n: ASTNode): Range {
   )
 }
 
-export function isDefinition(n: ASTNode): boolean {
+export function isDefinition(n: SyntaxNode): boolean {
   switch (n.type) {
     // For now. Later we'll have a command_declaration take precedence over
     // variable_assignment
@@ -31,7 +31,7 @@ export function isDefinition(n: ASTNode): boolean {
   }
 }
 
-export function isReference(n: ASTNode): boolean {
+export function isReference(n: SyntaxNode): boolean {
   switch (n.type) {
     case 'variable_name':
     case 'command_name':
@@ -42,9 +42,9 @@ export function isReference(n: ASTNode): boolean {
 }
 
 export function findParent(
-  start: ASTNode,
-  predicate: (n: ASTNode) => boolean,
-): ASTNode | null {
+  start: SyntaxNode,
+  predicate: (n: SyntaxNode) => boolean,
+): SyntaxNode | null {
   let node = start.parent
   while (node !== null) {
     if (predicate(node)) {

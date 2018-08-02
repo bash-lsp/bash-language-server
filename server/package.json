@@ -20,8 +20,8 @@
     "glob": "^7.1.2",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
-    "tree-sitter": "^0.11.0",
-    "tree-sitter-bash": "^0.11.0",
+    "tree-sitter": "^0.13.2",
+    "tree-sitter-bash": "^0.13.1",
     "turndown": "^4.0.2",
     "urijs": "^1.19.1",
     "vscode-languageserver": "^4.1.1"
