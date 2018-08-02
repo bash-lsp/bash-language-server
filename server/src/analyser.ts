@@ -118,6 +118,22 @@ export default class Analyzer {
     return symbols.map(s => s.location)
   }
 
+  /**
+   * Find all the locations where something named name has been defined.
+   */
+  public search(query: string): LSP.SymbolInformation[] {
+    const symbols: LSP.SymbolInformation[] = []
+    Object.keys(this.uriToDeclarations).forEach(uri => {
+      Object.keys(this.uriToDeclarations[uri]).forEach(name => {
+        if (name.startsWith(query)) {
+          const declarationNames = this.uriToDeclarations[uri][name] || []
+          declarationNames.forEach(d => symbols.push(d))
+        }
+      })
+    })
+    return symbols
+  }
+
   public async getExplainshellDocumentation({
     params,
     endpoint,
