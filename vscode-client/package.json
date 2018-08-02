@@ -14,9 +14,17 @@
     "vscode": "^1.18.x"
   },
   "icon": "assets/bash-logo.png",
-  "categories": ["Other"],
-  "keywords": ["shell script", "bash script", "bash"],
-  "activationEvents": ["onLanguage:shellscript"],
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "shell script",
+    "bash script",
+    "bash"
+  ],
+  "activationEvents": [
+    "onLanguage:shellscript"
+  ],
   "main": "./out/src/extension",
   "contributes": {
     "configuration": {
@@ -26,20 +34,17 @@
         "bashIde.path": {
           "type": "string",
           "default": null,
-          "description":
-            "The path to the bash language server binary (example: /usr/local/bin/bash-language-server)"
+          "description": "The path to the bash language server binary (example: /usr/local/bin/bash-language-server)"
         },
         "bashIde.highlightParsingErrors": {
           "type": "boolean",
           "default": true,
-          "description":
-            "If enabled parsing errors will be highlighted as 'problems' "
+          "description": "If enabled parsing errors will be highlighted as 'problems' "
         },
         "bashIde.explainshellEndpoint": {
           "type": "string",
           "default": "",
-          "description":
-            "Set this to https://explainshell.com (once https://github.com/idank/explainshell/pull/125 is merged in) in order to get hover documentation on flags and options."
+          "description": "Set this to https://explainshell.com (once https://github.com/idank/explainshell/pull/125 is merged in) in order to get hover documentation on flags and options."
         }
       }
     }
