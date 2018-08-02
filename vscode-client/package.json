@@ -55,8 +55,7 @@
     "postinstall": "node ./node_modules/vscode/bin/install"
   },
   "dependencies": {
-    "@types/semver-compare": "^1.0.0",
-    "semver-compare": "^1.0.0",
+    "bash-language-server": "1.5.1",
     "vscode": "^1.1.14",
     "vscode-languageclient": "^4.1.3"
   }

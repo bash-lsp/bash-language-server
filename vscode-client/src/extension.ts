@@ -1,64 +1,49 @@
 'use strict'
 
-import semverCompare = require('semver-compare')
-import { ExtensionContext, window, workspace } from 'vscode'
+import * as path from 'path'
+
+import { ExtensionContext, workspace } from 'vscode'
 import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
+  TransportKind,
 } from 'vscode-languageclient'
 
-import { getServerInfo } from './util'
-
-const MINIMUM_SERVER_VERSION = '1.5.2'
+let client: LanguageClient
 
 export async function activate(context: ExtensionContext) {
-  try {
-    const { command, version } = await getServerInfo()
-    if (semverCompare(version, MINIMUM_SERVER_VERSION) === -1) {
-      return handleOutdatedExecutable()
-    }
+  // FIXME: do we need this?
+  const serverModule = context.asAbsolutePath(
+    path.join('node_modules', 'bash-language-server', 'bin', 'main.js'),
+  )
 
-    const explainshellEndpoint = workspace
-      .getConfiguration('bashIde')
-      .get('explainshellEndpoint', '')
+  /*
+  const explainshellEndpoint = workspace
+    .getConfiguration('bashIde')
+    .get('explainshellEndpoint', '')
 
-    const highlightParsingErrors = workspace
-      .getConfiguration('bashIde')
-      .get('highlightParsingErrors', false)
+  const highlightParsingErrors = workspace
+    .getConfiguration('bashIde')
+    .get('highlightParsingErrors', false)
 
-    start(context, command, explainshellEndpoint, highlightParsingErrors)
-  } catch (error) {
-    handleMissingExecutable()
-  }
-}
-
-function start(
-  context: ExtensionContext,
-  command: string,
-  explainshellEndpoint: string,
-  highlightParsingErrors: boolean,
-) {
   const env: any = {
     ...process.env,
     EXPLAINSHELL_ENDPOINT: explainshellEndpoint,
     HIGHLIGHT_PARSING_ERRORS: highlightParsingErrors,
   }
+  */
 
   const serverOptions: ServerOptions = {
     run: {
-      command,
-      args: ['start'],
-      options: {
-        env,
-      },
+      module: serverModule,
+      transport: TransportKind.ipc,
+      // options: { env, execArgv: ['start'] },
     },
     debug: {
-      command,
-      args: ['start'],
-      options: {
-        env,
-      },
+      module: serverModule,
+      transport: TransportKind.ipc,
+      // options: { env, execArgv: ['start --inspect=6009'] },
     },
   }
 
@@ -76,24 +61,28 @@ function start(
     },
   }
 
-  const disposable = new LanguageClient(
-    'Bash IDE',
-    'Bash IDE',
-    serverOptions,
-    clientOptions,
-  ).start()
+  client = new LanguageClient('Bash IDE', 'Bash IDE', serverOptions, clientOptions)
+
+  client.start()
 
   // Push the disposable to the context's subscriptions so that the
   // client can be deactivated on extension deactivation
-  context.subscriptions.push(disposable)
+  // context.subscriptions.push(client)
+
+  /*
+  // FIXME: or
+  export function deactivate(): Thenable<void> {
+    if (!client) {
+      return undefined;
+    }
+    return client.stop();
+  }
+  */
 }
 
-function handleOutdatedExecutable() {
-  const message = `Outdated bash server. Please upgrade by running "npm i -g bash-language-server".`
-  window.showErrorMessage(message, { modal: false })
-}
-
-function handleMissingExecutable() {
-  const message = `Can't find bash-language-server on your PATH. Please install it using "npm i -g bash-language-server".`
-  window.showErrorMessage(message, { modal: false })
+export function deactivate(): Thenable<void> {
+  if (!client) {
+    return Promise.resolve()
+  }
+  return client.stop()
 }
