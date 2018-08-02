@@ -45,9 +45,7 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "yarn run compile",
-    "compile": "rm -rf out && ../node_modules/.bin/tsc -p ./",
-    "compile:watch": "../node_modules/.bin/tsc -w -p ./",
+    "vscode:prepublish": "cd .. && yarn run compile:client",
     "update-vscode": "node ./node_modules/vscode/bin/install",
     "postinstall": "node ./node_modules/vscode/bin/install"
   },

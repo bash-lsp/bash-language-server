@@ -27,8 +27,6 @@
     "vscode-languageserver": "^4.1.1"
   },
   "scripts": {
-    "compile": "rm -rf out && ../node_modules/.bin/tsc -p ./",
-    "compile:watch": "../node_modules/.bin/tsc -w -p ./",
-    "prepublishOnly": "yarn run compile"
+    "prepublishOnly": "cd .. && yarn run compile:server"
   }
 }
