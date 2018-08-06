@@ -7,4 +7,4 @@ PATH_OUTPUT=src/out.js
 
 if [[ $PATH_INPUT -nt $PATH_OUTPUT ]]; then
   babel --compact false ${PATH_INPUT} > ${PATH_OUTPUT}
-f
+>
