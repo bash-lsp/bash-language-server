@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 1.5.2
+
+* Upgrade `tree-sitter` to `0.13.5` and `tree-sitter-bash` to `0.13.2`
+
 ## 1.5.1
 
 * Upgrade `tree-sitter` and `tree-sitter-bash`
