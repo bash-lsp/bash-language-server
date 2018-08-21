@@ -4,9 +4,14 @@ import * as LSP from 'vscode-languageserver'
 
 const base = path.join(__dirname, './fixtures/')
 
+function getFixture(filename: string) {
+  return LSP.TextDocument.create('foo', 'bar', 0, fs.readFileSync(path.join(base, filename), 'utf8'))
+}
+
 const FIXTURES = {
-  INSTALL: LSP.TextDocument.create('foo', 'bar', 0, fs.readFileSync(path.join(base, 'install.sh'), 'utf8')),
-  PARSE_PROBLEMS: LSP.TextDocument.create('foo', 'bar', 0, fs.readFileSync(path.join(base, 'parse-problems.sh'), 'utf8')),
+  MISSING_NODE: getFixture('missing-node.sh'),
+  INSTALL: getFixture('install.sh'),
+  PARSE_PROBLEMS: getFixture('parse-problems.sh'),
 }
 
 export default FIXTURES
