@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 1.5.3
+
+* Support for showing warning for missing nodes
+
 ## 1.5.2
 
 * Upgrade `tree-sitter` to `0.13.5` and `tree-sitter-bash` to `0.13.2`
