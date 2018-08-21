@@ -241,7 +241,7 @@ export default class Analyzer {
 
     const problems = []
 
-    TreeSitterUtil.forEach(tree.rootNode, n => {
+    TreeSitterUtil.forEach(tree.rootNode, (n: Parser.SyntaxNode) => {
       if (n.type === 'ERROR') {
         problems.push(
           LSP.Diagnostic.create(
@@ -276,6 +276,22 @@ export default class Analyzer {
         this.uriToDeclarations[uri][name] = namedDeclarations
       }
     })
+
+    function findMissingNodes(node: Parser.SyntaxNode) {
+      if (node.isMissing()) {
+        problems.push(
+          LSP.Diagnostic.create(
+            TreeSitterUtil.range(node),
+            `Syntax error: expected "${node.type}" somewhere in the file`,
+            LSP.DiagnosticSeverity.Warning,
+          ),
+        )
+      } else if (node.hasError()) {
+        node.children.forEach(findMissingNodes)
+      }
+    }
+
+    findMissingNodes(tree.rootNode)
 
     return problems
   }
