@@ -3,6 +3,7 @@
 ## 1.5.3
 
 * Support for showing warning for missing nodes
+* Upgrade `tree-sitter-bash` to `0.13.3`
 
 ## 1.5.2
 
