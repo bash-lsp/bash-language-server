@@ -10,7 +10,7 @@ import {
 
 import { getServerInfo } from './util'
 
-const MINIMUM_SERVER_VERSION = '1.3.0'
+const MINIMUM_SERVER_VERSION = '1.5.2'
 
 export async function activate(context: ExtensionContext) {
   try {

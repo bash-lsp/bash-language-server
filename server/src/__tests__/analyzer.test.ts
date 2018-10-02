@@ -9,12 +9,18 @@ beforeEach(() => {
 })
 
 describe('analyze', () => {
-  it('returns an empty list for a file with no errors', () => {
+  it('returns an empty list of errors for a file with no parsing errors', () => {
     const result = analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
     expect(result).toEqual([])
   })
 
-  it('returns a list of errors for a file with errors', () => {
+  it('returns a list of errors for a file with a missing node', () => {
+    const result = analyzer.analyze(CURRENT_URI, FIXTURES.MISSING_NODE)
+    expect(result).not.toEqual([])
+    expect(result).toMatchSnapshot()
+  })
+
+  it('returns a list of errors for a file with parsing errors', () => {
     const result = analyzer.analyze(CURRENT_URI, FIXTURES.PARSE_PROBLEMS)
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()

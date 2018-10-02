@@ -839,9 +839,9 @@ tr46@^1.0.1:
   dependencies:
     punycode "^2.1.0"
 
-tree-sitter-bash@^0.13.2:
-  version "0.13.2"
-  resolved "https://registry.yarnpkg.com/tree-sitter-bash/-/tree-sitter-bash-0.13.2.tgz#e3a0b049df7edf0bea74b8bf58f29241e3c73463"
+tree-sitter-bash@^0.13.3:
+  version "0.13.3"
+  resolved "https://registry.yarnpkg.com/tree-sitter-bash/-/tree-sitter-bash-0.13.3.tgz#b9d3bebb0ff9ddc3692b2a96a02872beef5af53f"
   dependencies:
     nan "^2.10.0"
     prebuild-install "^5.0.0"
