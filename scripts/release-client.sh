@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-version=$(cat server/package.json | jq -r .version)
+version=$(cat vscode-client/package.json | jq -r .version)
 
 yarn && yarn run check:bail
 
