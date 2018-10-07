@@ -3,6 +3,7 @@ import * as LSP from 'vscode-languageserver'
 import * as TurndownService from 'turndown'
 import Analyzer from './analyser'
 import * as Builtins from './builtins'
+import * as config from './config'
 import Executables from './executables'
 
 /**
@@ -55,7 +56,7 @@ export default class BashServer {
     this.documents.onDidChangeContent(change => {
       const uri = change.document.uri
       const diagnostics = this.analyzer.analyze(uri, change.document)
-      if (process.env.HIGHLIGHT_PARSING_ERRORS !== 'false') {
+      if (config.getHighlightParsingError()) {
         connection.sendDiagnostics({
           uri: change.document.uri,
           diagnostics,
@@ -108,11 +109,12 @@ export default class BashServer {
     )
 
     const word = this.getWordAtPoint(pos)
-
-    if (process.env.EXPLAINSHELL_ENDPOINT !== '') {
+    const explainshellEndpoint = config.getExplainshellEndpoint()
+    if (explainshellEndpoint) {
+      this.connection.console.log(`Query ${explainshellEndpoint}`)
       const response = await this.analyzer.getExplainshellDocumentation({
         pos,
-        endpoint: process.env.EXPLAINSHELL_ENDPOINT,
+        endpoint: explainshellEndpoint,
       })
 
       if (response.status === 'error') {
