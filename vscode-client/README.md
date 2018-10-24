@@ -37,9 +37,9 @@ And add this to your VS Code settings:
     "bashIde.explainshellEndpoint": "http://localhost:5000",
 ```
 
-It defaults to `""`, which disables explainshell integration. When set, this extension will send requests to the endpoint and displays documentation for flags.
+For security reasons, it defaults to `""`, which disables explainshell integration. When set, this extension will send requests to the endpoint and displays documentation for flags.
 
-Once https://github.com/idank/explainshell/pull/125 is merged in, you'll be able to set this to `"https://explainshell.com"`.
+Once https://github.com/idank/explainshell/pull/125 is merged, it would be possible to set this to `"https://explainshell.com"`, however doing this is **not recommended** as it will leak *all your shell scripts* to a third party — do this at your own risk, or better always use a locally running Docker image.
 
 [tree-sitter]: https://github.com/tree-sitter/tree-sitter
 [tree-sitter-bash]: https://github.com/tree-sitter/tree-sitter-bash
