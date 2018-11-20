@@ -28,6 +28,9 @@
     "typescript": "^2.8.1",
     "vscode-languageserver": "^4.1.1"
   },
+  "resolutions": {
+    "sane": "^3.0.2"
+  },
   "jest": {
     "testEnvironment": "node",
     "timers": "fake",
