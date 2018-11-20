@@ -1,6 +1,7 @@
 {
   "private": true,
   "scripts": {
+    "clean": "rm -rf *.log */*.log */out node_modules vscode-client/node_modules server/node_modules",
     "postinstall": "cd server && yarn install && cd ../vscode-client && yarn install && cd ..",
     "compile": "yarn run compile:server && yarn run compile:client",
     "compile:client": "cd vscode-client && yarn run compile",
@@ -26,6 +27,9 @@
     "tslint": "^5.9.1",
     "typescript": "^2.8.1",
     "vscode-languageserver": "^4.1.1"
+  },
+  "resolutions": {
+    "sane": "^3.0.2"
   },
   "jest": {
     "testEnvironment": "node",
