@@ -26,9 +26,9 @@ The following editors and IDEs have available clients:
 
 - Visual Studio Code ([Bash IDE][vscode-marketplace])
 - Atom ([ide-bash][ide-bash])
-- Vim (see below)
-- Neovim (see below)
-- [Oni](https://github.com/onivim/oni) (see below)
+- Vim ([see below](#vim))
+- Neovim ([see below](#neovim))
+- [Oni](https://github.com/onivim/oni) ([see below](#oni))
 
 #### Vim
 
