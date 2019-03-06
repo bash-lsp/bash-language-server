@@ -29,6 +29,7 @@ The following editors and IDEs have available clients:
 - Vim ([see below](#vim))
 - Neovim ([see below](#neovim))
 - [Oni](https://github.com/onivim/oni) ([see below](#oni))
+- Eclipse ([ShellWax](https://marketplace.eclipse.org/content/shellwax))
 
 #### Vim
 
