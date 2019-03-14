@@ -57,7 +57,12 @@ export default class Analyzer {
               connection.console.log('Analyzing ' + uri)
               analyzer.analyze(
                 uri,
-                LSP.TextDocument.create(uri, 'shell', 1, fs.readFileSync(absolute, 'utf8')),
+                LSP.TextDocument.create(
+                  uri,
+                  'shell',
+                  1,
+                  fs.readFileSync(absolute, 'utf8'),
+                ),
               )
             }
           })
