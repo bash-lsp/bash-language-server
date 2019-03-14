@@ -10,6 +10,7 @@ function getFixture(filename: string) {
 
 const FIXTURES = {
   MISSING_NODE: getFixture('missing-node.sh'),
+  ISSUE101: getFixture('issue101.sh'),
   INSTALL: getFixture('install.sh'),
   PARSE_PROBLEMS: getFixture('parse-problems.sh'),
 }

@@ -64,6 +64,13 @@ describe('findSymbols', () => {
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()
   })
+
+  it('issue 101', () => {
+    analyzer.analyze(CURRENT_URI, FIXTURES.ISSUE101)
+    const result = analyzer.findSymbols(CURRENT_URI)
+    expect(result).not.toEqual([])
+    expect(result).toMatchSnapshot()
+  })
 })
 
 describe('wordAtPoint', () => {

@@ -77,6 +77,7 @@ export default class Analyzer {
     // These keys are using underscores as that's the naming convention in tree-sitter.
     environment_variable_assignment: LSP.SymbolKind.Variable,
     function_definition: LSP.SymbolKind.Function,
+    variable_assignment: LSP.SymbolKind.Variable,
   }
 
   /**
