@@ -51,12 +51,20 @@ export default class Analyzer {
           const analyzer = new Analyzer()
           paths.forEach(p => {
             const absolute = Path.join(rootPath, p)
-            const uri = 'file://' + absolute
-            connection.console.log('Analyzing ' + uri)
-            analyzer.analyze(
-              uri,
-              LSP.TextDocument.create(uri, 'shell', 1, fs.readFileSync(absolute, 'utf8')),
-            )
+            // only analyze files, glob pattern may match directories
+            if (fs.existsSync(absolute) && fs.lstatSync(absolute).isFile()) {
+              const uri = 'file://' + absolute
+              connection.console.log('Analyzing ' + uri)
+              analyzer.analyze(
+                uri,
+                LSP.TextDocument.create(
+                  uri,
+                  'shell',
+                  1,
+                  fs.readFileSync(absolute, 'utf8'),
+                ),
+              )
+            }
           })
           resolve(analyzer)
         }
