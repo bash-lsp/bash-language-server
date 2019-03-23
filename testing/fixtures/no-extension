@@ -1,0 +1,8 @@
+#!/bin/bash
+configures="`env | grep 'npm_config_' | sed -e 's|^npm_config_||g'`"
+
+ret=$?
+if [ $ret -ne 0 ]; the
+  echo "It failed" >&2
+fi
+exit $ret
