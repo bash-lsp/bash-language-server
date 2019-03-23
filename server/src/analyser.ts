@@ -11,6 +11,7 @@ import * as LSP from 'vscode-languageserver'
 import { uniqueBasedOnHash } from './util/array'
 import { flattenArray, flattenObjectValues } from './util/flatten'
 import * as TreeSitterUtil from './util/tree-sitter'
+import { hasBashShebang } from './util/shebang';
 import { getGlobPattern } from './config';
 
 type Kinds = { [type: string]: LSP.SymbolKind }
@@ -49,6 +50,10 @@ export default class Analyzer {
 
       filePaths.forEach(filePath => {
         const fileContent = fs.readFileSync(filePath, 'utf8')
+        if (!hasBashShebang(fileContent)) {
+          connection.console.log(`No bash shebang found for ${filePath}`)
+          return
+        }
 
         connection.console.log(`Analyzing ${filePath}`)
 
