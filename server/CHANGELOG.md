@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 1.5.6
+
+* Fix crash when parsing directories with `.sh` suffix (https://github.com/mads-hartmann/bash-language-server/pull/111)
+* Fix invalid LSP response (https://github.com/mads-hartmann/bash-language-server/pull/110)
+
 ## 1.5.5
 
 * Upgrade `tree-sitter` from `0.13.5` to `0.13.22`
