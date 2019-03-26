@@ -20,6 +20,13 @@ with [explainshell][explainshell] integration.
 npm i -g bash-language-server
 ```
 
+If you encounter `EACCESS` errors on installation, similarly to what's described in [#93](https://github.com/mads-hartmann/bash-language-server/issues/93), you may need to solve either or both of the following issues:
+
+- https://wiki.archlinux.org/index.php/Node.js#node-gyp_python_errors
+- https://bugs.archlinux.org/task/54981
+
+The workaround for the missing `semver@5.3.0` dependency described in [the Arch Linux Bug report](https://bugs.archlinux.org/task/54981), is best workaround by running `npm install` in `/usr/lib/node_modules/node-gyp`.
+
 ### Clients
 
 The following editors and IDEs have available clients:
@@ -43,6 +50,19 @@ if executable('bash-language-server')
         \ 'whitelist': ['sh'],
         \ })
 endif
+```
+
+For Vim 8 or Neovim using [neoclide/coc.nvim][coc.nvim], according to [it's Wiki article](https://github.com/neoclide/coc.nvim/wiki/Language-servers#bash), add the following to your `coc-settings.json`:
+
+```jsonc
+  "languageserver": {
+    "bash": {
+      "command": "bash-language-server",
+      "args": ["start"],
+      "filetypes": ["sh"],
+      "ignoredRootPaths": ["~"]
+    }
+  }
 ```
 
 For Vim 8 or NeoVim using [w0rp/ale][vim-ale] add the following
@@ -87,3 +107,4 @@ Please see [docs/development-guide][dev-guide] for more information.
 [languageclient-neovim]: https://github.com/autozimu/LanguageClient-neovim
 [vim-lsp]: https://github.com/prabirshrestha/vim-lsp
 [vim-ale]: https://github.com/w0rp/ale
+[coc.nvim]: https://github.com/neoclide/coc.nvim
