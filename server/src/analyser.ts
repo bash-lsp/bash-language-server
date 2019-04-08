@@ -312,18 +312,85 @@ export default class Analyzer {
     const document = this.uriToTreeSitterTrees[uri]
     const contents = this.uriToFileContent[uri]
 
-    const node = document.rootNode.namedDescendantForPosition({ row: line, column })
+    if (!document.rootNode) {
+      // Check for lacking rootNode (due to failed parse?)
+      return null
+    }
+
+    const point = { row: line, column }
+
+    const node = this.namedLeafDescendantForPosition(point, document.rootNode)
+    if (!node) {
+      return null
+    }
 
     const start = node.startIndex
     const end = node.endIndex
-    const name = contents.slice(start, end)
+    let name = contents.slice(start, end)
 
     // Hack. Might be a problem with the grammar.
     if (name.endsWith('=')) {
-      return name.slice(0, name.length - 1)
+      name = name.slice(0, name.length - 1)
     }
 
     return name
+  }
+
+  /**
+   * Given a tree and a point, try to find the named leaf node that the point corresponds to.
+   * This is a helper for wordAtPoint, useful in cases where the point occurs at the boundary of
+   * a word so the normal behavior of "namedDescendantForPosition" does not find the desired leaf.
+   * For example, if you do
+   * > (new Parser()).setLanguage(bash).parse("echo 42").rootNode.descendantForIndex(4).text
+   * then you get 'echo 42', not the leaf node for 'echo'.
+   */
+  private namedLeafDescendantForPosition(
+    point: Parser.Point,
+    rootNode: Parser.SyntaxNode,
+  ): Parser.SyntaxNode | null {
+    const node = rootNode.namedDescendantForPosition(point)
+
+    if (node.childCount === 0) {
+      return node
+    } else {
+      // The node wasn't a leaf. Try to figure out what word we should use.
+      const nodeToUse = this.searchForLeafNode(point, node)
+      if (nodeToUse) {
+        return nodeToUse
+      } else {
+        return null
+      }
+    }
+  }
+
+  /**
+   * Recursive helper for namedLeafDescendantForPosition.
+   */
+  private searchForLeafNode(
+    point: Parser.Point,
+    parent: Parser.SyntaxNode,
+  ): Parser.SyntaxNode | null {
+    let child: Parser.SyntaxNode = parent.firstNamedChild
+    while (child) {
+      if (
+        this.pointsEqual(child.startPosition, point) ||
+        this.pointsEqual(child.endPosition, point)
+      ) {
+        if (child.childCount === 0) {
+          return child
+        } else {
+          return this.searchForLeafNode(point, child)
+        }
+      }
+
+      child = child.nextNamedSibling
+    }
+
+    return null
+  }
+
+  private pointsEqual(point1: Parser.Point, point2: Parser.Point) {
+    return point1.row === point2.row && point1.column === point2.column
   }
 
   private symbolKindToCompletionKind(s: LSP.SymbolKind): LSP.CompletionItemKind {
