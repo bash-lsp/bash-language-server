@@ -208,7 +208,17 @@ export default class BashServer {
       },
     }))
 
-    return [...symbolCompletions, ...programCompletions, ...builtinsCompletions]
+    const allCompletions = [
+      ...symbolCompletions,
+      ...programCompletions,
+      ...builtinsCompletions,
+    ]
+
+    // Filter to only return suffixes of the current word
+    const currentWord = this.getWordAtPoint(pos)
+    return allCompletions.filter(
+      (x: LSP.CompletionItem) => x.label && x.label.startsWith(currentWord),
+    )
   }
 
   private async onCompletionResolve(
