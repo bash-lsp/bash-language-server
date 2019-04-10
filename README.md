@@ -37,6 +37,7 @@ The following editors and IDEs have available clients:
 - Neovim ([see below](#neovim))
 - [Oni](https://github.com/onivim/oni) ([see below](#oni))
 - Eclipse ([ShellWax](https://marketplace.eclipse.org/content/shellwax))
+- Emacs ([see below](#emacs))
 
 #### Vim
 
@@ -92,6 +93,18 @@ On the config file (`File -> Preferences -> Edit Oni config`) add the following 
 ```javascript
 "language.bash.languageServer.command": "bash-language-server",
 "language.bash.languageServer.arguments": ["start"],
+```
+
+#### Emacs
+
+[Lsp-mode](https://github.com/emacs-lsp/lsp-mode) has a built-in client, can be installed by `use-package`.
+Add the configuration to your `.emacs.d/init.el`
+
+```emacs-lisp
+(use-package lsp-mode
+  :commands lsp
+  :hook
+  (sh-mode . lsp))
 ```
 
 ## Development Guide
