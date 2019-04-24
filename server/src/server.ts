@@ -210,7 +210,9 @@ export default class BashServer {
   private async onCompletionResolve(
     item: LSP.CompletionItem,
   ): Promise<LSP.CompletionItem> {
-    const { data: { name, type } } = item
+    const {
+      data: { name, type },
+    } = item
     try {
       if (type === 'executable') {
         const doc = await this.executables.documentation(name)
