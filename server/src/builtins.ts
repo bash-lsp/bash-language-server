@@ -14,6 +14,7 @@ export const LIST = [
   'cd',
   'command',
   'compgen',
+  'compopt',
   'complete',
   'continue',
   'declare',
