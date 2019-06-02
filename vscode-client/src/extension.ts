@@ -1,65 +1,40 @@
 'use strict'
 
-import semverCompare = require('semver-compare')
-import { ExtensionContext, window, workspace } from 'vscode'
+import * as path from 'path'
+import { ExtensionContext, workspace } from 'vscode'
 import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
+  TransportKind,
 } from 'vscode-languageclient'
 
-import { getServerInfo } from './util'
-
-const MINIMUM_SERVER_VERSION = '1.5.2'
-
 export async function activate(context: ExtensionContext) {
-  try {
-    const { command, version } = await getServerInfo()
-    if (semverCompare(version, MINIMUM_SERVER_VERSION) === -1) {
-      return handleOutdatedExecutable()
-    }
+  const explainshellEndpoint = workspace
+    .getConfiguration('bashIde')
+    .get('explainshellEndpoint', '')
 
-    const explainshellEndpoint = workspace
-      .getConfiguration('bashIde')
-      .get('explainshellEndpoint', '')
+  const highlightParsingErrors = workspace
+    .getConfiguration('bashIde')
+    .get('highlightParsingErrors', false)
 
-    const highlightParsingErrors = workspace
-      .getConfiguration('bashIde')
-      .get('highlightParsingErrors', false)
-
-    start(context, command, explainshellEndpoint, highlightParsingErrors)
-  } catch (error) {
-    handleMissingExecutable()
-  }
-}
-
-function start(
-  context: ExtensionContext,
-  command: string,
-  explainshellEndpoint: string,
-  highlightParsingErrors: boolean,
-) {
   const env: any = {
     ...process.env,
     EXPLAINSHELL_ENDPOINT: explainshellEndpoint,
     HIGHLIGHT_PARSING_ERRORS: highlightParsingErrors,
   }
 
+  const serverExecutable = {
+    module: context.asAbsolutePath(path.join('out', 'src', 'server.js')),
+    transport: TransportKind.ipc,
+    options: {
+      env,
+    },
+  }
+
   const serverOptions: ServerOptions = {
-    run: {
-      command,
-      args: ['start'],
-      options: {
-        env,
-      },
-    },
-    debug: {
-      command,
-      args: ['start'],
-      options: {
-        env,
-      },
-    },
+    run: serverExecutable,
+    debug: serverExecutable,
   }
 
   const clientOptions: LanguageClientOptions = {
@@ -76,24 +51,16 @@ function start(
     },
   }
 
-  const disposable = new LanguageClient(
+  const client = new LanguageClient(
     'Bash IDE',
     'Bash IDE',
     serverOptions,
     clientOptions,
-  ).start()
+  )
+
+  // client.registerProposedFeatures();
 
   // Push the disposable to the context's subscriptions so that the
   // client can be deactivated on extension deactivation
-  context.subscriptions.push(disposable)
-}
-
-function handleOutdatedExecutable() {
-  const message = `Outdated bash server. Please upgrade by running "npm i -g bash-language-server".`
-  window.showErrorMessage(message, { modal: false })
-}
-
-function handleMissingExecutable() {
-  const message = `Can't find bash-language-server on your PATH. Please install it using "npm i -g bash-language-server".`
-  window.showErrorMessage(message, { modal: false })
+  context.subscriptions.push(client.start())
 }

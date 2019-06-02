@@ -5,8 +5,7 @@ There are two moving parts.
 - **Server**: A node server written in Typescript that implements the
   [Language Server Protocol (LSP)][LSP].
 
-- **Client**: A super tiny Visual Studio Code (vscode) extension which basically
-  just tells vscode how to launch the LSP server.
+- **Client**: A Visual Studio Code (vscode) extension which wraps the LSP server.
 
 The project has a root `package.json` file which is really just there for
 convenience - it proxies to the `package.json` files in the `vscode-client` and
@@ -57,7 +56,7 @@ To support a good develop workflow we set up [TSLint][tslint], [Prettier][pretti
 
 Working on the client is simply a matter of starting vscode and using the Debug
 View to launch the `Launch Client` task. This will open a new vscode window with the
-extension loaded. It also looks for changes to your client code and recompiles
+extension loaded. It also looks for changes to your client code and re-compiles
 it whenever you save your changes.
 
 ### Atom
