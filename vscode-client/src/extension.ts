@@ -29,7 +29,7 @@ export async function activate(context: ExtensionContext) {
 
     start(context, command, explainshellEndpoint, highlightParsingErrors)
   } catch (error) {
-    handleMissingExecutable()
+    handleStartError(error)
   }
 }
 
@@ -93,7 +93,9 @@ function handleOutdatedExecutable() {
   window.showErrorMessage(message, { modal: false })
 }
 
-function handleMissingExecutable() {
-  const message = `Can't find bash-language-server on your PATH. Please install it using "npm i -g bash-language-server".`
+function handleStartError(error: Error) {
+  const message =
+    'Unable to start bash-language-server, did you install it? Open DevTools for additional details.'
+  console.error(error)
   window.showErrorMessage(message, { modal: false })
 }
