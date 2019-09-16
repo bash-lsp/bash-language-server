@@ -29,7 +29,7 @@ export async function activate(context: ExtensionContext) {
 
     start(context, command, explainshellEndpoint, highlightParsingErrors)
   } catch (error) {
-    handleMissingExecutable()
+    handleMissingExecutable(error.toString())
   }
 }
 
@@ -93,7 +93,7 @@ function handleOutdatedExecutable() {
   window.showErrorMessage(message, { modal: false })
 }
 
-function handleMissingExecutable() {
-  const message = `Can't find bash-language-server on your PATH. Please install it using "npm i -g bash-language-server".`
+function handleMissingExecutable(error) {
+  const message = `Can't find bash-language-server on your PATH. Please install it using "npm i -g bash-language-server".\n` + error
   window.showErrorMessage(message, { modal: false })
 }
