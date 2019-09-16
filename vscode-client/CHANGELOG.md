@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.3.4
+
+* Add additional error logging when LSP process cannot be started.
+
 ## 1.3.3
 
 * Force people to upgrade their `bash-language-server` installation to `1.5.2`.
