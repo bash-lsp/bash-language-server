@@ -5,6 +5,7 @@ import Analyzer from './analyser'
 import * as Builtins from './builtins'
 import * as config from './config'
 import Executables from './executables'
+import { initializeParser } from './parser'
 
 /**
  * The BashServer glues together the separate components to implement
@@ -15,13 +16,15 @@ export default class BashServer {
    * Initialize the server based on a connection to the client and the protocols
    * initialization parameters.
    */
-  public static initialize(
+  public static async initialize(
     connection: LSP.Connection,
-    params: LSP.InitializeParams,
+    { rootPath }: LSP.InitializeParams,
   ): Promise<BashServer> {
+    const parser = await initializeParser()
+
     return Promise.all([
       Executables.fromPath(process.env.PATH),
-      Analyzer.fromRoot(connection, params.rootPath),
+      Analyzer.fromRoot({ connection, rootPath, parser }),
     ]).then(xs => {
       const executables = xs[0]
       const analyzer = xs[1]

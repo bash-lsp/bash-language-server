@@ -986,21 +986,18 @@ tr46@^1.0.1:
   dependencies:
     punycode "^2.1.0"
 
-tree-sitter-bash@^0.13.7:
-  version "0.13.7"
-  resolved "https://registry.yarnpkg.com/tree-sitter-bash/-/tree-sitter-bash-0.13.7.tgz#35b2b03962a32c55cfb6c2b44309e8cbdc1a8ec9"
-  integrity sha512-lk9PAhiVGtmQaImz7qV8bgmXDqMLaPZcYuDCoosNS7VrNO2b3hg89tdgBr/XwOdseIKSMxDNWZ3fo/fToAAXIA==
+tree-sitter-bash@^0.16.0:
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/tree-sitter-bash/-/tree-sitter-bash-0.16.0.tgz#36701524d940a781d6c5302c19aa730a23126933"
+  integrity sha512-s4P9gAAkFiE9NAlpumxJ9omWCpEykD+vlvSUpdyCQZlRIwcu03Krgt8WcbpV/Cvmsib6sbC5FxKGRBI1izdcmA==
   dependencies:
     nan "^2.10.0"
     prebuild-install "^5.0.0"
 
-tree-sitter@^0.13.22:
-  version "0.13.22"
-  resolved "https://registry.yarnpkg.com/tree-sitter/-/tree-sitter-0.13.22.tgz#47170c5825d1782a99526e3bff40834be2c2389d"
-  integrity sha512-BgbhV/h6KnihtbFQSA88AP/rSUlt1/D0d9ZOO5aPZSueyU7rJSqLF/gVV+QHAiLL8iue85OzOB2G2slhVFfR6Q==
-  dependencies:
-    nan "^2.10.0"
-    prebuild-install "^5.0.0"
+tree-sitter-cli@^0.15.9:
+  version "0.15.9"
+  resolved "https://registry.yarnpkg.com/tree-sitter-cli/-/tree-sitter-cli-0.15.9.tgz#3e9509282f1a589172cf8a59e92350f7c6b5ae88"
+  integrity sha512-jqeuo78srjRgYu4QjoPfLiYxBKSUGiv3/pZEaZZT2bB1fTQzaBS9mVtQvgAYTOC/fwY/K894Hb/LHqshmdopKw==
 
 tunnel-agent@^0.6.0:
   version "0.6.0"
@@ -1089,6 +1086,11 @@ w3c-hr-time@^1.0.1:
   integrity sha1-gqwr/2PZUOqeMYmlimViX+3xkEU=
   dependencies:
     browser-process-hrtime "^0.1.2"
+
+web-tree-sitter@^0.15.9:
+  version "0.15.9"
+  resolved "https://registry.yarnpkg.com/web-tree-sitter/-/web-tree-sitter-0.15.9.tgz#f93ec2e02cfc01ca3fa85d600114b982eef7b33c"
+  integrity sha512-1lf4lnmi8oxuEzI6gpUok2FQlHXOmV1iipltkQvmR785JWnUbjhw1sZnwSCkisQP+/g/aezpMGcW3mjz0uVhMw==
 
 webidl-conversions@^4.0.2:
   version "4.0.2"
