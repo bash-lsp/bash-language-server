@@ -4,9 +4,9 @@ import * as glob from 'glob'
 import * as Path from 'path'
 
 import * as request from 'request-promise-native'
-import * as Parser from 'tree-sitter'
-import * as bash from 'tree-sitter-bash'
 import * as URI from 'urijs'
+import * as Parser from 'web-tree-sitter'
+
 import * as LSP from 'vscode-languageserver'
 
 import { uniqueBasedOnHash } from './util/array'
@@ -33,14 +33,19 @@ export default class Analyzer {
    * If the rootPath is provided it will initialize all *.sh files it can find
    * anywhere on that path.
    */
-  public static fromRoot(
-    connection: LSP.Connection,
-    rootPath: string | null,
-  ): Promise<Analyzer> {
+  public static fromRoot({
+    connection,
+    rootPath,
+    parser,
+  }: {
+    connection: LSP.Connection
+    rootPath: string | null
+    parser: Parser
+  }): Promise<Analyzer> {
     // This happens if the users opens a single bash script without having the
     // 'window' associated with a specific project.
     if (!rootPath) {
-      return Promise.resolve(new Analyzer())
+      return Promise.resolve(new Analyzer(parser))
     }
 
     return new Promise((resolve, reject) => {
@@ -48,7 +53,7 @@ export default class Analyzer {
         if (err != null) {
           reject(err)
         } else {
-          const analyzer = new Analyzer()
+          const analyzer = new Analyzer(parser)
           paths.forEach(p => {
             const absolute = Path.join(rootPath, p)
             // only analyze files, glob pattern may match directories
@@ -72,6 +77,8 @@ export default class Analyzer {
     })
   }
 
+  private parser: Parser
+
   private uriToTextDocument: { [uri: string]: LSP.TextDocument } = {}
 
   private uriToTreeSitterTrees: Trees = {}
@@ -86,6 +93,10 @@ export default class Analyzer {
     environment_variable_assignment: LSP.SymbolKind.Variable,
     function_definition: LSP.SymbolKind.Function,
     variable_assignment: LSP.SymbolKind.Variable,
+  }
+
+  public constructor(parser: Parser) {
+    this.parser = parser
   }
 
   /**
@@ -239,9 +250,7 @@ export default class Analyzer {
   public analyze(uri: string, document: LSP.TextDocument): LSP.Diagnostic[] {
     const contents = document.getText()
 
-    const parser = new Parser()
-    parser.setLanguage(bash)
-    const tree = parser.parse(contents)
+    const tree = this.parser.parse(contents)
 
     this.uriToTextDocument[uri] = document
     this.uriToTreeSitterTrees[uri] = tree
