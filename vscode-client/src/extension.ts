@@ -95,7 +95,7 @@ function handleOutdatedExecutable() {
 
 function handleStartError(error: Error) {
   const message =
-    'Unable to start bash-language-server, did you install it? Open DevTools for additional details.'
+    'Unable to start bash-language-server, did you install it by running "npm i -g bash-language-server"? Open DevTools for additional details.'
   console.error(error)
   window.showErrorMessage(message, { modal: false })
 }
