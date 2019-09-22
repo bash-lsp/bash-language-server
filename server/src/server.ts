@@ -57,7 +57,7 @@ export default class BashServer {
     // when the text document first opened or when its content has changed.
     this.documents.listen(this.connection)
     this.documents.onDidChangeContent(change => {
-      const uri = change.document.uri
+      const { uri } = change.document
       const diagnostics = this.analyzer.analyze(uri, change.document)
       if (config.getHighlightParsingError()) {
         connection.sendDiagnostics({
@@ -122,7 +122,7 @@ export default class BashServer {
 
       if (response.status === 'error') {
         this.connection.console.log(
-          'getExplainshellDocumentation returned: ' + JSON.stringify(response, null, 4),
+          `getExplainshellDocumentation returned: ${JSON.stringify(response, null, 4)}`,
         )
       } else {
         return {
@@ -213,7 +213,9 @@ export default class BashServer {
   private async onCompletionResolve(
     item: LSP.CompletionItem,
   ): Promise<LSP.CompletionItem> {
-    const { data: { name, type } } = item
+    const {
+      data: { name, type },
+    } = item
     try {
       if (type === 'executable') {
         const doc = await this.executables.documentation(name)

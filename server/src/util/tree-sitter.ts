@@ -1,5 +1,3 @@
-// tslint:disable:no-submodule-imports
-
 import { Range } from 'vscode-languageserver/lib/main'
 import { SyntaxNode } from 'web-tree-sitter'
 

@@ -1,4 +1,3 @@
-// tslint:disable:no-submodule-imports
 import * as fs from 'fs'
 import * as glob from 'glob'
 import * as Path from 'path'
@@ -58,8 +57,8 @@ export default class Analyzer {
             const absolute = Path.join(rootPath, p)
             // only analyze files, glob pattern may match directories
             if (fs.existsSync(absolute) && fs.lstatSync(absolute).isFile()) {
-              const uri = 'file://' + absolute
-              connection.console.log('Analyzing ' + uri)
+              const uri = `file://${absolute}`
+              connection.console.log(`Analyzing ${uri}`)
               analyzer.analyze(
                 uri,
                 LSP.TextDocument.create(
@@ -90,9 +89,11 @@ export default class Analyzer {
 
   private treeSitterTypeToLSPKind: Kinds = {
     // These keys are using underscores as that's the naming convention in tree-sitter.
+    /* eslint-disable @typescript-eslint/camelcase */
     environment_variable_assignment: LSP.SymbolKind.Variable,
     function_definition: LSP.SymbolKind.Function,
     variable_assignment: LSP.SymbolKind.Variable,
+    /* eslint-enable @typescript-eslint/camelcase */
   }
 
   public constructor(parser: Parser) {

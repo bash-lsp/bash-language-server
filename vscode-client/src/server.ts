@@ -10,25 +10,27 @@ import BashLanguageServer from 'bash-language-server'
 
 const connection: IConnection = createConnection(ProposedFeatures.all)
 
-connection.onInitialize(async (params: InitializeParams): Promise<InitializeResult> => {
-  connection.console.info('Initializing Bash LSP server...')
+connection.onInitialize(
+  async (params: InitializeParams): Promise<InitializeResult> => {
+    connection.console.info('Initializing Bash LSP server...')
 
-  connection.console.info('Rebuild succeeded')
+    connection.console.info('Rebuild succeeded')
 
-  const server = await BashLanguageServer.initialize(connection, params)
+    const server = await BashLanguageServer.initialize(connection, params)
 
-  connection.console.info('BashLanguageServer initialized, registering connection')
+    connection.console.info('BashLanguageServer initialized, registering connection')
 
-  server.register(connection)
+    server.register(connection)
 
-  connection.console.info(
-    'BashLanguageServer initialized ' + JSON.stringify(server.capabilities()),
-  )
+    connection.console.info(
+      `BashLanguageServer initialized ${JSON.stringify(server.capabilities())}`,
+    )
 
-  return {
-    capabilities: server.capabilities(),
-  }
-})
+    return {
+      capabilities: server.capabilities(),
+    }
+  },
+)
 
 // Listen on the connection
 connection.listen()
