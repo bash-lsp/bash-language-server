@@ -5,7 +5,8 @@
   "license": "MIT",
   "version": "1.5.6",
   "publisher": "mads-hartmann",
-  "main": "out/server.js",
+  "main": "./out/server.js",
+  "typings": "./out/server.d.ts",
   "bin": {
     "bash-language-server": "./bin/main.js"
   },
@@ -23,7 +24,7 @@
     "tree-sitter-bash": "^0.16.0",
     "turndown": "^4.0.2",
     "urijs": "^1.19.1",
-    "vscode-languageserver": "^4.1.1",
+    "vscode-languageserver": "^5.2.1",
     "web-tree-sitter": "^0.15.9"
   },
   "scripts": {
