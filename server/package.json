@@ -31,8 +31,5 @@
     "compile": "rm -rf out && ../node_modules/.bin/tsc -p ./",
     "compile:watch": "../node_modules/.bin/tsc -w -p ./",
     "prepublishOnly": "yarn run compile"
-  },
-  "devDependencies": {
-    "tree-sitter-cli": "^0.15.9"
   }
 }

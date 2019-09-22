@@ -994,11 +994,6 @@ tree-sitter-bash@^0.16.0:
     nan "^2.10.0"
     prebuild-install "^5.0.0"
 
-tree-sitter-cli@^0.15.9:
-  version "0.15.9"
-  resolved "https://registry.yarnpkg.com/tree-sitter-cli/-/tree-sitter-cli-0.15.9.tgz#3e9509282f1a589172cf8a59e92350f7c6b5ae88"
-  integrity sha512-jqeuo78srjRgYu4QjoPfLiYxBKSUGiv3/pZEaZZT2bB1fTQzaBS9mVtQvgAYTOC/fwY/K894Hb/LHqshmdopKw==
-
 tunnel-agent@^0.6.0:
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/tunnel-agent/-/tunnel-agent-0.6.0.tgz#27a5dea06b36b04a0a9966774b290868f0fc40fd"
