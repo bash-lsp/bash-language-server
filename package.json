@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "clean": "rm -rf *.log */*.log */out node_modules vscode-client/node_modules server/node_modules",
-    "postinstall": "cd server && yarn install && cd ../vscode-client && yarn install && cd ..",
+    "postinstall": "cd server && yarn install && yarn link && cd ../vscode-client && yarn install && yarn link bash-language-server && cd ..",
     "compile": "yarn run compile:server && yarn run compile:client",
     "compile:client": "cd vscode-client && yarn run compile",
     "compile:server": "cd server && yarn run compile",
