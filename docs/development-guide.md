@@ -5,8 +5,7 @@ There are two moving parts.
 - **Server**: A node server written in Typescript that implements the
   [Language Server Protocol (LSP)][LSP].
 
-- **Client**: A super tiny Visual Studio Code (vscode) extension which basically
-  just tells vscode how to launch the LSP server.
+**Client**: A Visual Studio Code (vscode) extension which wraps the LSP server.
 
 The project has a root `package.json` file which is really just there for
 convenience - it proxies to the `package.json` files in the `vscode-client` and
