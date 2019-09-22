@@ -18,7 +18,6 @@
   "devDependencies": {
     "@types/jest": "^22.2.2",
     "@types/node": "^9.6.2",
-    "electron-rebuild": "^1.7.3",
     "jest": "^22.4.3",
     "prettier": "^1.11.1",
     "ts-jest": "^22.4.2",
