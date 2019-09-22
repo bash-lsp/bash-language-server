@@ -21,7 +21,6 @@
     "glob": "^7.1.2",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
-    "tree-sitter-bash": "^0.16.0",
     "turndown": "^4.0.2",
     "urijs": "^1.19.1",
     "vscode-languageserver": "^5.2.1",
