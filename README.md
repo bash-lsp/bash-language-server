@@ -20,12 +20,8 @@ with [explainshell][explainshell] integration.
 npm i -g bash-language-server
 ```
 
-If you encounter `EACCESS` errors on installation, similarly to what's described in [#93](https://github.com/mads-hartmann/bash-language-server/issues/93), you may need to solve either or both of the following issues:
+If you encounter installation errors, ensure you have node version 8 or newer (`node --version`).
 
-- https://wiki.archlinux.org/index.php/Node.js#node-gyp_python_errors
-- https://bugs.archlinux.org/task/54981
-
-The workaround for the missing `semver@5.3.0` dependency described in [the Arch Linux Bug report](https://bugs.archlinux.org/task/54981), is best workaround by running `npm install` in `/usr/lib/node_modules/node-gyp`.
 
 ### Clients
 
