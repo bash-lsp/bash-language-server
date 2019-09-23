@@ -25,8 +25,8 @@ Array [
     "message": "Failed to parse expression",
     "range": Object {
       "end": Object {
-        "character": 0,
-        "line": 10,
+        "character": 1,
+        "line": 9,
       },
       "start": Object {
         "character": 0,

@@ -1,7 +1,7 @@
 // tslint:disable:no-submodule-imports
 
-import { SyntaxNode } from 'tree-sitter'
 import { Range } from 'vscode-languageserver/lib/main'
+import { SyntaxNode } from 'web-tree-sitter'
 
 export function forEach(node: SyntaxNode, cb: (n: SyntaxNode) => void) {
   cb(node)

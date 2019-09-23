@@ -1,11 +1,14 @@
 import FIXTURES from '../../../testing/fixtures'
 import Analyzer from '../analyser'
+import { initializeParser } from '../parser'
 
-const analyzer = new Analyzer()
+let analyzer: Analyzer
 
 const CURRENT_URI = 'dummy-uri.sh'
-beforeEach(() => {
-  analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
+
+beforeAll(async () => {
+  const parser = await initializeParser()
+  analyzer = new Analyzer(parser)
 })
 
 describe('analyze', () => {
