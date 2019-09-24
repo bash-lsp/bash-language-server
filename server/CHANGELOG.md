@@ -1,9 +1,13 @@
 # Bash Language Server
 
+## 1.6.1
+
+* Expose TypeScript typings from server
+* Update vscode-languageserver dependency
+
 ## 1.6.0
 
-* Switch to tree-sitter-wasm instead of tree-sitter (native bindings) to support node 12 and to ease installation.
-
+* Switch to tree-sitter-wasm instead of tree-sitter (native bindings) to support node 12 and to ease installation (https://github.com/mads-hartmann/bash-language-server/pull/147)
 
 ## 1.5.6
 
