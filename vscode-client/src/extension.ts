@@ -1,6 +1,7 @@
 'use strict'
 import * as path from 'path'
 
+// tslint:disable-next-line:no-implicit-dependencies
 import { ExtensionContext, workspace } from 'vscode'
 import {
   LanguageClient,
