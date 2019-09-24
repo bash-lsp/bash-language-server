@@ -6,6 +6,7 @@
   "version": "1.6.0",
   "publisher": "mads-hartmann",
   "main": "out/server.js",
+  "typings": "./out/server.d.ts",
   "bin": {
     "bash-language-server": "./bin/main.js"
   },
