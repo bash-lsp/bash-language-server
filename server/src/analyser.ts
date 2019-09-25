@@ -89,9 +89,11 @@ export default class Analyzer {
 
   private treeSitterTypeToLSPKind: Kinds = {
     // These keys are using underscores as that's the naming convention in tree-sitter.
+    /* eslint-disable @typescript-eslint/camelcase */
     environment_variable_assignment: LSP.SymbolKind.Variable,
     function_definition: LSP.SymbolKind.Function,
     variable_assignment: LSP.SymbolKind.Variable,
+    /* eslint-enable @typescript-eslint/camelcase */
   }
 
   public constructor(parser: Parser) {
