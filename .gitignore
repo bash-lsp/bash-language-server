@@ -5,3 +5,4 @@ server/out
 .DS_Store
 *.log
 coverage
+.eslintcache

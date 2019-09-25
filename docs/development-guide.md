@@ -43,7 +43,7 @@ below.
 
 ## Development Tools
 
-To support a good develop workflow we set up [TSLint][tslint], [Prettier][prettier] and integration tests using [Jest][jest]:
+To support a good develop workflow we set up [eslint][eslint], [Prettier][prettier] and integration tests using [Jest][jest]:
 
     yarn run check  # (runs lint, prettier and tests)
     yarn run lint
@@ -81,6 +81,6 @@ I'm open to suggestions on how to improve this workflow.
 [ide-bash]: https://github.com/mads-hartmann/ide-bash
 [jest]: https://facebook.github.io/jest/
 [prettier]: https://prettier.io/
-[tslint]: https://palantir.github.io/tslint/
+[eslint]: https://eslint.org/
 [yarn]: https://yarnpkg.com/lang/en/docs/install/
 [node]: https://nodejs.org/en/download/

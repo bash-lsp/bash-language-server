@@ -1,7 +1,7 @@
-export function flattenArray<T>(nestedArray: Array<Array<T>>): Array<T> {
+export function flattenArray<T>(nestedArray: T[][]): T[] {
   return nestedArray.reduce((acc, array) => [...acc, ...array], [])
 }
 
-export function flattenObjectValues<T>(object: { [key: string]: Array<T> }): Array<T> {
+export function flattenObjectValues<T>(object: { [key: string]: T[] }): T[] {
   return flattenArray(Object.keys(object).map(objectKey => object[objectKey]))
 }

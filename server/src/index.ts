@@ -4,7 +4,6 @@ import * as LSP from 'vscode-languageserver'
 
 import BashServer from './server'
 
-// tslint:disable-next-line:no-var-requires
 const pkg = require('../package')
 
 export function listen() {
@@ -15,20 +14,20 @@ export function listen() {
     new LSP.StreamMessageWriter(process.stdout),
   )
 
-  connection.onInitialize((params: LSP.InitializeParams): Promise<
-    LSP.InitializeResult
-  > => {
-    connection.console.log(`Initialized server v. ${pkg.version} for ${params.rootUri}`)
+  connection.onInitialize(
+    (params: LSP.InitializeParams): Promise<LSP.InitializeResult> => {
+      connection.console.log(`Initialized server v. ${pkg.version} for ${params.rootUri}`)
 
-    return BashServer.initialize(connection, params)
-      .then(server => {
-        server.register(connection)
-        return server
-      })
-      .then(server => ({
-        capabilities: server.capabilities(),
-      }))
-  })
+      return BashServer.initialize(connection, params)
+        .then(server => {
+          server.register(connection)
+          return server
+        })
+        .then(server => ({
+          capabilities: server.capabilities(),
+        }))
+    },
+  )
 
   connection.listen()
 }
