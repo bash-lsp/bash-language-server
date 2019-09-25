@@ -1,4 +1,3 @@
-// tslint:disable:no-submodule-imports
 import * as fs from 'fs'
 import * as glob from 'glob'
 import * as Path from 'path'
