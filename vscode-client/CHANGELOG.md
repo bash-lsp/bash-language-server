@@ -1,8 +1,8 @@
 # Bash IDE
 
-## 1.3.4
+## 1.4.0
 
-* Add additional error logging when LSP process cannot be started.
+* Remove additional installation step by integrating the `bash-language-server` (versuib 1.6.1)
 
 ## 1.3.3
 
@@ -24,7 +24,7 @@
 
 ## 1.3.0
 
-The client will now prompt to upgrade the Bash Language Server if you're running
+* The client will now prompt to upgrade the Bash Language Server if you're running
 an old version.
 
 ## 1.2.1
