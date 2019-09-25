@@ -1,12 +1,10 @@
 import * as fs from 'fs'
 import * as glob from 'glob'
 import * as Path from 'path'
-
 import * as request from 'request-promise-native'
 import * as URI from 'urijs'
-import * as Parser from 'web-tree-sitter'
-
 import * as LSP from 'vscode-languageserver'
+import * as Parser from 'web-tree-sitter'
 
 import { uniqueBasedOnHash } from './util/array'
 import { flattenArray, flattenObjectValues } from './util/flatten'

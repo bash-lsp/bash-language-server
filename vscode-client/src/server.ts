@@ -1,3 +1,4 @@
+import BashLanguageServer from 'bash-language-server'
 import {
   createConnection,
   IConnection,
@@ -5,8 +6,6 @@ import {
   InitializeResult,
   ProposedFeatures,
 } from 'vscode-languageserver'
-
-import BashLanguageServer from 'bash-language-server'
 
 const connection: IConnection = createConnection(ProposedFeatures.all)
 
