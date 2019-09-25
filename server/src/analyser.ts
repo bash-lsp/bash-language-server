@@ -136,6 +136,7 @@ export default class Analyzer {
       interestingNode.endIndex,
     )
 
+    // FIXME: type the response and unit test it
     const explainshellResponse = await request({
       uri: URI(endpoint)
         .path('/api/explain')
@@ -158,7 +159,7 @@ export default class Analyzer {
         interestingNode.startIndex
 
       const match = explainshellResponse.matches.find(
-        helpItem =>
+        (helpItem: any) =>
           helpItem.start <= offsetOfMousePointerInCommand &&
           offsetOfMousePointerInCommand < helpItem.end,
       )
@@ -189,7 +190,7 @@ export default class Analyzer {
     const tree = this.uriToTreeSitterTrees[uri]
     const contents = this.uriToFileContent[uri]
 
-    const locations = []
+    const locations: LSP.Location[] = []
 
     TreeSitterUtil.forEach(tree.rootNode, n => {
       let name: string = null
@@ -225,7 +226,7 @@ export default class Analyzer {
    * Find unique symbol completions for the given file.
    */
   public findSymbolCompletions(uri: string): LSP.CompletionItem[] {
-    const hashFunction = ({ name, kind }) => `${name}${kind}`
+    const hashFunction = ({ name, kind }: LSP.SymbolInformation) => `${name}${kind}`
 
     return uniqueBasedOnHash(this.findSymbols(uri), hashFunction).map(
       (symbol: LSP.SymbolInformation) => ({
@@ -256,7 +257,7 @@ export default class Analyzer {
     this.uriToDeclarations[uri] = {}
     this.uriToFileContent[uri] = contents
 
-    const problems = []
+    const problems: LSP.Diagnostic[] = []
 
     TreeSitterUtil.forEach(tree.rootNode, (n: Parser.SyntaxNode) => {
       if (n.type === 'ERROR') {

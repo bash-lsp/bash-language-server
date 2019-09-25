@@ -30,5 +30,11 @@
     "compile": "rm -rf out && ../node_modules/.bin/tsc -p ./",
     "compile:watch": "../node_modules/.bin/tsc -w -p ./",
     "prepublishOnly": "yarn run compile"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.1",
+    "@types/request-promise-native": "^1.0.17",
+    "@types/turndown": "^5.0.0",
+    "@types/urijs": "^1.19.4"
   }
 }

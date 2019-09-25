@@ -3,8 +3,11 @@
   "compilerOptions": {
     "outDir": "out",
 
+    "lib": [
+      "dom", // Required by @types/turndown
+      "es2016"
+    ],
     // TODO: enable:
     "strict": false,
-    "noImplicitAny": false,
   }
 }
