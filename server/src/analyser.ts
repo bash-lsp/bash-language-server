@@ -58,8 +58,8 @@ export default class Analyzer {
             const absolute = Path.join(rootPath, p)
             // only analyze files, glob pattern may match directories
             if (fs.existsSync(absolute) && fs.lstatSync(absolute).isFile()) {
-              const uri = 'file://' + absolute
-              connection.console.log('Analyzing ' + uri)
+              const uri = `file://${absolute}`
+              connection.console.log(`Analyzing ${uri}`)
               analyzer.analyze(
                 uri,
                 LSP.TextDocument.create(
