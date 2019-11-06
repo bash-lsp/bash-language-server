@@ -45,22 +45,46 @@ export default class Analyzer {
     const lookupStartTime = Date.now()
 
     const globPattern = getGlobPattern()
+    const shebangGlobPattern = '*'
+
     connection.console.log(`Looking up files matching "${globPattern}"`)
 
-    const filePaths = await this.getFilePaths({ globPattern, rootPath })
+    const filePathsAgainstGlobPattern = await this.getFilePaths({ globPattern, rootPath })
+    const filePathsAgainstShebangGlobPattern = await this.getFilePaths({
+      globPattern: shebangGlobPattern,
+      rootPath,
+    })
 
-    filePaths.forEach(filePath => {
+    filePathsAgainstGlobPattern.forEach(filePath => {
       const fileContent = fs.readFileSync(filePath, 'utf8')
-      if (!hasBashShebang(fileContent)) {
-        connection.console.log(`No bash shebang found for ${filePath}`)
-        return
-      }
 
-      connection.console.log(`Analyzing ${filePath}`)
+      connection.console.log(`Analyzing ${filePath} (file matches glob pattern)`)
 
       const uri = `file://${filePath}`
       analyzer.analyze(uri, LSP.TextDocument.create(uri, 'shell', 1, fileContent))
     })
+
+    filePathsAgainstShebangGlobPattern
+      .filter(filePath => {
+        return !filePathsAgainstGlobPattern.includes(filePath)
+      })
+      .filter(filePath => {
+        const fileContent = fs.readFileSync(filePath, 'utf8')
+        if (hasBashShebang(fileContent)) {
+          return true
+        }
+
+        connection.console.log(`No bash shebang found for ${filePath}`)
+        return false
+      })
+      .forEach(filePath => {
+        const fileContent = fs.readFileSync(filePath, 'utf8')
+
+        connection.console.log(`Analyzing ${filePath} (file contains shebang)`)
+
+        const uri = `file://${filePath}`
+        analyzer.analyze(uri, LSP.TextDocument.create(uri, 'shell', 1, fileContent))
+      })
 
     connection.console.log(
       `Analyzing finished after ${(Date.now() - lookupStartTime) / 1000} seconds`,
