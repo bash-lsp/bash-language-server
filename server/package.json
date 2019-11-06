@@ -3,9 +3,10 @@
   "description": "A language server for Bash",
   "author": "Mads Hartmann",
   "license": "MIT",
-  "version": "1.5.6",
+  "version": "1.6.1",
   "publisher": "mads-hartmann",
-  "main": "out/server.js",
+  "main": "./out/server.js",
+  "typings": "./out/server.d.ts",
   "bin": {
     "bash-language-server": "./bin/main.js"
   },
@@ -20,11 +21,10 @@
     "glob": "^7.1.3",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
-    "tree-sitter": "^0.13.22",
-    "tree-sitter-bash": "^0.13.7",
     "turndown": "^4.0.2",
     "urijs": "^1.19.1",
-    "vscode-languageserver": "^4.1.1"
+    "vscode-languageserver": "^5.2.1",
+    "web-tree-sitter": "^0.15.9"
   },
   "scripts": {
     "compile": "rm -rf out && ../node_modules/.bin/tsc -p ./",
@@ -32,6 +32,9 @@
     "prepublishOnly": "yarn run compile"
   },
   "devDependencies": {
-    "@types/glob": "^7.1.1"
+    "@types/glob": "^7.1.1",
+    "@types/request-promise-native": "^1.0.17",
+    "@types/turndown": "^5.0.0",
+    "@types/urijs": "^1.19.4"
   }
 }

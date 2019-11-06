@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.4.0
+
+* Remove additional installation step by integrating the `bash-language-server` (versuib 1.6.1)
+
 ## 1.3.3
 
 * Force people to upgrade their `bash-language-server` installation to `1.5.2`.
@@ -20,7 +24,7 @@
 
 ## 1.3.0
 
-The client will now prompt to upgrade the Bash Language Server if you're running
+* The client will now prompt to upgrade the Bash Language Server if you're running
 an old version.
 
 ## 1.2.1

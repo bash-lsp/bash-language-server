@@ -20,6 +20,9 @@ with [explainshell][explainshell] integration.
 npm i -g bash-language-server
 ```
 
+If you encounter installation errors, ensure you have node version 8 or newer (`node --version`).
+
+
 ### Clients
 
 The following editors and IDEs have available clients:
@@ -30,6 +33,7 @@ The following editors and IDEs have available clients:
 - Neovim ([see below](#neovim))
 - [Oni](https://github.com/onivim/oni) ([see below](#oni))
 - Eclipse ([ShellWax](https://marketplace.eclipse.org/content/shellwax))
+- Emacs ([see below](#emacs))
 
 #### Vim
 
@@ -43,6 +47,19 @@ if executable('bash-language-server')
         \ 'whitelist': ['sh'],
         \ })
 endif
+```
+
+For Vim 8 or Neovim using [neoclide/coc.nvim][coc.nvim], according to [it's Wiki article](https://github.com/neoclide/coc.nvim/wiki/Language-servers#bash), add the following to your `coc-settings.json`:
+
+```jsonc
+  "languageserver": {
+    "bash": {
+      "command": "bash-language-server",
+      "args": ["start"],
+      "filetypes": ["sh"],
+      "ignoredRootPaths": ["~"]
+    }
+  }
 ```
 
 For Vim 8 or NeoVim using [w0rp/ale][vim-ale] add the following
@@ -74,6 +91,18 @@ On the config file (`File -> Preferences -> Edit Oni config`) add the following 
 "language.bash.languageServer.arguments": ["start"],
 ```
 
+#### Emacs
+
+[Lsp-mode](https://github.com/emacs-lsp/lsp-mode) has a built-in client, can be installed by `use-package`.
+Add the configuration to your `.emacs.d/init.el`
+
+```emacs-lisp
+(use-package lsp-mode
+  :commands lsp
+  :hook
+  (sh-mode . lsp))
+```
+
 ## Development Guide
 
 Please see [docs/development-guide][dev-guide] for more information.
@@ -87,3 +116,4 @@ Please see [docs/development-guide][dev-guide] for more information.
 [languageclient-neovim]: https://github.com/autozimu/LanguageClient-neovim
 [vim-lsp]: https://github.com/prabirshrestha/vim-lsp
 [vim-ale]: https://github.com/w0rp/ale
+[coc.nvim]: https://github.com/neoclide/coc.nvim

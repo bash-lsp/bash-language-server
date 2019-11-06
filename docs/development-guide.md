@@ -5,8 +5,7 @@ There are two moving parts.
 - **Server**: A node server written in Typescript that implements the
   [Language Server Protocol (LSP)][LSP].
 
-- **Client**: A super tiny Visual Studio Code (vscode) extension which basically
-  just tells vscode how to launch the LSP server.
+**Client**: A Visual Studio Code (vscode) extension which wraps the LSP server.
 
 The project has a root `package.json` file which is really just there for
 convenience - it proxies to the `package.json` files in the `vscode-client` and
@@ -44,7 +43,7 @@ below.
 
 ## Development Tools
 
-To support a good develop workflow we set up [TSLint][tslint], [Prettier][prettier] and integration tests using [Jest][jest]:
+To support a good develop workflow we set up [eslint][eslint], [Prettier][prettier] and integration tests using [Jest][jest]:
 
     yarn run check  # (runs lint, prettier and tests)
     yarn run lint
@@ -82,6 +81,6 @@ I'm open to suggestions on how to improve this workflow.
 [ide-bash]: https://github.com/mads-hartmann/ide-bash
 [jest]: https://facebook.github.io/jest/
 [prettier]: https://prettier.io/
-[tslint]: https://palantir.github.io/tslint/
+[eslint]: https://eslint.org/
 [yarn]: https://yarnpkg.com/lang/en/docs/install/
 [node]: https://nodejs.org/en/download/

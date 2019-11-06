@@ -1,6 +1,7 @@
 language: node_js
 node_js:
-  - '6'
+  - '10'
+  - '12'
 cache: yarn
 script:
   - yarn run check:bail

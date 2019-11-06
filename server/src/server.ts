@@ -1,10 +1,11 @@
+import * as TurndownService from 'turndown'
 import * as LSP from 'vscode-languageserver'
 
-import * as TurndownService from 'turndown'
 import Analyzer from './analyser'
 import * as Builtins from './builtins'
 import * as config from './config'
 import Executables from './executables'
+import { initializeParser } from './parser'
 
 /**
  * The BashServer glues together the separate components to implement
@@ -15,13 +16,15 @@ export default class BashServer {
    * Initialize the server based on a connection to the client and the protocols
    * initialization parameters.
    */
-  public static initialize(
+  public static async initialize(
     connection: LSP.Connection,
-    params: LSP.InitializeParams,
+    { rootPath }: LSP.InitializeParams,
   ): Promise<BashServer> {
+    const parser = await initializeParser()
+
     return Promise.all([
       Executables.fromPath(process.env.PATH),
-      Analyzer.fromRoot(connection, params.rootPath),
+      Analyzer.fromRoot(connection, rootPath, parser),
     ]).then(xs => {
       const executables = xs[0]
       const analyzer = xs[1]
@@ -54,7 +57,7 @@ export default class BashServer {
     // when the text document first opened or when its content has changed.
     this.documents.listen(this.connection)
     this.documents.onDidChangeContent(change => {
-      const uri = change.document.uri
+      const { uri } = change.document
       const diagnostics = this.analyzer.analyze(uri, change.document)
       if (config.getHighlightParsingError()) {
         connection.sendDiagnostics({
@@ -119,7 +122,7 @@ export default class BashServer {
 
       if (response.status === 'error') {
         this.connection.console.log(
-          'getExplainshellDocumentation returned: ' + JSON.stringify(response, null, 4),
+          `getExplainshellDocumentation returned: ${JSON.stringify(response, null, 4)}`,
         )
       } else {
         return {
@@ -210,7 +213,9 @@ export default class BashServer {
   private async onCompletionResolve(
     item: LSP.CompletionItem,
   ): Promise<LSP.CompletionItem> {
-    const { data: { name, type } } = item
+    const {
+      data: { name, type },
+    } = item
     try {
       if (type === 'executable') {
         const doc = await this.executables.documentation(name)

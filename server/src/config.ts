@@ -5,7 +5,9 @@ export function getExplainshellEndpoint(): string | null {
 
 export function getGlobPattern(): string {
   const { GLOB_PATTERN } = process.env
-  return typeof GLOB_PATTERN === 'string' ? GLOB_PATTERN : '**/*@(.sh|.inc|.bash|.command)'
+  return typeof GLOB_PATTERN === 'string'
+    ? GLOB_PATTERN
+    : '**/*@(.sh|.inc|.bash|.command)'
 }
 
 export function getHighlightParsingError(): boolean {

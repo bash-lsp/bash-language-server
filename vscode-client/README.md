@@ -1,16 +1,6 @@
 # Bash IDE
 
-Bash language server. Uses [Tree Sitter][tree-sitter] and its
-[grammar for Bash][tree-sitter-bash] with [explainshell][explainshell] integration.
-
-## System Requirements
-
-You need to install that language server separately as it depends on native node
-modules.
-
-```bash
-npm i -g bash-language-server
-```
+Visual Studio Code extension utilizing the [bash language server](bash-lsp), that is based on [Tree Sitter][tree-sitter] and its [grammar for Bash][tree-sitter-bash] and supports [explainshell][explainshell] integration.
 
 ## Features
 
@@ -41,6 +31,7 @@ For security reasons, it defaults to `""`, which disables explainshell integrati
 
 Once https://github.com/idank/explainshell/pull/125 is merged, it would be possible to set this to `"https://explainshell.com"`, however doing this is **not recommended** as it will leak *all your shell scripts* to a third party — do this at your own risk, or better always use a locally running Docker image.
 
+[bash-lsp]: https://github.com/mads-hartmann/bash-language-server
 [tree-sitter]: https://github.com/tree-sitter/tree-sitter
 [tree-sitter-bash]: https://github.com/tree-sitter/tree-sitter-bash
 [explainshell]: https://explainshell.com/

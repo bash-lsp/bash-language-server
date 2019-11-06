@@ -1,18 +1,15 @@
-// tslint:disable:no-submodule-imports
 import * as fs from 'fs'
 import * as glob from 'glob'
-
 import * as request from 'request-promise-native'
-import * as Parser from 'tree-sitter'
-import * as bash from 'tree-sitter-bash'
 import * as URI from 'urijs'
 import * as LSP from 'vscode-languageserver'
+import * as Parser from 'web-tree-sitter'
 
+import { getGlobPattern } from './config'
 import { uniqueBasedOnHash } from './util/array'
 import { flattenArray, flattenObjectValues } from './util/flatten'
+import { hasBashShebang } from './util/shebang'
 import * as TreeSitterUtil from './util/tree-sitter'
-import { hasBashShebang } from './util/shebang';
-import { getGlobPattern } from './config';
 
 type Kinds = { [type: string]: LSP.SymbolKind }
 
@@ -37,47 +34,53 @@ export default class Analyzer {
   public static async fromRoot(
     connection: LSP.Connection,
     rootPath: string | null,
+    parser: Parser,
   ): Promise<Analyzer> {
-    const analyzer = new Analyzer()
+    const analyzer = new Analyzer(parser)
 
-    if (rootPath) {
-      const lookupStartTime = Date.now()
-
-      const globPattern = getGlobPattern()
-      connection.console.log(`Looking up files matching "${globPattern}"`)
-
-      const filePaths = await this.getFilePaths({globPattern, rootPath})
-
-      filePaths.forEach(filePath => {
-        const fileContent = fs.readFileSync(filePath, 'utf8')
-        if (!hasBashShebang(fileContent)) {
-          connection.console.log(`No bash shebang found for ${filePath}`)
-          return
-        }
-
-        connection.console.log(`Analyzing ${filePath}`)
-
-        const uri = 'file://' + filePath
-        analyzer.analyze(
-          uri,
-          LSP.TextDocument.create(
-            uri,
-            'shell',
-            1,
-            fileContent,
-          ),
-        )
-      })
-
-      connection.console.log(`Analyzing finished after ${(Date.now() - lookupStartTime)/1000} seconds`)
+    if (!rootPath) {
+      return Promise.resolve(analyzer)
     }
 
-    return analyzer
+    const lookupStartTime = Date.now()
+
+    const globPattern = getGlobPattern()
+    connection.console.log(`Looking up files matching "${globPattern}"`)
+
+    const filePaths = await this.getFilePaths({ globPattern, rootPath })
+
+    filePaths.forEach(filePath => {
+      const fileContent = fs.readFileSync(filePath, 'utf8')
+      if (!hasBashShebang(fileContent)) {
+        connection.console.log(`No bash shebang found for ${filePath}`)
+        return
+      }
+
+      connection.console.log(`Analyzing ${filePath}`)
+
+      const uri = `file://${filePath}`
+      analyzer.analyze(uri, LSP.TextDocument.create(uri, 'shell', 1, fileContent))
+    })
+
+    connection.console.log(
+      `Analyzing finished after ${(Date.now() - lookupStartTime) / 1000} seconds`,
+    )
+
+    return Promise.resolve(analyzer)
   }
 
-  private static getFilePaths({globPattern, rootPath}:{ globPattern: string, rootPath: string}): Promise<string[]> {
+  private static getFilePaths({
+    globPattern,
+    rootPath,
+  }: {
+    globPattern: string
+    rootPath: string
+  }): Promise<string[]> {
     return new Promise((resolve, reject) => {
-      glob(globPattern, { cwd: rootPath, nodir: true, absolute: true }, function (err, files) {
+      glob(globPattern, { cwd: rootPath, nodir: true, absolute: true }, function(
+        err,
+        files,
+      ) {
         if (err) {
           return reject(err)
         }
@@ -86,6 +89,8 @@ export default class Analyzer {
       })
     })
   }
+
+  private parser: Parser
 
   private uriToTextDocument: { [uri: string]: LSP.TextDocument } = {}
 
@@ -98,9 +103,15 @@ export default class Analyzer {
 
   private treeSitterTypeToLSPKind: Kinds = {
     // These keys are using underscores as that's the naming convention in tree-sitter.
+    /* eslint-disable @typescript-eslint/camelcase */
     environment_variable_assignment: LSP.SymbolKind.Variable,
     function_definition: LSP.SymbolKind.Function,
     variable_assignment: LSP.SymbolKind.Variable,
+    /* eslint-enable @typescript-eslint/camelcase */
+  }
+
+  public constructor(parser: Parser) {
+    this.parser = parser
   }
 
   /**
@@ -141,6 +152,7 @@ export default class Analyzer {
       interestingNode.endIndex,
     )
 
+    // FIXME: type the response and unit test it
     const explainshellResponse = await request({
       uri: URI(endpoint)
         .path('/api/explain')
@@ -163,7 +175,7 @@ export default class Analyzer {
         interestingNode.startIndex
 
       const match = explainshellResponse.matches.find(
-        helpItem =>
+        (helpItem: any) =>
           helpItem.start <= offsetOfMousePointerInCommand &&
           offsetOfMousePointerInCommand < helpItem.end,
       )
@@ -194,7 +206,7 @@ export default class Analyzer {
     const tree = this.uriToTreeSitterTrees[uri]
     const contents = this.uriToFileContent[uri]
 
-    const locations = []
+    const locations: LSP.Location[] = []
 
     TreeSitterUtil.forEach(tree.rootNode, n => {
       let name: string = null
@@ -230,7 +242,7 @@ export default class Analyzer {
    * Find unique symbol completions for the given file.
    */
   public findSymbolCompletions(uri: string): LSP.CompletionItem[] {
-    const hashFunction = ({ name, kind }) => `${name}${kind}`
+    const hashFunction = ({ name, kind }: LSP.SymbolInformation) => `${name}${kind}`
 
     return uniqueBasedOnHash(this.findSymbols(uri), hashFunction).map(
       (symbol: LSP.SymbolInformation) => ({
@@ -254,16 +266,14 @@ export default class Analyzer {
   public analyze(uri: string, document: LSP.TextDocument): LSP.Diagnostic[] {
     const contents = document.getText()
 
-    const parser = new Parser()
-    parser.setLanguage(bash)
-    const tree = parser.parse(contents)
+    const tree = this.parser.parse(contents)
 
     this.uriToTextDocument[uri] = document
     this.uriToTreeSitterTrees[uri] = tree
     this.uriToDeclarations[uri] = {}
     this.uriToFileContent[uri] = contents
 
-    const problems = []
+    const problems: LSP.Diagnostic[] = []
 
     TreeSitterUtil.forEach(tree.rootNode, (n: Parser.SyntaxNode) => {
       if (n.type === 'ERROR') {

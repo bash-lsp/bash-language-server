@@ -30,7 +30,7 @@ export default class Executables {
   /**
    * Find all programs in your PATH
    */
-  public list(): Array<string> {
+  public list(): string[] {
     return Array.from(this.executables.values())
   }
 
