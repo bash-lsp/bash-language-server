@@ -1,4 +1,4 @@
-import {hasBashShebang} from '../shebang'
+import { hasBashShebang } from '../shebang'
 
 describe('hasBashShebang', () => {
   it('returns false for empty file', () => {
