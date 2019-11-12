@@ -13,7 +13,7 @@ export function getStats(path: string): Promise<Fs.Stats> {
   })
 }
 
-// from https://github.com/sindresorhus/untildify/blob/master/index.js#L11
+// from https://github.com/sindresorhus/untildify/blob/f85a087418aeaa2beb56fe2684fe3b64fc8c588d/index.js#L11
 export function untildify(pathWithTilde: string): string {
   const homeDirectory = Os.homedir()
   return homeDirectory
