@@ -221,13 +221,22 @@ export default class BashServer {
         const doc = await this.executables.documentation(name)
         return {
           ...item,
-          detail: doc,
+          documentation: {
+            // LSP.MarkupContent
+            value: doc,
+            // Passed as plaintext to not break man pages formatting
+            kind: 'plaintext',
+          },
         }
       } else if (type === 'builtin') {
         const doc = await Builtins.documentation(name)
         return {
           ...item,
-          detail: doc,
+          documentation: {
+            // LSP.MarkupContent
+            value: doc,
+            kind: 'plaintext',
+          },
         }
       } else {
         return item
