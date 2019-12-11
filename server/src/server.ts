@@ -134,21 +134,22 @@ export default class BashServer {
       }
     }
 
+    const getMarkdownHoverItem = (doc: string) => ({
+      // LSP.MarkupContent
+      value: ['``` man', doc, '```'].join('\n'),
+      // Passed as markdown for syntax highlighting
+      kind: 'markdown' as const,
+    })
+
     if (Builtins.isBuiltin(word)) {
       return Builtins.documentation(word).then(doc => ({
-        contents: {
-          language: 'plaintext',
-          value: doc,
-        },
+        contents: getMarkdownHoverItem(doc),
       }))
     }
 
     if (this.executables.isExecutableOnPATH(word)) {
       return this.executables.documentation(word).then(doc => ({
-        contents: {
-          language: 'plaintext',
-          value: doc,
-        },
+        contents: getMarkdownHoverItem(doc),
       }))
     }
 
@@ -216,28 +217,24 @@ export default class BashServer {
     const {
       data: { name, type },
     } = item
+
+    const getMarkdownCompletionItem = (doc: string) => ({
+      ...item,
+      // LSP.MarkupContent
+      documentation: {
+        value: ['``` man', doc, '```'].join('\n'),
+        // Passed as markdown for syntax highlighting
+        kind: 'markdown' as const,
+      },
+    })
+
     try {
       if (type === 'executable') {
         const doc = await this.executables.documentation(name)
-        return {
-          ...item,
-          documentation: {
-            // LSP.MarkupContent
-            value: doc,
-            // Passed as plaintext to not break man pages formatting
-            kind: 'plaintext',
-          },
-        }
+        return getMarkdownCompletionItem(doc)
       } else if (type === 'builtin') {
         const doc = await Builtins.documentation(name)
-        return {
-          ...item,
-          documentation: {
-            // LSP.MarkupContent
-            value: doc,
-            kind: 'plaintext',
-          },
-        }
+        return getMarkdownCompletionItem(doc)
       } else {
         return item
       }
