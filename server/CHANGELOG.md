@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 1.7.0
+
+* Add PATH tilde expansion
+* Builtins and man pages formatting
+
 ## 1.6.1
 
 * Expose TypeScript typings from server
