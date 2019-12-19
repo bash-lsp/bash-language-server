@@ -59,6 +59,7 @@ export default class Executables {
  * Only returns direct children, or the path itself if it's an executable.
  */
 function findExecutablesInPath(path: string): Promise<string[]> {
+  path = FsUtil.untildify(path)
   return new Promise((resolve, _) => {
     Fs.lstat(path, (err, stat) => {
       if (err) {
