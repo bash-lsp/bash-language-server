@@ -34,6 +34,7 @@ The following editors and IDEs have available clients:
 - [Oni](https://github.com/onivim/oni) ([see below](#oni))
 - Eclipse ([ShellWax](https://marketplace.eclipse.org/content/shellwax))
 - Emacs ([see below](#emacs))
+- JupyterLab ([jupyterlab-lsp][jupyterlab-lsp])
 
 #### Vim
 
@@ -117,3 +118,4 @@ Please see [docs/development-guide][dev-guide] for more information.
 [vim-lsp]: https://github.com/prabirshrestha/vim-lsp
 [vim-ale]: https://github.com/w0rp/ale
 [coc.nvim]: https://github.com/neoclide/coc.nvim
+[jupyterlab-lsp]: https://github.com/krassowski/jupyterlab-lsp
