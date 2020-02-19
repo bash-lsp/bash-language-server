@@ -59,23 +59,40 @@ View to launch the `Launch Client` task. This will open a new vscode window with
 extension loaded. It also looks for changes to your client code and recompiles
 it whenever you save your changes.
 
+As the server is embedded into the
+
 ### Atom
 
 See the [ide-bash][ide-bash] package for Atom. Due to how Atom packages are
 published the client lives in a separate repository.
 
-## Working on the server
+## Working on the server (VS Code)
 
-The easiest way right now is to simply compile and install the server globally
-whenever you've made a change, and then reload your vscode window to re-launch
-the server.
+As the server is embedded into the VS Code client, you can link any server
+changes into the local installation of your VS Code client by running this once:
+
+```
+yarn link-server
+```
+
+After that follow the steps above to work on the client.
+
+If you make any changes to the server, you need to recompile it:
+
+```
+yarn compile:server
+```
+
+
+## Working on the server (standalone)
+
+If you are working on the server outside of VS Code, then simply compile
+and install the server globally whenever you've made a change, and then
+reload your vscode window to re-launch the server.
 
 ```
 yarn run reinstall-server
-# Reload vscode window.
 ```
-
-I'm open to suggestions on how to improve this workflow.
 
 [LSP]: https://microsoft.github.io/language-server-protocol/
 [ide-bash]: https://github.com/mads-hartmann/ide-bash
