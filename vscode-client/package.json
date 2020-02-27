@@ -31,11 +31,6 @@
       "type": "object",
       "title": "Bash IDE configuration",
       "properties": {
-        "bashIde.path": {
-          "type": "string",
-          "default": null,
-          "description": "The path to the bash language server binary (example: /usr/local/bin/bash-language-server)"
-        },
         "bashIde.highlightParsingErrors": {
           "type": "boolean",
           "default": true,
