@@ -2,7 +2,7 @@
 
 ## 1.4.0
 
-* Remove additional installation step by integrating the `bash-language-server` (versuib 1.6.1)
+* Remove additional installation step by integrating the `bash-language-server` (version 1.6.1)
 
 ## 1.3.3
 
