@@ -82,10 +82,10 @@ balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
 
-bash-language-server@1.6.1:
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-1.6.1.tgz#c5f4a0f59a3d377d2553428a59d1e2f49b5ec7df"
-  integrity sha512-i40MhENbRrfGEjhfwacQ0iBMX0WyhYou3AjPXa6C6RMvsuFu5J0LFwY4BjKOF2IFGZPaS6VgcffmfRvmD1TgRA==
+bash-language-server@1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-1.7.0.tgz#9b7e93d056ac26bebde08decdf9689685352853d"
+  integrity sha512-7LoZPq2jYPov87LDnoYY5/3KdwTjjUQbQAim9zvRvjV2DI6sku5CKLGmoqaivOyx0Ah8mUWwnvHg/1R+H5N9qg==
   dependencies:
     glob "^7.1.2"
     request "^2.83.0"
