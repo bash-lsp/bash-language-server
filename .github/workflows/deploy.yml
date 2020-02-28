@@ -1,0 +1,15 @@
+name: Deploy VS Code Extension
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: sh scripts/release-client.sh
+        env:
+          VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
