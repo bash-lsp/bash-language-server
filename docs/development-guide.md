@@ -45,10 +45,10 @@ below.
 
 To support a good develop workflow we set up [eslint][eslint], [Prettier][prettier] and integration tests using [Jest][jest]:
 
-    yarn run check  # (runs lint, prettier and tests)
-    yarn run lint
-    yarn run test
-    yarn run test:coverage
+    yarn verify  # (runs lint, prettier and tests)
+    yarn lint
+    yarn test
+    yarn test:coverage
 
 ## Working on the client
 

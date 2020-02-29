@@ -7,7 +7,7 @@ tag="server-${version}"
 
 yarn run clean
 yarn install
-yarn run check:bail
+yarn run verify:bail
 
 git tag -a "${tag}" -m "Release ${version} of the bash-language-server package"
 git push origin "${tag}"

@@ -4,7 +4,7 @@ node_js:
   - '12'
 cache: yarn
 script:
-  - yarn run check:bail
+  - yarn verify:bail
 notifications:
   email:
     on_failure: always
