@@ -13,7 +13,7 @@ module.exports = {
     },
     ecmaVersion: 2018,
     sourceType: 'module',
-    project: './server/tsconfig.json',
+    project: './tsconfig.eslint.json',
   },
   rules: {
     'prettier/prettier': [
