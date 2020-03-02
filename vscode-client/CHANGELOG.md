@@ -1,5 +1,10 @@
 # Bash IDE
 
+## 1.5.0
+
+* Upgrade LSP to 1.7.0 (PATH tilde expansion, builtins and man pages formatting)
+* Remove unused `bashIde.path` configuration parameter
+
 ## 1.4.0
 
 * Remove additional installation step by integrating the `bash-language-server` (version 1.6.1)
