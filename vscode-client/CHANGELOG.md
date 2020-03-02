@@ -2,7 +2,8 @@
 
 ## 1.5.0
 
-* Upgrade LSP to 1.7.0 (PATH tilde expansion, builtins and man pages formatting)
+* Upgrade LSP to 1.8.0 (PATH tilde expansion, builtins and man pages formatting, pre-analyzes more files than just .sh)
+- Make file glob configurable
 * Remove unused `bashIde.path` configuration parameter
 
 ## 1.4.0
