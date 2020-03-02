@@ -7,6 +7,14 @@ describe('getExplainshellEndpoint', () => {
     expect(result).toBeNull()
   })
 
+  it('default to null in case of an empty string', () => {
+    process.env = {
+      EXPLAINSHELL_ENDPOINT: '',
+    }
+    const result = config.getExplainshellEndpoint()
+    expect(result).toBeNull()
+  })
+
   it('parses environment variable', () => {
     process.env = {
       EXPLAINSHELL_ENDPOINT: 'localhost:8080',
@@ -20,7 +28,15 @@ describe('getGlobPattern', () => {
   it('default to a basic glob', () => {
     process.env = {}
     const result = config.getGlobPattern()
-    expect(result).toEqual('**/*@(.sh|.inc|.bash|.command)')
+    expect(result).toEqual(config.DEFAULT_GLOB_PATTERN)
+  })
+
+  it('default to a basic glob in case of an empty string', () => {
+    process.env = {
+      GLOB_PATTERN: '',
+    }
+    const result = config.getGlobPattern()
+    expect(result).toEqual(config.DEFAULT_GLOB_PATTERN)
   })
 
   it('parses environment variable', () => {

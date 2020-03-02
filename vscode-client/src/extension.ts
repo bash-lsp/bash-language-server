@@ -13,7 +13,7 @@ export async function activate(context: ExtensionContext) {
     .getConfiguration('bashIde')
     .get('explainshellEndpoint', '')
 
-  const globPattern = workspace.getConfiguration('bashIde').get('globPattern', false)
+  const globPattern = workspace.getConfiguration('bashIde').get('globPattern', '')
 
   const highlightParsingErrors = workspace
     .getConfiguration('bashIde')
