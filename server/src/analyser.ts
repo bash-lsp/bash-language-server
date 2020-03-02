@@ -8,6 +8,7 @@ import { getGlobPattern } from './config'
 import { uniqueBasedOnHash } from './util/array'
 import { flattenArray, flattenObjectValues } from './util/flatten'
 import { getFilePaths } from './util/fs'
+import { getShebang, isBashShebang } from './util/shebang'
 import * as TreeSitterUtil from './util/tree-sitter'
 
 type Kinds = { [type: string]: LSP.SymbolKind }
@@ -51,8 +52,6 @@ export default class Analyzer {
       const getTimePassed = (): string =>
         `${(Date.now() - lookupStartTime) / 1000} seconds`
 
-      // NOTE: An alternative would be to preload all files and analyze their
-      // shebang or mimetype, but it would be fairly expensive.
       const filePaths = await getFilePaths({ globPattern, rootPath })
 
       connection.console.log(
@@ -62,7 +61,15 @@ export default class Analyzer {
       filePaths.forEach(filePath => {
         const uri = `file://${filePath}`
         connection.console.log(`Analyzing ${uri}`)
+
         const fileContent = fs.readFileSync(filePath, 'utf8')
+
+        const shebang = getShebang(fileContent)
+        if (shebang && !isBashShebang(shebang)) {
+          connection.console.log(`Skipping file ${uri} with shebang "${shebang}"`)
+          return
+        }
+
         analyzer.analyze(uri, LSP.TextDocument.create(uri, 'shell', 1, fileContent))
       })
 
