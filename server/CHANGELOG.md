@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 1.8.0
+
+* Extend file glob used for pre-analyzing files from `**/*.sh` to `**/*@(.sh|.inc|.bash|.command)`
+* Make file glob configurable with `GLOB_PATTERN` environment variable
+
 ## 1.7.0
 
 * Add PATH tilde expansion

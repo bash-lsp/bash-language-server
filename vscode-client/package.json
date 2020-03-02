@@ -31,10 +31,15 @@
       "type": "object",
       "title": "Bash IDE configuration",
       "properties": {
+        "bashIde.globPattern": {
+          "type": "string",
+          "default": "**/*@(.sh|.inc|.bash|.command)",
+          "description": "Glob pattern for finding and parsing shell script files."
+        },
         "bashIde.highlightParsingErrors": {
           "type": "boolean",
           "default": true,
-          "description": "If enabled parsing errors will be highlighted as 'problems' "
+          "description": "If enabled parsing errors will be highlighted as problems."
         },
         "bashIde.explainshellEndpoint": {
           "type": "string",

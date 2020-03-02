@@ -1,13 +1,13 @@
 import * as fs from 'fs'
-import * as glob from 'glob'
-import * as Path from 'path'
 import * as request from 'request-promise-native'
 import * as URI from 'urijs'
 import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
 
+import { getGlobPattern } from './config'
 import { uniqueBasedOnHash } from './util/array'
 import { flattenArray, flattenObjectValues } from './util/flatten'
+import { getFilePaths } from './util/fs'
 import * as TreeSitterUtil from './util/tree-sitter'
 
 type Kinds = { [type: string]: LSP.SymbolKind }
@@ -27,10 +27,10 @@ export default class Analyzer {
    * Initialize the Analyzer based on a connection to the client and an optional
    * root path.
    *
-   * If the rootPath is provided it will initialize all *.sh files it can find
-   * anywhere on that path.
+   * If the rootPath is provided it will initialize all shell files it can find
+   * anywhere on that path. This non-exhaustive glob is used to preload the parser.
    */
-  public static fromRoot({
+  public static async fromRoot({
     connection,
     rootPath,
     parser,
@@ -39,39 +39,37 @@ export default class Analyzer {
     rootPath: string | null
     parser: Parser
   }): Promise<Analyzer> {
-    // This happens if the users opens a single bash script without having the
-    // 'window' associated with a specific project.
-    if (!rootPath) {
-      return Promise.resolve(new Analyzer(parser))
+    const analyzer = new Analyzer(parser)
+
+    if (rootPath) {
+      const globPattern = getGlobPattern()
+      connection.console.log(
+        `Analyzing files matching glob "${globPattern}" inside ${rootPath}`,
+      )
+
+      const lookupStartTime = Date.now()
+      const getTimePassed = (): string =>
+        `${(Date.now() - lookupStartTime) / 1000} seconds`
+
+      // NOTE: An alternative would be to preload all files and analyze their
+      // shebang or mimetype, but it would be fairly expensive.
+      const filePaths = await getFilePaths({ globPattern, rootPath })
+
+      connection.console.log(
+        `Glob resolved with ${filePaths.length} files after ${getTimePassed()}`,
+      )
+
+      filePaths.forEach(filePath => {
+        const uri = `file://${filePath}`
+        connection.console.log(`Analyzing ${uri}`)
+        const fileContent = fs.readFileSync(filePath, 'utf8')
+        analyzer.analyze(uri, LSP.TextDocument.create(uri, 'shell', 1, fileContent))
+      })
+
+      connection.console.log(`Analyzer finished after ${getTimePassed()}`)
     }
 
-    return new Promise((resolve, reject) => {
-      glob('**/*.sh', { cwd: rootPath }, (err, paths) => {
-        if (err != null) {
-          reject(err)
-        } else {
-          const analyzer = new Analyzer(parser)
-          paths.forEach(p => {
-            const absolute = Path.join(rootPath, p)
-            // only analyze files, glob pattern may match directories
-            if (fs.existsSync(absolute) && fs.lstatSync(absolute).isFile()) {
-              const uri = `file://${absolute}`
-              connection.console.log(`Analyzing ${uri}`)
-              analyzer.analyze(
-                uri,
-                LSP.TextDocument.create(
-                  uri,
-                  'shell',
-                  1,
-                  fs.readFileSync(absolute, 'utf8'),
-                ),
-              )
-            }
-          })
-          resolve(analyzer)
-        }
-      })
-    })
+    return analyzer
   }
 
   private parser: Parser

@@ -1,4 +1,5 @@
 import * as Fs from 'fs'
+import * as glob from 'glob'
 import * as Os from 'os'
 
 export function getStats(path: string): Promise<Fs.Stats> {
@@ -19,4 +20,25 @@ export function untildify(pathWithTilde: string): string {
   return homeDirectory
     ? pathWithTilde.replace(/^~(?=$|\/|\\)/, homeDirectory)
     : pathWithTilde
+}
+
+export async function getFilePaths({
+  globPattern,
+  rootPath,
+}: {
+  globPattern: string
+  rootPath: string
+}): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    glob(globPattern, { cwd: rootPath, nodir: true, absolute: true }, function(
+      err,
+      files,
+    ) {
+      if (err) {
+        return reject(err)
+      }
+
+      resolve(files)
+    })
+  })
 }

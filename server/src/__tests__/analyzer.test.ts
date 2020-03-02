@@ -1,4 +1,4 @@
-import FIXTURES from '../../../testing/fixtures'
+import FIXTURES, { FIXTURE_FOLDER } from '../../../testing/fixtures'
 import Analyzer from '../analyser'
 import { initializeParser } from '../parser'
 
@@ -95,5 +95,41 @@ describe('findSymbolCompletions', () => {
   it('return a list of symbols', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
     expect(analyzer.findSymbolCompletions(CURRENT_URI)).toMatchSnapshot()
+  })
+})
+
+describe('fromRoot', () => {
+  it('initializes an analyzer from a root', async () => {
+    const parser = await initializeParser()
+
+    jest.spyOn(Date, 'now').mockImplementation(() => 0)
+
+    const connection: any = {
+      console: {
+        log: jest.fn(),
+      },
+    }
+
+    const newAnalyzer = await Analyzer.fromRoot({
+      connection,
+      rootPath: FIXTURE_FOLDER,
+      parser,
+    })
+
+    expect(newAnalyzer).toBeDefined()
+
+    const FIXTURE_FILES_MATCHING_GLOB = 8
+    const LOG_LINES = FIXTURE_FILES_MATCHING_GLOB + 3
+
+    expect(connection.console.log).toHaveBeenCalledTimes(LOG_LINES)
+    expect(connection.console.log).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('Analyzing files matching'),
+    )
+
+    expect(connection.console.log).toHaveBeenNthCalledWith(
+      LOG_LINES,
+      'Analyzer finished after 0 seconds',
+    )
   })
 })

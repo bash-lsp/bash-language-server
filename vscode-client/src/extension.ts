@@ -13,6 +13,8 @@ export async function activate(context: ExtensionContext) {
     .getConfiguration('bashIde')
     .get('explainshellEndpoint', '')
 
+  const globPattern = workspace.getConfiguration('bashIde').get('globPattern', '')
+
   const highlightParsingErrors = workspace
     .getConfiguration('bashIde')
     .get('highlightParsingErrors', false)
@@ -20,6 +22,7 @@ export async function activate(context: ExtensionContext) {
   const env: any = {
     ...process.env,
     EXPLAINSHELL_ENDPOINT: explainshellEndpoint,
+    GLOB_PATTERN: globPattern,
     HIGHLIGHT_PARSING_ERRORS: highlightParsingErrors,
   }
 
