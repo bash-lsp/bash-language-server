@@ -1,4 +1,4 @@
-import FIXTURES from '../../../testing/fixtures'
+import FIXTURES, { FIXTURE_FOLDER } from '../../../testing/fixtures'
 import Analyzer from '../analyser'
 import { initializeParser } from '../parser'
 
@@ -95,5 +95,53 @@ describe('findSymbolCompletions', () => {
   it('return a list of symbols', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
     expect(analyzer.findSymbolCompletions(CURRENT_URI)).toMatchSnapshot()
+  })
+})
+
+describe('fromRoot', () => {
+  it('initializes an analyzer from a root', async () => {
+    const parser = await initializeParser()
+
+    jest.spyOn(Date, 'now').mockImplementation(() => 0)
+
+    const connection: any = {
+      console: {
+        log: jest.fn(),
+      },
+    }
+
+    const newAnalyzer = await Analyzer.fromRoot({
+      connection,
+      rootPath: FIXTURE_FOLDER,
+      parser,
+    })
+
+    expect(newAnalyzer).toBeDefined()
+
+    expect(connection.console.log).toHaveBeenCalledTimes(5)
+    expect(connection.console.log).toHaveBeenNthCalledWith(
+      1,
+      'Analyzing file:///Users/kenneth/git/bash-language-server/testing/fixtures/install.sh',
+    )
+
+    expect(connection.console.log).toHaveBeenNthCalledWith(
+      2,
+      'Analyzing file:///Users/kenneth/git/bash-language-server/testing/fixtures/issue101.sh',
+    )
+
+    expect(connection.console.log).toHaveBeenNthCalledWith(
+      3,
+      'Analyzing file:///Users/kenneth/git/bash-language-server/testing/fixtures/missing-node.sh',
+    )
+
+    expect(connection.console.log).toHaveBeenNthCalledWith(
+      4,
+      'Analyzing file:///Users/kenneth/git/bash-language-server/testing/fixtures/parse-problems.sh',
+    )
+
+    expect(connection.console.log).toHaveBeenNthCalledWith(
+      5,
+      'Analyzer finished after 0 seconds',
+    )
   })
 })

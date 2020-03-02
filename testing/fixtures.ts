@@ -2,14 +2,14 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as LSP from 'vscode-languageserver'
 
-const base = path.join(__dirname, './fixtures/')
+export const FIXTURE_FOLDER = path.join(__dirname, './fixtures/')
 
 function getFixture(filename: string) {
   return LSP.TextDocument.create(
     'foo',
     'bar',
     0,
-    fs.readFileSync(path.join(base, filename), 'utf8'),
+    fs.readFileSync(path.join(FIXTURE_FOLDER, filename), 'utf8'),
   )
 }
 
