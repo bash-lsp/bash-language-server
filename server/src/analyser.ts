@@ -27,7 +27,7 @@ export default class Analyzer {
    * Initialize the Analyzer based on a connection to the client and an optional
    * root path.
    *
-   * If the rootPath is provided it will initialize all *.sh files it can find
+   * If the rootPath is provided it will initialize all shell files it can find
    * anywhere on that path. This non-exhaustive glob is used to preload the parser.
    */
   public static async fromRoot({
