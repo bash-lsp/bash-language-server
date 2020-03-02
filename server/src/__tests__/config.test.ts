@@ -16,6 +16,22 @@ describe('getExplainshellEndpoint', () => {
   })
 })
 
+describe('getGlobPattern', () => {
+  it('default to a basic glob', () => {
+    process.env = {}
+    const result = config.getGlobPattern()
+    expect(result).toEqual('**/*@(.sh|.inc|.bash|.command)')
+  })
+
+  it('parses environment variable', () => {
+    process.env = {
+      GLOB_PATTERN: '*.*',
+    }
+    const result = config.getGlobPattern()
+    expect(result).toEqual('*.*')
+  })
+})
+
 describe('highlightParsingError', () => {
   it('default to true', () => {
     process.env = {}

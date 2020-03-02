@@ -4,6 +4,7 @@ import * as URI from 'urijs'
 import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
 
+import { getGlobPattern } from './config'
 import { uniqueBasedOnHash } from './util/array'
 import { flattenArray, flattenObjectValues } from './util/flatten'
 import { getFilePaths } from './util/fs'
@@ -43,9 +44,14 @@ export default class Analyzer {
     const lookupStartTime = Date.now()
 
     if (rootPath) {
+      const globPattern = getGlobPattern()
+      connection.console.log(
+        `Analyzing files matching glob "${globPattern}" inside ${rootPath}`,
+      )
+
       // NOTE: An alternative would be to preload all files and analyze their
       // shebang (this would only be needed if we supported cross file referencing).
-      const filePaths = await getFilePaths({ globPattern: '**/*.sh', rootPath })
+      const filePaths = await getFilePaths({ globPattern, rootPath })
 
       filePaths.forEach(filePath => {
         const uri = `file://${filePath}`

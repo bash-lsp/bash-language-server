@@ -118,29 +118,27 @@ describe('fromRoot', () => {
 
     expect(newAnalyzer).toBeDefined()
 
-    expect(connection.console.log).toHaveBeenCalledTimes(5)
+    const FIXTURE_FILES_MATCHING_GLOB = 8
+    const LOG_LINES = FIXTURE_FILES_MATCHING_GLOB + 2
+
+    expect(connection.console.log).toHaveBeenCalledTimes(LOG_LINES)
     expect(connection.console.log).toHaveBeenNthCalledWith(
       1,
-      'Analyzing file:///Users/kenneth/git/bash-language-server/testing/fixtures/install.sh',
+      expect.stringContaining('Analyzing files matching'),
     )
 
     expect(connection.console.log).toHaveBeenNthCalledWith(
       2,
-      'Analyzing file:///Users/kenneth/git/bash-language-server/testing/fixtures/issue101.sh',
+      'Analyzing file:///Users/kenneth/git/bash-language-server/testing/fixtures/extension.inc',
     )
 
     expect(connection.console.log).toHaveBeenNthCalledWith(
       3,
-      'Analyzing file:///Users/kenneth/git/bash-language-server/testing/fixtures/missing-node.sh',
+      'Analyzing file:///Users/kenneth/git/bash-language-server/testing/fixtures/install.sh',
     )
 
     expect(connection.console.log).toHaveBeenNthCalledWith(
-      4,
-      'Analyzing file:///Users/kenneth/git/bash-language-server/testing/fixtures/parse-problems.sh',
-    )
-
-    expect(connection.console.log).toHaveBeenNthCalledWith(
-      5,
+      LOG_LINES,
       'Analyzer finished after 0 seconds',
     )
   })
