@@ -128,16 +128,6 @@ describe('fromRoot', () => {
     )
 
     expect(connection.console.log).toHaveBeenNthCalledWith(
-      2,
-      'Analyzing file:///Users/kenneth/git/bash-language-server/testing/fixtures/extension.inc',
-    )
-
-    expect(connection.console.log).toHaveBeenNthCalledWith(
-      3,
-      'Analyzing file:///Users/kenneth/git/bash-language-server/testing/fixtures/install.sh',
-    )
-
-    expect(connection.console.log).toHaveBeenNthCalledWith(
       LOG_LINES,
       'Analyzer finished after 0 seconds',
     )
