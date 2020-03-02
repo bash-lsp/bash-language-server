@@ -54,6 +54,8 @@ export default class Analyzer {
 
       const filePaths = await getFilePaths({ globPattern, rootPath })
 
+      // TODO: we could load all files without extensions: globPattern: '**/[^.]'
+
       connection.console.log(
         `Glob resolved with ${filePaths.length} files after ${getTimePassed()}`,
       )
