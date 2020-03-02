@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 1.9.0
+
+* Skip analyzing files with a non-bash shebang
+
 ## 1.8.0
 
 * Extend file glob used for pre-analyzing files from `**/*.sh` to `**/*@(.sh|.inc|.bash|.command)`
