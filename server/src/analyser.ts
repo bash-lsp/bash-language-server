@@ -41,31 +41,33 @@ export default class Analyzer {
   }): Promise<Analyzer> {
     const analyzer = new Analyzer(parser)
 
-    const lookupStartTime = Date.now()
-
     if (rootPath) {
       const globPattern = getGlobPattern()
       connection.console.log(
         `Analyzing files matching glob "${globPattern}" inside ${rootPath}`,
       )
 
+      const lookupStartTime = Date.now()
+      const getTimePassed = (): string =>
+        `${(Date.now() - lookupStartTime) / 1000} seconds`
+
       // NOTE: An alternative would be to preload all files and analyze their
-      // shebang (this would only be needed if we supported cross file referencing).
+      // shebang or mimetype, but it would be fairly expensive.
       const filePaths = await getFilePaths({ globPattern, rootPath })
+
+      connection.console.log(
+        `Glob resolved with ${filePaths.length} files after ${getTimePassed()}`,
+      )
 
       filePaths.forEach(filePath => {
         const uri = `file://${filePath}`
         connection.console.log(`Analyzing ${uri}`)
-
         const fileContent = fs.readFileSync(filePath, 'utf8')
-
         analyzer.analyze(uri, LSP.TextDocument.create(uri, 'shell', 1, fileContent))
       })
-    }
 
-    connection.console.log(
-      `Analyzer finished after ${(Date.now() - lookupStartTime) / 1000} seconds`,
-    )
+      connection.console.log(`Analyzer finished after ${getTimePassed()}`)
+    }
 
     return analyzer
   }
