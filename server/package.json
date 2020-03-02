@@ -18,7 +18,7 @@
     "node": "*"
   },
   "dependencies": {
-    "glob": "^7.1.2",
+    "glob": "^7.1.6",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
     "turndown": "^4.0.2",
