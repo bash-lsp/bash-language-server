@@ -223,6 +223,7 @@ export default class BashServer {
       },
     }))
 
+    // TODO: we have duplicates here (e.g. echo is both a builtin AND have a man page)
     const allCompletions = [
       ...symbolCompletions,
       ...programCompletions,
