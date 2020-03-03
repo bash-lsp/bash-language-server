@@ -216,6 +216,11 @@ export default class BashServer {
 
     const currentWord = this.getWordAtPoint(pos)
     if (currentWord) {
+      if (currentWord.startsWith('#')) {
+        // Inside a comment block
+        return []
+      }
+
       // Filter to only return suffixes of the current word
       return allCompletions.filter(item => item.label.startsWith(currentWord))
     }
