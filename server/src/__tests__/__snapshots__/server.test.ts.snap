@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`server initializes and responds to capabilities 1`] = `
+Object {
+  "completionProvider": Object {
+    "resolveProvider": true,
+  },
+  "definitionProvider": true,
+  "documentHighlightProvider": true,
+  "documentSymbolProvider": true,
+  "hoverProvider": true,
+  "referencesProvider": true,
+  "textDocumentSync": 1,
+}
+`;
