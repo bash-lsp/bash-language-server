@@ -130,7 +130,7 @@ describe('server', () => {
     })
   })
 
-  it('responds to onCompletion when word is found', async () => {
+  it('responds to onCompletion with filtered list when word is found', async () => {
     const { connection, server } = await initializeServer()
     server.register(connection)
 
@@ -142,6 +142,7 @@ describe('server', () => {
           uri: FIXTURE_URI.INSTALL,
         },
         position: {
+          // rm
           line: 25,
           character: 5,
         },
@@ -149,11 +150,29 @@ describe('server', () => {
       {} as any,
     )
 
-    // Entire list
-    expect('length' in result && result.length > 50)
+    expect(result).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "data": Object {
+                "name": "rm",
+                "type": "executable",
+              },
+              "kind": 12,
+              "label": "rm",
+            },
+            Object {
+              "data": Object {
+                "name": "rmdir",
+                "type": "executable",
+              },
+              "kind": 12,
+              "label": "rmdir",
+            },
+          ]
+      `)
   })
 
-  it('responds to onCompletion when no word is found', async () => {
+  it('responds to onCompletion with entire list when no word is found', async () => {
     const { connection, server } = await initializeServer()
     server.register(connection)
 
@@ -165,6 +184,31 @@ describe('server', () => {
           uri: FIXTURE_URI.INSTALL,
         },
         position: {
+          // else
+          line: 24,
+          character: 5,
+        },
+      },
+      {} as any,
+    )
+
+    // Entire list
+    expect('length' in result && result.length > 50).toBe(true)
+  })
+
+  it('responds to onCompletion with empty list when word is a comment', async () => {
+    const { connection, server } = await initializeServer()
+    server.register(connection)
+
+    const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+    const result = await onCompletion(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.INSTALL,
+        },
+        position: {
+          // inside comment
           line: 2,
           character: 1,
         },
@@ -172,7 +216,6 @@ describe('server', () => {
       {} as any,
     )
 
-    // Entire list
-    expect('length' in result && result.length > 50)
+    expect(result).toEqual([])
   })
 })
