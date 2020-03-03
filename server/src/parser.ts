@@ -17,8 +17,8 @@ export async function initializeParser(): Promise<Parser> {
    *    yarn remove tree-sitter-bash tree-sitter-cli
    *
    * The current files was compiled with:
-   * "tree-sitter-bash": "^0.16.0",
-   * "tree-sitter-cli": "^0.15.9"
+   * "tree-sitter-bash": "^0.16.1",
+   * "tree-sitter-cli": "^0.16.5"
    */
   const lang = await Parser.Language.load(`${__dirname}/../tree-sitter-bash.wasm`)
 
