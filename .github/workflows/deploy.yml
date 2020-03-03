@@ -1,4 +1,4 @@
-name: Deploy VS Code Extension
+name: Deploy server and extension
 
 on:
   push:
@@ -13,6 +13,9 @@ jobs:
       - run: bash scripts/release-client.sh
         env:
           VSCE_TOKEN: ${{ secrets.VSCE_PERSONAL_ACCESS_TOKEN }}
-      - run: bash scripts/release-server.sh
+      - run: |
+          git config --local user.email "kenneth.skovhus@gmail.com"
+          git config --local user.name "skovhus"
+        - run: bash scripts/release-server.sh
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
