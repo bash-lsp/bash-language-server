@@ -7,6 +7,7 @@ import * as config from './config'
 import Executables from './executables'
 import { initializeParser } from './parser'
 import * as ReservedWords from './reservedWords'
+import { BashCompletionItem, CompletionItemDataType } from './types'
 
 /**
  * The BashServer glues together the separate components to implement
@@ -204,7 +205,7 @@ export default class BashServer {
     return this.analyzer.findReferences(word)
   }
 
-  private onCompletion(params: LSP.TextDocumentPositionParams): LSP.CompletionItem[] {
+  private onCompletion(params: LSP.TextDocumentPositionParams): BashCompletionItem[] {
     const word = this.getWordAtPoint(params)
     this.logRequest({ request: 'onCompletion', params, word })
 
@@ -217,7 +218,7 @@ export default class BashServer {
       kind: LSP.SymbolKind.Interface, // ??
       data: {
         name: reservedWord,
-        type: 'reservedWord',
+        type: CompletionItemDataType.ReservedWord,
       },
     }))
 
@@ -227,17 +228,17 @@ export default class BashServer {
         kind: LSP.SymbolKind.Function,
         data: {
           name: s,
-          type: 'executable',
+          type: CompletionItemDataType.Executable,
         },
       }
     })
 
     const builtinsCompletions = Builtins.LIST.map(builtin => ({
       label: builtin,
-      kind: LSP.SymbolKind.Method, // ??
+      kind: LSP.SymbolKind.Interface, // ??
       data: {
         name: builtin,
-        type: 'builtin',
+        type: CompletionItemDataType.Builtin,
       },
     }))
 
@@ -263,7 +264,7 @@ export default class BashServer {
   }
 
   private async onCompletionResolve(
-    item: LSP.CompletionItem,
+    item: BashCompletionItem,
   ): Promise<LSP.CompletionItem> {
     const {
       data: { name, type },
@@ -282,13 +283,13 @@ export default class BashServer {
     })
 
     try {
-      if (type === 'executable') {
+      if (type === CompletionItemDataType.Executable) {
         const doc = await this.executables.documentation(name)
         return getMarkdownCompletionItem(doc)
-      } else if (type === 'builtin') {
+      } else if (type === CompletionItemDataType.Builtin) {
         const doc = await Builtins.documentation(name)
         return getMarkdownCompletionItem(doc)
-      } else if (type === 'reservedWord') {
+      } else if (type === CompletionItemDataType.ReservedWord) {
         const doc = await ReservedWords.documentation(name)
         return getMarkdownCompletionItem(doc)
       } else {

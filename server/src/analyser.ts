@@ -5,6 +5,7 @@ import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
 
 import { getGlobPattern } from './config'
+import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
 import { flattenArray, flattenObjectValues } from './util/flatten'
 import { getFilePaths } from './util/fs'
@@ -232,7 +233,7 @@ export default class Analyzer {
   /**
    * Find unique symbol completions for the given file.
    */
-  public findSymbolCompletions(uri: string): LSP.CompletionItem[] {
+  public findSymbolCompletions(uri: string): BashCompletionItem[] {
     const hashFunction = ({ name, kind }: LSP.SymbolInformation) => `${name}${kind}`
 
     return uniqueBasedOnHash(this.findSymbols(uri), hashFunction).map(
@@ -241,7 +242,7 @@ export default class Analyzer {
         kind: this.symbolKindToCompletionKind(symbol.kind),
         data: {
           name: symbol.name,
-          type: 'function',
+          type: CompletionItemDataType.Symbol,
         },
       }),
     )

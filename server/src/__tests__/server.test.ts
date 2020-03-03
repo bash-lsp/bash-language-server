@@ -2,6 +2,7 @@ import * as lsp from 'vscode-languageserver'
 
 import { FIXTURE_FOLDER, FIXTURE_URI } from '../../../testing/fixtures'
 import LspServer from '../server'
+import { CompletionItemDataType } from '../types'
 
 async function initializeServer() {
   const diagnostics: Array<lsp.PublishDiagnosticsParams | undefined> = undefined
@@ -157,7 +158,7 @@ describe('server', () => {
         {
           data: {
             name: 'rm',
-            type: 'executable',
+            type: CompletionItemDataType.Executable,
           },
           kind: expect.any(Number),
           label: 'rm',
