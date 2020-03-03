@@ -44,14 +44,24 @@ export default class Executables {
   /**
    * Look up documentation for the given executable.
    *
-   * For now it simply tries to look up the MAN documentation.
+   * For now it simply tries to look up the MAN documentation or calls --help.
    */
-  public documentation(executable: string): Promise<string> {
-    return ShUtil.execShellScript(`man ${executable} | col -b`).then(doc => {
-      return !doc
-        ? Promise.resolve(`No MAN page for ${executable}`)
-        : Promise.resolve(doc)
-    })
+  public async documentation(executable: string): Promise<null | string> {
+    try {
+      const manResult = await ShUtil.execShellScript(`man ${executable} | col -b`)
+      if (manResult) {
+        return manResult
+      }
+
+      const helpResult = await ShUtil.execShellScript(`${executable} --help  | col -b`)
+      if (helpResult) {
+        return helpResult
+      }
+    } catch (error) {
+      // Ignore any script errors
+    }
+
+    return null
   }
 }
 

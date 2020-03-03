@@ -172,9 +172,13 @@ export default class BashServer {
     }
 
     if (this.executables.isExecutableOnPATH(word)) {
-      return this.executables.documentation(word).then(doc => ({
-        contents: getMarkdownHoverItem(doc),
-      }))
+      const doc = await this.executables.documentation(word)
+
+      if (doc) {
+        return {
+          contents: getMarkdownHoverItem(doc),
+        }
+      }
     }
 
     return null
