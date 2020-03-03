@@ -2,14 +2,11 @@
 
 ## Client
 
-If the client depends on a specific version of the server, then update
-`MINIMUM_SERVER_VERSION` in `vscode-client/src/extensions.ts`.
-
 To release a new version of the vscode extension
 
 - Bump the version in `vscode-client/package.json`
 - Update `vscode-client/CHANGELOG.md`
-- Run the script: `./scripts/release-client.sh`
+- Merge to master
 
 ## Server
 
@@ -17,4 +14,4 @@ To release a new version of the server
 
 - Bump the version in `package.json`
 - Update `server/CHANGELOG.md`
-- Run the script: `./scripts/release-server.sh`
+- Merge to master
