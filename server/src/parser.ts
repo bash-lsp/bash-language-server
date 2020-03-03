@@ -7,9 +7,14 @@ export async function initializeParser(): Promise<Parser> {
   /**
    * See https://github.com/tree-sitter/tree-sitter/tree/master/lib/binding_web#generate-wasm-language-files
    *
-   * To compile:
-   *  yarn add --dev tree-sitter-cli
-   *  npx tree-sitter build-wasm node_modules/tree-sitter-bash
+   * To compile and use a new tree-sitter-bash version:
+   *    cd server
+   *    yarn add web-tree-sitter
+   *    yarn add --dev tree-sitter-bash tree-sitter-cli
+   *    npx tree-sitter build-wasm node_modules/tree-sitter-bash
+   *
+   * Note down the versions (from the package.json) below and then run
+   *    yarn remove tree-sitter-bash tree-sitter-cli
    *
    * The current files was compiled with:
    * "tree-sitter-bash": "^0.16.0",
