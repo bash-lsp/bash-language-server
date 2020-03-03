@@ -119,7 +119,9 @@ describe('fromRoot', () => {
     expect(newAnalyzer).toBeDefined()
 
     const FIXTURE_FILES_MATCHING_GLOB = 8
-    const LOG_LINES = FIXTURE_FILES_MATCHING_GLOB + 3
+
+    // Intro, stats on glob, one file skipped due to shebang, and outro
+    const LOG_LINES = FIXTURE_FILES_MATCHING_GLOB + 4
 
     expect(connection.console.log).toHaveBeenCalledTimes(LOG_LINES)
     expect(connection.console.log).toHaveBeenNthCalledWith(
