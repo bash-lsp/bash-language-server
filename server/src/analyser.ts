@@ -328,13 +328,25 @@ export default class Analyzer {
     const document = this.uriToTreeSitterTrees[uri]
     const contents = this.uriToFileContent[uri]
 
-    const node = document.rootNode.namedDescendantForPosition({ row: line, column })
+    if (!document.rootNode) {
+      // Check for lacking rootNode (due to failed parse?)
+      return null
+    }
+
+    const point = { row: line, column }
+
+    const node = TreeSitterUtil.namedLeafDescendantForPosition(point, document.rootNode)
+
+    if (!node) {
+      return null
+    }
 
     const start = node.startIndex
     const end = node.endIndex
     const name = contents.slice(start, end)
 
     // Hack. Might be a problem with the grammar.
+    // TODO: Document this with a test case
     if (name.endsWith('=')) {
       return name.slice(0, name.length - 1)
     }
