@@ -6,6 +6,7 @@ import * as Builtins from './builtins'
 import * as config from './config'
 import Executables from './executables'
 import { initializeParser } from './parser'
+import * as ReservedWords from './reservedWords'
 
 /**
  * The BashServer glues together the separate components to implement
@@ -161,6 +162,12 @@ export default class BashServer {
       }))
     }
 
+    if (ReservedWords.isReservedWord(word)) {
+      return ReservedWords.documentation(word).then(doc => ({
+        contents: getMarkdownHoverItem(doc),
+      }))
+    }
+
     if (this.executables.isExecutableOnPATH(word)) {
       return this.executables.documentation(word).then(doc => ({
         contents: getMarkdownHoverItem(doc),
@@ -203,6 +210,17 @@ export default class BashServer {
 
     const symbolCompletions = this.analyzer.findSymbolCompletions(params.textDocument.uri)
 
+    // TODO: we could do some caching here...
+
+    const reservedWordsCompletions = ReservedWords.LIST.map(reservedWord => ({
+      label: reservedWord,
+      kind: LSP.SymbolKind.Interface, // ??
+      data: {
+        name: reservedWord,
+        type: 'reservedWord',
+      },
+    }))
+
     const programCompletions = this.executables.list().map((s: string) => {
       return {
         label: s,
@@ -225,6 +243,7 @@ export default class BashServer {
 
     // TODO: we have duplicates here (e.g. echo is both a builtin AND have a man page)
     const allCompletions = [
+      ...reservedWordsCompletions,
       ...symbolCompletions,
       ...programCompletions,
       ...builtinsCompletions,
@@ -268,6 +287,9 @@ export default class BashServer {
         return getMarkdownCompletionItem(doc)
       } else if (type === 'builtin') {
         const doc = await Builtins.documentation(name)
+        return getMarkdownCompletionItem(doc)
+      } else if (type === 'reservedWord') {
+        const doc = await ReservedWords.documentation(name)
         return getMarkdownCompletionItem(doc)
       } else {
         return item
