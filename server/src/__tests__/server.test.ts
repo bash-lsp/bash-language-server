@@ -150,26 +150,20 @@ describe('server', () => {
       {} as any,
     )
 
-    expect(result).toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "data": Object {
-                "name": "rm",
-                "type": "executable",
-              },
-              "kind": 12,
-              "label": "rm",
-            },
-            Object {
-              "data": Object {
-                "name": "rmdir",
-                "type": "executable",
-              },
-              "kind": 12,
-              "label": "rmdir",
-            },
-          ]
-      `)
+    // Limited set
+    expect('length' in result && result.length < 5).toBe(true)
+    expect(result).toEqual(
+      expect.arrayContaining([
+        {
+          data: {
+            name: 'rm',
+            type: 'executable',
+          },
+          kind: expect.any(Number),
+          label: 'rm',
+        },
+      ]),
+    )
   })
 
   it('responds to onCompletion with entire list when no word is found', async () => {
