@@ -214,11 +214,13 @@ export default class BashServer {
       ...builtinsCompletions,
     ]
 
-    // Filter to only return suffixes of the current word
     const currentWord = this.getWordAtPoint(pos)
-    return allCompletions.filter(
-      (x: LSP.CompletionItem) => x.label && x.label.startsWith(currentWord),
-    )
+    if (currentWord) {
+      // Filter to only return suffixes of the current word
+      return allCompletions.filter(item => item.label.startsWith(currentWord))
+    }
+
+    return allCompletions
   }
 
   private async onCompletionResolve(
