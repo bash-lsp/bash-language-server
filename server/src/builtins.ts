@@ -63,8 +63,10 @@ export const LIST = [
   'wait',
 ]
 
+const SET = new Set(LIST)
+
 export function isBuiltin(word: string): boolean {
-  return LIST.find(builtin => builtin === word) !== undefined
+  return SET.has(word)
 }
 
 export async function documentation(builtin: string): Promise<string> {
