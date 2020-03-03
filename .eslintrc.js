@@ -50,6 +50,7 @@ module.exports = {
     'prefer-const': 'error',
     'prefer-template': 'error',
     'simple-import-sort/sort': 'error',
+    'object-shorthand': 'error',
 
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-member-accessibility': 'off',
