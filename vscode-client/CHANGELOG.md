@@ -1,8 +1,12 @@
 # Bash IDE
 
+## 1.7.0
+
+* Upgrade LSP to 1.10.0 (improved completion handler)
+
 ## 1.6.0
 
-* Upgrade LSP to 1.9.0 (Skip analyzing files with a non-bash shebang)
+* Upgrade LSP to 1.9.0 (skip analyzing files with a non-bash shebang)
 
 ## 1.5.0
 

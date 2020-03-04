@@ -82,10 +82,10 @@ balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
 
-bash-language-server@^1.9.0:
-  version "1.9.0"
-  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-1.9.0.tgz#b0878f3ee8776064f7f9f5782c9e53bdbf3345d2"
-  integrity sha512-ApCrZ2BXSrxQ7sCl/cyg6FY0HSSp+uNUNoKvVFlvM1pT0mBAns2wdDKCk0rdEIQzWDSaIqx/nAzJASYAYP3V+A==
+bash-language-server@1.10.0:
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-1.10.0.tgz#2d0e79b4c4e2ecd509c9b96c2b289a84b5eb779d"
+  integrity sha512-G9SK2j6hVXexW66F7MTGZF3tk5g0A73KiHHH4nTON1KiqkSRiq0mNS5LNAzyXz9tbqihATQ9uPxbiuM/SjZkWA==
   dependencies:
     glob "^7.1.6"
     request "^2.83.0"
@@ -93,7 +93,7 @@ bash-language-server@^1.9.0:
     turndown "^4.0.2"
     urijs "^1.19.1"
     vscode-languageserver "^5.2.1"
-    web-tree-sitter "^0.15.9"
+    web-tree-sitter "^0.16.2"
 
 bcrypt-pbkdf@^1.0.0:
   version "1.0.1"
@@ -891,10 +891,10 @@ w3c-hr-time@^1.0.1:
   dependencies:
     browser-process-hrtime "^0.1.2"
 
-web-tree-sitter@^0.15.9:
-  version "0.15.9"
-  resolved "https://registry.yarnpkg.com/web-tree-sitter/-/web-tree-sitter-0.15.9.tgz#f93ec2e02cfc01ca3fa85d600114b982eef7b33c"
-  integrity sha512-1lf4lnmi8oxuEzI6gpUok2FQlHXOmV1iipltkQvmR785JWnUbjhw1sZnwSCkisQP+/g/aezpMGcW3mjz0uVhMw==
+web-tree-sitter@^0.16.2:
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/web-tree-sitter/-/web-tree-sitter-0.16.2.tgz#fc6b62681d7ca524a9ffc8498448f8e23be7b1ea"
+  integrity sha512-vxZHqu4nItCARmE+oGvTgjFBrMbhEuGI9PWYSgF4ET/nLuW3K11KQQIVhAsoGtYvTI9jdbjc/THj38P7nhYwow==
 
 webidl-conversions@^4.0.2:
   version "4.0.2"
