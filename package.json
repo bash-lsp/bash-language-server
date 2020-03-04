@@ -12,7 +12,7 @@
     "test:coverage": "yarn run test --coverage",
     "test:watch": "yarn run test --watch",
     "verify": "yarn run lint && yarn run compile && yarn run test",
-    "verify:bail": "yarn run lint:bail && yarn run compile && yarn run test",
+    "verify:bail": "yarn run lint:bail && yarn run compile && yarn run test:coverage",
     "reinstall-server": "npm uninstall -g bash-language-server && yarn compile:server && npm i -g ./server",
     "link-server": "npm uninstall -g bash-language-server && yarn compile:server && yarn unlink bash-language-server && cd server && yarn link && cd ../vscode-client && yarn link bash-language-server"
   },
@@ -71,6 +71,7 @@
     ],
     "coverageReporters": [
       "text-summary",
+      "lcov",
       "html"
     ]
   }
