@@ -12,6 +12,7 @@ with [explainshell][explainshell] integration.
 - [x] Code completion
 - [x] Simple diagnostics reporting
 - [x] Documentation for flags on hover
+- [x] Workspace symbols
 - [ ] Rename symbol
 
 ## Installation

@@ -11,5 +11,6 @@ Object {
   "hoverProvider": true,
   "referencesProvider": true,
   "textDocumentSync": 1,
+  "workspaceSymbolProvider": true,
 }
 `;
