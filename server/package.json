@@ -18,6 +18,7 @@
     "node": "*"
   },
   "dependencies": {
+    "fuzzy-search": "^3.2.1",
     "glob": "^7.1.6",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",

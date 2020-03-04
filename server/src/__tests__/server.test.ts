@@ -138,31 +138,43 @@ describe('server', () => {
 
     const onWorkspaceSymbol = connection.onWorkspaceSymbol.mock.calls[0][0]
 
-    const result = await onWorkspaceSymbol(
-      {
-        query: 'config_log',
-      },
-      {} as any,
-    )
+    async function lookupAndExpectNpmConfigLoglevelResult(query: string) {
+      const result = await onWorkspaceSymbol(
+        {
+          query,
+        },
+        {} as any,
+      )
 
-    expect(result).toEqual([
-      {
-        kind: expect.any(Number),
-        location: {
-          range: { end: { character: 27, line: 40 }, start: { character: 0, line: 40 } },
-          uri: expect.stringContaining('/testing/fixtures/install.sh'),
+      expect(result).toEqual([
+        {
+          kind: expect.any(Number),
+          location: {
+            range: {
+              end: { character: 27, line: 40 },
+              start: { character: 0, line: 40 },
+            },
+            uri: expect.stringContaining('/testing/fixtures/install.sh'),
+          },
+          name: 'npm_config_loglevel',
         },
-        name: 'npm_config_loglevel',
-      },
-      {
-        kind: expect.any(Number),
-        location: {
-          range: { end: { character: 31, line: 48 }, start: { character: 2, line: 48 } },
-          uri: expect.stringContaining('/testing/fixtures/install.sh'),
+        {
+          kind: expect.any(Number),
+          location: {
+            range: {
+              end: { character: 31, line: 48 },
+              start: { character: 2, line: 48 },
+            },
+            uri: expect.stringContaining('/testing/fixtures/install.sh'),
+          },
+          name: 'npm_config_loglevel',
         },
-        name: 'npm_config_loglevel',
-      },
-    ])
+      ])
+    }
+
+    await lookupAndExpectNpmConfigLoglevelResult('npm_config_loglevel') // exact
+    await lookupAndExpectNpmConfigLoglevelResult('config_log') // in the middle
+    await lookupAndExpectNpmConfigLoglevelResult('npmloglevel') // fuzzy
   })
 
   it('responds to onCompletion with filtered list when word is found', async () => {
