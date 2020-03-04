@@ -97,6 +97,7 @@ describe('server', () => {
     expect(connection.onHover).toHaveBeenCalledTimes(1)
     expect(connection.onDefinition).toHaveBeenCalledTimes(1)
     expect(connection.onDocumentSymbol).toHaveBeenCalledTimes(1)
+    expect(connection.onWorkspaceSymbol).toHaveBeenCalledTimes(1)
     expect(connection.onDocumentHighlight).toHaveBeenCalledTimes(1)
     expect(connection.onReferences).toHaveBeenCalledTimes(1)
     expect(connection.onCompletion).toHaveBeenCalledTimes(1)
@@ -129,6 +130,40 @@ describe('server', () => {
         value: expect.stringContaining('RM(1)'),
       },
     })
+  })
+
+  it('responds to onWorkspaceSymbol', async () => {
+    const { connection, server } = await initializeServer()
+    server.register(connection)
+
+    const onWorkspaceSymbol = connection.onWorkspaceSymbol.mock.calls[0][0]
+
+    const result = await onWorkspaceSymbol(
+      {
+        query: 'npm_config_log',
+      },
+      {} as any,
+    )
+
+    expect(result).toBeDefined()
+    expect(result).toEqual([
+      {
+        kind: expect.any(Number),
+        location: {
+          range: { end: { character: 27, line: 40 }, start: { character: 0, line: 40 } },
+          uri: expect.stringContaining('/testing/fixtures/install.sh'),
+        },
+        name: 'npm_config_loglevel',
+      },
+      {
+        kind: expect.any(Number),
+        location: {
+          range: { end: { character: 31, line: 48 }, start: { character: 2, line: 48 } },
+          uri: expect.stringContaining('/testing/fixtures/install.sh'),
+        },
+        name: 'npm_config_loglevel',
+      },
+    ])
   })
 
   it('responds to onCompletion with filtered list when word is found', async () => {

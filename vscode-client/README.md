@@ -11,6 +11,7 @@ Visual Studio Code extension utilizing the [bash language server](bash-lsp), tha
 - [x] Code completion
 - [x] Simple diagnostics reporting
 - [x] Documentation for flags on hover
+- [x] Workspace symbols
 - [ ] Rename symbol
 
 ## Configuration

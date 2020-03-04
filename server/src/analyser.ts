@@ -119,7 +119,7 @@ export default class Analyzer {
   }
 
   /**
-   * Find all the locations where something named name has been defined.
+   * Find all the symbols matching the query.
    */
   public search(query: string): LSP.SymbolInformation[] {
     const symbols: LSP.SymbolInformation[] = []

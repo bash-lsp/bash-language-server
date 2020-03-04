@@ -192,7 +192,7 @@ export default class BashServer {
   }
 
   private onWorkspaceSymbol(params: LSP.WorkspaceSymbolParams): LSP.SymbolInformation[] {
-    this.connection.console.log('Asking for workspace symbols')
+    this.connection.console.log('onWorkspaceSymbol')
     return this.analyzer.search(params.query)
   }
 
