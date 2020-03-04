@@ -24,7 +24,7 @@
     "turndown": "^4.0.2",
     "urijs": "^1.19.1",
     "vscode-languageserver": "^5.2.1",
-    "web-tree-sitter": "^0.15.9"
+    "web-tree-sitter": "^0.16.2"
   },
   "scripts": {
     "compile": "rm -rf out && ../node_modules/.bin/tsc -p ./",
