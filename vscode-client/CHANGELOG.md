@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.6.0
+
+* Upgrade LSP to 1.9.0 (Skip analyzing files with a non-bash shebang)
+
 ## 1.5.0
 
 * Upgrade LSP to 1.8.0 (PATH tilde expansion, builtins and man pages formatting, pre-analyzes more files than just .sh)

@@ -4,7 +4,7 @@
   "description": "A language server for Bash",
   "author": "Mads Hartmann",
   "license": "MIT",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "publisher": "mads-hartmann",
   "repository": {
     "type": "git",
@@ -57,7 +57,7 @@
     "postinstall": "vscode-install"
   },
   "dependencies": {
-    "bash-language-server": "1.8.0",
+    "bash-language-server": "^1.9.0",
     "vscode-languageclient": "^5.2.1",
     "vscode-languageserver": "^5.2.1"
   },
