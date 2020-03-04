@@ -57,7 +57,7 @@
     "postinstall": "vscode-install"
   },
   "dependencies": {
-    "bash-language-server": "1.8.0",
+    "bash-language-server": "^1.9.0",
     "vscode-languageclient": "^5.2.1",
     "vscode-languageserver": "^5.2.1"
   },
