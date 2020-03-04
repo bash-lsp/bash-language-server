@@ -6,6 +6,8 @@ import * as Builtins from './builtins'
 import * as config from './config'
 import Executables from './executables'
 import { initializeParser } from './parser'
+import * as ReservedWords from './reservedWords'
+import { BashCompletionItem, CompletionItemDataType } from './types'
 
 /**
  * The BashServer glues together the separate components to implement
@@ -106,17 +108,31 @@ export default class BashServer {
     )
   }
 
-  private async onHover(pos: LSP.TextDocumentPositionParams): Promise<LSP.Hover> {
+  private logRequest({
+    request,
+    params,
+    word,
+  }: {
+    request: string
+    params: LSP.ReferenceParams | LSP.TextDocumentPositionParams
+    word?: string | null
+  }) {
+    const wordLog = word ? `"${word}"` : ''
     this.connection.console.log(
-      `Hovering over ${pos.position.line}:${pos.position.character}`,
+      `${request} ${params.position.line}:${params.position.character} ${wordLog}`,
     )
+  }
 
-    const word = this.getWordAtPoint(pos)
+  private async onHover(params: LSP.TextDocumentPositionParams): Promise<LSP.Hover> {
+    const word = this.getWordAtPoint(params)
+
+    this.logRequest({ request: 'onHover', params, word })
+
     const explainshellEndpoint = config.getExplainshellEndpoint()
     if (explainshellEndpoint) {
       this.connection.console.log(`Query ${explainshellEndpoint}`)
       const response = await this.analyzer.getExplainshellDocumentation({
-        pos,
+        params,
         endpoint: explainshellEndpoint,
       })
 
@@ -147,6 +163,12 @@ export default class BashServer {
       }))
     }
 
+    if (ReservedWords.isReservedWord(word)) {
+      return ReservedWords.documentation(word).then(doc => ({
+        contents: getMarkdownHoverItem(doc),
+      }))
+    }
+
     if (this.executables.isExecutableOnPATH(word)) {
       return this.executables.documentation(word).then(doc => ({
         contents: getMarkdownHoverItem(doc),
@@ -156,37 +178,49 @@ export default class BashServer {
     return null
   }
 
-  private onDefinition(pos: LSP.TextDocumentPositionParams): LSP.Definition {
-    this.connection.console.log(
-      `Asked for definition at ${pos.position.line}:${pos.position.character}`,
-    )
-    const word = this.getWordAtPoint(pos)
+  private onDefinition(params: LSP.TextDocumentPositionParams): LSP.Definition {
+    const word = this.getWordAtPoint(params)
+    this.logRequest({ request: 'onDefinition', params, word })
     return this.analyzer.findDefinition(word)
   }
 
   private onDocumentSymbol(params: LSP.DocumentSymbolParams): LSP.SymbolInformation[] {
+    this.connection.console.log(`onDocumentSymbol`)
     return this.analyzer.findSymbols(params.textDocument.uri)
   }
 
   private onDocumentHighlight(
-    pos: LSP.TextDocumentPositionParams,
+    params: LSP.TextDocumentPositionParams,
   ): LSP.DocumentHighlight[] {
-    const word = this.getWordAtPoint(pos)
+    const word = this.getWordAtPoint(params)
+    this.logRequest({ request: 'onDocumentHighlight', params, word })
     return this.analyzer
-      .findOccurrences(pos.textDocument.uri, word)
+      .findOccurrences(params.textDocument.uri, word)
       .map(n => ({ range: n.range }))
   }
 
   private onReferences(params: LSP.ReferenceParams): LSP.Location[] {
     const word = this.getWordAtPoint(params)
+    this.logRequest({ request: 'onReferences', params, word })
     return this.analyzer.findReferences(word)
   }
 
-  private onCompletion(pos: LSP.TextDocumentPositionParams): LSP.CompletionItem[] {
-    this.connection.console.log(
-      `Asked for completions at ${pos.position.line}:${pos.position.character}`,
-    )
-    const symbolCompletions = this.analyzer.findSymbolCompletions(pos.textDocument.uri)
+  private onCompletion(params: LSP.TextDocumentPositionParams): BashCompletionItem[] {
+    const word = this.getWordAtPoint(params)
+    this.logRequest({ request: 'onCompletion', params, word })
+
+    const symbolCompletions = this.analyzer.findSymbolCompletions(params.textDocument.uri)
+
+    // TODO: we could do some caching here...
+
+    const reservedWordsCompletions = ReservedWords.LIST.map(reservedWord => ({
+      label: reservedWord,
+      kind: LSP.SymbolKind.Interface, // ??
+      data: {
+        name: reservedWord,
+        type: CompletionItemDataType.ReservedWord,
+      },
+    }))
 
     const programCompletions = this.executables.list().map((s: string) => {
       return {
@@ -194,29 +228,49 @@ export default class BashServer {
         kind: LSP.SymbolKind.Function,
         data: {
           name: s,
-          type: 'executable',
+          type: CompletionItemDataType.Executable,
         },
       }
     })
 
     const builtinsCompletions = Builtins.LIST.map(builtin => ({
       label: builtin,
-      kind: LSP.SymbolKind.Method, // ??
+      kind: LSP.SymbolKind.Interface, // ??
       data: {
         name: builtin,
-        type: 'builtin',
+        type: CompletionItemDataType.Builtin,
       },
     }))
 
-    return [...symbolCompletions, ...programCompletions, ...builtinsCompletions]
+    // TODO: we have duplicates here (e.g. echo is both a builtin AND have a man page)
+    const allCompletions = [
+      ...reservedWordsCompletions,
+      ...symbolCompletions,
+      ...programCompletions,
+      ...builtinsCompletions,
+    ]
+
+    if (word) {
+      if (word.startsWith('#')) {
+        // Inside a comment block
+        return []
+      }
+
+      // Filter to only return suffixes of the current word
+      return allCompletions.filter(item => item.label.startsWith(word))
+    }
+
+    return allCompletions
   }
 
   private async onCompletionResolve(
-    item: LSP.CompletionItem,
+    item: BashCompletionItem,
   ): Promise<LSP.CompletionItem> {
     const {
       data: { name, type },
     } = item
+
+    this.connection.console.log(`onCompletionResolve name=${name} type=${type}`)
 
     const getMarkdownCompletionItem = (doc: string) => ({
       ...item,
@@ -229,11 +283,14 @@ export default class BashServer {
     })
 
     try {
-      if (type === 'executable') {
+      if (type === CompletionItemDataType.Executable) {
         const doc = await this.executables.documentation(name)
         return getMarkdownCompletionItem(doc)
-      } else if (type === 'builtin') {
+      } else if (type === CompletionItemDataType.Builtin) {
         const doc = await Builtins.documentation(name)
+        return getMarkdownCompletionItem(doc)
+      } else if (type === CompletionItemDataType.ReservedWord) {
+        const doc = await ReservedWords.documentation(name)
         return getMarkdownCompletionItem(doc)
       } else {
         return item

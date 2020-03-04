@@ -5,6 +5,7 @@ import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
 
 import { getGlobPattern } from './config'
+import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
 import { flattenArray, flattenObjectValues } from './util/flatten'
 import { getFilePaths } from './util/fs'
@@ -118,17 +119,17 @@ export default class Analyzer {
   }
 
   public async getExplainshellDocumentation({
-    pos,
+    params,
     endpoint,
   }: {
-    pos: LSP.TextDocumentPositionParams
+    params: LSP.TextDocumentPositionParams
     endpoint: string
   }): Promise<any> {
     const leafNode = this.uriToTreeSitterTrees[
-      pos.textDocument.uri
+      params.textDocument.uri
     ].rootNode.descendantForPosition({
-      row: pos.position.line,
-      column: pos.position.character,
+      row: params.position.line,
+      column: params.position.character,
     })
 
     // explainshell needs the whole command, not just the "word" (tree-sitter
@@ -138,7 +139,7 @@ export default class Analyzer {
     // encounters newlines.
     const interestingNode = leafNode.type === 'word' ? leafNode.parent : leafNode
 
-    const cmd = this.uriToFileContent[pos.textDocument.uri].slice(
+    const cmd = this.uriToFileContent[params.textDocument.uri].slice(
       interestingNode.startIndex,
       interestingNode.endIndex,
     )
@@ -162,7 +163,7 @@ export default class Analyzer {
       return { ...response, status: 'error' }
     } else {
       const offsetOfMousePointerInCommand =
-        this.uriToTextDocument[pos.textDocument.uri].offsetAt(pos.position) -
+        this.uriToTextDocument[params.textDocument.uri].offsetAt(params.position) -
         interestingNode.startIndex
 
       const match = explainshellResponse.matches.find(
@@ -232,7 +233,7 @@ export default class Analyzer {
   /**
    * Find unique symbol completions for the given file.
    */
-  public findSymbolCompletions(uri: string): LSP.CompletionItem[] {
+  public findSymbolCompletions(uri: string): BashCompletionItem[] {
     const hashFunction = ({ name, kind }: LSP.SymbolInformation) => `${name}${kind}`
 
     return uniqueBasedOnHash(this.findSymbols(uri), hashFunction).map(
@@ -241,7 +242,7 @@ export default class Analyzer {
         kind: this.symbolKindToCompletionKind(symbol.kind),
         data: {
           name: symbol.name,
-          type: 'function',
+          type: CompletionItemDataType.Symbol,
         },
       }),
     )
@@ -328,13 +329,25 @@ export default class Analyzer {
     const document = this.uriToTreeSitterTrees[uri]
     const contents = this.uriToFileContent[uri]
 
-    const node = document.rootNode.namedDescendantForPosition({ row: line, column })
+    if (!document.rootNode) {
+      // Check for lacking rootNode (due to failed parse?)
+      return null
+    }
+
+    const point = { row: line, column }
+
+    const node = TreeSitterUtil.namedLeafDescendantForPosition(point, document.rootNode)
+
+    if (!node) {
+      return null
+    }
 
     const start = node.startIndex
     const end = node.endIndex
     const name = contents.slice(start, end)
 
     // Hack. Might be a problem with the grammar.
+    // TODO: Document this with a test case
     if (name.endsWith('=')) {
       return name.slice(0, name.length - 1)
     }

@@ -86,8 +86,17 @@ describe('wordAtPoint', () => {
   it('returns current word at a given point', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
     expect(analyzer.wordAtPoint(CURRENT_URI, 25, 5)).toEqual('rm')
-    // FIXME: seems like there is an issue here:
-    // expect(analyzer.wordAtPoint(CURRENT_URI, 24, 4)).toEqual('else')
+
+    // FIXME: grammar issue: else is not found
+    // expect(analyzer.wordAtPoint(CURRENT_URI, 24, 5)).toEqual('else')
+
+    expect(analyzer.wordAtPoint(CURRENT_URI, 30, 1)).toEqual(null)
+
+    expect(analyzer.wordAtPoint(CURRENT_URI, 30, 3)).toEqual('ret')
+    expect(analyzer.wordAtPoint(CURRENT_URI, 30, 4)).toEqual('ret')
+    expect(analyzer.wordAtPoint(CURRENT_URI, 30, 5)).toEqual('ret')
+
+    expect(analyzer.wordAtPoint(CURRENT_URI, 38, 5)).toEqual('configures')
   })
 })
 

@@ -131,7 +131,7 @@ Array [
   Object {
     "data": Object {
       "name": "ret",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "ret",
@@ -139,7 +139,7 @@ Array [
   Object {
     "data": Object {
       "name": "configures",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "configures",
@@ -147,7 +147,7 @@ Array [
   Object {
     "data": Object {
       "name": "npm_config_loglevel",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "npm_config_loglevel",
@@ -155,7 +155,7 @@ Array [
   Object {
     "data": Object {
       "name": "node",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "node",
@@ -163,7 +163,7 @@ Array [
   Object {
     "data": Object {
       "name": "TMP",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "TMP",
@@ -171,7 +171,7 @@ Array [
   Object {
     "data": Object {
       "name": "BACK",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "BACK",
@@ -179,7 +179,7 @@ Array [
   Object {
     "data": Object {
       "name": "tar",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "tar",
@@ -187,7 +187,7 @@ Array [
   Object {
     "data": Object {
       "name": "MAKE",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "MAKE",
@@ -195,7 +195,7 @@ Array [
   Object {
     "data": Object {
       "name": "make",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "make",
@@ -203,7 +203,7 @@ Array [
   Object {
     "data": Object {
       "name": "clean",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "clean",
@@ -211,7 +211,7 @@ Array [
   Object {
     "data": Object {
       "name": "node_version",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "node_version",
@@ -219,7 +219,7 @@ Array [
   Object {
     "data": Object {
       "name": "t",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "t",
@@ -227,7 +227,7 @@ Array [
   Object {
     "data": Object {
       "name": "url",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "url",
@@ -235,7 +235,7 @@ Array [
   Object {
     "data": Object {
       "name": "ver",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "ver",
@@ -243,7 +243,7 @@ Array [
   Object {
     "data": Object {
       "name": "isnpm10",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "isnpm10",
@@ -251,7 +251,7 @@ Array [
   Object {
     "data": Object {
       "name": "NODE",
-      "type": "function",
+      "type": 3,
     },
     "kind": 6,
     "label": "NODE",
