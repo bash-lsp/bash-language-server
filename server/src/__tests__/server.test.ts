@@ -140,12 +140,11 @@ describe('server', () => {
 
     const result = await onWorkspaceSymbol(
       {
-        query: 'npm_config_log',
+        query: 'config_log',
       },
       {} as any,
     )
 
-    expect(result).toBeDefined()
     expect(result).toEqual([
       {
         kind: expect.any(Number),

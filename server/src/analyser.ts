@@ -125,7 +125,7 @@ export default class Analyzer {
     const symbols: LSP.SymbolInformation[] = []
     Object.keys(this.uriToDeclarations).forEach(uri => {
       Object.keys(this.uriToDeclarations[uri]).forEach(name => {
-        if (name.startsWith(query)) {
+        if (name.includes(query)) {
           const declarationNames = this.uriToDeclarations[uri][name] || []
           declarationNames.forEach(d => symbols.push(d))
         }
