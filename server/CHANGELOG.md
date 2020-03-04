@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 1.11.0
+
+* Support for workspace symbols (https://github.com/mads-hartmann/bash-language-server/pull/195)
+
 ## 1.10.0
 
 * Improved completion handler and support  auto-completion and documentation for [bash reserved words](https://www.gnu.org/software/bash/manual/html_node/Reserved-Word-Index.html) (https://github.com/mads-hartmann/bash-language-server/pull/192)
