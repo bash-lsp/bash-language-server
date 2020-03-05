@@ -82,11 +82,12 @@ balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
 
-bash-language-server@1.10.0:
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-1.10.0.tgz#2d0e79b4c4e2ecd509c9b96c2b289a84b5eb779d"
-  integrity sha512-G9SK2j6hVXexW66F7MTGZF3tk5g0A73KiHHH4nTON1KiqkSRiq0mNS5LNAzyXz9tbqihATQ9uPxbiuM/SjZkWA==
+bash-language-server@1.11.1:
+  version "1.11.1"
+  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-1.11.1.tgz#a23cb42a2916a7cda342ef6b4a20aaaaf0f81dfb"
+  integrity sha512-1fF8RVa/y3yKvMAeorLbapFtRQx85c51V2P+P25U6Cl6HyDzh1IezgmdW6Rau4jg2hDWVN1hCpce36UGjCGE2g==
   dependencies:
+    fuzzy-search "^3.2.1"
     glob "^7.1.6"
     request "^2.83.0"
     request-promise-native "^1.0.5"
@@ -295,6 +296,11 @@ form-data@~2.3.2:
 fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
+
+fuzzy-search@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/fuzzy-search/-/fuzzy-search-3.2.1.tgz#65d5faad6bc633aee86f1898b7788dfe312ac6c9"
+  integrity sha512-vAcPiyomt1ioKAsAL2uxSABHJ4Ju/e4UeDM+g1OlR0vV4YhLGMNsdLNvZTpEDY4JCSt0E4hASCNM5t2ETtsbyg==
 
 getpass@^0.1.1:
   version "0.1.7"

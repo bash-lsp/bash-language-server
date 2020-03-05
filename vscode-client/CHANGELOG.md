@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.8.0
+
+* Upgrade LSP to 1.11.1 (support for workspace symbols). This can for example be used by doing `Command + P` and then write `# someSearchQuery`.
+
 ## 1.7.0
 
 * Upgrade LSP to 1.10.0 (improved completion handler)
