@@ -10,16 +10,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - uses: actions/setup-node@v1
         with:
           node-version: 12
           registry-url: https://registry.npmjs.org/
-      - run: bash scripts/release-client.sh
-        env:
-          VSCE_TOKEN: ${{ secrets.VSCE_PERSONAL_ACCESS_TOKEN }}
+
       - run: |
           git config --local user.email "kenneth.skovhus@gmail.com"
           git config --local user.name "skovhus"
+        name: Configure for pushing git tags
+
+      - run: bash scripts/release-client.sh
+        name: Deploy VS Code extension
+        env:
+          VSCE_TOKEN: ${{ secrets.VSCE_PERSONAL_ACCESS_TOKEN }}
+
       - run: bash scripts/release-server.sh
+        name: Deploy server
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
