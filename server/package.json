@@ -33,6 +33,7 @@
     "prepublishOnly": "yarn run compile"
   },
   "devDependencies": {
+    "@types/fuzzy-search": "^2.1.0",
     "@types/glob": "^7.1.1",
     "@types/request-promise-native": "^1.0.17",
     "@types/turndown": "^5.0.0",

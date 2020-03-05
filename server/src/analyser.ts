@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-const FuzzySearch = require('fuzzy-search')
+import * as FuzzySearch from 'fuzzy-search'
 import * as request from 'request-promise-native'
 import * as URI from 'urijs'
 import * as LSP from 'vscode-languageserver'
