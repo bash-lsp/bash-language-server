@@ -95,7 +95,7 @@ yarn run reinstall-server
 ```
 
 [LSP]: https://microsoft.github.io/language-server-protocol/
-[ide-bash]: https://github.com/mads-hartmann/ide-bash
+[ide-bash]: https://github.com/bash-lsp/ide-bash
 [jest]: https://facebook.github.io/jest/
 [prettier]: https://prettier.io/
 [eslint]: https://eslint.org/
