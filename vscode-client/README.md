@@ -32,7 +32,7 @@ For security reasons, it defaults to `""`, which disables explainshell integrati
 
 Once https://github.com/idank/explainshell/pull/125 is merged, it would be possible to set this to `"https://explainshell.com"`, however doing this is **not recommended** as it will leak *all your shell scripts* to a third party — do this at your own risk, or better always use a locally running Docker image.
 
-[bash-lsp]: https://github.com/mads-hartmann/bash-language-server/tree/master/server
+[bash-lsp]: https://github.com/bash-lsp/bash-language-server/tree/master/server
 [tree-sitter]: https://github.com/tree-sitter/tree-sitter
 [tree-sitter-bash]: https://github.com/tree-sitter/tree-sitter-bash
 [explainshell]: https://explainshell.com/

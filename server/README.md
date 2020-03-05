@@ -7,4 +7,4 @@ For more information see the main Github repository: [mads-hartmann/bash-languag
 
 [tree-sitter]: https://github.com/tree-sitter/tree-sitter
 [tree-sitter-bash]: https://github.com/tree-sitter/tree-sitter-bash
-[repo]: https://github.com/mads-hartmann/bash-language-server
+[repo]: https://github.com/bash-lsp/bash-language-server

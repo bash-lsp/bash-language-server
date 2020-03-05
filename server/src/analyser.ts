@@ -1,4 +1,5 @@
 import * as fs from 'fs'
+import * as FuzzySearch from 'fuzzy-search'
 import * as request from 'request-promise-native'
 import * as URI from 'urijs'
 import * as LSP from 'vscode-languageserver'
@@ -119,19 +120,13 @@ export default class Analyzer {
   }
 
   /**
-   * Find all the symbols matching the query.
+   * Find all the symbols matching the query using fuzzy search.
    */
   public search(query: string): LSP.SymbolInformation[] {
-    const symbols: LSP.SymbolInformation[] = []
-    Object.keys(this.uriToDeclarations).forEach(uri => {
-      Object.keys(this.uriToDeclarations[uri]).forEach(name => {
-        if (name.startsWith(query)) {
-          const declarationNames = this.uriToDeclarations[uri][name] || []
-          declarationNames.forEach(d => symbols.push(d))
-        }
-      })
+    const searcher = new FuzzySearch(this.getAllSymbols(), ['name'], {
+      caseSensitive: true,
     })
-    return symbols
+    return searcher.search(query)
   }
 
   public async getExplainshellDocumentation({
@@ -369,6 +364,20 @@ export default class Analyzer {
     }
 
     return name
+  }
+
+  private getAllSymbols(): LSP.SymbolInformation[] {
+    // NOTE: this could be cached, it takes < 1 ms to generate for a project with 250 bash files...
+    const symbols: LSP.SymbolInformation[] = []
+
+    Object.keys(this.uriToDeclarations).forEach(uri => {
+      Object.keys(this.uriToDeclarations[uri]).forEach(name => {
+        const declarationNames = this.uriToDeclarations[uri][name] || []
+        declarationNames.forEach(d => symbols.push(d))
+      })
+    })
+
+    return symbols
   }
 
   private symbolKindToCompletionKind(s: LSP.SymbolKind): LSP.CompletionItemKind {

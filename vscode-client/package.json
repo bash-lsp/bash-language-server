@@ -8,7 +8,7 @@
   "publisher": "mads-hartmann",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mads-hartmann/bash-language-server"
+    "url": "https://github.com/bash-lsp/bash-language-server"
   },
   "engines": {
     "vscode": "^1.30.0"

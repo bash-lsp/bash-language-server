@@ -1,12 +1,16 @@
 # Bash Language Server
 
+## 1.11.1
+
+* Workspace symbols are resolved using fuzzy search (not just starting with it)
+
 ## 1.11.0
 
-* Support for workspace symbols (https://github.com/mads-hartmann/bash-language-server/pull/195)
+* Support for workspace symbols (https://github.com/bash-lsp/bash-language-server/pull/195)
 
 ## 1.10.0
 
-* Improved completion handler and support  auto-completion and documentation for [bash reserved words](https://www.gnu.org/software/bash/manual/html_node/Reserved-Word-Index.html) (https://github.com/mads-hartmann/bash-language-server/pull/192)
+* Improved completion handler and support  auto-completion and documentation for [bash reserved words](https://www.gnu.org/software/bash/manual/html_node/Reserved-Word-Index.html) (https://github.com/bash-lsp/bash-language-server/pull/192)
 * Upgrade tree-sitter
 
 ## 1.9.0
@@ -30,12 +34,12 @@
 
 ## 1.6.0
 
-* Switch to tree-sitter-wasm instead of tree-sitter (native bindings) to support node 12 and to ease installation (https://github.com/mads-hartmann/bash-language-server/pull/147)
+* Switch to tree-sitter-wasm instead of tree-sitter (native bindings) to support node 12 and to ease installation (https://github.com/bash-lsp/bash-language-server/pull/147)
 
 ## 1.5.6
 
-* Fix crash when parsing directories with `.sh` suffix (https://github.com/mads-hartmann/bash-language-server/pull/111)
-* Fix invalid LSP response (https://github.com/mads-hartmann/bash-language-server/pull/110)
+* Fix crash when parsing directories with `.sh` suffix (https://github.com/bash-lsp/bash-language-server/pull/111)
+* Fix invalid LSP response (https://github.com/bash-lsp/bash-language-server/pull/110)
 
 ## 1.5.5
 
@@ -44,7 +48,7 @@
 
 ## 1.5.4
 
-* Fix explain shell configuration issue (https://github.com/mads-hartmann/bash-language-server/issues/80)
+* Fix explain shell configuration issue (https://github.com/bash-lsp/bash-language-server/issues/80)
 
 ## 1.5.3
 
@@ -100,12 +104,12 @@ improves the Bash parser. There are still known parsing issues. For more
 information following the progress on this issue over at
 [tree-sitter/tree-sitter-bash#9](https://github.com/tree-sitter/tree-sitter-bash/issues/9)
 
-[17]: https://github.com/mads-hartmann/bash-language-server/pull/17
-[28]: https://github.com/mads-hartmann/bash-language-server/pull/28
-[31]: https://github.com/mads-hartmann/bash-language-server/pull/31
-[33]: https://github.com/mads-hartmann/bash-language-server/pull/33
-[40]: https://github.com/mads-hartmann/bash-language-server/pull/40
-[45]: https://github.com/mads-hartmann/bash-language-server/pull/45
-[58]: https://github.com/mads-hartmann/bash-language-server/pull/58
+[17]: https://github.com/bash-lsp/bash-language-server/pull/17
+[28]: https://github.com/bash-lsp/bash-language-server/pull/28
+[31]: https://github.com/bash-lsp/bash-language-server/pull/31
+[33]: https://github.com/bash-lsp/bash-language-server/pull/33
+[40]: https://github.com/bash-lsp/bash-language-server/pull/40
+[45]: https://github.com/bash-lsp/bash-language-server/pull/45
+[58]: https://github.com/bash-lsp/bash-language-server/pull/58
 [chrismwendt]: https://github.com/chrismwendt
 [maximbaz]: https://github.com/maximbaz
