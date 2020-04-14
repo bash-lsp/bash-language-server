@@ -119,9 +119,9 @@ export default class BashServer {
     params: LSP.ReferenceParams | LSP.TextDocumentPositionParams
     word?: string | null
   }) {
-    const wordLog = word ? `"${word}"` : ''
+    const wordLog = word ? `"${word}"` : 'null'
     this.connection.console.log(
-      `${request} ${params.position.line}:${params.position.character} ${wordLog}`,
+      `${request} ${params.position.line}:${params.position.character} word=${wordLog}`,
     )
   }
 
