@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 1.11.2
+
+* Fix invalid documentHighlight response when word cannot be found (https://github.com/bash-lsp/bash-language-server/pull/209)
+
 ## 1.11.1
 
 * Workspace symbols are resolved using fuzzy search (not just starting with it)
