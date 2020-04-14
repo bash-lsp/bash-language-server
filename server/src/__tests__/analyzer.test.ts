@@ -1,4 +1,5 @@
 import FIXTURES, { FIXTURE_FOLDER } from '../../../testing/fixtures'
+import { getMockConnection } from '../../../testing/mocks'
 import Analyzer from '../analyser'
 import { initializeParser } from '../parser'
 
@@ -113,11 +114,7 @@ describe('fromRoot', () => {
 
     jest.spyOn(Date, 'now').mockImplementation(() => 0)
 
-    const connection: any = {
-      console: {
-        log: jest.fn(),
-      },
-    }
+    const connection = getMockConnection()
 
     const newAnalyzer = await Analyzer.fromRoot({
       connection,
@@ -127,7 +124,7 @@ describe('fromRoot', () => {
 
     expect(newAnalyzer).toBeDefined()
 
-    const FIXTURE_FILES_MATCHING_GLOB = 9
+    const FIXTURE_FILES_MATCHING_GLOB = 10
 
     // Intro, stats on glob, one file skipped due to shebang, and outro
     const LOG_LINES = FIXTURE_FILES_MATCHING_GLOB + 4
