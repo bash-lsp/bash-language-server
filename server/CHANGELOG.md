@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 1.11.3
+
+* Recover from file reading errors (https://github.com/bash-lsp/bash-language-server/pull/211)
+
 ## 1.11.2
 
 * Fix invalid documentHighlight response when word cannot be found (https://github.com/bash-lsp/bash-language-server/pull/209)
