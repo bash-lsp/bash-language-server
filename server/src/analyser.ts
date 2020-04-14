@@ -66,15 +66,18 @@ export default class Analyzer {
         const uri = `file://${filePath}`
         connection.console.log(`Analyzing ${uri}`)
 
-        const fileContent = fs.readFileSync(filePath, 'utf8')
+        try {
+          const fileContent = fs.readFileSync(filePath, 'utf8')
+          const shebang = getShebang(fileContent)
+          if (shebang && !isBashShebang(shebang)) {
+            connection.console.log(`Skipping file ${uri} with shebang "${shebang}"`)
+            return
+          }
 
-        const shebang = getShebang(fileContent)
-        if (shebang && !isBashShebang(shebang)) {
-          connection.console.log(`Skipping file ${uri} with shebang "${shebang}"`)
-          return
+          analyzer.analyze(uri, LSP.TextDocument.create(uri, 'shell', 1, fileContent))
+        } catch (error) {
+          connection.console.warn(`Failed analyzing ${uri}. Error: ${error.message}`)
         }
-
-        analyzer.analyze(uri, LSP.TextDocument.create(uri, 'shell', 1, fileContent))
       })
 
       connection.console.log(`Analyzer finished after ${getTimePassed()}`)
