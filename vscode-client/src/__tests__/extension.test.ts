@@ -2,6 +2,8 @@ import { ExtensionContext } from 'vscode'
 
 import { activate } from '../extension'
 
+jest.mock('vscode')
+
 function getContextMock(): jest.Mocked<ExtensionContext> {
   return {
     subscriptions: [],
@@ -21,9 +23,11 @@ function getContextMock(): jest.Mocked<ExtensionContext> {
 }
 
 describe('extension', () => {
-  const contextMock = getContextMock()
-  activate(contextMock)
+  it('...', async () => {
+    const contextMock = getContextMock()
+    await activate(contextMock)
 
-  expect(contextMock.asAbsolutePath).toHaveBeenCalledWith('?')
-  expect(contextMock.subscriptions).toEqual(['?'])
+    expect(contextMock.asAbsolutePath).toHaveBeenCalledWith('?')
+    expect(contextMock.subscriptions).toEqual(['?'])
+  })
 })

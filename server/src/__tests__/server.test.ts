@@ -7,6 +7,12 @@ import { CompletionItemDataType } from '../types'
 
 async function initializeServer() {
   const diagnostics: Array<lsp.PublishDiagnosticsParams | undefined> = []
+  const console: any = {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    log: jest.fn(),
+  }
 
   const connection = getMockConnection()
 
