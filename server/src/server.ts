@@ -119,9 +119,9 @@ export default class BashServer {
     params: LSP.ReferenceParams | LSP.TextDocumentPositionParams
     word?: string | null
   }) {
-    const wordLog = word ? `"${word}"` : ''
+    const wordLog = word ? `"${word}"` : 'null'
     this.connection.console.log(
-      `${request} ${params.position.line}:${params.position.character} ${wordLog}`,
+      `${request} ${params.position.line}:${params.position.character} word=${wordLog}`,
     )
   }
 
@@ -201,6 +201,11 @@ export default class BashServer {
   ): LSP.DocumentHighlight[] {
     const word = this.getWordAtPoint(params)
     this.logRequest({ request: 'onDocumentHighlight', params, word })
+
+    if (!word) {
+      return []
+    }
+
     return this.analyzer
       .findOccurrences(params.textDocument.uri, word)
       .map(n => ({ range: n.range }))

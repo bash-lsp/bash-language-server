@@ -132,6 +132,85 @@ describe('server', () => {
     })
   })
 
+  it('responds to onDocumentHighlight', async () => {
+    const { connection, server } = await initializeServer()
+    server.register(connection)
+
+    const onDocumentHighlight = connection.onDocumentHighlight.mock.calls[0][0]
+
+    const result1 = await onDocumentHighlight(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.ISSUE206,
+        },
+        position: {
+          // FOO
+          line: 0,
+          character: 10,
+        },
+      },
+      {} as any,
+    )
+
+    // TODO: there is a superfluous range here on line 0:
+    expect(result1).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 12,
+              "line": 0,
+            },
+            "start": Object {
+              "character": 9,
+              "line": 0,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 12,
+              "line": 0,
+            },
+            "start": Object {
+              "character": 9,
+              "line": 0,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 28,
+              "line": 1,
+            },
+            "start": Object {
+              "character": 25,
+              "line": 1,
+            },
+          },
+        },
+      ]
+    `)
+
+    const result2 = await onDocumentHighlight(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.ISSUE206,
+        },
+        position: {
+          // readonly cannot be parsed as a word
+          line: 0,
+          character: 0,
+        },
+      },
+      {} as any,
+    )
+
+    expect(result2).toMatchInlineSnapshot(`Array []`)
+  })
+
   it('responds to onWorkspaceSymbol', async () => {
     const { connection, server } = await initializeServer()
     server.register(connection)
