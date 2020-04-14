@@ -201,6 +201,11 @@ export default class BashServer {
   ): LSP.DocumentHighlight[] {
     const word = this.getWordAtPoint(params)
     this.logRequest({ request: 'onDocumentHighlight', params, word })
+
+    if (!word) {
+      return []
+    }
+
     return this.analyzer
       .findOccurrences(params.textDocument.uri, word)
       .map(n => ({ range: n.range }))
