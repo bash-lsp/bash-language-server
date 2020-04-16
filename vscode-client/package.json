@@ -39,7 +39,7 @@
         "bashIde.highlightParsingErrors": {
           "type": "boolean",
           "default": true,
-          "description": "If enabled parsing errors will be highlighted as problems."
+          "description": "Controls if parsing errors will be highlighted as problems."
         },
         "bashIde.explainshellEndpoint": {
           "type": "string",
