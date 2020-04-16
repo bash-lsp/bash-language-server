@@ -83,7 +83,8 @@ export function namedLeafDescendantForPosition(
 }
 
 function searchForLeafNode(point: Point, parent: SyntaxNode): SyntaxNode | null {
-  let child: SyntaxNode = parent.firstNamedChild
+  let child = parent.firstNamedChild
+
   while (child) {
     if (
       pointsEqual(child.startPosition, point) ||

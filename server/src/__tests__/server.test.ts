@@ -6,13 +6,13 @@ import LspServer from '../server'
 import { CompletionItemDataType } from '../types'
 
 async function initializeServer() {
-  const diagnostics: Array<lsp.PublishDiagnosticsParams | undefined> = undefined
+  const diagnostics: Array<lsp.PublishDiagnosticsParams | undefined> = []
 
   const connection = getMockConnection()
 
   const server = await LspServer.initialize(connection, {
     rootPath: FIXTURE_FOLDER,
-    rootUri: undefined,
+    rootUri: null,
     processId: 42,
     capabilities: {} as any,
     workspaceFolders: null,
@@ -154,7 +154,7 @@ describe('server', () => {
       {} as any,
     )
 
-    expect(result2).toMatchInlineSnapshot(`Array []`)
+    expect(result2).toMatchInlineSnapshot(`null`)
   })
 
   it('responds to onWorkspaceSymbol', async () => {
@@ -225,7 +225,7 @@ describe('server', () => {
     )
 
     // Limited set (not using snapshot due to different executables on CI and locally)
-    expect('length' in result && result.length < 5).toBe(true)
+    expect(result && 'length' in result && result.length < 5).toBe(true)
     expect(result).toEqual(
       expect.arrayContaining([
         {
@@ -262,7 +262,7 @@ describe('server', () => {
     )
 
     // Entire list
-    expect('length' in result && result.length > 50).toBe(true)
+    expect(result && 'length' in result && result.length > 50).toBe(true)
   })
 
   it('responds to onCompletion with empty list when word is a comment', async () => {

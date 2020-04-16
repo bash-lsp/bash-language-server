@@ -2,7 +2,7 @@ import * as path from 'path'
 
 import Executables from '../executables'
 
-let executables: Executables = null
+let executables: Executables
 
 beforeAll(async () => {
   executables = await Executables.fromPath(
