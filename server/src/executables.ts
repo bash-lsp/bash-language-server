@@ -1,9 +1,13 @@
-import * as Fs from 'fs'
-import * as Path from 'path'
+import * as fs from 'fs'
+import { basename, join } from 'path'
+import { promisify } from 'util'
 
 import * as ArrayUtil from './util/array'
 import * as FsUtil from './util/fs'
 import * as ShUtil from './util/sh'
+
+const lstatAsync = promisify(fs.lstat)
+const readdirAsync = promisify(fs.readdir)
 
 /**
  * Provides information based on the programs on your PATH
@@ -58,34 +62,40 @@ export default class Executables {
 /**
  * Only returns direct children, or the path itself if it's an executable.
  */
-function findExecutablesInPath(path: string): Promise<string[]> {
+async function findExecutablesInPath(path: string): Promise<string[]> {
   path = FsUtil.untildify(path)
-  return new Promise((resolve, _) => {
-    Fs.lstat(path, (err, stat) => {
-      if (err) {
-        resolve([])
-      } else {
-        if (stat.isDirectory()) {
-          Fs.readdir(path, (readDirErr, paths) => {
-            if (readDirErr) {
-              resolve([])
-            } else {
-              const files = paths.map(p =>
-                FsUtil.getStats(Path.join(path, p))
-                  .then(s => (s.isFile() ? [Path.basename(p)] : []))
-                  .catch(() => []),
-              )
 
-              resolve(Promise.all(files).then(ArrayUtil.flatten))
-            }
-          })
-        } else if (stat.isFile()) {
-          resolve([Path.basename(path)])
-        } else {
-          // Something else.
-          resolve([])
+  try {
+    const pathStats = await lstatAsync(path)
+
+    if (pathStats.isDirectory()) {
+      const childrenPaths = await readdirAsync(path)
+
+      const files = []
+
+      for (const childrenPath of childrenPaths) {
+        try {
+          const stats = await lstatAsync(join(path, childrenPath))
+          if (isExecutableFile(stats)) {
+            files.push(basename(childrenPath))
+          }
+        } catch (error) {
+          // Ignore error
         }
       }
-    })
-  })
+
+      return files
+    } else if (isExecutableFile(pathStats)) {
+      return [basename(path)]
+    }
+  } catch (error) {
+    // Ignore error
+  }
+
+  return []
+}
+
+function isExecutableFile(stats: fs.Stats): boolean {
+  const isExecutable = !!(1 & parseInt((stats.mode & parseInt('777', 8)).toString(8)[0]))
+  return stats.isFile() && isExecutable
 }

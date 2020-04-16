@@ -61,23 +61,23 @@ describe('findReferences', () => {
   })
 })
 
-describe('findSymbols', () => {
+describe('findSymbolsForFile', () => {
   it('returns empty list if uri is not found', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
-    const result = analyzer.findSymbols('foobar.sh')
+    const result = analyzer.findSymbolsForFile({ uri: 'foobar.sh' })
     expect(result).toEqual([])
   })
 
   it('returns a list of SymbolInformation if uri is found', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
-    const result = analyzer.findSymbols(CURRENT_URI)
+    const result = analyzer.findSymbolsForFile({ uri: CURRENT_URI })
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()
   })
 
   it('issue 101', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.ISSUE101)
-    const result = analyzer.findSymbols(CURRENT_URI)
+    const result = analyzer.findSymbolsForFile({ uri: CURRENT_URI })
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()
   })
@@ -102,9 +102,91 @@ describe('wordAtPoint', () => {
 })
 
 describe('findSymbolCompletions', () => {
-  it('return a list of symbols', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
-    expect(analyzer.findSymbolCompletions(CURRENT_URI)).toMatchSnapshot()
+  it('return a list of symbols across the workspace', () => {
+    analyzer.analyze('install.sh', FIXTURES.INSTALL)
+    analyzer.analyze('sourcing-sh', FIXTURES.SOURCING)
+
+    expect(analyzer.findSymbolsMatchingWord({ word: 'npm_config_logl' }))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "kind": 13,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 27,
+                "line": 40,
+              },
+              "start": Object {
+                "character": 0,
+                "line": 40,
+              },
+            },
+            "uri": "dummy-uri.sh",
+          },
+          "name": "npm_config_loglevel",
+        },
+        Object {
+          "kind": 13,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 31,
+                "line": 48,
+              },
+              "start": Object {
+                "character": 2,
+                "line": 48,
+              },
+            },
+            "uri": "dummy-uri.sh",
+          },
+          "name": "npm_config_loglevel",
+        },
+        Object {
+          "kind": 13,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 27,
+                "line": 40,
+              },
+              "start": Object {
+                "character": 0,
+                "line": 40,
+              },
+            },
+            "uri": "install.sh",
+          },
+          "name": "npm_config_loglevel",
+        },
+        Object {
+          "kind": 13,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 31,
+                "line": 48,
+              },
+              "start": Object {
+                "character": 2,
+                "line": 48,
+              },
+            },
+            "uri": "install.sh",
+          },
+          "name": "npm_config_loglevel",
+        },
+      ]
+    `)
+
+    expect(analyzer.findSymbolsMatchingWord({ word: 'xxxxxxxx' })).toMatchInlineSnapshot(
+      `Array []`,
+    )
+
+    expect(analyzer.findSymbolsMatchingWord({ word: 'BLU' })).toMatchInlineSnapshot(
+      `Array []`,
+    )
   })
 })
 

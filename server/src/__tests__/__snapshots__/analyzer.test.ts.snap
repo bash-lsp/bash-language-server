@@ -126,140 +126,7 @@ Array [
 ]
 `;
 
-exports[`findSymbolCompletions return a list of symbols 1`] = `
-Array [
-  Object {
-    "data": Object {
-      "name": "ret",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "ret",
-  },
-  Object {
-    "data": Object {
-      "name": "configures",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "configures",
-  },
-  Object {
-    "data": Object {
-      "name": "npm_config_loglevel",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "npm_config_loglevel",
-  },
-  Object {
-    "data": Object {
-      "name": "node",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "node",
-  },
-  Object {
-    "data": Object {
-      "name": "TMP",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "TMP",
-  },
-  Object {
-    "data": Object {
-      "name": "BACK",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "BACK",
-  },
-  Object {
-    "data": Object {
-      "name": "tar",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "tar",
-  },
-  Object {
-    "data": Object {
-      "name": "MAKE",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "MAKE",
-  },
-  Object {
-    "data": Object {
-      "name": "make",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "make",
-  },
-  Object {
-    "data": Object {
-      "name": "clean",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "clean",
-  },
-  Object {
-    "data": Object {
-      "name": "node_version",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "node_version",
-  },
-  Object {
-    "data": Object {
-      "name": "t",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "t",
-  },
-  Object {
-    "data": Object {
-      "name": "url",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "url",
-  },
-  Object {
-    "data": Object {
-      "name": "ver",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "ver",
-  },
-  Object {
-    "data": Object {
-      "name": "isnpm10",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "isnpm10",
-  },
-  Object {
-    "data": Object {
-      "name": "NODE",
-      "type": 3,
-    },
-    "kind": 6,
-    "label": "NODE",
-  },
-]
-`;
-
-exports[`findSymbols issue 101 1`] = `
+exports[`findSymbolsForFile issue 101 1`] = `
 Array [
   Object {
     "kind": 12,
@@ -335,7 +202,7 @@ Array [
 ]
 `;
 
-exports[`findSymbols returns a list of SymbolInformation if uri is found 1`] = `
+exports[`findSymbolsForFile returns a list of SymbolInformation if uri is found 1`] = `
 Array [
   Object {
     "kind": 13,
