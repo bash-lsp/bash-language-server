@@ -55,8 +55,6 @@ export async function activate(context: ExtensionContext) {
 
   const client = new LanguageClient('Bash IDE', 'Bash IDE', serverOptions, clientOptions)
 
-  // client.registerProposedFeatures();
-
   // Push the disposable to the context's subscriptions so that the
   // client can be deactivated on extension deactivation
   context.subscriptions.push(client.start())

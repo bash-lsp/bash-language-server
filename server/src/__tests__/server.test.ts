@@ -64,6 +64,7 @@ describe('server', () => {
         },
       },
       {} as any,
+      {} as any,
     )
 
     expect(result).toBeDefined()
@@ -92,6 +93,7 @@ describe('server', () => {
           character: 10,
         },
       },
+      {} as any,
       {} as any,
     )
 
@@ -149,6 +151,7 @@ describe('server', () => {
         },
       },
       {} as any,
+      {} as any,
     )
 
     expect(result2).toMatchInlineSnapshot(`Array []`)
@@ -165,6 +168,7 @@ describe('server', () => {
         {
           query,
         },
+        {} as any,
         {} as any,
       )
 
@@ -217,6 +221,7 @@ describe('server', () => {
         },
       },
       {} as any,
+      {} as any,
     )
 
     // Limited set (not using snapshot due to different executables on CI and locally)
@@ -253,6 +258,7 @@ describe('server', () => {
         },
       },
       {} as any,
+      {} as any,
     )
 
     // Entire list
@@ -277,6 +283,7 @@ describe('server', () => {
         },
       },
       {} as any,
+      {} as any,
     )
 
     expect(result).toEqual([])
@@ -299,6 +306,7 @@ describe('server', () => {
           character: 7,
         },
       },
+      {} as any,
       {} as any,
     )
 
@@ -327,6 +335,7 @@ describe('server', () => {
           character: 7,
         },
       },
+      {} as any,
       {} as any,
     )
 
@@ -362,6 +371,7 @@ describe('server', () => {
           character: 7,
         },
       },
+      {} as any,
       {} as any,
     )
 
