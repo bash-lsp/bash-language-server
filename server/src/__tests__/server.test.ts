@@ -219,7 +219,7 @@ describe('server', () => {
       {} as any,
     )
 
-    // Limited set
+    // Limited set (not using snapshot due to different executables on CI and locally)
     expect('length' in result && result.length < 5).toBe(true)
     expect(result).toEqual(
       expect.arrayContaining([
@@ -280,5 +280,103 @@ describe('server', () => {
     )
 
     expect(result).toEqual([])
+  })
+
+  it('responds to onCompletion when word is found in another file', async () => {
+    const { connection, server } = await initializeServer()
+    server.register(connection)
+
+    const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+    const resultVariable = await onCompletion(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.SOURCING,
+        },
+        position: {
+          // $BLU (variable)
+          line: 6,
+          character: 7,
+        },
+      },
+      {} as any,
+    )
+
+    expect(resultVariable).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data": Object {
+            "name": "BLUE",
+            "type": 3,
+          },
+          "documentation": "Variable defined in ../extension.inc",
+          "kind": 6,
+          "label": "BLUE",
+        },
+      ]
+    `)
+
+    const resultFunction = await onCompletion(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.SOURCING,
+        },
+        position: {
+          // add_a_us (function)
+          line: 8,
+          character: 7,
+        },
+      },
+      {} as any,
+    )
+
+    expect(resultFunction).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data": Object {
+            "name": "add_a_user",
+            "type": 3,
+          },
+          "documentation": "Function defined in ../issue101.sh",
+          "kind": 3,
+          "label": "add_a_user",
+        },
+      ]
+    `)
+  })
+
+  it('responds to onCompletion with local symbol when word is found in multiple files', async () => {
+    const { connection, server } = await initializeServer()
+    server.register(connection)
+
+    const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+    const result = await onCompletion(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.SOURCING,
+        },
+        position: {
+          // BOL (BOLD is defined in multiple places)
+          line: 12,
+          character: 7,
+        },
+      },
+      {} as any,
+    )
+
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data": Object {
+            "name": "BOLD",
+            "type": 3,
+          },
+          "documentation": undefined,
+          "kind": 6,
+          "label": "BOLD",
+        },
+      ]
+    `)
   })
 })

@@ -1,3 +1,4 @@
+import * as path from 'path'
 import * as TurndownService from 'turndown'
 import * as LSP from 'vscode-languageserver'
 
@@ -8,6 +9,7 @@ import Executables from './executables'
 import { initializeParser } from './parser'
 import * as ReservedWords from './reservedWords'
 import { BashCompletionItem, CompletionItemDataType } from './types'
+import { uniqueBasedOnHash } from './util/array'
 
 /**
  * The BashServer glues together the separate components to implement
@@ -190,7 +192,7 @@ export default class BashServer {
 
   private onDocumentSymbol(params: LSP.DocumentSymbolParams): LSP.SymbolInformation[] {
     this.connection.console.log(`onDocumentSymbol`)
-    return this.analyzer.findSymbols(params.textDocument.uri)
+    return this.analyzer.findSymbolsForFile({ uri: params.textDocument.uri })
   }
 
   private onWorkspaceSymbol(params: LSP.WorkspaceSymbolParams): LSP.SymbolInformation[] {
@@ -223,9 +225,14 @@ export default class BashServer {
     const word = this.getWordAtPoint(params)
     this.logRequest({ request: 'onCompletion', params, word })
 
-    const symbolCompletions = this.analyzer.findSymbolCompletions(params.textDocument.uri)
+    const currentUri = params.textDocument.uri
 
-    // TODO: we could do some caching here...
+    const symbolCompletions = getCompletionItemsForSymbols({
+      symbols: this.analyzer.findSymbolsMatchingWord({
+        word,
+      }),
+      currentUri,
+    })
 
     const reservedWordsCompletions = ReservedWords.LIST.map(reservedWord => ({
       label: reservedWord,
@@ -314,5 +321,113 @@ export default class BashServer {
     } catch (error) {
       return item
     }
+  }
+}
+
+function getCompletionItemsForSymbols({
+  symbols,
+  currentUri,
+}: {
+  symbols: LSP.SymbolInformation[]
+  currentUri: string
+}): BashCompletionItem[] {
+  const isCurrentFile = ({ location: { uri } }: LSP.SymbolInformation) =>
+    uri === currentUri
+
+  const getSymbolId = ({ name, kind }: LSP.SymbolInformation) => `${name}${kind}`
+
+  const symbolsCurrentFile = symbols.filter(s => isCurrentFile(s))
+
+  const symbolsOtherFiles = symbols
+    .filter(s => !isCurrentFile(s))
+    // Remove identical symbols
+    .filter(
+      symbolOtherFiles =>
+        !symbolsCurrentFile.some(
+          symbolCurrentFile =>
+            getSymbolId(symbolCurrentFile) === getSymbolId(symbolOtherFiles),
+        ),
+    )
+
+  return uniqueBasedOnHash(
+    [...symbolsCurrentFile, ...symbolsOtherFiles],
+    getSymbolId,
+  ).map((symbol: LSP.SymbolInformation) => ({
+    label: symbol.name,
+    kind: symbolKindToCompletionKind(symbol.kind),
+    data: {
+      name: symbol.name,
+      type: CompletionItemDataType.Symbol,
+    },
+    documentation:
+      symbol.location.uri !== currentUri
+        ? `${symbolKindToDescription(symbol.kind)} defined in ${path.relative(
+            currentUri,
+            symbol.location.uri,
+          )}`
+        : undefined,
+  }))
+}
+
+function symbolKindToCompletionKind(s: LSP.SymbolKind): LSP.CompletionItemKind {
+  switch (s) {
+    case LSP.SymbolKind.File:
+      return LSP.CompletionItemKind.File
+    case LSP.SymbolKind.Module:
+    case LSP.SymbolKind.Namespace:
+    case LSP.SymbolKind.Package:
+      return LSP.CompletionItemKind.Module
+    case LSP.SymbolKind.Class:
+      return LSP.CompletionItemKind.Class
+    case LSP.SymbolKind.Method:
+      return LSP.CompletionItemKind.Method
+    case LSP.SymbolKind.Property:
+      return LSP.CompletionItemKind.Property
+    case LSP.SymbolKind.Field:
+      return LSP.CompletionItemKind.Field
+    case LSP.SymbolKind.Constructor:
+      return LSP.CompletionItemKind.Constructor
+    case LSP.SymbolKind.Enum:
+      return LSP.CompletionItemKind.Enum
+    case LSP.SymbolKind.Interface:
+      return LSP.CompletionItemKind.Interface
+    case LSP.SymbolKind.Function:
+      return LSP.CompletionItemKind.Function
+    case LSP.SymbolKind.Variable:
+      return LSP.CompletionItemKind.Variable
+    case LSP.SymbolKind.Constant:
+      return LSP.CompletionItemKind.Constant
+    case LSP.SymbolKind.String:
+    case LSP.SymbolKind.Number:
+    case LSP.SymbolKind.Boolean:
+    case LSP.SymbolKind.Array:
+    case LSP.SymbolKind.Key:
+    case LSP.SymbolKind.Null:
+      return LSP.CompletionItemKind.Text
+    case LSP.SymbolKind.Object:
+      return LSP.CompletionItemKind.Module
+    case LSP.SymbolKind.EnumMember:
+      return LSP.CompletionItemKind.EnumMember
+    case LSP.SymbolKind.Struct:
+      return LSP.CompletionItemKind.Struct
+    case LSP.SymbolKind.Event:
+      return LSP.CompletionItemKind.Event
+    case LSP.SymbolKind.Operator:
+      return LSP.CompletionItemKind.Operator
+    case LSP.SymbolKind.TypeParameter:
+      return LSP.CompletionItemKind.TypeParameter
+    default:
+      return LSP.CompletionItemKind.Text
+  }
+}
+
+function symbolKindToDescription(s: LSP.SymbolKind): string {
+  switch (s) {
+    case LSP.SymbolKind.Function:
+      return 'Function'
+    case LSP.SymbolKind.Variable:
+      return 'Variable'
+    default:
+      return 'Keyword'
   }
 }
