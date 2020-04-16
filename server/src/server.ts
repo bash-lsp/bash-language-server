@@ -234,16 +234,19 @@ export default class BashServer {
       },
     }))
 
-    const programCompletions = this.executables.list().map((s: string) => {
-      return {
-        label: s,
-        kind: LSP.SymbolKind.Function,
-        data: {
-          name: s,
-          type: CompletionItemDataType.Executable,
-        },
-      }
-    })
+    const programCompletions = this.executables
+      .list()
+      .filter(executable => !Builtins.isBuiltin(executable))
+      .map(executable => {
+        return {
+          label: executable,
+          kind: LSP.SymbolKind.Function,
+          data: {
+            name: executable,
+            type: CompletionItemDataType.Executable,
+          },
+        }
+      })
 
     const builtinsCompletions = Builtins.LIST.map(builtin => ({
       label: builtin,
@@ -254,7 +257,6 @@ export default class BashServer {
       },
     }))
 
-    // TODO: we have duplicates here (e.g. echo is both a builtin AND have a man page)
     const allCompletions = [
       ...reservedWordsCompletions,
       ...symbolCompletions,
