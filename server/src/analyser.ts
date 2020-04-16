@@ -1,7 +1,8 @@
-import {promises as fs} from 'fs'
+import * as fs from 'fs'
 import * as FuzzySearch from 'fuzzy-search'
 import * as request from 'request-promise-native'
 import * as URI from 'urijs'
+import { promisify } from 'util'
 import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
 
@@ -12,6 +13,8 @@ import { flattenArray, flattenObjectValues } from './util/flatten'
 import { getFilePaths } from './util/fs'
 import { getShebang, isBashShebang } from './util/shebang'
 import * as TreeSitterUtil from './util/tree-sitter'
+
+const readFileAsync = promisify(fs.readFile)
 
 type Kinds = { [type: string]: LSP.SymbolKind }
 
@@ -67,7 +70,7 @@ export default class Analyzer {
         connection.console.log(`Analyzing ${uri}`)
 
         try {
-          const fileContent = await fs.readFile(filePath, 'utf8')
+          const fileContent = await readFileAsync(filePath, 'utf8')
           const shebang = getShebang(fileContent)
           if (shebang && !isBashShebang(shebang)) {
             connection.console.log(`Skipping file ${uri} with shebang "${shebang}"`)
