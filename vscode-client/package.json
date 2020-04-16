@@ -44,7 +44,7 @@
         "bashIde.explainshellEndpoint": {
           "type": "string",
           "default": "",
-          "description": "Set this to https://explainshell.com (once https://github.com/idank/explainshell/pull/125 is merged in) in order to get hover documentation on flags and options."
+          "description": "Configure explainshell server in order to get hover documentation on flags and options."
         }
       }
     }
