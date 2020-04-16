@@ -40,7 +40,7 @@ export default class Analyzer {
     parser,
   }: {
     connection: LSP.Connection
-    rootPath: string | null
+    rootPath: LSP.InitializeParams['rootPath']
     parser: Parser
   }): Promise<Analyzer> {
     const analyzer = new Analyzer(parser)
@@ -154,6 +154,13 @@ export default class Analyzer {
     // encounters newlines.
     const interestingNode = leafNode.type === 'word' ? leafNode.parent : leafNode
 
+    if (!interestingNode) {
+      return {
+        status: 'error',
+        message: 'no interestingNode found',
+      }
+    }
+
     const cmd = this.uriToFileContent[params.textDocument.uri].slice(
       interestingNode.startIndex,
       interestingNode.endIndex,
@@ -216,21 +223,23 @@ export default class Analyzer {
     const locations: LSP.Location[] = []
 
     TreeSitterUtil.forEach(tree.rootNode, n => {
-      let name: string = null
-      let rng: LSP.Range = null
+      let name: null | string = null
+      let range: null | LSP.Range = null
 
       if (TreeSitterUtil.isReference(n)) {
         const node = n.firstNamedChild || n
         name = contents.slice(node.startIndex, node.endIndex)
-        rng = TreeSitterUtil.range(node)
+        range = TreeSitterUtil.range(node)
       } else if (TreeSitterUtil.isDefinition(n)) {
         const namedNode = n.firstNamedChild
-        name = contents.slice(namedNode.startIndex, namedNode.endIndex)
-        rng = TreeSitterUtil.range(n.firstNamedChild)
+        if (namedNode) {
+          name = contents.slice(namedNode.startIndex, namedNode.endIndex)
+          range = TreeSitterUtil.range(namedNode)
+        }
       }
 
-      if (name === query) {
-        locations.push(LSP.Location.create(uri, rng))
+      if (name === query && range !== null) {
+        locations.push(LSP.Location.create(uri, range))
       }
     })
 
@@ -294,16 +303,22 @@ export default class Analyzer {
         return
       } else if (TreeSitterUtil.isDefinition(n)) {
         const named = n.firstNamedChild
+
+        if (named === null) {
+          return
+        }
+
         const name = contents.slice(named.startIndex, named.endIndex)
         const namedDeclarations = this.uriToDeclarations[uri][name] || []
 
         const parent = TreeSitterUtil.findParent(n, p => p.type === 'function_definition')
-        const parentName = parent
-          ? contents.slice(
-              parent.firstNamedChild.startIndex,
-              parent.firstNamedChild.endIndex,
-            )
-          : null
+        const parentName =
+          parent && parent.firstNamedChild
+            ? contents.slice(
+                parent.firstNamedChild.startIndex,
+                parent.firstNamedChild.endIndex,
+              )
+            : '' // TODO: unsure what we should do here?
 
         namedDeclarations.push(
           LSP.SymbolInformation.create(
