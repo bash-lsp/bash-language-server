@@ -177,6 +177,8 @@ export default class BashServer {
       }))
     }
 
+    // FIXME: could also be a symbol
+
     return null
   }
 
