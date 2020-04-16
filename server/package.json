@@ -15,7 +15,7 @@
     "url": "https://github.com/bash-lsp/bash-language-server"
   },
   "engines": {
-    "node": "*"
+    "node" : ">=8.0.0"
   },
   "dependencies": {
     "fuzzy-search": "^3.2.1",
