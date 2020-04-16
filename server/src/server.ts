@@ -1,6 +1,7 @@
 import * as path from 'path'
 import * as TurndownService from 'turndown'
 import * as LSP from 'vscode-languageserver'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import Analyzer from './analyser'
 import * as Builtins from './builtins'
@@ -39,7 +40,7 @@ export default class BashServer {
   private executables: Executables
   private analyzer: Analyzer
 
-  private documents: LSP.TextDocuments = new LSP.TextDocuments()
+  private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
   private connection: LSP.Connection
 
   private constructor(
@@ -89,7 +90,7 @@ export default class BashServer {
     return {
       // For now we're using full-sync even though tree-sitter has great support
       // for partial updates.
-      textDocumentSync: this.documents.syncKind,
+      textDocumentSync: LSP.TextDocumentSyncKind.Full,
       completionProvider: {
         resolveProvider: true,
       },
