@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 1.13.0
+
+* Upgrade `vscode-languageserver` from 5 to 6 (https://github.com/bash-lsp/bash-language-server/pull/217)
+
 ## 1.12.0
 
 * Completion handler improvements: remove duplicates, include symbols from other files, ensure that programs found on the paths are actually executable (https://github.com/bash-lsp/bash-language-server/pull/215)
