@@ -26,9 +26,9 @@
     "eslint-plugin-jest": "^22.17.0",
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-simple-import-sort": "^4.0.0",
-    "jest": "^25.3.0",
+    "jest": "25.0.0",
     "prettier": "^1.19.1",
-    "ts-jest": "^25.3.1",
+    "ts-jest": "^25.2.1",
     "typescript": "^3.8.3",
     "vscode-languageserver": "^5.2.1"
   },

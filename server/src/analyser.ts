@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import * as FuzzySearch from 'fuzzy-search'
 import * as request from 'request-promise-native'
 import * as URI from 'urijs'
+import { promisify } from 'util'
 import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
 
@@ -12,6 +13,8 @@ import { flattenArray, flattenObjectValues } from './util/flatten'
 import { getFilePaths } from './util/fs'
 import { getShebang, isBashShebang } from './util/shebang'
 import * as TreeSitterUtil from './util/tree-sitter'
+
+const readFileAsync = promisify(fs.readFile)
 
 type Kinds = { [type: string]: LSP.SymbolKind }
 
@@ -62,23 +65,23 @@ export default class Analyzer {
         `Glob resolved with ${filePaths.length} files after ${getTimePassed()}`,
       )
 
-      filePaths.forEach(filePath => {
+      for (const filePath of filePaths) {
         const uri = `file://${filePath}`
         connection.console.log(`Analyzing ${uri}`)
 
         try {
-          const fileContent = fs.readFileSync(filePath, 'utf8')
+          const fileContent = await readFileAsync(filePath, 'utf8')
           const shebang = getShebang(fileContent)
           if (shebang && !isBashShebang(shebang)) {
             connection.console.log(`Skipping file ${uri} with shebang "${shebang}"`)
-            return
+            continue
           }
 
           analyzer.analyze(uri, LSP.TextDocument.create(uri, 'shell', 1, fileContent))
         } catch (error) {
           connection.console.warn(`Failed analyzing ${uri}. Error: ${error.message}`)
         }
-      })
+      }
 
       connection.console.log(`Analyzer finished after ${getTimePassed()}`)
     }
