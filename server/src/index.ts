@@ -15,17 +15,16 @@ export function listen() {
   )
 
   connection.onInitialize(
-    (params: LSP.InitializeParams): Promise<LSP.InitializeResult> => {
+    async (params: LSP.InitializeParams): Promise<LSP.InitializeResult> => {
       connection.console.log(`Initialized server v. ${pkg.version} for ${params.rootUri}`)
 
-      return BashServer.initialize(connection, params)
-        .then(server => {
-          server.register(connection)
-          return server
-        })
-        .then(server => ({
-          capabilities: server.capabilities(),
-        }))
+      const server = await BashServer.initialize(connection, params)
+
+      server.register(connection)
+
+      return {
+        capabilities: server.capabilities(),
+      }
     },
   )
 
