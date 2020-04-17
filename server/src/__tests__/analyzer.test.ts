@@ -2,6 +2,7 @@ import FIXTURES, { FIXTURE_FOLDER } from '../../../testing/fixtures'
 import { getMockConnection } from '../../../testing/mocks'
 import Analyzer from '../analyser'
 import { initializeParser } from '../parser'
+import * as fsUtil from '../util/fs'
 
 let analyzer: Analyzer
 
@@ -206,6 +207,8 @@ describe('fromRoot', () => {
 
     expect(newAnalyzer).toBeDefined()
 
+    expect(connection.window.showWarningMessage).not.toHaveBeenCalled()
+
     const FIXTURE_FILES_MATCHING_GLOB = 10
 
     // Intro, stats on glob, one file skipped due to shebang, and outro
@@ -220,6 +223,28 @@ describe('fromRoot', () => {
     expect(connection.console.log).toHaveBeenNthCalledWith(
       LOG_LINES,
       'Analyzer finished after 0 seconds',
+    )
+  })
+
+  it('handles glob errors', async () => {
+    jest
+      .spyOn(fsUtil, 'getFilePaths')
+      .mockImplementation(() => Promise.reject(new Error('BOOM')))
+
+    const parser = await initializeParser()
+
+    const connection = getMockConnection()
+
+    const newAnalyzer = await Analyzer.fromRoot({
+      connection,
+      rootPath: FIXTURE_FOLDER,
+      parser,
+    })
+
+    expect(newAnalyzer).toBeDefined()
+
+    expect(connection.window.showWarningMessage).toHaveBeenCalledWith(
+      expect.stringContaining('BOOM'),
     )
   })
 })

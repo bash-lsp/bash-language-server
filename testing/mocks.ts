@@ -62,7 +62,14 @@ export function getMockConnection(): jest.Mocked<lsp.Connection> {
     sendRequest: jest.fn(),
     telemetry: {} as any,
     tracer: {} as any,
-    window: {} as any,
+    window: {
+      attachWorkDoneProgress: jest.fn(),
+      connection: {} as any,
+      createWorkDoneProgress: jest.fn(),
+      showErrorMessage: jest.fn(),
+      showInformationMessage: jest.fn(),
+      showWarningMessage: jest.fn(),
+    },
     workspace: {} as any,
   }
 }
