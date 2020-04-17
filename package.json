@@ -3,9 +3,8 @@
   "scripts": {
     "clean": "rm -rf *.log */*.log */out node_modules vscode-client/node_modules server/node_modules",
     "postinstall": "cd server && yarn install && cd ../vscode-client && yarn install && cd ..",
-    "compile": "yarn run compile:server && yarn run compile:client",
-    "compile:client": "cd vscode-client && yarn run compile",
-    "compile:server": "cd server && yarn run compile",
+    "compile": "tsc -b",
+    "watch": "tsc -b -w",
     "lint": "yarn lint:bail --fix",
     "lint:bail": "eslint . --ext js,ts,tsx --cache",
     "test": "jest --runInBand",
@@ -13,8 +12,8 @@
     "test:watch": "yarn run test --watch",
     "verify": "yarn run lint && yarn run compile && yarn run test",
     "verify:bail": "yarn run lint:bail && yarn run compile && yarn run test:coverage",
-    "reinstall-server": "npm uninstall -g bash-language-server && yarn compile:server && npm i -g ./server",
-    "link-server": "npm uninstall -g bash-language-server && yarn compile:server && yarn unlink bash-language-server && cd server && yarn link && cd ../vscode-client && yarn link bash-language-server"
+    "reinstall-server": "npm uninstall -g bash-language-server && yarn compile && npm i -g ./server",
+    "link-server": "npm uninstall -g bash-language-server && yarn compile && yarn unlink bash-language-server && cd server && yarn link && cd ../vscode-client && yarn link bash-language-server"
   },
   "devDependencies": {
     "@types/jest": "^25.1.3",

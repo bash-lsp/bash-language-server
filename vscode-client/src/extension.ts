@@ -27,16 +27,24 @@ export async function activate(context: ExtensionContext) {
   }
 
   const serverExecutable = {
-    module: context.asAbsolutePath(path.join('out', 'src', 'server.js')),
+    module: context.asAbsolutePath(path.join('out', 'server.js')),
     transport: TransportKind.ipc,
     options: {
       env,
     },
   }
 
+  const debugServerExecutable = {
+    ...serverExecutable,
+    options: {
+      ...serverExecutable.options,
+      execArgv: ['--nolazy', '--inspect=6009'],
+    },
+  }
+
   const serverOptions: ServerOptions = {
     run: serverExecutable,
-    debug: serverExecutable,
+    debug: debugServerExecutable,
   }
 
   const clientOptions: LanguageClientOptions = {

@@ -2,17 +2,18 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "compile",
 			"type": "npm",
-			"script": "compile",
-			"group": "build",
+			"script": "watch",
+			"problemMatcher": "$tsc-watch",
+			"isBackground": true,
 			"presentation": {
 				"panel": "dedicated",
 				"reveal": "never"
 			},
-			"problemMatcher": [
-				"$tsc"
-			]
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
 		}
 	]
 }
