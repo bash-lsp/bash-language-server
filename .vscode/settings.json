@@ -1,6 +1,5 @@
 {
 	"files.exclude": {
-		"vscode-client/out": true,
 		"server/out": true
 	},
 	"search.exclude": {

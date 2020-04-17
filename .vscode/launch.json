@@ -1,3 +1,5 @@
+// A launch configuration that compiles the extension and then opens it inside a new window
+// https://github.com/microsoft/vscode-extension-samples/blob/e1ecdaec8974b938e7a92589faa233e1691d251f/lsp-sample/.vscode/launch.json
 {
 	"version": "0.2.0",
 	"configurations": [
@@ -9,12 +11,39 @@
 			"args": [
 				"--extensionDevelopmentPath=${workspaceRoot}/vscode-client"
 			],
-			"stopOnEntry": false,
-			"sourceMaps": true,
 			"outFiles": [
 				"${workspaceRoot}/vscode-client/out/**/*.js"
 			],
-			"preLaunchTask": "compile"
+			"preLaunchTask": {
+				"type": "npm",
+				"script": "watch"
+			}
+		},
+		{
+			"type": "node",
+			"request": "attach",
+			"name": "Attach to Server",
+			"port": 6009,
+			"restart": true,
+			"outFiles": ["${workspaceRoot}/server/out/**/*.js"]
+		},
+		{
+			"name": "Language Server E2E Test",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceRoot}",
+				"--extensionTestsPath=${workspaceRoot}/vscode-client/out/test/index",
+				"${workspaceRoot}/vscode-client/testFixture"
+			],
+			"outFiles": ["${workspaceRoot}/vscode-client/out/test/**/*.js"]
+		}
+	],
+	"compounds": [
+		{
+			"name": "Client + Server",
+			"configurations": ["Launch Client", "Attach to Server"]
 		}
 	]
 }

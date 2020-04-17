@@ -59,8 +59,6 @@ View to launch the `Launch Client` task. This will open a new vscode window with
 extension loaded. It also looks for changes to your client code and recompiles
 it whenever you save your changes.
 
-As the server is embedded into the
-
 ### Atom
 
 See the [ide-bash][ide-bash] package for Atom. Due to how Atom packages are
@@ -76,12 +74,6 @@ yarn link-server
 ```
 
 After that follow the steps above to work on the client.
-
-If you make any changes to the server, you need to recompile it:
-
-```
-yarn compile:server
-```
 
 
 ## Working on the server (standalone)

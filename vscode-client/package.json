@@ -25,7 +25,7 @@
   "activationEvents": [
     "onLanguage:shellscript"
   ],
-  "main": "./out/src/extension",
+  "main": "./out/extension",
   "contributes": {
     "configuration": {
       "type": "object",
@@ -50,9 +50,7 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "yarn run compile",
-    "compile": "rm -rf out && ../node_modules/.bin/tsc -p ./",
-    "compile:watch": "../node_modules/.bin/tsc -w -p ./"
+    "vscode:prepublish": "cd.. && yarn run compile"
   },
   "dependencies": {
     "bash-language-server": "1.13.0",

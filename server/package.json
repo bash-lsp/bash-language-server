@@ -29,9 +29,7 @@
     "web-tree-sitter": "^0.16.2"
   },
   "scripts": {
-    "compile": "rm -rf out && ../node_modules/.bin/tsc -p ./",
-    "compile:watch": "../node_modules/.bin/tsc -w -p ./",
-    "prepublishOnly": "yarn run compile"
+    "prepublishOnly": "cd ../ && yarn run compile"
   },
   "devDependencies": {
     "@types/fuzzy-search": "^2.1.0",

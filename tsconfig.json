@@ -10,12 +10,22 @@
     "lib": [
       "es2016"
     ],
+    "rootDir": ".",
     "sourceMap": true
   },
+  "include": [
+    "testing"
+  ],
   "exclude": [
     "node_modules",
     "**/__tests__/*",
+    "vscode-client/out",
+    "server/out",
     "server/setupJest.ts",
     "testing"
+  ],
+  "references": [
+    { "path": "./vscode-client" },
+    { "path": "./server" }
   ]
 }

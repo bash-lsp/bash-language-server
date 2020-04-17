@@ -1,12 +1,14 @@
 {
-  "extends": "../tsconfig.base.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "out",
+    "rootDir": "src",
 
     "lib": [
       "dom", // Required by @types/turndown
       "es2016"
     ],
-    "strict": true,
-  }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "../testing", "src/__tests__"]
 }
