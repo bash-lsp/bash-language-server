@@ -50,7 +50,7 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "cd.. && yarn run compile"
+    "vscode:prepublish": "cd .. && yarn run compile"
   },
   "dependencies": {
     "bash-language-server": "1.13.1",
