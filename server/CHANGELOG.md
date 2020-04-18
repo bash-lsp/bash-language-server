@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 1.13.1
+
+* Gracefully handle glob failures (https://github.com/bash-lsp/bash-language-server/pull/224, https://github.com/bash-lsp/bash-language-server/pull/226)
+* Maintenance (https://github.com/bash-lsp/bash-language-server/pull/222, https://github.com/bash-lsp/bash-language-server/pull/225)
+
 ## 1.13.0
 
 * Upgrade `vscode-languageserver` from 5 to 6 (https://github.com/bash-lsp/bash-language-server/pull/217)
