@@ -1,24 +1,28 @@
 # Bash IDE
 
+## 1.9.1
+
+* Upgrade language server to 1.13.1 (improved file lookup error handling)
+
 ## 1.9.0
 
-* Upgrade LSP to 1.13.0 (improved completion handler with suggestions based on variables and functions found in the workspace)
+* Upgrade language server to 1.13.0 (improved completion handler with suggestions based on variables and functions found in the workspace)
 
 ## 1.8.0
 
-* Upgrade LSP to 1.11.1 (support for workspace symbols). This can for example be used by doing `Command + P` and then write `# someSearchQuery`
+* Upgrade language server to 1.11.1 (support for workspace symbols). This can for example be used by doing `Command + P` and then write `# someSearchQuery`
 
 ## 1.7.0
 
-* Upgrade LSP to 1.10.0 (improved completion handler)
+* Upgrade language server to 1.10.0 (improved completion handler)
 
 ## 1.6.0
 
-* Upgrade LSP to 1.9.0 (skip analyzing files with a non-bash shebang)
+* Upgrade language server to 1.9.0 (skip analyzing files with a non-bash shebang)
 
 ## 1.5.0
 
-* Upgrade LSP to 1.8.0 (PATH tilde expansion, builtins and man pages formatting, pre-analyzes more files than just .sh)
+* Upgrade language server to 1.8.0 (PATH tilde expansion, builtins and man pages formatting, pre-analyzes more files than just .sh)
 - Make file glob configurable
 * Remove unused `bashIde.path` configuration parameter
 
