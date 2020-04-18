@@ -17,15 +17,16 @@ export async function getFilePaths({
   rootPath: string
 }): Promise<string[]> {
   return new Promise((resolve, reject) => {
-    glob(globPattern, { cwd: rootPath, nodir: true, absolute: true }, function(
-      err,
-      files,
-    ) {
-      if (err) {
-        return reject(err)
-      }
+    glob(
+      globPattern,
+      { cwd: rootPath, nodir: true, absolute: true, strict: false },
+      function(err, files) {
+        if (err) {
+          return reject(err)
+        }
 
-      resolve(files)
-    })
+        resolve(files)
+      },
+    )
   })
 }
