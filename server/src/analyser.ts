@@ -60,7 +60,7 @@ export default class Analyzer {
         filePaths = await getFilePaths({ globPattern, rootPath })
       } catch (error) {
         connection.window.showWarningMessage(
-          `Failed to analyze bash files using the glob "${globPattern}". The experience will be degraded. Consider configuring the glob or fix any permission issues. Error: ${error.message}`,
+          `Failed to analyze bash files using the glob "${globPattern}". The experience will be degraded. Error: ${error.message}`,
         )
       }
 
