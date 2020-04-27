@@ -491,3 +491,24 @@ BSD                             April 12, 2003                             BSD`)
     ).toMatchSnapshot()
   })
 })
+
+describe('memorize', () => {
+  it('memorizes a function', async () => {
+    const fnRaw = jest.fn(async args => args)
+    const arg1 = { one: '1' }
+    const arg2 = { another: { word: 'word' } }
+    const fnMemorized = sh.memorize(fnRaw)
+
+    const arg1CallResult1 = await fnMemorized(arg1)
+    const arg1CallResult2 = await fnMemorized(arg1)
+
+    const arg2CallResult1 = await fnMemorized(arg2)
+    const arg2CallResult2 = await fnMemorized(arg2)
+
+    expect(fnRaw).toHaveBeenCalledTimes(2)
+    expect(fnRaw).toHaveBeenCalledWith(arg2)
+
+    expect(arg1CallResult1).toBe(arg1CallResult2)
+    expect(arg2CallResult1).toBe(arg2CallResult2)
+  })
+})

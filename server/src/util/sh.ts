@@ -27,7 +27,7 @@ export function execShellScript(body: string): Promise<string> {
 /**
  * Get documentation for the given word by usingZZ help and man.
  */
-export async function getShellDocumentation({
+export async function getShellDocumentationWithoutCache({
   word,
 }: {
   word: string
@@ -84,3 +84,27 @@ export function formatManOutput(manOutput: string): string {
 
   return formattedManOutput
 }
+
+/**
+ * Only works for one-parameter (serializable) functions.
+ */
+export function memorize<T extends Function>(func: T): T {
+  const cache = new Map()
+
+  const returnFunc = async function(arg: any) {
+    const cacheKey = JSON.stringify(arg)
+
+    if (cache.has(cacheKey)) {
+      return cache.get(cacheKey)
+    }
+
+    const result = await func(arg)
+
+    cache.set(cacheKey, result)
+    return result
+  }
+
+  return returnFunc as any
+}
+
+export const getShellDocumentation = memorize(getShellDocumentationWithoutCache)
