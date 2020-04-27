@@ -107,8 +107,9 @@ describe('findSymbolCompletions', () => {
     analyzer.analyze('install.sh', FIXTURES.INSTALL)
     analyzer.analyze('sourcing-sh', FIXTURES.SOURCING)
 
-    expect(analyzer.findSymbolsMatchingWord({ word: 'npm_config_logl' }))
-      .toMatchInlineSnapshot(`
+    expect(
+      analyzer.findSymbolsMatchingWord({ word: 'npm_config_logl', exactMatch: false }),
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "kind": 13,
@@ -181,13 +182,13 @@ describe('findSymbolCompletions', () => {
       ]
     `)
 
-    expect(analyzer.findSymbolsMatchingWord({ word: 'xxxxxxxx' })).toMatchInlineSnapshot(
-      `Array []`,
-    )
+    expect(
+      analyzer.findSymbolsMatchingWord({ word: 'xxxxxxxx', exactMatch: false }),
+    ).toMatchInlineSnapshot(`Array []`)
 
-    expect(analyzer.findSymbolsMatchingWord({ word: 'BLU' })).toMatchInlineSnapshot(
-      `Array []`,
-    )
+    expect(
+      analyzer.findSymbolsMatchingWord({ word: 'BLU', exactMatch: false }),
+    ).toMatchInlineSnapshot(`Array []`)
   })
 })
 
