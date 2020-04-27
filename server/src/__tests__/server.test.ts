@@ -71,7 +71,7 @@ describe('server', () => {
     expect(result).toEqual({
       contents: {
         kind: 'markdown',
-        value: expect.stringContaining('RM(1)'),
+        value: expect.stringContaining('remove directory'),
       },
     })
   })

@@ -4,7 +4,6 @@ import { promisify } from 'util'
 
 import * as ArrayUtil from './util/array'
 import * as FsUtil from './util/fs'
-import * as ShUtil from './util/sh'
 
 const lstatAsync = promisify(fs.lstat)
 const readdirAsync = promisify(fs.readdir)
@@ -43,19 +42,6 @@ export default class Executables {
    */
   public isExecutableOnPATH(executable: string): boolean {
     return this.executables.has(executable)
-  }
-
-  /**
-   * Look up documentation for the given executable.
-   *
-   * For now it simply tries to look up the MAN documentation.
-   */
-  public documentation(executable: string): Promise<string> {
-    return ShUtil.execShellScript(`man ${executable} | col -b`).then(doc => {
-      return !doc
-        ? Promise.resolve(`No MAN page for ${executable}`)
-        : Promise.resolve(doc)
-    })
   }
 }
 

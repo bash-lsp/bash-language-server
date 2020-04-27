@@ -11,6 +11,7 @@ import { initializeParser } from './parser'
 import * as ReservedWords from './reservedWords'
 import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
+import { getShellDocumentation } from './util/sh'
 
 /**
  * The BashServer glues together the separate components to implement
@@ -138,6 +139,7 @@ export default class BashServer {
     params: LSP.TextDocumentPositionParams,
   ): Promise<LSP.Hover | null> {
     const word = this.getWordAtPoint(params)
+    const currentUri = params.textDocument.uri
 
     this.logRequest({ request: 'onHover', params, word })
 
@@ -167,29 +169,16 @@ export default class BashServer {
       }
     }
 
-    const getMarkdownHoverItem = (doc: string) => ({
-      // LSP.MarkupContent
-      value: ['``` man', doc, '```'].join('\n'),
-      // Passed as markdown for syntax highlighting
-      kind: 'markdown' as const,
-    })
-
-    if (Builtins.isBuiltin(word)) {
-      return Builtins.documentation(word).then(doc => ({
-        contents: getMarkdownHoverItem(doc),
-      }))
-    }
-
-    if (ReservedWords.isReservedWord(word)) {
-      return ReservedWords.documentation(word).then(doc => ({
-        contents: getMarkdownHoverItem(doc),
-      }))
-    }
-
-    if (this.executables.isExecutableOnPATH(word)) {
-      return this.executables.documentation(word).then(doc => ({
-        contents: getMarkdownHoverItem(doc),
-      }))
+    if (
+      ReservedWords.isReservedWord(word) ||
+      Builtins.isBuiltin(word) ||
+      this.executables.isExecutableOnPATH(word)
+    ) {
+      const shellDocumentation = await getShellDocumentation({ word })
+      if (shellDocumentation) {
+        // eslint-disable-next-line no-console
+        return { contents: getMarkdownContent(shellDocumentation) }
+      }
     }
 
     // FIXME: could also be a symbol

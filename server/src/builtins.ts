@@ -1,5 +1,3 @@
-import * as ShUtil from './util/sh'
-
 // You can generate this list by running `compgen -b` in a bash session
 export const LIST = [
   '.',
@@ -67,14 +65,4 @@ const SET = new Set(LIST)
 
 export function isBuiltin(word: string): boolean {
   return SET.has(word)
-}
-
-export async function documentation(builtin: string): Promise<string> {
-  const errorMessage = `No help page for ${builtin}`
-  try {
-    const doc = await ShUtil.execShellScript(`help ${builtin}`)
-    return doc || errorMessage
-  } catch (error) {
-    return errorMessage
-  }
 }
