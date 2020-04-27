@@ -143,7 +143,7 @@ export default class BashServer {
 
     this.logRequest({ request: 'onHover', params, word })
 
-    if (!word) {
+    if (!word || word.startsWith('#')) {
       return null
     }
 
