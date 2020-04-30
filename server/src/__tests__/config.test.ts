@@ -63,6 +63,18 @@ describe('highlightParsingError', () => {
     expect(result).toEqual(true)
 
     process.env = {
+      HIGHLIGHT_PARSING_ERRORS: '1',
+    }
+    result = config.getHighlightParsingError()
+    expect(result).toEqual(true)
+
+    process.env = {
+      HIGHLIGHT_PARSING_ERRORS: '0',
+    }
+    result = config.getHighlightParsingError()
+    expect(result).toEqual(false)
+
+    process.env = {
       HIGHLIGHT_PARSING_ERRORS: 'false',
     }
     result = config.getHighlightParsingError()
