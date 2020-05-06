@@ -27,13 +27,6 @@ describe('list', () => {
   })
 })
 
-describe('documentation', () => {
-  it('uses `man` so it disregards the PATH it has been initialized with', async () => {
-    const result = await executables.documentation('ls')
-    expect(result).toBeTruthy()
-  })
-})
-
 describe('isExecutableOnPATH', () => {
   it('looks at the PATH it has been initialized with', async () => {
     const result = executables.isExecutableOnPATH('ls')

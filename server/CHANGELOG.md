@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 1.14.0
+
+* onHover and onCompletion documentation improvements (https://github.com/bash-lsp/bash-language-server/pull/230)
+* support 0/1 as values for `HIGHLIGHT_PARSING_ERRORS` (https://github.com/bash-lsp/bash-language-server/pull/231)
+
 ## 1.13.1
 
 * Gracefully handle glob failures (https://github.com/bash-lsp/bash-language-server/pull/224, https://github.com/bash-lsp/bash-language-server/pull/226)

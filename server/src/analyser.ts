@@ -264,13 +264,20 @@ export default class Analyzer {
   /**
    * Find symbol completions for the given word.
    */
-  public findSymbolsMatchingWord({ word }: { word: string }): LSP.SymbolInformation[] {
+  public findSymbolsMatchingWord({
+    exactMatch,
+    word,
+  }: {
+    exactMatch: boolean
+    word: string
+  }): LSP.SymbolInformation[] {
     const symbols: LSP.SymbolInformation[] = []
 
     Object.keys(this.uriToDeclarations).forEach(uri => {
       const declarationsInFile = this.uriToDeclarations[uri] || {}
       Object.keys(declarationsInFile).map(name => {
-        if (name.startsWith(word)) {
+        const match = exactMatch ? name === word : name.startsWith(word)
+        if (match) {
           declarationsInFile[name].forEach(symbol => symbols.push(symbol))
         }
       })

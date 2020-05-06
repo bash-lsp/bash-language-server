@@ -11,6 +11,7 @@ import { initializeParser } from './parser'
 import * as ReservedWords from './reservedWords'
 import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
+import { getShellDocumentation } from './util/sh'
 
 /**
  * The BashServer glues together the separate components to implement
@@ -138,10 +139,11 @@ export default class BashServer {
     params: LSP.TextDocumentPositionParams,
   ): Promise<LSP.Hover | null> {
     const word = this.getWordAtPoint(params)
+    const currentUri = params.textDocument.uri
 
     this.logRequest({ request: 'onHover', params, word })
 
-    if (!word) {
+    if (!word || word.startsWith('#')) {
       return null
     }
 
@@ -167,32 +169,40 @@ export default class BashServer {
       }
     }
 
-    const getMarkdownHoverItem = (doc: string) => ({
-      // LSP.MarkupContent
-      value: ['``` man', doc, '```'].join('\n'),
-      // Passed as markdown for syntax highlighting
-      kind: 'markdown' as const,
-    })
+    if (
+      ReservedWords.isReservedWord(word) ||
+      Builtins.isBuiltin(word) ||
+      this.executables.isExecutableOnPATH(word)
+    ) {
+      const shellDocumentation = await getShellDocumentation({ word })
+      if (shellDocumentation) {
+        // eslint-disable-next-line no-console
+        return { contents: getMarkdownContent(shellDocumentation) }
+      }
+    } else {
+      const symbolDocumentation = deduplicateSymbols({
+        symbols: this.analyzer.findSymbolsMatchingWord({
+          exactMatch: true,
+          word,
+        }),
+        currentUri,
+      })
+        // do not return hover referencing for the current line
+        .filter(symbol => symbol.location.range.start.line !== params.position.line)
+        .map((symbol: LSP.SymbolInformation) =>
+          symbol.location.uri !== currentUri
+            ? `${symbolKindToDescription(symbol.kind)} defined in ${path.relative(
+                currentUri,
+                symbol.location.uri,
+              )}`
+            : `${symbolKindToDescription(symbol.kind)} defined on line ${symbol.location
+                .range.start.line + 1}`,
+        )
 
-    if (Builtins.isBuiltin(word)) {
-      return Builtins.documentation(word).then(doc => ({
-        contents: getMarkdownHoverItem(doc),
-      }))
+      if (symbolDocumentation.length === 1) {
+        return { contents: symbolDocumentation[0] }
+      }
     }
-
-    if (ReservedWords.isReservedWord(word)) {
-      return ReservedWords.documentation(word).then(doc => ({
-        contents: getMarkdownHoverItem(doc),
-      }))
-    }
-
-    if (this.executables.isExecutableOnPATH(word)) {
-      return this.executables.documentation(word).then(doc => ({
-        contents: getMarkdownHoverItem(doc),
-      }))
-    }
-
-    // FIXME: could also be a symbol
 
     return null
   }
@@ -249,6 +259,7 @@ export default class BashServer {
         ? []
         : getCompletionItemsForSymbols({
             symbols: this.analyzer.findSymbolsMatchingWord({
+              exactMatch: false,
               word,
             }),
             currentUri,
@@ -315,42 +326,39 @@ export default class BashServer {
 
     this.connection.console.log(`onCompletionResolve name=${name} type=${type}`)
 
-    const getMarkdownCompletionItem = (doc: string) => ({
-      ...item,
-      // LSP.MarkupContent
-      documentation: {
-        value: ['``` man', doc, '```'].join('\n'),
-        // Passed as markdown for syntax highlighting
-        kind: 'markdown' as const,
-      },
-    })
-
     try {
-      if (type === CompletionItemDataType.Executable) {
-        const doc = await this.executables.documentation(name)
-        return getMarkdownCompletionItem(doc)
-      } else if (type === CompletionItemDataType.Builtin) {
-        const doc = await Builtins.documentation(name)
-        return getMarkdownCompletionItem(doc)
-      } else if (type === CompletionItemDataType.ReservedWord) {
-        const doc = await ReservedWords.documentation(name)
-        return getMarkdownCompletionItem(doc)
-      } else {
-        return item
+      let documentation = null
+
+      if (
+        type === CompletionItemDataType.Executable ||
+        type === CompletionItemDataType.Builtin ||
+        type === CompletionItemDataType.ReservedWord
+      ) {
+        documentation = await getShellDocumentation({ word: name })
       }
+
+      return documentation
+        ? {
+            ...item,
+            documentation: getMarkdownContent(documentation),
+          }
+        : item
     } catch (error) {
       return item
     }
   }
 }
 
-function getCompletionItemsForSymbols({
+/**
+ * Deduplicate symbols by prioritizing the current file.
+ */
+function deduplicateSymbols({
   symbols,
   currentUri,
 }: {
   symbols: LSP.SymbolInformation[]
   currentUri: string
-}): BashCompletionItem[] {
+}) {
   const isCurrentFile = ({ location: { uri } }: LSP.SymbolInformation) =>
     uri === currentUri
 
@@ -360,7 +368,7 @@ function getCompletionItemsForSymbols({
 
   const symbolsOtherFiles = symbols
     .filter(s => !isCurrentFile(s))
-    // Remove identical symbols
+    // Remove identical symbols matching current file
     .filter(
       symbolOtherFiles =>
         !symbolsCurrentFile.some(
@@ -369,24 +377,33 @@ function getCompletionItemsForSymbols({
         ),
     )
 
-  return uniqueBasedOnHash(
-    [...symbolsCurrentFile, ...symbolsOtherFiles],
-    getSymbolId,
-  ).map((symbol: LSP.SymbolInformation) => ({
-    label: symbol.name,
-    kind: symbolKindToCompletionKind(symbol.kind),
-    data: {
-      name: symbol.name,
-      type: CompletionItemDataType.Symbol,
-    },
-    documentation:
-      symbol.location.uri !== currentUri
-        ? `${symbolKindToDescription(symbol.kind)} defined in ${path.relative(
-            currentUri,
-            symbol.location.uri,
-          )}`
-        : undefined,
-  }))
+  return uniqueBasedOnHash([...symbolsCurrentFile, ...symbolsOtherFiles], getSymbolId)
+}
+
+function getCompletionItemsForSymbols({
+  symbols,
+  currentUri,
+}: {
+  symbols: LSP.SymbolInformation[]
+  currentUri: string
+}): BashCompletionItem[] {
+  return deduplicateSymbols({ symbols, currentUri }).map(
+    (symbol: LSP.SymbolInformation) => ({
+      label: symbol.name,
+      kind: symbolKindToCompletionKind(symbol.kind),
+      data: {
+        name: symbol.name,
+        type: CompletionItemDataType.Symbol,
+      },
+      documentation:
+        symbol.location.uri !== currentUri
+          ? `${symbolKindToDescription(symbol.kind)} defined in ${path.relative(
+              currentUri,
+              symbol.location.uri,
+            )}`
+          : undefined,
+    }),
+  )
 }
 
 function symbolKindToCompletionKind(s: LSP.SymbolKind): LSP.CompletionItemKind {
@@ -451,3 +468,9 @@ function symbolKindToDescription(s: LSP.SymbolKind): string {
       return 'Keyword'
   }
 }
+
+const getMarkdownContent = (documentation: string): LSP.MarkupContent => ({
+  value: ['``` man', documentation, '```'].join('\n'),
+  // Passed as markdown for syntax highlighting
+  kind: 'markdown' as const,
+})
