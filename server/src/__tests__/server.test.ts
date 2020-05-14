@@ -248,7 +248,7 @@ describe('server', () => {
     )
 
     // Limited set (not using snapshot due to different executables on CI and locally)
-    expect(result && 'length' in result && result.length < 5).toBe(true)
+    expect(result && 'length' in result && result.length < 8).toBe(true)
     expect(result).toEqual(
       expect.arrayContaining([
         {
