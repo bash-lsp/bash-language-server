@@ -405,58 +405,59 @@ export default class Analyzer {
   public commentsAbove(uri: string, line: number): string | null {
     const doc = this.uriToTextDocument[uri]
 
-    const comment_block = []
+    const commentBlock = []
 
     // start from the line above
-    let comment_block_index = line - 1
+    let commentBlockIndex = line - 1
 
     // check if that line starts with a comment
     // its possible that some lines
     // might have whitespace before the comment
     // begins, so check by iterating from
     // the start of the line
-    const starts_with_a_comment = (line: string): boolean => {
-      let char_index = 0
-      let char = line.charAt(char_index)
+    const startsWithAComment = (line: string): boolean => {
+      let charindex = 0
+      let char = line.charAt(charindex)
       while (char === ' ') {
-        char_index += 1
-        char = line.charAt(char_index)
+        charindex += 1
+        char = line.charAt(charindex)
       }
       // once we reach a character that is not whitespace
       // return true if its a comment, false otherwise
       return char === '#'
     }
 
-    const exists_and_is_comment = (elm: string): boolean => elm !== undefined && starts_with_a_comment(elm)
+    const existsAndIsComment = (elm: string): boolean =>
+      elm !== undefined && startsWithAComment(elm)
 
-    let current_line = doc.getText({
-      start: { line: comment_block_index, character: 0 },
-      end: { line: comment_block_index + 1, character: 0 },
+    let currentLine = doc.getText({
+      start: { line: commentBlockIndex, character: 0 },
+      end: { line: commentBlockIndex + 1, character: 0 },
     })
 
-    while (exists_and_is_comment(current_line)) {
+    while (existsAndIsComment(currentLine)) {
       // TODO: vscode must have some API for detecting comments
       // should figure that out instead of hardcoding the # symbol...
-      current_line = current_line.replace('#', '')
-      if (current_line.charAt(current_line.length - 1) === '\n') {
+      currentLine = currentLine.replace('#', '')
+      if (currentLine.charAt(currentLine.length - 1) === '\n') {
         // TODO: should preserve comment line endings?
         // I think not because sometimes comment strings wrap a line
         // to prevent the line from being too long, and it'd be nice
         // to see it displayed as a sentence.
-        current_line = current_line.substr(0, current_line.length - 1)
+        currentLine = currentLine.substr(0, currentLine.length - 1)
       }
-      comment_block.push(current_line)
-      comment_block_index -= 1
-      current_line = doc.getText({
-        start: { line: comment_block_index, character: 0 },
-        end: { line: comment_block_index + 1, character: 0 },
+      commentBlock.push(currentLine)
+      commentBlockIndex -= 1
+      currentLine = doc.getText({
+        start: { line: commentBlockIndex, character: 0 },
+        end: { line: commentBlockIndex + 1, character: 0 },
       })
     }
 
     // since we searched from bottom up, we then reverse
     // the lines so that it reads top down.
-    const comment_str = comment_block.reverse().join('\n')
-    return comment_str
+    const commentStr = commentBlock.reverse().join('\n')
+    return commentStr
   }
 
   private getAllSymbols(): LSP.SymbolInformation[] {
