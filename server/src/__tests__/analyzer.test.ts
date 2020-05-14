@@ -201,7 +201,7 @@ describe('commentsAbove', () => {
   it('handles line breaks in comments', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
     expect(analyzer.commentsAbove(CURRENT_URI, 28)).toEqual(
-        'doc for func_two\nhas two lines',
+      'doc for func_two\nhas two lines',
     )
   })
 
@@ -239,8 +239,7 @@ describe('fromRoot', () => {
 
     expect(connection.window.showWarningMessage).not.toHaveBeenCalled()
 
-    // TODO: maybe not hardcode this number in case
-    // fixture files are added in the future?
+    // if you add a .sh file to testing/fixtures, update this value
     const FIXTURE_FILES_MATCHING_GLOB = 11
 
     // Intro, stats on glob, one file skipped due to shebang, and outro

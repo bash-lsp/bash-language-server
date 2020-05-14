@@ -415,7 +415,7 @@ export default class Analyzer {
     // is not a comment line
     const getComment = (l: string): null | string => {
       // this regexp has to be defined within the function
-      const commentRegExp = /^\s*\#\s*(.*)/g
+      const commentRegExp = /^\s*#\s*(.*)/g
       const matches = commentRegExp.exec(l)
       return matches ? matches[1].trim() : null
     }
@@ -428,7 +428,7 @@ export default class Analyzer {
     // iterate on every line above and including
     // the current line until getComment returns null
     let currentComment: string | null = ''
-    while (currentComment = getComment(currentLine)) {
+    while ((currentComment = getComment(currentLine))) {
       commentBlock.push(currentComment)
       commentBlockIndex -= 1
       currentLine = doc.getText({
