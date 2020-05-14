@@ -210,7 +210,9 @@ describe('fromRoot', () => {
 
     expect(connection.window.showWarningMessage).not.toHaveBeenCalled()
 
-    const FIXTURE_FILES_MATCHING_GLOB = 10
+    // TODO: maybe not hardcode this number in case
+    // fixture files are added in the future?
+    const FIXTURE_FILES_MATCHING_GLOB = 11
 
     // Intro, stats on glob, one file skipped due to shebang, and outro
     const LOG_LINES = FIXTURE_FILES_MATCHING_GLOB + 4
