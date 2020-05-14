@@ -194,9 +194,16 @@ export default class BashServer {
             ? `${symbolKindToDescription(symbol.kind)} defined in ${path.relative(
                 currentUri,
                 symbol.location.uri,
+              )}\n\n${this.analyzer.commentsAbove(
+                symbol.location.uri,
+                symbol.location.range.start.line
               )}`
             : `${symbolKindToDescription(symbol.kind)} defined on line ${symbol.location
-                .range.start.line + 1}`,
+                .range.start.line + 1}
+                \n\n${this.analyzer.commentsAbove(
+                  params.textDocument.uri,
+                  symbol.location.range.start.line
+              )}`,
         )
 
       if (symbolDocumentation.length === 1) {
