@@ -196,14 +196,28 @@ describe('commentsAbove', () => {
   it('returns a string of a comment block above a line', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
     expect(analyzer.commentsAbove(CURRENT_URI, 22)).toEqual('doc for func_one')
+  })
 
+  it('handles line breaks in comments', () => {
+    analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
     expect(analyzer.commentsAbove(CURRENT_URI, 28)).toEqual(
-      'doc for func_two\nhas two lines',
+        'doc for func_two\nhas two lines',
     )
+  })
 
-    // if there is a line break in the comments
-    // it should not include the above comment
-    expect(analyzer.commentsAbove(CURRENT_URI, 36)).not.toMatch('this is not included')
+  it('only returns connected comments', () => {
+    analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
+    expect(analyzer.commentsAbove(CURRENT_URI, 36)).toEqual('doc for func_three')
+  })
+
+  it('returns null if no comment found', () => {
+    analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
+    expect(analyzer.commentsAbove(CURRENT_URI, 45)).toEqual(null)
+  })
+
+  it('works for variables', () => {
+    analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
+    expect(analyzer.commentsAbove(CURRENT_URI, 42)).toEqual('works for variables')
   })
 })
 

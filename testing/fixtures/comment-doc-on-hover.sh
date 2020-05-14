@@ -37,3 +37,11 @@ func_two() {
 func_three() {
     echo "func_three"
 }
+
+
+# works for variables
+my_var="pizza"
+
+
+my_other_var="no comments above me :("
+
