@@ -20,7 +20,7 @@ export const FIXTURE_URI = {
   MISSING_NODE: `file://${path.join(FIXTURE_FOLDER, 'missing-node.sh')}`,
   PARSE_PROBLEMS: `file://${path.join(FIXTURE_FOLDER, 'parse-problems.sh')}`,
   SOURCING: `file://${path.join(FIXTURE_FOLDER, 'sourcing.sh')}`,
-  COMMENT_DOC: `file://${path.join(FIXTURE_FOLDER, 'comment-doc-on-hover.sh')}`, 
+  COMMENT_DOC: `file://${path.join(FIXTURE_FOLDER, 'comment-doc-on-hover.sh')}`,
 }
 
 export const FIXTURE_DOCUMENT = {

@@ -192,6 +192,21 @@ describe('findSymbolCompletions', () => {
   })
 })
 
+describe('commentsAbove', () => {
+  it('returns a string of a comment block above a line', () => {
+    analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
+    expect(analyzer.commentsAbove(CURRENT_URI, 22)).toEqual(' doc for func_one')
+
+    expect(analyzer.commentsAbove(CURRENT_URI, 28)).toEqual(
+      ' doc for func_two\n has two lines',
+    )
+
+    // if there is a line break in the comments
+    // it should not include the above comment
+    expect(analyzer.commentsAbove(CURRENT_URI, 36)).not.toMatch('this is not included')
+  })
+})
+
 describe('fromRoot', () => {
   it('initializes an analyzer from a root', async () => {
     const parser = await initializeParser()

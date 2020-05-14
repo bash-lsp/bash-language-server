@@ -16,3 +16,24 @@ hello_world() {
 # containing the lines 4 - 7 above
 
 hello_world "bob" "sally"
+
+
+
+# doc for func_one
+func_one() {
+    echo "func_one"
+}
+
+# doc for func_two
+# has two lines
+func_two() {
+    echo "func_two"
+}
+
+
+# this is not included
+
+# doc for func_three
+func_three() {
+    echo "func_three"
+}
