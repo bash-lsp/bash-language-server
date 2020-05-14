@@ -67,12 +67,35 @@ describe('server', () => {
       {} as any,
     )
 
+    // if user hovers over a function name
+    // the hover contents should contain
+    // the comment above the function definition
+    // see testing/fixtures/comment-doc-on-hover.sh
+    const commentResult = await onHover(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.COMMENT_DOC,
+        },
+        position: {
+          line: 17,
+          character: 0,
+        },
+      },
+      {} as any,
+      {} as any,
+    )
+
     expect(result).toBeDefined()
     expect(result).toEqual({
       contents: {
         kind: 'markdown',
         value: expect.stringContaining('remove directories'),
       },
+    })
+
+    expect(commentResult).toBeDefined()
+    expect(commentResult).toEqual({
+      contents: expect.stringContaining('this function takes two arguments'),
     })
   })
 
