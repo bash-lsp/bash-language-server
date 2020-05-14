@@ -410,43 +410,26 @@ export default class Analyzer {
     // start from the line above
     let commentBlockIndex = line - 1
 
-    // check if that line starts with a comment
-    // its possible that some lines
-    // might have whitespace before the comment
-    // begins, so check by iterating from
-    // the start of the line
-    const startsWithAComment = (line: string): boolean => {
-      let charindex = 0
-      let char = line.charAt(charindex)
-      while (char === ' ') {
-        charindex += 1
-        char = line.charAt(charindex)
-      }
-      // once we reach a character that is not whitespace
-      // return true if its a comment, false otherwise
-      return char === '#'
+    // will return the comment string without the comment '#'
+    // and without leading whitespace, or null if the line 'l'
+    // is not a comment line
+    const getComment = (l: string): null | string => {
+      // this regexp has to be defined within the function
+      const commentRegExp = /^\s*\#\s*(.*)/g
+      const matches = commentRegExp.exec(l)
+      return matches ? matches[1].trim() : null
     }
-
-    const existsAndIsComment = (elm: string): boolean =>
-      elm !== undefined && startsWithAComment(elm)
 
     let currentLine = doc.getText({
       start: { line: commentBlockIndex, character: 0 },
       end: { line: commentBlockIndex + 1, character: 0 },
     })
 
-    while (existsAndIsComment(currentLine)) {
-      // TODO: vscode must have some API for detecting comments
-      // should figure that out instead of hardcoding the # symbol...
-      currentLine = currentLine.replace('#', '')
-      if (currentLine.charAt(currentLine.length - 1) === '\n') {
-        // TODO: should preserve comment line endings?
-        // I think not because sometimes comment strings wrap a line
-        // to prevent the line from being too long, and it'd be nice
-        // to see it displayed as a sentence.
-        currentLine = currentLine.substr(0, currentLine.length - 1)
-      }
-      commentBlock.push(currentLine)
+    // iterate on every line above and including
+    // the current line until getComment returns null
+    let currentComment: string | null = ''
+    while (currentComment = getComment(currentLine)) {
+      commentBlock.push(currentComment)
       commentBlockIndex -= 1
       currentLine = doc.getText({
         start: { line: commentBlockIndex, character: 0 },
@@ -454,10 +437,14 @@ export default class Analyzer {
       })
     }
 
-    // since we searched from bottom up, we then reverse
-    // the lines so that it reads top down.
-    const commentStr = commentBlock.reverse().join('\n')
-    return commentStr
+    if (commentBlock.length) {
+      // since we searched from bottom up, we then reverse
+      // the lines so that it reads top down.
+      return commentBlock.reverse().join('\n')
+    }
+
+    // no comments found above line:
+    return null
   }
 
   private getAllSymbols(): LSP.SymbolInformation[] {
