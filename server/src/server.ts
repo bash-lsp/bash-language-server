@@ -180,6 +180,11 @@ export default class BashServer {
         return { contents: getMarkdownContent(shellDocumentation) }
       }
     } else {
+      const getCommentsAbove = (uri: string, line: number): string => {
+        const comment = this.analyzer.commentsAbove(uri, line)
+        return comment ? `\n\n${comment}` : ''
+      }
+
       const symbolDocumentation = deduplicateSymbols({
         symbols: this.analyzer.findSymbolsMatchingWord({
           exactMatch: true,
@@ -194,9 +199,15 @@ export default class BashServer {
             ? `${symbolKindToDescription(symbol.kind)} defined in ${path.relative(
                 currentUri,
                 symbol.location.uri,
+              )}${getCommentsAbove(
+                symbol.location.uri,
+                symbol.location.range.start.line,
               )}`
             : `${symbolKindToDescription(symbol.kind)} defined on line ${symbol.location
-                .range.start.line + 1}`,
+                .range.start.line + 1}${getCommentsAbove(
+                params.textDocument.uri,
+                symbol.location.range.start.line,
+              )}`,
         )
 
       if (symbolDocumentation.length === 1) {

@@ -399,6 +399,54 @@ export default class Analyzer {
     return name
   }
 
+  /**
+   * Find a block of comments above a line position
+   */
+  public commentsAbove(uri: string, line: number): string | null {
+    const doc = this.uriToTextDocument[uri]
+
+    const commentBlock = []
+
+    // start from the line above
+    let commentBlockIndex = line - 1
+
+    // will return the comment string without the comment '#'
+    // and without leading whitespace, or null if the line 'l'
+    // is not a comment line
+    const getComment = (l: string): null | string => {
+      // this regexp has to be defined within the function
+      const commentRegExp = /^\s*#\s*(.*)/g
+      const matches = commentRegExp.exec(l)
+      return matches ? matches[1].trim() : null
+    }
+
+    let currentLine = doc.getText({
+      start: { line: commentBlockIndex, character: 0 },
+      end: { line: commentBlockIndex + 1, character: 0 },
+    })
+
+    // iterate on every line above and including
+    // the current line until getComment returns null
+    let currentComment: string | null = ''
+    while ((currentComment = getComment(currentLine))) {
+      commentBlock.push(currentComment)
+      commentBlockIndex -= 1
+      currentLine = doc.getText({
+        start: { line: commentBlockIndex, character: 0 },
+        end: { line: commentBlockIndex + 1, character: 0 },
+      })
+    }
+
+    if (commentBlock.length) {
+      // since we searched from bottom up, we then reverse
+      // the lines so that it reads top down.
+      return commentBlock.reverse().join('\n')
+    }
+
+    // no comments found above line:
+    return null
+  }
+
   private getAllSymbols(): LSP.SymbolInformation[] {
     // NOTE: this could be cached, it takes < 1 ms to generate for a project with 250 bash files...
     const symbols: LSP.SymbolInformation[] = []

@@ -76,6 +76,33 @@ describe('server', () => {
     })
   })
 
+  it('responds to onHover with function documentation extracted from comments', async () => {
+    const { connection, server } = await initializeServer()
+    server.register(connection)
+
+    const onHover = connection.onHover.mock.calls[0][0]
+
+    const result = await onHover(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.COMMENT_DOC,
+        },
+        position: {
+          line: 17,
+          character: 0,
+        },
+      },
+      {} as any,
+      {} as any,
+    )
+
+    expect(result).toBeDefined()
+    expect(result).toEqual({
+      contents:
+        'Function defined on line 8\n\nthis is a comment\ndescribing the function\nhello_world\nthis function takes two arguments',
+    })
+  })
+
   it('responds to onDocumentHighlight', async () => {
     const { connection, server } = await initializeServer()
     server.register(connection)
@@ -225,7 +252,7 @@ describe('server', () => {
     )
 
     // Limited set (not using snapshot due to different executables on CI and locally)
-    expect(result && 'length' in result && result.length < 5).toBe(true)
+    expect(result && 'length' in result && result.length < 8).toBe(true)
     expect(result).toEqual(
       expect.arrayContaining([
         {

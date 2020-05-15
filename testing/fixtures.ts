@@ -20,6 +20,7 @@ export const FIXTURE_URI = {
   MISSING_NODE: `file://${path.join(FIXTURE_FOLDER, 'missing-node.sh')}`,
   PARSE_PROBLEMS: `file://${path.join(FIXTURE_FOLDER, 'parse-problems.sh')}`,
   SOURCING: `file://${path.join(FIXTURE_FOLDER, 'sourcing.sh')}`,
+  COMMENT_DOC: `file://${path.join(FIXTURE_FOLDER, 'comment-doc-on-hover.sh')}`,
 }
 
 export const FIXTURE_DOCUMENT = {
@@ -28,6 +29,7 @@ export const FIXTURE_DOCUMENT = {
   MISSING_NODE: getDocument(FIXTURE_URI.MISSING_NODE),
   PARSE_PROBLEMS: getDocument(FIXTURE_URI.PARSE_PROBLEMS),
   SOURCING: getDocument(FIXTURE_URI.SOURCING),
+  COMMENT_DOC: getDocument(FIXTURE_URI.COMMENT_DOC),
 }
 
 export default FIXTURE_DOCUMENT
