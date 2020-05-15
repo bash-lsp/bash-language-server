@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.10.0
+
+* Upgrade language server to 1.15.0 (improved hover and completion documentation)
+
 ## 1.9.1
 
 * Upgrade language server to 1.13.1 (improved file lookup error handling)
