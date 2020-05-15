@@ -142,21 +142,19 @@ export default class BashServer {
     symbol: LSP.SymbolInformation
     currentUri: string
   }): string {
-    const getCommentsAbove = (uri: string, line: number): string => {
-      const comment = this.analyzer.commentsAbove(uri, line)
-      return comment ? `\n\n${comment}` : ''
-    }
+    const symbolUri = symbol.location.uri
+    const symbolStarLine = symbol.location.range.start.line
 
-    return symbol.location.uri !== currentUri
+    const commentAboveSymbol = this.analyzer.commentsAbove(symbolUri, symbolStarLine)
+    const symbolDocumentation = commentAboveSymbol ? `\n\n${commentAboveSymbol}` : ''
+
+    return symbolUri !== currentUri
       ? `${symbolKindToDescription(symbol.kind)} defined in ${path.relative(
           currentUri,
-          symbol.location.uri,
-        )}${getCommentsAbove(symbol.location.uri, symbol.location.range.start.line)}`
-      : `${symbolKindToDescription(symbol.kind)} defined on line ${symbol.location.range
-          .start.line + 1}${getCommentsAbove(
-          currentUri,
-          symbol.location.range.start.line,
-        )}`
+          symbolUri,
+        )}${symbolDocumentation}`
+      : `${symbolKindToDescription(symbol.kind)} defined on line ${symbolStarLine +
+          1}${symbolDocumentation}`
   }
 
   private getCompletionItemsForSymbols({
