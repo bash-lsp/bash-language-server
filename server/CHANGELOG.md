@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 1.15.0
+
+* Use comments above symbols for documentation (https://github.com/bash-lsp/bash-language-server/pull/234, https://github.com/bash-lsp/bash-language-server/pull/235)
+
+
 ## 1.14.0
 
 * onHover and onCompletion documentation improvements (https://github.com/bash-lsp/bash-language-server/pull/230)
