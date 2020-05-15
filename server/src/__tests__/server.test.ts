@@ -367,18 +367,20 @@ describe('server', () => {
     )
 
     expect(resultFunction).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "data": Object {
-            "name": "add_a_user",
-            "type": 3,
-          },
-          "documentation": "Function defined in ../issue101.sh",
-          "kind": 3,
-          "label": "add_a_user",
-        },
-      ]
-    `)
+Array [
+  Object {
+    "data": Object {
+      "name": "add_a_user",
+      "type": 3,
+    },
+    "documentation": "Function defined in ../issue101.sh
+
+Helper function to add a user",
+    "kind": 3,
+    "label": "add_a_user",
+  },
+]
+`)
   })
 
   it('responds to onCompletion with local symbol when word is found in multiple files', async () => {

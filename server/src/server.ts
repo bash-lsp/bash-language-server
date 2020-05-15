@@ -135,6 +135,56 @@ export default class BashServer {
     )
   }
 
+  private getDocumentationForSymbol({
+    currentUri,
+    symbol,
+  }: {
+    symbol: LSP.SymbolInformation
+    currentUri: string
+  }): string {
+    const getCommentsAbove = (uri: string, line: number): string => {
+      const comment = this.analyzer.commentsAbove(uri, line)
+      return comment ? `\n\n${comment}` : ''
+    }
+
+    return symbol.location.uri !== currentUri
+      ? `${symbolKindToDescription(symbol.kind)} defined in ${path.relative(
+          currentUri,
+          symbol.location.uri,
+        )}${getCommentsAbove(symbol.location.uri, symbol.location.range.start.line)}`
+      : `${symbolKindToDescription(symbol.kind)} defined on line ${symbol.location.range
+          .start.line + 1}${getCommentsAbove(
+          currentUri,
+          symbol.location.range.start.line,
+        )}`
+  }
+
+  private getCompletionItemsForSymbols({
+    symbols,
+    currentUri,
+  }: {
+    symbols: LSP.SymbolInformation[]
+    currentUri: string
+  }): BashCompletionItem[] {
+    return deduplicateSymbols({ symbols, currentUri }).map(
+      (symbol: LSP.SymbolInformation) => ({
+        label: symbol.name,
+        kind: symbolKindToCompletionKind(symbol.kind),
+        data: {
+          name: symbol.name,
+          type: CompletionItemDataType.Symbol,
+        },
+        documentation:
+          symbol.location.uri !== currentUri
+            ? this.getDocumentationForSymbol({
+                currentUri,
+                symbol,
+              })
+            : undefined,
+      }),
+    )
+  }
+
   private async onHover(
     params: LSP.TextDocumentPositionParams,
   ): Promise<LSP.Hover | null> {
@@ -180,11 +230,6 @@ export default class BashServer {
         return { contents: getMarkdownContent(shellDocumentation) }
       }
     } else {
-      const getCommentsAbove = (uri: string, line: number): string => {
-        const comment = this.analyzer.commentsAbove(uri, line)
-        return comment ? `\n\n${comment}` : ''
-      }
-
       const symbolDocumentation = deduplicateSymbols({
         symbols: this.analyzer.findSymbolsMatchingWord({
           exactMatch: true,
@@ -195,19 +240,7 @@ export default class BashServer {
         // do not return hover referencing for the current line
         .filter(symbol => symbol.location.range.start.line !== params.position.line)
         .map((symbol: LSP.SymbolInformation) =>
-          symbol.location.uri !== currentUri
-            ? `${symbolKindToDescription(symbol.kind)} defined in ${path.relative(
-                currentUri,
-                symbol.location.uri,
-              )}${getCommentsAbove(
-                symbol.location.uri,
-                symbol.location.range.start.line,
-              )}`
-            : `${symbolKindToDescription(symbol.kind)} defined on line ${symbol.location
-                .range.start.line + 1}${getCommentsAbove(
-                params.textDocument.uri,
-                symbol.location.range.start.line,
-              )}`,
+          this.getDocumentationForSymbol({ currentUri, symbol }),
         )
 
       if (symbolDocumentation.length === 1) {
@@ -268,7 +301,7 @@ export default class BashServer {
     const symbolCompletions =
       word === null
         ? []
-        : getCompletionItemsForSymbols({
+        : this.getCompletionItemsForSymbols({
             symbols: this.analyzer.findSymbolsMatchingWord({
               exactMatch: false,
               word,
@@ -389,32 +422,6 @@ function deduplicateSymbols({
     )
 
   return uniqueBasedOnHash([...symbolsCurrentFile, ...symbolsOtherFiles], getSymbolId)
-}
-
-function getCompletionItemsForSymbols({
-  symbols,
-  currentUri,
-}: {
-  symbols: LSP.SymbolInformation[]
-  currentUri: string
-}): BashCompletionItem[] {
-  return deduplicateSymbols({ symbols, currentUri }).map(
-    (symbol: LSP.SymbolInformation) => ({
-      label: symbol.name,
-      kind: symbolKindToCompletionKind(symbol.kind),
-      data: {
-        name: symbol.name,
-        type: CompletionItemDataType.Symbol,
-      },
-      documentation:
-        symbol.location.uri !== currentUri
-          ? `${symbolKindToDescription(symbol.kind)} defined in ${path.relative(
-              currentUri,
-              symbol.location.uri,
-            )}`
-          : undefined,
-    }),
-  )
 }
 
 function symbolKindToCompletionKind(s: LSP.SymbolKind): LSP.CompletionItemKind {

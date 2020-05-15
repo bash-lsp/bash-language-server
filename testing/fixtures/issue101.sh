@@ -1,6 +1,6 @@
 #!/bin/sh
-# A simple script with a function...
 
+# Helper function to add a user
 add_a_user()
 {
   USER=$1
