@@ -13,6 +13,8 @@ import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
 import { getShellDocumentation } from './util/sh'
 
+const PARAMETER_EXPANSION_PREFIXES = new Set(['$', '${', '${#'])
+
 /**
  * The BashServer glues together the separate components to implement
  * the various parts of the Language Server Protocol.
@@ -304,18 +306,33 @@ export default class BashServer {
     })
     this.logRequest({ request: 'onCompletion', params, word })
 
+    if (word && word.startsWith('#')) {
+      // Inside a comment block
+      return []
+    }
+
     const currentUri = params.textDocument.uri
+
+    const shouldCompleteOnVariables = word
+      ? PARAMETER_EXPANSION_PREFIXES.has(word)
+      : false
 
     const symbolCompletions =
       word === null
         ? []
         : this.getCompletionItemsForSymbols({
-            symbols: this.analyzer.findSymbolsMatchingWord({
-              exactMatch: false,
-              word,
-            }),
+            symbols: shouldCompleteOnVariables
+              ? this.analyzer.getAllVariableSymbols()
+              : this.analyzer.findSymbolsMatchingWord({
+                  exactMatch: false,
+                  word,
+                }),
             currentUri,
           })
+
+    if (shouldCompleteOnVariables) {
+      return symbolCompletions
+    }
 
     const reservedWordsCompletions = ReservedWords.LIST.map(reservedWord => ({
       label: reservedWord,
@@ -357,11 +374,6 @@ export default class BashServer {
     ]
 
     if (word) {
-      if (word.startsWith('#')) {
-        // Inside a comment block
-        return []
-      }
-
       // Filter to only return suffixes of the current word
       return allCompletions.filter(item => item.label.startsWith(word))
     }

@@ -434,6 +434,10 @@ export default class Analyzer {
     return null
   }
 
+  public getAllVariableSymbols(): LSP.SymbolInformation[] {
+    return this.getAllSymbols().filter(symbol => symbol.kind === LSP.SymbolKind.Variable)
+  }
+
   private getAllSymbols(): LSP.SymbolInformation[] {
     // NOTE: this could be cached, it takes < 1 ms to generate for a project with 250 bash files...
     const symbols: LSP.SymbolInformation[] = []
