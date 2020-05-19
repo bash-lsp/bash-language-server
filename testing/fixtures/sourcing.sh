@@ -11,3 +11,5 @@ add_a_us
 BOLD=`tput bold` # redefined
 
 echo $BOL
+
+echo "$"

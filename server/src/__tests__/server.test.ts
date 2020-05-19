@@ -418,4 +418,33 @@ Helper function to add a user",
       ]
     `)
   })
+
+  it('responds to onCompletion with all variables when starting to expand parameters', async () => {
+    const { connection, server } = await initializeServer()
+    server.register(connection)
+
+    const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+    const result: any = await onCompletion(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.SOURCING,
+        },
+        position: {
+          // $
+          line: 14,
+          character: 7,
+        },
+      },
+      {} as any,
+      {} as any,
+    )
+
+    const itemKinds = result.map((item: any) => item.kind)
+
+    // they are all variables
+    expect(itemKinds.every((kind: any) => kind === lsp.CompletionItemKind.Variable)).toBe(
+      true,
+    )
+  })
 })
