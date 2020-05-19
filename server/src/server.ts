@@ -273,9 +273,11 @@ export default class BashServer {
   ): LSP.DocumentHighlight[] | null {
     const word = this.getWordAtPoint(params)
     this.logRequest({ request: 'onDocumentHighlight', params, word })
+
     if (!word) {
-      return null
+      return []
     }
+
     return this.analyzer
       .findOccurrences(params.textDocument.uri, word)
       .map(n => ({ range: n.range }))
@@ -291,7 +293,14 @@ export default class BashServer {
   }
 
   private onCompletion(params: LSP.TextDocumentPositionParams): BashCompletionItem[] {
-    const word = this.getWordAtPoint(params)
+    const word = this.getWordAtPoint({
+      ...params,
+      position: {
+        line: params.position.line,
+        // Go one character back to get completion on the current word
+        character: Math.max(params.position.character - 1, 0),
+      },
+    })
     this.logRequest({ request: 'onCompletion', params, word })
 
     const currentUri = params.textDocument.uri

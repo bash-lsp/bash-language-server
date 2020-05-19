@@ -371,32 +371,19 @@ export default class Analyzer {
    */
   public wordAtPoint(uri: string, line: number, column: number): string | null {
     const document = this.uriToTreeSitterTrees[uri]
-    const contents = this.uriToFileContent[uri]
 
     if (!document.rootNode) {
       // Check for lacking rootNode (due to failed parse?)
       return null
     }
 
-    const point = { row: line, column }
+    const node = document.rootNode.descendantForPosition({ row: line, column })
 
-    const node = TreeSitterUtil.namedLeafDescendantForPosition(point, document.rootNode)
-
-    if (!node) {
+    if (!node || node.childCount > 0 || node.text.trim() === '') {
       return null
     }
 
-    const start = node.startIndex
-    const end = node.endIndex
-    const name = contents.slice(start, end)
-
-    // Hack. Might be a problem with the grammar.
-    // TODO: Document this with a test case
-    if (name.endsWith('=')) {
-      return name.slice(0, name.length - 1)
-    }
-
-    return name
+    return node.text.trim()
   }
 
   /**

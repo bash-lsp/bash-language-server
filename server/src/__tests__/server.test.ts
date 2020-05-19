@@ -181,7 +181,7 @@ describe('server', () => {
       {} as any,
     )
 
-    expect(result2).toMatchInlineSnapshot(`null`)
+    expect(result2).toMatchInlineSnapshot(`Array []`)
   })
 
   it('responds to onWorkspaceSymbol', async () => {
@@ -279,9 +279,9 @@ describe('server', () => {
           uri: FIXTURE_URI.INSTALL,
         },
         position: {
-          // else
-          line: 24,
-          character: 5,
+          // empty space
+          line: 26,
+          character: 0,
         },
       },
       {} as any,
@@ -289,7 +289,7 @@ describe('server', () => {
     )
 
     // Entire list
-    expect(result && 'length' in result && result.length > 50).toBe(true)
+    expect(result && 'length' in result && result.length).toBeGreaterThanOrEqual(50)
   })
 
   it('responds to onCompletion with empty list when word is a comment', async () => {

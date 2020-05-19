@@ -87,16 +87,26 @@ describe('findSymbolsForFile', () => {
 describe('wordAtPoint', () => {
   it('returns current word at a given point', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
+    expect(analyzer.wordAtPoint(CURRENT_URI, 25, 0)).toEqual(null)
+    expect(analyzer.wordAtPoint(CURRENT_URI, 25, 1)).toEqual(null)
+    expect(analyzer.wordAtPoint(CURRENT_URI, 25, 2)).toEqual(null)
+    expect(analyzer.wordAtPoint(CURRENT_URI, 25, 3)).toEqual(null)
+    expect(analyzer.wordAtPoint(CURRENT_URI, 25, 4)).toEqual('rm')
     expect(analyzer.wordAtPoint(CURRENT_URI, 25, 5)).toEqual('rm')
+    expect(analyzer.wordAtPoint(CURRENT_URI, 25, 6)).toEqual(null)
+    expect(analyzer.wordAtPoint(CURRENT_URI, 25, 7)).toEqual('npm-install-')
 
-    // FIXME: grammar issue: else is not found
-    // expect(analyzer.wordAtPoint(CURRENT_URI, 24, 5)).toEqual('else')
+    expect(analyzer.wordAtPoint(CURRENT_URI, 24, 2)).toEqual('else')
+    expect(analyzer.wordAtPoint(CURRENT_URI, 24, 3)).toEqual('else')
+    expect(analyzer.wordAtPoint(CURRENT_URI, 24, 5)).toEqual('else')
+    expect(analyzer.wordAtPoint(CURRENT_URI, 24, 7)).toEqual(null)
 
     expect(analyzer.wordAtPoint(CURRENT_URI, 30, 1)).toEqual(null)
 
+    expect(analyzer.wordAtPoint(CURRENT_URI, 30, 2)).toEqual('ret')
     expect(analyzer.wordAtPoint(CURRENT_URI, 30, 3)).toEqual('ret')
     expect(analyzer.wordAtPoint(CURRENT_URI, 30, 4)).toEqual('ret')
-    expect(analyzer.wordAtPoint(CURRENT_URI, 30, 5)).toEqual('ret')
+    expect(analyzer.wordAtPoint(CURRENT_URI, 30, 5)).toEqual('=')
 
     expect(analyzer.wordAtPoint(CURRENT_URI, 38, 5)).toEqual('configures')
   })
