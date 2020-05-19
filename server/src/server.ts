@@ -100,6 +100,7 @@ export default class BashServer {
       textDocumentSync: LSP.TextDocumentSyncKind.Full,
       completionProvider: {
         resolveProvider: true,
+        triggerCharacters: ['$', '{'],
       },
       hoverProvider: true,
       documentHighlightProvider: true,
