@@ -24,6 +24,18 @@ export function execShellScript(body: string): Promise<string> {
   })
 }
 
+// Currently only reserved words where documentation doesn't make sense.
+// At least on OS X these just return the builtin man. On ubuntu there
+// are no documentaiton for them.
+const WORDS_WITHOUT_DOCUMENTATION = new Set([
+  'else',
+  'fi',
+  'then',
+  'esac',
+  'elif',
+  'done',
+])
+
 /**
  * Get documentation for the given word by usingZZ help and man.
  */
@@ -34,6 +46,10 @@ export async function getShellDocumentationWithoutCache({
 }): Promise<string | null> {
   if (word.split(' ').length > 1) {
     throw new Error(`lookupDocumentation should be given a word, received "${word}"`)
+  }
+
+  if (WORDS_WITHOUT_DOCUMENTATION.has(word)) {
+    return null
   }
 
   const DOCUMENTATION_COMMANDS = [
