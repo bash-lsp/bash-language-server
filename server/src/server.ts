@@ -313,6 +313,9 @@ export default class BashServer {
 
     const currentUri = params.textDocument.uri
 
+    // TODO: an improvement here would be to detect if the current word is
+    // not only a parameter expansion prefix, but also if the word is actually
+    // inside a parameter expansion (e.g. auto completing on a word $MY_VARIA).
     const shouldCompleteOnVariables = word
       ? PARAMETER_EXPANSION_PREFIXES.has(word)
       : false
