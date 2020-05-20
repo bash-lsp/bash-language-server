@@ -20,6 +20,11 @@ describe('getDocumentation', () => {
     expect(lines[1]).toContain('list directory contents')
   })
 
+  it('skips documentation for some builtins', async () => {
+    const result = await sh.getShellDocumentation({ word: 'else' })
+    expect(result).toEqual(null)
+  })
+
   it('sanity checks the given word', async () => {
     await expect(sh.getShellDocumentation({ word: 'ls foo' })).rejects.toThrow()
   })

@@ -13,6 +13,8 @@ import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
 import { getShellDocumentation } from './util/sh'
 
+const PARAMETER_EXPANSION_PREFIXES = new Set(['$', '${'])
+
 /**
  * The BashServer glues together the separate components to implement
  * the various parts of the Language Server Protocol.
@@ -100,6 +102,7 @@ export default class BashServer {
       textDocumentSync: LSP.TextDocumentSyncKind.Full,
       completionProvider: {
         resolveProvider: true,
+        triggerCharacters: ['$', '{'],
       },
       hoverProvider: true,
       documentHighlightProvider: true,
@@ -273,9 +276,11 @@ export default class BashServer {
   ): LSP.DocumentHighlight[] | null {
     const word = this.getWordAtPoint(params)
     this.logRequest({ request: 'onDocumentHighlight', params, word })
+
     if (!word) {
-      return null
+      return []
     }
+
     return this.analyzer
       .findOccurrences(params.textDocument.uri, word)
       .map(n => ({ range: n.range }))
@@ -291,21 +296,50 @@ export default class BashServer {
   }
 
   private onCompletion(params: LSP.TextDocumentPositionParams): BashCompletionItem[] {
-    const word = this.getWordAtPoint(params)
+    const word = this.getWordAtPoint({
+      ...params,
+      position: {
+        line: params.position.line,
+        // Go one character back to get completion on the current word
+        character: Math.max(params.position.character - 1, 0),
+      },
+    })
     this.logRequest({ request: 'onCompletion', params, word })
 
+    if (word && word.startsWith('#')) {
+      // Inside a comment block
+      return []
+    }
+
     const currentUri = params.textDocument.uri
+
+    // TODO: an improvement here would be to detect if the current word is
+    // not only a parameter expansion prefix, but also if the word is actually
+    // inside a parameter expansion (e.g. auto completing on a word $MY_VARIA).
+    const shouldCompleteOnVariables = word
+      ? PARAMETER_EXPANSION_PREFIXES.has(word)
+      : false
 
     const symbolCompletions =
       word === null
         ? []
         : this.getCompletionItemsForSymbols({
-            symbols: this.analyzer.findSymbolsMatchingWord({
-              exactMatch: false,
-              word,
-            }),
+            symbols: shouldCompleteOnVariables
+              ? this.analyzer.getAllVariableSymbols()
+              : this.analyzer.findSymbolsMatchingWord({
+                  exactMatch: false,
+                  word,
+                }),
             currentUri,
           })
+
+    if (shouldCompleteOnVariables) {
+      // In case we auto complete on a word that starts a parameter expansion,
+      // we do not return anything else than variable/parameter suggestions.
+      // Note: that LSP clients should not call onCompletion in the middle
+      // of a word, so the following should work for client.
+      return symbolCompletions
+    }
 
     const reservedWordsCompletions = ReservedWords.LIST.map(reservedWord => ({
       label: reservedWord,
@@ -347,11 +381,6 @@ export default class BashServer {
     ]
 
     if (word) {
-      if (word.startsWith('#')) {
-        // Inside a comment block
-        return []
-      }
-
       // Filter to only return suffixes of the current word
       return allCompletions.filter(item => item.label.startsWith(word))
     }

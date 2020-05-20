@@ -4,6 +4,10 @@ exports[`server initializes and responds to capabilities 1`] = `
 Object {
   "completionProvider": Object {
     "resolveProvider": true,
+    "triggerCharacters": Array [
+      "$",
+      "{",
+    ],
   },
   "definitionProvider": true,
   "documentHighlightProvider": true,
