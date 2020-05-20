@@ -1,9 +1,12 @@
 # Bash Language Server
 
+## 1.16.0
+
+* Improved completion handler for parameter expansions (https://github.com/bash-lsp/bash-language-server/pull/237)
+
 ## 1.15.0
 
 * Use comments above symbols for documentation (https://github.com/bash-lsp/bash-language-server/pull/234, https://github.com/bash-lsp/bash-language-server/pull/235)
-
 
 ## 1.14.0
 
