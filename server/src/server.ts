@@ -13,7 +13,7 @@ import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
 import { getShellDocumentation } from './util/sh'
 
-const PARAMETER_EXPANSION_PREFIXES = new Set(['$', '${', '${#'])
+const PARAMETER_EXPANSION_PREFIXES = new Set(['$', '${'])
 
 /**
  * The BashServer glues together the separate components to implement
@@ -331,6 +331,10 @@ export default class BashServer {
           })
 
     if (shouldCompleteOnVariables) {
+      // In case we auto complete on a word that starts a parameter expansion,
+      // we do not return anything else than variable/parameter suggestions.
+      // Note: that LSP clients should not call onCompletion in the middle
+      // of a word, so the following should work for client.
       return symbolCompletions
     }
 
