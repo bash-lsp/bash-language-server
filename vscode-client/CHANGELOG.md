@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.10.1
+
+* Upgrade language server to 1.16.0 (improved completion support for parameters)
+
 ## 1.10.0
 
 * Upgrade language server to 1.15.0 (improved hover and completion documentation)
