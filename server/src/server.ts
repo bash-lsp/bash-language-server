@@ -201,22 +201,28 @@ export default class BashServer {
     const explainshellEndpoint = config.getExplainshellEndpoint()
     if (explainshellEndpoint) {
       this.connection.console.log(`Query ${explainshellEndpoint}`)
-      const response = await this.analyzer.getExplainshellDocumentation({
-        params,
-        endpoint: explainshellEndpoint,
-      })
+      try {
+        const response = await this.analyzer.getExplainshellDocumentation({
+          params,
+          endpoint: explainshellEndpoint,
+        })
 
-      if (response.status === 'error') {
-        this.connection.console.log(
-          `getExplainshellDocumentation returned: ${JSON.stringify(response, null, 4)}`,
-        )
-      } else {
-        return {
-          contents: {
-            kind: 'markdown',
-            value: new TurndownService().turndown(response.helpHTML),
-          },
+        if (response.status === 'error') {
+          this.connection.console.log(
+            `getExplainshellDocumentation returned: ${JSON.stringify(response, null, 4)}`,
+          )
+        } else {
+          return {
+            contents: {
+              kind: 'markdown',
+              value: new TurndownService().turndown(response.helpHTML),
+            },
+          }
         }
+      } catch (error) {
+        this.connection.console.warn(
+          `getExplainshellDocumentation exception: ${error.message}`,
+        )
       }
     }
 
