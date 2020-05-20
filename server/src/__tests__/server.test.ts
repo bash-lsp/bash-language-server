@@ -440,11 +440,9 @@ Helper function to add a user",
       {} as any,
     )
 
-    const itemKinds = result.map((item: any) => item.kind)
-
     // they are all variables
-    expect(itemKinds.every((kind: any) => kind === lsp.CompletionItemKind.Variable)).toBe(
-      true,
-    )
+    expect(Array.from(new Set(result.map((item: any) => item.kind)))).toEqual([
+      lsp.CompletionItemKind.Variable,
+    ])
   })
 })
