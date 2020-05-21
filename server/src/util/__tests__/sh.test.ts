@@ -1,5 +1,51 @@
+import * as ChildPorcess from 'child_process'
+// @ts-ignore
+ChildPorcess.spawn = jest.fn(ChildPorcess.spawn)
+
 /* eslint-disable no-useless-escape */
 import * as sh from '../sh'
+
+describe('execShellScript', () => {
+  it('resolves if childprocess sends close signal', async () => {
+    // @ts-ignore
+    ChildPorcess.spawn.mockReturnValueOnce({
+      stdout: {
+        on: (eventName: string, cb: (s: string) => {}) => {
+          setImmediate(() => {
+            cb('abc')
+          })
+        },
+      },
+      on: (eventName: string, cb: (n: number) => {}) => {
+        setImmediate(() => {
+          cb(0)
+        })
+      },
+    })
+    return expect(sh.execShellScript('something')).resolves.toBe('abc')
+  })
+
+  it('rejects if childprocess sends error signal', async () => {
+    // @ts-ignore
+    ChildPorcess.spawn.mockReturnValueOnce({
+      stdout: {
+        on: (eventName: string, cb: (s: string) => {}) => {
+          setImmediate(() => {
+            cb('abc')
+          })
+        },
+      },
+      on: (eventName: string, cb: (err: Error) => {}) => {
+        setImmediate(() => {
+          cb(new Error('err'))
+        })
+      },
+    })
+    return expect(sh.execShellScript('something')).rejects.toBe(
+      'Failed to execute something',
+    )
+  })
+})
 
 describe('getDocumentation', () => {
   it('returns null for an unknown builtin', async () => {
