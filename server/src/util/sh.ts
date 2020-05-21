@@ -10,17 +10,20 @@ export function execShellScript(body: string): Promise<string> {
   return new Promise((resolve, reject) => {
     let output = ''
 
-    process.stdout.on('data', buffer => {
-      output += buffer
-    })
-
-    process.on('close', returnCode => {
+    const handleClose = (returnCode: number | Error) => {
       if (returnCode === 0) {
         resolve(output)
       } else {
         reject(`Failed to execute ${body}`)
       }
+    }
+
+    process.stdout.on('data', buffer => {
+      output += buffer
     })
+
+    process.on('close', handleClose)
+    process.on('error', handleClose)
   })
 }
 
