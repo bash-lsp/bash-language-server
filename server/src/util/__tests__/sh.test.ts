@@ -1,49 +1,16 @@
-import * as ChildPorcess from 'child_process'
-// @ts-ignore
-ChildPorcess.spawn = jest.fn(ChildPorcess.spawn)
-
 /* eslint-disable no-useless-escape */
 import * as sh from '../sh'
 
 describe('execShellScript', () => {
   it('resolves if childprocess sends close signal', async () => {
-    // @ts-ignore
-    ChildPorcess.spawn.mockReturnValueOnce({
-      stdout: {
-        on: (eventName: string, cb: (s: string) => {}) => {
-          setImmediate(() => {
-            cb('abc')
-          })
-        },
-      },
-      on: (eventName: string, cb: (n: number) => {}) => {
-        setImmediate(() => {
-          cb(0)
-        })
-      },
-    })
-    return expect(sh.execShellScript('something')).resolves.toBe('abc')
+    return expect(sh.execShellScript('echo')).resolves
   })
 
   it('rejects if childprocess sends error signal', async () => {
-    // @ts-ignore
-    ChildPorcess.spawn.mockReturnValueOnce({
-      stdout: {
-        on: (eventName: string, cb: (s: string) => {}) => {
-          setImmediate(() => {
-            cb('abc')
-          })
-        },
-      },
-      on: (eventName: string, cb: (err: Error) => {}) => {
-        setImmediate(() => {
-          cb(new Error('err'))
-        })
-      },
-    })
-    return expect(sh.execShellScript('something')).rejects.toBe(
-      'Failed to execute something',
-    )
+    // an error is sent if child_process cant spawn 'some-nonexistant-command'
+    return expect(
+      sh.execShellScript('something', 'some-nonexistant-command'),
+    ).rejects.toBe('Failed to execute something')
   })
 })
 
