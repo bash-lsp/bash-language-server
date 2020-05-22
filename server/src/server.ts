@@ -316,6 +316,12 @@ export default class BashServer {
       // Inside a comment block
       return []
     }
+    if (word && word === '{') {
+      // We should not complete when it is not prefixed by a $.
+      // This case needs to be here
+      // because { is a completionProvider triggerCharacter.
+      return []
+    }
 
     const currentUri = params.textDocument.uri
 
