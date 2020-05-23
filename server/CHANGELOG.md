@@ -1,5 +1,11 @@
 # Bash Language Server
 
+
+## 1.16.1
+
+* Fix brace expansion bug (https://github.com/bash-lsp/bash-language-server/pull/240)
+* Do not crash if bash is not installed (https://github.com/bash-lsp/bash-language-server/pull/242)
+
 ## 1.16.0
 
 * Improved completion handler for parameter expansions (https://github.com/bash-lsp/bash-language-server/pull/237)
