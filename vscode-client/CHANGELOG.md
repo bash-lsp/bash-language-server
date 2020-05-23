@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.10.2
+
+* Upgrade language server to 1.16.1 (fix brace expansion bug and crash when bash is not installed)
+
 ## 1.10.1
 
 * Upgrade language server to 1.16.0 (improved completion support for parameters)
