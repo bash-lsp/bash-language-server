@@ -3,24 +3,27 @@ import * as ChildProcess from 'child_process'
 /**
  * Execute the following sh program.
  */
-export function execShellScript(body: string): Promise<string> {
+export function execShellScript(body: string, cmd = 'bash'): Promise<string> {
   const args = ['-c', body]
-  const process = ChildProcess.spawn('bash', args)
+  const process = ChildProcess.spawn(cmd, args)
 
   return new Promise((resolve, reject) => {
     let output = ''
 
-    process.stdout.on('data', buffer => {
-      output += buffer
-    })
-
-    process.on('close', returnCode => {
+    const handleClose = (returnCode: number | Error) => {
       if (returnCode === 0) {
         resolve(output)
       } else {
         reject(`Failed to execute ${body}`)
       }
+    }
+
+    process.stdout.on('data', buffer => {
+      output += buffer
     })
+
+    process.on('close', handleClose)
+    process.on('error', handleClose)
   })
 }
 

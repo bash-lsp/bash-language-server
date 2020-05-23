@@ -1,6 +1,19 @@
 /* eslint-disable no-useless-escape */
 import * as sh from '../sh'
 
+describe('execShellScript', () => {
+  it('resolves if childprocess sends close signal', async () => {
+    return expect(sh.execShellScript('echo')).resolves
+  })
+
+  it('rejects if childprocess sends error signal', async () => {
+    // an error is sent if child_process cant spawn 'some-nonexistant-command'
+    return expect(
+      sh.execShellScript('something', 'some-nonexistant-command'),
+    ).rejects.toBe('Failed to execute something')
+  })
+})
+
 describe('getDocumentation', () => {
   it('returns null for an unknown builtin', async () => {
     const result = await sh.getShellDocumentation({ word: 'foobar' })
