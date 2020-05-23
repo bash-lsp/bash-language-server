@@ -316,6 +316,30 @@ describe('server', () => {
     expect(result).toEqual([])
   })
 
+  it('responds to onCompletion with empty list when word is {', async () => {
+    const { connection, server } = await initializeServer()
+    server.register(connection)
+
+    const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+    const result = await onCompletion(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.ISSUE101,
+        },
+        position: {
+          // the opening brace '{' to 'add_a_user'
+          line: 4,
+          character: 0,
+        },
+      },
+      {} as any,
+      {} as any,
+    )
+
+    expect(result).toEqual([])
+  })
+
   it('responds to onCompletion when word is found in another file', async () => {
     const { connection, server } = await initializeServer()
     server.register(connection)
