@@ -511,6 +511,86 @@ describe('server', () => {
     expect(Array.from(new Set(result.map((item: any) => item.kind)))).toEqual([
       LSP.CompletionItemKind.Variable,
     ])
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data": Object {
+            "name": "BOLD",
+            "type": 3,
+          },
+          "documentation": undefined,
+          "kind": 6,
+          "label": "BOLD",
+        },
+        Object {
+          "data": Object {
+            "name": "RED",
+            "type": 3,
+          },
+          "documentation": "### Variable: **RED** - *defined in ../extension.inc*",
+          "kind": 6,
+          "label": "RED",
+        },
+        Object {
+          "data": Object {
+            "name": "GREEN",
+            "type": 3,
+          },
+          "documentation": "### Variable: **GREEN** - *defined in ../extension.inc*",
+          "kind": 6,
+          "label": "GREEN",
+        },
+        Object {
+          "data": Object {
+            "name": "BLUE",
+            "type": 3,
+          },
+          "documentation": "### Variable: **BLUE** - *defined in ../extension.inc*",
+          "kind": 6,
+          "label": "BLUE",
+        },
+        Object {
+          "data": Object {
+            "name": "RESET",
+            "type": 3,
+          },
+          "documentation": "### Variable: **RESET** - *defined in ../extension.inc*",
+          "kind": 6,
+          "label": "RESET",
+        },
+        Object {
+          "data": Object {
+            "name": "USER",
+            "type": 3,
+          },
+          "documentation": "### Variable: **USER** - *defined in ../issue101.sh*",
+          "kind": 6,
+          "label": "USER",
+        },
+        Object {
+          "data": Object {
+            "name": "PASSWORD",
+            "type": 3,
+          },
+          "documentation": "### Variable: **PASSWORD** - *defined in ../issue101.sh*",
+          "kind": 6,
+          "label": "PASSWORD",
+        },
+        Object {
+          "data": Object {
+            "name": "COMMENTS",
+            "type": 3,
+          },
+          "documentation": "### Variable: **COMMENTS** - *defined in ../issue101.sh*
+
+      \`\`\`txt
+      Having shifted twice, the rest is now comments ...
+      \`\`\`",
+          "kind": 6,
+          "label": "COMMENTS",
+        },
+      ]
+    `)
   })
 
   it('responds to onCodeAction', async () => {
