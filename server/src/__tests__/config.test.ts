@@ -5,6 +5,7 @@ describe('ConfigSchema', () => {
     expect(ConfigSchema.parse({})).toMatchInlineSnapshot(`
       Object {
         "backgroundAnalysisMaxFiles": 500,
+        "completionBasedOnImports": true,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
         "highlightParsingErrors": false,
@@ -24,6 +25,7 @@ describe('ConfigSchema', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "backgroundAnalysisMaxFiles": 1,
+        "completionBasedOnImports": true,
         "explainshellEndpoint": "localhost:8080",
         "globPattern": "**/*@(.sh)",
         "highlightParsingErrors": true,

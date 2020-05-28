@@ -47,15 +47,20 @@ export default class Analyzer {
     variable_assignment: LSP.SymbolKind.Variable,
   }
 
+  private isSourcingAware: boolean
+
   public constructor({
     console,
+    isSourcingAware = true,
     parser,
   }: {
     console: LSP.RemoteConsole
+    isSourcingAware?: boolean
     parser: Parser
   }) {
-    this.parser = parser
     this.console = console
+    this.isSourcingAware = isSourcingAware
+    this.parser = parser
   }
 
   /**
@@ -537,10 +542,15 @@ export default class Analyzer {
     )
   }
 
+  public setIsSourcingAware(isSourcingAware: boolean): void {
+    this.isSourcingAware = isSourcingAware
+  }
+
   private getAllFileDeclarations({ uri }: { uri?: string } = {}): FileDeclarations {
-    const uris = uri
-      ? [uri, ...Array.from(this.findAllSourcedUris({ uri }))]
-      : Object.keys(this.uriToDeclarations)
+    const uris =
+      uri && this.isSourcingAware
+        ? [uri, ...Array.from(this.findAllSourcedUris({ uri }))]
+        : Object.keys(this.uriToDeclarations)
 
     return uris.reduce((fileDeclarations, uri) => {
       fileDeclarations[uri] = this.uriToDeclarations[uri] || {}

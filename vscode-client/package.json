@@ -37,6 +37,11 @@
           "description": "Maximum number of files to analyze in the background. Set to 0 to disable background analysis.",
           "minimum": 0
         },
+        "bashIde.completionBasedOnImports": {
+          "type": "boolean",
+          "default": true,
+          "description": "Controls if symbols completion across files is based on parsing sourcing statements (i.e. 'source file.sh' or '. file.sh'). If false then all symbols found in the workspace will be used."
+        },
         "bashIde.explainshellEndpoint": {
           "type": "string",
           "default": "",

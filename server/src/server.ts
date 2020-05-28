@@ -224,6 +224,8 @@ export default class BashServer {
             })
           }
 
+          this.analyzer.setIsSourcingAware(this.config.completionBasedOnImports)
+
           return true
         }
       } catch (err) {
