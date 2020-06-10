@@ -82,6 +82,11 @@ describe('findSymbolsForFile', () => {
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()
   })
+
+  it('issue 233 failed to parse expression for modulus operator surrounded by spaces', () => {
+    const diagnostics = analyzer.analyze(CURRENT_URI, FIXTURES.ISSUE233)
+    expect(diagnostics).toEqual([])
+  })
 })
 
 describe('wordAtPoint', () => {
@@ -250,7 +255,7 @@ describe('fromRoot', () => {
     expect(connection.window.showWarningMessage).not.toHaveBeenCalled()
 
     // if you add a .sh file to testing/fixtures, update this value
-    const FIXTURE_FILES_MATCHING_GLOB = 11
+    const FIXTURE_FILES_MATCHING_GLOB = 12
 
     // Intro, stats on glob, one file skipped due to shebang, and outro
     const LOG_LINES = FIXTURE_FILES_MATCHING_GLOB + 4
