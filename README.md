@@ -64,7 +64,7 @@ For Vim 8 or Neovim using [neoclide/coc.nvim][coc.nvim], according to [it's Wiki
   }
 ```
 
-For Vim 8 or NeoVim using [w0rp/ale][vim-ale] add the following
+For Vim 8 or NeoVim using [dense-analysis/ale][vim-ale] add the following
 configuration to your `.vimrc`:
 
 ```vim
@@ -117,6 +117,6 @@ Please see [docs/development-guide][dev-guide] for more information.
 [explainshell]: https://explainshell.com/
 [languageclient-neovim]: https://github.com/autozimu/LanguageClient-neovim
 [vim-lsp]: https://github.com/prabirshrestha/vim-lsp
-[vim-ale]: https://github.com/w0rp/ale
+[vim-ale]: https://github.com/dense-analysis/ale
 [coc.nvim]: https://github.com/neoclide/coc.nvim
 [jupyterlab-lsp]: https://github.com/krassowski/jupyterlab-lsp
