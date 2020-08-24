@@ -4,7 +4,7 @@
   "description": "A language server for Bash",
   "author": "Mads Hartmann",
   "license": "MIT",
-  "version": "1.10.2",
+  "version": "1.11.0",
   "publisher": "mads-hartmann",
   "repository": {
     "type": "git",
@@ -38,7 +38,7 @@
         },
         "bashIde.highlightParsingErrors": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Controls if parsing errors will be highlighted as problems."
         },
         "bashIde.explainshellEndpoint": {

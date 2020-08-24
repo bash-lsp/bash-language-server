@@ -49,10 +49,10 @@ describe('getGlobPattern', () => {
 })
 
 describe('highlightParsingError', () => {
-  it('default to true', () => {
+  it('default to false', () => {
     process.env = {}
     const result = config.getHighlightParsingError()
-    expect(result).toEqual(true)
+    expect(result).toEqual(false)
   })
 
   it('parses environment variable', () => {

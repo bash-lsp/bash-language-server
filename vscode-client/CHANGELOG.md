@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.11.0
+
+* Default configuration change: parsing errors are not highlighted as problems (as the grammar is buggy)
+
 ## 1.10.2
 
 * Upgrade language server to 1.16.1 (fix brace expansion bug and crash when bash is not installed)

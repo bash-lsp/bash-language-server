@@ -1,5 +1,8 @@
 # Bash Language Server
 
+## 1.17.0
+
+* Default configuration change: parsing errors are not highlighted as problems (as the grammar is buggy)
 
 ## 1.16.1
 
