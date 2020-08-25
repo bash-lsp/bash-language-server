@@ -30,6 +30,7 @@ The following editors and IDEs have available clients:
 
 - Visual Studio Code ([Bash IDE][vscode-marketplace])
 - Atom ([ide-bash][ide-bash])
+- Sublime Text ([LSP-bash][sublime-text-lsp])
 - Vim ([see below](#vim))
 - Neovim ([see below](#neovim))
 - [Oni](https://github.com/onivim/oni) ([see below](#oni))
@@ -114,6 +115,7 @@ Please see [docs/development-guide][dev-guide] for more information.
 [vscode-marketplace]: https://marketplace.visualstudio.com/items?itemName=mads-hartmann.bash-ide-vscode
 [dev-guide]: https://github.com/bash-lsp/bash-language-server/blob/master/docs/development-guide.md
 [ide-bash]: https://atom.io/packages/ide-bash
+[sublime-text-lsp]: https://packagecontrol.io/packages/LSP-bash
 [explainshell]: https://explainshell.com/
 [languageclient-neovim]: https://github.com/autozimu/LanguageClient-neovim
 [vim-lsp]: https://github.com/prabirshrestha/vim-lsp
