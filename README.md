@@ -76,13 +76,27 @@ let g:ale_linters = {
 
 #### Neovim
 
-Install the plugin [autozimu/LanguageClient-neovim][languageclient-neovim] and add the following configuration to
+For NeoVim using [autozimu/LanguageClient-neovim][languageclient-neovim], add the following configuration to
 `init.vim`:
 
 ```vim
 let g:LanguageClient_serverCommands = {
     \ 'sh': ['bash-language-server', 'start']
     \ }
+```
+
+For NeoVim v0.5(nightly) using its built-in lsp, install [neovim/nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) and add the following configuration to either your `init.vim` or `init.lua`
+
+`init.vim`:
+```vim
+lua require'lspconfig'.bashls.setup{}
+```
+
+or
+
+`init.lua`:
+``` lua
+require'lspconfig'.bashls.setup{}
 ```
 
 #### Oni
@@ -118,6 +132,7 @@ Please see [docs/development-guide][dev-guide] for more information.
 [sublime-text-lsp]: https://packagecontrol.io/packages/LSP-bash
 [explainshell]: https://explainshell.com/
 [languageclient-neovim]: https://github.com/autozimu/LanguageClient-neovim
+[nvim-lspconfig]: https://github.com/neovim/nvim-lspconfig
 [vim-lsp]: https://github.com/prabirshrestha/vim-lsp
 [vim-ale]: https://github.com/dense-analysis/ale
 [coc.nvim]: https://github.com/neoclide/coc.nvim
