@@ -21,6 +21,7 @@ export const FIXTURE_URI = {
   PARSE_PROBLEMS: `file://${path.join(FIXTURE_FOLDER, 'parse-problems.sh')}`,
   SOURCING: `file://${path.join(FIXTURE_FOLDER, 'sourcing.sh')}`,
   COMMENT_DOC: `file://${path.join(FIXTURE_FOLDER, 'comment-doc-on-hover.sh')}`,
+  OVERRIDE_SYMBOL: `file://${path.join(FIXTURE_FOLDER, 'override-executable-symbol.sh')}`,
 }
 
 export const FIXTURE_DOCUMENT = {
@@ -30,6 +31,7 @@ export const FIXTURE_DOCUMENT = {
   PARSE_PROBLEMS: getDocument(FIXTURE_URI.PARSE_PROBLEMS),
   SOURCING: getDocument(FIXTURE_URI.SOURCING),
   COMMENT_DOC: getDocument(FIXTURE_URI.COMMENT_DOC),
+  OVERRIDE_SYMBOL: getDocument(FIXTURE_URI.OVERRIDE_SYMBOL),
 }
 
 export default FIXTURE_DOCUMENT
