@@ -401,19 +401,17 @@ export default class Analyzer {
    * Find the name of the command at the given point.
    */
   public commandNameAtPoint(uri: string, line: number, column: number): string | null {
-    const node = this.nodeAtPoint(uri, line, column)
+    let node = this.nodeAtPoint(uri, line, column)
 
-    if (!node || node.childCount > 0 || node.text.trim() === '') {
+    while (node && node.type !== 'command') {
+      node = node.parent
+    }
+
+    if (!node) {
       return null
     }
 
-    const { parent } = node
-
-    if (!parent || parent.type !== 'command') {
-      return null
-    }
-
-    const firstChild = parent.firstNamedChild
+    const firstChild = node.firstNamedChild
 
     if (!firstChild || firstChild.type !== 'command_name') {
       return null
