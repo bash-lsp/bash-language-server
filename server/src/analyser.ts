@@ -367,9 +367,9 @@ export default class Analyzer {
   }
 
   /**
-   * Find the full word at the given point.
+   * Find the node at the given point.
    */
-  public wordAtPoint(uri: string, line: number, column: number): string | null {
+  private nodeAtPoint(uri: string, line: number, column: number): Parser.SyntaxNode | null {
     const document = this.uriToTreeSitterTrees[uri]
 
     if (!document.rootNode) {
@@ -377,13 +377,45 @@ export default class Analyzer {
       return null
     }
 
-    const node = document.rootNode.descendantForPosition({ row: line, column })
+    return document.rootNode.descendantForPosition({ row: line, column })
+  }
+
+  /**
+   * Find the full word at the given point.
+   */
+  public wordAtPoint(uri: string, line: number, column: number): string | null {
+    const node = this.nodeAtPoint(uri, line, column)
 
     if (!node || node.childCount > 0 || node.text.trim() === '') {
       return null
     }
 
     return node.text.trim()
+  }
+
+  /**
+   * Find the name of the command at the given point.
+   */
+  public commandNameAtPoint(uri: string, line: number, column: number): string | null {
+    const node = this.nodeAtPoint(uri, line, column)
+
+    if (!node || node.childCount > 0 || node.text.trim() === '') {
+      return null
+    }
+
+    const parent = node.parent
+
+    if (!parent || parent.type !== 'command') {
+        return null
+    }
+
+    const firstChild = parent.firstNamedChild
+
+    if (!firstChild || firstChild.type !== 'command_name') {
+        return null
+    }
+
+    return firstChild.text.trim()
   }
 
   /**
