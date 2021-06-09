@@ -267,6 +267,41 @@ describe('server', () => {
     )
   })
 
+  it('responds to onCompletion with options list when command name is found', async () => {
+    const { connection, server } = await initializeServer()
+    server.register(connection)
+
+    const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+    const result = await onCompletion(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.OPTIONS,
+        },
+        position: {
+          // grep --line-
+          line: 2,
+          character: 12,
+        },
+      },
+      {} as any,
+      {} as any,
+    )
+
+    expect(result).toEqual(
+      expect.arrayContaining([
+        {
+          data: {
+            name: expect.stringMatching(RegExp('--line-.*')),
+            type: CompletionItemDataType.Symbol,
+          },
+          kind: expect.any(Number),
+          label: expect.stringMatching(RegExp('--line-.*')),
+        },
+      ]),
+    )
+  })
+
   it('responds to onCompletion with entire list when no word is found', async () => {
     const { connection, server } = await initializeServer()
     server.register(connection)
