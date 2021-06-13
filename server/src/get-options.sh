@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -u
-
 DATADIR="$(pkg-config --variable=datadir bash-completion)"
 
 source "$DATADIR/bash-completion/bash_completion"
