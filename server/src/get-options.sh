@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-source /usr/share/bash-completion/bash_completion
+DATADIR="$(pkg-config --variable=datadir bash-completion)"
+
+source "$DATADIR/bash-completion/bash_completion"
 
 COMP_LINE="$*"
 COMP_WORDS=("$@")
