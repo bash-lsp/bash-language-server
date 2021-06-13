@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -uo pipefail
+
 DATADIR="$(pkg-config --variable=datadir bash-completion)"
 
 source "$DATADIR/bash-completion/bash_completion"
