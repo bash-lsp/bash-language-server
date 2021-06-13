@@ -15,7 +15,12 @@ _command_offset 0 2> /dev/null
 
 if (( ${#COMPREPLY[@]} == 0 ))
 then
-	_longopt "${COMP_WORDS[0]}"
+	# Disabled by default because _longopt executes the program
+	# to get its options.
+	if (( ${BASH_LSP_COMPLETE_LONGOPTS} == 1 ))
+	then
+		_longopt "${COMP_WORDS[0]}"
+	fi
 fi
 
 printf "%s\t" "${COMPREPLY[@]}"
