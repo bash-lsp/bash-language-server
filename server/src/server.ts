@@ -577,5 +577,9 @@ function getCommandOptions(name: string, word: string): string[] {
     word,
   ])
 
-  return options.stdout.toString().split('\t')
+  return options.stdout
+    .toString()
+    .split('\t')
+    .map(l => l.trim())
+    .filter(l => l.length > 0)
 }
