@@ -2,6 +2,12 @@
 
 DATADIR="$(pkg-config --variable=datadir bash-completion)"
 
+# Exit if bash-completion isn't installed.
+if (( $? != 0 ))
+then
+	exit 1
+fi
+
 source "$DATADIR/bash-completion/bash_completion"
 
 COMP_LINE="$*"
