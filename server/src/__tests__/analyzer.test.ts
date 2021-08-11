@@ -112,6 +112,24 @@ describe('wordAtPoint', () => {
   })
 })
 
+describe('commandNameAtPoint', () => {
+  it('returns current command name at a given point', () => {
+    analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
+    expect(analyzer.commandNameAtPoint(CURRENT_URI, 15, 0)).toEqual(null)
+
+    expect(analyzer.commandNameAtPoint(CURRENT_URI, 20, 2)).toEqual('curl')
+    expect(analyzer.commandNameAtPoint(CURRENT_URI, 20, 15)).toEqual('curl')
+    expect(analyzer.commandNameAtPoint(CURRENT_URI, 20, 19)).toEqual('curl')
+
+    expect(analyzer.commandNameAtPoint(CURRENT_URI, 26, 4)).toEqual('echo')
+    expect(analyzer.commandNameAtPoint(CURRENT_URI, 26, 9)).toEqual('echo')
+
+    expect(analyzer.commandNameAtPoint(CURRENT_URI, 38, 13)).toEqual('env')
+    expect(analyzer.commandNameAtPoint(CURRENT_URI, 38, 24)).toEqual('grep')
+    expect(analyzer.commandNameAtPoint(CURRENT_URI, 38, 44)).toEqual('sed')
+  })
+})
+
 describe('findSymbolCompletions', () => {
   it('return a list of symbols across the workspace', () => {
     analyzer.analyze('install.sh', FIXTURES.INSTALL)
@@ -250,7 +268,7 @@ describe('fromRoot', () => {
     expect(connection.window.showWarningMessage).not.toHaveBeenCalled()
 
     // if you add a .sh file to testing/fixtures, update this value
-    const FIXTURE_FILES_MATCHING_GLOB = 11
+    const FIXTURE_FILES_MATCHING_GLOB = 12
 
     // Intro, stats on glob, one file skipped due to shebang, and outro
     const LOG_LINES = FIXTURE_FILES_MATCHING_GLOB + 4

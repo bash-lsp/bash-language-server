@@ -1,4 +1,6 @@
+import * as Process from 'child_process'
 import * as path from 'path'
+import * as Path from 'path'
 import * as TurndownService from 'turndown'
 import * as LSP from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
@@ -117,6 +119,16 @@ export default class BashServer {
     params: LSP.ReferenceParams | LSP.TextDocumentPositionParams,
   ): string | null {
     return this.analyzer.wordAtPoint(
+      params.textDocument.uri,
+      params.position.line,
+      params.position.character,
+    )
+  }
+
+  private getCommandNameAtPoint(
+    params: LSP.ReferenceParams | LSP.TextDocumentPositionParams,
+  ): string | null {
+    return this.analyzer.commandNameAtPoint(
       params.textDocument.uri,
       params.position.line,
       params.position.character,
@@ -323,6 +335,22 @@ export default class BashServer {
       return []
     }
 
+    let options: string[] = []
+    if (word && word.startsWith('-')) {
+      const commandName = this.getCommandNameAtPoint({
+        ...params,
+        position: {
+          line: params.position.line,
+          // Go one character back to get completion on the current word
+          character: Math.max(params.position.character - 1, 0),
+        },
+      })
+
+      if (commandName) {
+        options = getCommandOptions(commandName, word)
+      }
+    }
+
     const currentUri = params.textDocument.uri
 
     // TODO: an improvement here would be to detect if the current word is
@@ -385,11 +413,21 @@ export default class BashServer {
       },
     }))
 
+    const optionsCompletions = options.map(option => ({
+      label: option,
+      kind: LSP.SymbolKind.Interface,
+      data: {
+        name: option,
+        type: CompletionItemDataType.Symbol,
+      },
+    }))
+
     const allCompletions = [
       ...reservedWordsCompletions,
       ...symbolCompletions,
       ...programCompletions,
       ...builtinsCompletions,
+      ...optionsCompletions,
     ]
 
     if (word) {
@@ -531,3 +569,21 @@ const getMarkdownContent = (documentation: string): LSP.MarkupContent => ({
   // Passed as markdown for syntax highlighting
   kind: 'markdown' as const,
 })
+
+function getCommandOptions(name: string, word: string): string[] {
+  // TODO: The options could be cached.
+  const options = Process.spawnSync(Path.join(__dirname, '../src/get-options.sh'), [
+    name,
+    word,
+  ])
+
+  if (options.status !== 0) {
+    return []
+  }
+
+  return options.stdout
+    .toString()
+    .split('\t')
+    .map(l => l.trim())
+    .filter(l => l.length > 0)
+}
