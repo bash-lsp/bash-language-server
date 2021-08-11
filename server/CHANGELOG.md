@@ -1,5 +1,11 @@
 # Bash Language Server
 
+## 2.0.0
+
+- BREAKING: Drop node 10 support
+- Upgrade dependencies
+- Adds support for completing command line arguments (https://github.com/bash-lsp/bash-language-server/pull/294)
+
 ## 1.17.0
 
 - Default configuration change: parsing errors are not highlighted as problems (as the grammar is buggy)
