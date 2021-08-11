@@ -1,3 +1,5 @@
+import * as Process from 'child_process'
+import * as Path from 'path'
 import * as lsp from 'vscode-languageserver'
 
 import { FIXTURE_FOLDER, FIXTURE_URI } from '../../../testing/fixtures'
@@ -268,6 +270,17 @@ describe('server', () => {
   })
 
   it('responds to onCompletion with options list when command name is found', async () => {
+    // This doesn't work on all hosts:
+    const getOptionsResult = Process.spawnSync(
+      Path.join(__dirname, '../src/get-options.sh'),
+      ['find', '-'],
+    )
+
+    if (getOptionsResult.status !== 0) {
+      console.warn('Skipping onCompletion test as get-options.sh failed')
+      return
+    }
+
     const { connection, server } = await initializeServer()
     server.register(connection)
 
