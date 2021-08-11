@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.12.0
+
+- Upgrade language server to 2.0.0
+
 ## 1.11.0
 
 - Default configuration change: parsing errors are not highlighted as problems (as the grammar is buggy)
