@@ -777,10 +777,10 @@ w3c-hr-time@^1.0.1:
   dependencies:
     browser-process-hrtime "^0.1.2"
 
-web-tree-sitter@^0.16.2:
-  version "0.16.2"
-  resolved "https://registry.yarnpkg.com/web-tree-sitter/-/web-tree-sitter-0.16.2.tgz#fc6b62681d7ca524a9ffc8498448f8e23be7b1ea"
-  integrity sha512-vxZHqu4nItCARmE+oGvTgjFBrMbhEuGI9PWYSgF4ET/nLuW3K11KQQIVhAsoGtYvTI9jdbjc/THj38P7nhYwow==
+web-tree-sitter@^0.19.4:
+  version "0.19.4"
+  resolved "https://registry.yarnpkg.com/web-tree-sitter/-/web-tree-sitter-0.19.4.tgz#975076e233204de9063e7a7bda1138c4b454b424"
+  integrity sha512-8G0xBj05hqZybCqBtW7RPZ/hWEtP3DiLTauQzGJZuZYfVRgw7qj7iaZ+8djNqJ4VPrdOO+pS2dR1JsTbsLxdYg==
 
 webidl-conversions@^4.0.2:
   version "4.0.2"

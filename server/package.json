@@ -15,7 +15,7 @@
     "url": "https://github.com/bash-lsp/bash-language-server"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=11.0.0"
   },
   "dependencies": {
     "fuzzy-search": "^3.2.1",
@@ -26,7 +26,7 @@
     "urijs": "^1.19.1",
     "vscode-languageserver": "^6.1.1",
     "vscode-languageserver-textdocument": "^1.0.1",
-    "web-tree-sitter": "^0.16.2"
+    "web-tree-sitter": "^0.19.4"
   },
   "scripts": {
     "prepublishOnly": "cd ../ && yarn run compile"
