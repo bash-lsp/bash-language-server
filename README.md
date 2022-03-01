@@ -99,6 +99,8 @@ or
 require'lspconfig'.bashls.setup{}
 ```
 
+For Vim8/NeoVim v0.5 using [jayli/vim-easycomplete](https://github.com/jayli/vim-easycomplete). Execute `:InstallLspServer sh` and config nothing. Maybe it's the easiest way to use bash-language-server in vim/nvim.
+
 #### Oni
 
 On the config file (`File -> Preferences -> Edit Oni config`) add the following configuration:
