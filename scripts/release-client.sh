@@ -14,4 +14,4 @@ yarn run verify:bail
 cd vscode-client
 
 # NOTE: it would be much nicer if we could detect which version was deployed...
-npx vsce publish -p $VSCE_TOKEN && tagRelease $tag || echo 'Deploy failed, probably there was no changes'
+yarn vsce publish -p $VSCE_TOKEN && tagRelease $tag || echo 'Deploy failed, probably there was no changes'
