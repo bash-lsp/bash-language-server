@@ -58,7 +58,6 @@
     "vscode-languageserver": "^6.1.1"
   },
   "devDependencies": {
-    "@types/vscode": "^1.44.0",
-    "vsce": "1.103.1"
+    "@types/vscode": "^1.44.0"
   }
 }
