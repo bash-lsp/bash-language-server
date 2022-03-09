@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-DATADIR="$(pkg-config --variable=datadir bash-completion)"
+COMPLETIONSDIR="$(pkg-config --variable=completionsdir bash-completion)"
+DATADIR="$(dirname "$(dirname "${COMPLETIONSDIR}")")"
 
 # Exit if bash-completion isn't installed.
 if (( $? != 0 ))
