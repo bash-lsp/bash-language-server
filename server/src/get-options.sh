@@ -11,6 +11,17 @@ fi
 
 source "$DATADIR/bash-completion/bash_completion"
 
+# load local bash completion files
+for bcfile in ~/.bash_completion.d/* ; do
+    if [[ -d "$bcfile" ]]; then
+        for subbcfile in "$bcfile"/*; do
+            . "$subbcfile"
+        done
+    else
+        . "$bcfile"
+    fi
+done
+
 COMP_LINE="$*"
 COMP_WORDS=("$@")
 COMP_CWORD="${#COMP_WORDS[@]}"
