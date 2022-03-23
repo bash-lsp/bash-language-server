@@ -79,6 +79,7 @@ export default class BashServer {
       const { uri } = change.document
       const diagnostics = this.analyzer.analyze(uri, change.document)
 
+      // If treesitter fails to parse, report parse diagnostics only, do not shellcheck:
       if (diagnostics.length && config.getHighlightParsingError()) {
         connection.sendDiagnostics({
           uri: change.document.uri,
@@ -86,6 +87,7 @@ export default class BashServer {
         })
       }
 
+      // If treesitter succeeds, report shellcheck diagnostics:
       if (!diagnostics.length) {
         // FIXME: re-lint on workspace folder change
         const folders = await connection.workspace.getWorkspaceFolders()
