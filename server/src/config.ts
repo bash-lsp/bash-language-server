@@ -1,5 +1,10 @@
 export const DEFAULT_GLOB_PATTERN = '**/*@(.sh|.inc|.bash|.command)'
 
+export function getShellcheckPath(): string | null {
+  const { SHELLCHECK_PATH } = process.env
+  return typeof SHELLCHECK_PATH === 'string' ? SHELLCHECK_PATH : 'shellcheck'
+}
+
 export function getExplainshellEndpoint(): string | null {
   const { EXPLAINSHELL_ENDPOINT } = process.env
   return typeof EXPLAINSHELL_ENDPOINT === 'string' && EXPLAINSHELL_ENDPOINT.trim() !== ''

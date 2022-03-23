@@ -5,10 +5,13 @@ import * as TurndownService from 'turndown'
 import * as LSP from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
+import * as fs from 'fs'
+
 import Analyzer from './analyser'
 import * as Builtins from './builtins'
 import * as config from './config'
 import Executables from './executables'
+import Linter from './linter'
 import { initializeParser } from './parser'
 import * as ReservedWords from './reservedWords'
 import { BashCompletionItem, CompletionItemDataType } from './types'
@@ -41,15 +44,15 @@ export default class BashServer {
     return Promise.all([
       Executables.fromPath(PATH),
       Analyzer.fromRoot({ connection, rootPath, parser }),
-    ]).then(xs => {
-      const executables = xs[0]
-      const analyzer = xs[1]
-      return new BashServer(connection, executables, analyzer)
+      new Linter({ executablePath: config.getShellcheckPath() }),
+    ]).then(([executables, analyzer, linter]) => {
+      return new BashServer(connection, executables, analyzer, linter)
     })
   }
 
   private executables: Executables
   private analyzer: Analyzer
+  private linter: Linter
 
   private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
   private connection: LSP.Connection
@@ -58,10 +61,12 @@ export default class BashServer {
     connection: LSP.Connection,
     executables: Executables,
     analyzer: Analyzer,
+    linter: Linter,
   ) {
     this.connection = connection
     this.executables = executables
     this.analyzer = analyzer
+    this.linter = linter
   }
 
   /**
@@ -72,14 +77,28 @@ export default class BashServer {
     // The content of a text document has changed. This event is emitted
     // when the text document first opened or when its content has changed.
     this.documents.listen(this.connection)
-    this.documents.onDidChangeContent(change => {
+    this.documents.onDidChangeContent(async change => {
       const { uri } = change.document
       const diagnostics = this.analyzer.analyze(uri, change.document)
-      if (config.getHighlightParsingError()) {
+
+      if (diagnostics.length && config.getHighlightParsingError()) {
         connection.sendDiagnostics({
           uri: change.document.uri,
           diagnostics,
         })
+      }
+
+      if (!diagnostics.length) {
+        // FIXME: re-lint on workspace folder change
+        const folders = await connection.workspace.getWorkspaceFolders()
+
+        const checks = await this.linter.lint(change.document, folders || [])
+        if (checks) {
+          connection.sendDiagnostics({
+            uri: change.document.uri,
+            diagnostics: checks,
+          })
+        }
       }
     })
 
