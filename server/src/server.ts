@@ -5,8 +5,6 @@ import * as TurndownService from 'turndown'
 import * as LSP from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
-import * as fs from 'fs'
-
 import Analyzer from './analyser'
 import * as Builtins from './builtins'
 import * as config from './config'
