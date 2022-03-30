@@ -77,28 +77,20 @@ export default class BashServer {
     this.documents.listen(this.connection)
     this.documents.onDidChangeContent(async change => {
       const { uri } = change.document
-      const diagnostics = this.analyzer.analyze(uri, change.document)
+      let diagnostics: LSP.Diagnostic[] = []
 
-      // If treesitter fails to parse, report parse diagnostics only, do not shellcheck:
-      if (diagnostics.length && config.getHighlightParsingError()) {
-        connection.sendDiagnostics({
-          uri: change.document.uri,
-          diagnostics,
-        })
+      // FIXME: re-lint on workspace folder change
+      const folders = await connection.workspace.getWorkspaceFolders()
+      const lintDiagnostics = await this.linter.lint(change.document, folders || [])
+      diagnostics = diagnostics.concat(lintDiagnostics)
+
+      if (config.getHighlightParsingError()) {
+        const analyzeDiagnostics = this.analyzer.analyze(uri, change.document)
+        diagnostics = diagnostics.concat(analyzeDiagnostics)
       }
 
-      // If treesitter succeeds, report shellcheck diagnostics:
-      if (!diagnostics.length) {
-        // FIXME: re-lint on workspace folder change
-        const folders = await connection.workspace.getWorkspaceFolders()
-
-        const checks = await this.linter.lint(change.document, folders || [])
-        if (checks) {
-          connection.sendDiagnostics({
-            uri: change.document.uri,
-            diagnostics: checks,
-          })
-        }
+      if (diagnostics.length) {
+        connection.sendDiagnostics({ uri, diagnostics })
       }
     })
 
