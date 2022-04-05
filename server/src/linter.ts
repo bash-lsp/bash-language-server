@@ -1,8 +1,8 @@
-import * as LSP from 'vscode-languageserver'
 import { spawn } from 'child_process'
+import * as LSP from 'vscode-languageserver'
 
 function formatMessage(comment: any): string {
-  return (comment.code ? 'SC' + comment.code + ': ' : '') + comment.message
+  return (comment.code ? `SC${comment.code}: ` : '') + comment.message
 }
 
 export default class Linter {
