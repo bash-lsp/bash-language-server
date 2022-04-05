@@ -722,9 +722,9 @@ type-check@~0.3.2:
     prelude-ls "~1.1.2"
 
 urijs@^1.19.1:
-  version "1.19.8"
-  resolved "https://registry.yarnpkg.com/urijs/-/urijs-1.19.8.tgz#ee0407a18528934d3c383e691912f47043a58feb"
-  integrity sha512-iIXHrjomQ0ZCuDRy44wRbyTZVnfVNLVo3Ksz1yxNyE5wV1IDZW2S5Jszy45DTlw/UdsnRT7DyDhIz7Gy+vJumw==
+  version "1.19.10"
+  resolved "https://registry.yarnpkg.com/urijs/-/urijs-1.19.10.tgz#8e2fe70a8192845c180f75074884278f1eea26cb"
+  integrity sha512-EzauQlgKuJgsXOqoMrCiePBf4At5jVqRhXykF3Wfb8ZsOBMxPcfiVBcsHXug4Aepb/ICm2PIgqAUGMelgdrWEg==
 
 uuid@^3.1.0:
   version "3.2.1"
