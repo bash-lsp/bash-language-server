@@ -438,7 +438,14 @@ export default class Analyzer {
       // this regexp has to be defined within the function
       const commentRegExp = /^\s*#\s*(.*)/g
       const matches = commentRegExp.exec(l)
-      return matches ? matches[1].trim() : null
+      if (!matches) {
+        return null
+      }
+      let retVal = matches[1].trim()
+      if (retVal == '') {
+        retVal = ' '
+      }
+      return retVal
     }
 
     let currentLine = doc.getText({
@@ -450,6 +457,10 @@ export default class Analyzer {
     // the current line until getComment returns null
     let currentComment: string | null = ''
     while ((currentComment = getComment(currentLine))) {
+      if (currentComment == ' ') {
+        currentComment = ''
+      }
+
       commentBlock.push(currentComment)
       commentBlockIndex -= 1
       currentLine = doc.getText({

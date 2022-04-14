@@ -247,6 +247,13 @@ describe('commentsAbove', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
     expect(analyzer.commentsAbove(CURRENT_URI, 42)).toEqual('works for variables')
   })
+
+  it('returns connected comments with empty comment line', () => {
+    analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
+    expect(analyzer.commentsAbove(CURRENT_URI, 51)).toEqual(
+      'this is also included\n\ndoc for func_four',
+    )
+  })
 })
 
 describe('fromRoot', () => {
