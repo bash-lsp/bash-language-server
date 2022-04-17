@@ -450,10 +450,6 @@ export default class Analyzer {
     // the current line until getComment returns null
     let currentComment: string | null = ''
     while ((currentComment = getComment(currentLine)) !== null) {
-      if (currentComment == ' ') {
-        currentComment = ''
-      }
-
       commentBlock.push(currentComment)
       commentBlockIndex -= 1
       currentLine = doc.getText({
