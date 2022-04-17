@@ -1,5 +1,11 @@
 # Bash Language Server
 
+## 2.1.0
+
+- Fix failing to get options if bash-completion<=2.9 #340 (https://github.com/bash-lsp/bash-language-server/pull/340)
+- onHover now supports for multiline code comments (https://github.com/bash-lsp/bash-language-server/pull/348)
+- Dependency upgrades
+
 ## 2.0.0
 
 - BREAKING: Drop node 10 support
