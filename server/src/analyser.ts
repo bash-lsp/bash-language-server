@@ -438,14 +438,7 @@ export default class Analyzer {
       // this regexp has to be defined within the function
       const commentRegExp = /^\s*#\s*(.*)/g
       const matches = commentRegExp.exec(l)
-      if (!matches) {
-        return null
-      }
-      let retVal = matches[1].trim()
-      if (retVal == '') {
-        retVal = ' '
-      }
-      return retVal
+      return matches ? matches[1].trim() : null
     }
 
     let currentLine = doc.getText({
@@ -456,7 +449,7 @@ export default class Analyzer {
     // iterate on every line above and including
     // the current line until getComment returns null
     let currentComment: string | null = ''
-    while ((currentComment = getComment(currentLine))) {
+    while ((currentComment = getComment(currentLine)) !== null) {
       if (currentComment == ' ') {
         currentComment = ''
       }
