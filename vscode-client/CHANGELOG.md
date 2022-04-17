@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.13.0
+
+- Upgrade language server to 2.1.0
+
 ## 1.12.1
 
 - Bug fix to fix server not starting
