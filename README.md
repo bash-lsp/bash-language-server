@@ -23,20 +23,20 @@ npm i -g bash-language-server
 
 If you encounter installation errors, ensure you have node version 8 or newer (`node --version`).
 
-
 ### Clients
 
 The following editors and IDEs have available clients:
 
-- Visual Studio Code ([Bash IDE][vscode-marketplace])
 - Atom ([ide-bash][ide-bash])
-- Sublime Text ([LSP-bash][sublime-text-lsp])
-- Vim ([see below](#vim))
-- Neovim ([see below](#neovim))
-- [Oni](https://github.com/onivim/oni) ([see below](#oni))
 - Eclipse ([ShellWax](https://marketplace.eclipse.org/content/shellwax))
 - Emacs ([see below](#emacs))
+- [Helix](https://helix-editor.com/) (built-in support)
 - JupyterLab ([jupyterlab-lsp][jupyterlab-lsp])
+- Neovim ([see below](#neovim))
+- Sublime Text ([LSP-bash][sublime-text-lsp])
+- Vim ([see below](#vim))
+- Visual Studio Code ([Bash IDE][vscode-marketplace])
+- [Oni](https://github.com/onivim/oni) ([see below](#oni))
 
 #### Vim
 
@@ -88,6 +88,7 @@ let g:LanguageClient_serverCommands = {
 For NeoVim v0.5(nightly) using its built-in lsp, install [neovim/nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) and add the following configuration to either your `init.vim` or `init.lua`
 
 `init.vim`:
+
 ```vim
 lua require'lspconfig'.bashls.setup{}
 ```
@@ -95,7 +96,8 @@ lua require'lspconfig'.bashls.setup{}
 or
 
 `init.lua`:
-``` lua
+
+```lua
 require'lspconfig'.bashls.setup{}
 ```
 
