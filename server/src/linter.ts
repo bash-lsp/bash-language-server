@@ -1,44 +1,41 @@
 import { spawn } from 'child_process'
 import * as LSP from 'vscode-languageserver'
 
-function formatMessage(comment: any): string {
+function formatMessage(comment: ShellcheckComment): string {
   return (comment.code ? `SC${comment.code}: ` : '') + comment.message
+}
+
+type LinterOptions = {
+  executablePath?: string | null
+  cwd?: string
 }
 
 export default class Linter {
   private executablePath: string | null
-  private canLint: boolean
+  private cwd: string
+  _canLint: boolean
 
-  constructor({ executablePath }: { executablePath: string | null }) {
-    this.executablePath = executablePath
-    this.canLint = !!executablePath
+  constructor(opts: LinterOptions = {}) {
+    this.executablePath = opts.executablePath || null
+    this.cwd = opts.cwd || process.cwd()
+    this._canLint = !!this.executablePath
+  }
+
+  public get canLint(): boolean {
+    return this._canLint
   }
 
   public async lint(
     document: LSP.TextDocument,
     folders: LSP.WorkspaceFolder[],
   ): Promise<LSP.Diagnostic[]> {
-    if (!this.executablePath || !this.canLint) return []
+    if (!this.executablePath || !this._canLint) return []
 
-    const raw = await this.runShellcheck(this.executablePath, document, folders)
-    if (!this.canLint) return []
-
-    if (typeof raw != 'object')
-      throw new Error(`shellcheck: unexpected json output ${typeof raw}`)
-
-    if (!Array.isArray(raw.comments))
-      throw new Error(
-        `shellcheck: unexpected json output: expected 'comments' array ${typeof raw.comments}`,
-      )
+    const result = await this.runShellcheck(this.executablePath, document, folders)
+    if (!this._canLint) return []
 
     const diags: LSP.Diagnostic[] = []
-    for (const idx in raw.comments) {
-      const comment = raw.comments[idx]
-      if (typeof comment != 'object')
-        throw new Error(
-          `shellcheck: unexpected json comment at idx ${idx}: ${typeof comment}`,
-        )
-
+    for (const comment of result.comments) {
       const start: LSP.Position = {
         line: comment.line - 1,
         character: comment.column - 1,
@@ -50,7 +47,7 @@ export default class Linter {
 
       diags.push({
         message: formatMessage(comment),
-        severity: comment.level,
+        severity: mapShellcheckServerity(comment.level),
         code: comment.code,
         source: 'shellcheck',
         range: { start, end },
@@ -64,47 +61,137 @@ export default class Linter {
     executablePath: string,
     document: LSP.TextDocument,
     folders: LSP.WorkspaceFolder[],
-  ): Promise<any> {
+  ): Promise<ShellcheckResult> {
     // FIXME: inject?
-    const cwd = process.cwd()
-
-    const args = ['--format=json1', '--external-sources', `--source-path=${cwd}`]
+    const args = ['--format=json1', '--external-sources', `--source-path=${this.cwd}`]
     for (const folder of folders) {
       args.push(`--source-path=${folder.name}`)
     }
 
-    const proc = spawn(executablePath, [...args, '-'], { cwd })
-    const onErr = new Promise((_, reject) =>
-      proc.on('error', e => {
-        if ((e as any).code === 'ENOENT') {
-          // shellcheck path wasn't found, don't try to lint any more:
-          console.error(`shellcheck not available at path '${this.executablePath}'`)
-          this.canLint = false
-        }
-        reject(e)
-      }),
-    )
-
-    proc.stdin.write(document.getText())
-    proc.stdin.end()
-
     let out = ''
-    for await (const chunk of proc.stdout) out += chunk
-
     let err = ''
-    for await (const chunk of proc.stderr) err += chunk
+    const proc = new Promise((resolve, reject) => {
+      const proc = spawn(executablePath, [...args, '-'], { cwd: this.cwd })
+      proc.on('error', reject)
+      proc.on('close', resolve)
+      proc.stdout.on('data', data => (out += data))
+      proc.stderr.on('data', data => (err += data))
+      proc.stdin.write(document.getText())
+      proc.stdin.end()
+    })
 
     // XXX: do we care about exit code? 0 means "ok", 1 possibly means "errors",
     // but the presence of parseable errors in the output is also sufficient to
     // distinguish.
-    await Promise.race([new Promise((resolve, _) => proc.on('close', resolve)), onErr])
-
+    let exit
     try {
-      return JSON.parse(out)
+      exit = await proc
+    } catch (e) {
+      if ((e as any).code === 'ENOENT') {
+        // shellcheck path wasn't found, don't try to lint any more:
+        console.error(`shellcheck not available at path '${this.executablePath}'`)
+        this._canLint = false
+        return { comments: [] }
+      }
+      throw new Error(
+        `shellcheck failed with code ${exit}: ${e}\nout:\n${out}\nerr:\n${err}`,
+      )
+    }
+
+    let raw
+    try {
+      raw = JSON.parse(out)
     } catch (e) {
       throw new Error(
         `shellcheck: json parse failed with error ${e}\nout:\n${out}\nerr:\n${err}`,
       )
     }
+    assertShellcheckResult(raw)
+    return raw
   }
 }
+
+export type ShellcheckResult = Readonly<{
+  comments: ReadonlyArray<ShellcheckComment>
+}>
+
+// Constituent structures defined here:
+// https://github.com/koalaman/shellcheck/blob/4e703e5c61c6366bfd486d728bc624025e344e68/src/ShellCheck/Interface.hs#L221
+export type ShellcheckComment = Readonly<{
+  file: string
+  line: number // 1-based
+  endLine: number // 1-based
+  column: number // 1-based
+  endColumn: number // 1-based
+  level: string // See mapShellcheckServerity
+  code: number
+  message: string
+
+  // The Fix data type appears to be defined here. We aren't making use of
+  // it yet but this might help down the road:
+  // https://github.com/koalaman/shellcheck/blob/4e703e5c61c6366bfd486d728bc624025e344e68/src/ShellCheck/Interface.hs#L271
+  // fix: any;
+}>
+
+export function assertShellcheckResult(val: any): asserts val is ShellcheckResult {
+  if (val !== null && typeof val !== 'object') {
+    throw new Error(`shellcheck: unexpected json output ${typeof val}`)
+  }
+
+  if (!Array.isArray(val.comments)) {
+    throw new Error(
+      `shellcheck: unexpected json output: expected 'comments' array ${typeof val.comments}`,
+    )
+  }
+
+  for (const idx in val.comments) {
+    const comment = val.comments[idx]
+    if (comment !== null && typeof comment != 'object') {
+      throw new Error(
+        `shellcheck: expected comment at index ${idx} to be object, found ${typeof comment}`,
+      )
+    }
+    if (typeof comment.file !== 'string')
+      throw new Error(
+        `shellcheck: expected comment file at index ${idx} to be string, found ${typeof comment.file}`,
+      )
+    if (typeof comment.level !== 'string')
+      throw new Error(
+        `shellcheck: expected comment level at index ${idx} to be string, found ${typeof comment.level}`,
+      )
+    if (typeof comment.message !== 'string')
+      throw new Error(
+        `shellcheck: expected comment message at index ${idx} to be string, found ${typeof comment.level}`,
+      )
+    if (typeof comment.line !== 'number')
+      throw new Error(
+        `shellcheck: expected comment line at index ${idx} to be number, found ${typeof comment.line}`,
+      )
+    if (typeof comment.endLine !== 'number')
+      throw new Error(
+        `shellcheck: expected comment endLine at index ${idx} to be number, found ${typeof comment.endLine}`,
+      )
+    if (typeof comment.column !== 'number')
+      throw new Error(
+        `shellcheck: expected comment column at index ${idx} to be number, found ${typeof comment.column}`,
+      )
+    if (typeof comment.endColumn !== 'number')
+      throw new Error(
+        `shellcheck: expected comment endColumn at index ${idx} to be number, found ${typeof comment.endColumn}`,
+      )
+    if (typeof comment.code !== 'number')
+      throw new Error(
+        `shellcheck: expected comment code at index ${idx} to be number, found ${typeof comment.code}`,
+      )
+  }
+}
+
+// Severity mappings:
+// https://github.com/koalaman/shellcheck/blob/364c33395e2f2d5500307f01989f70241c247d5a/src/ShellCheck/Formatter/Format.hs#L50
+// prettier-ignore
+const mapShellcheckServerity = (sev: string): LSP.DiagnosticSeverity =>
+  sev == 'error' ? LSP.DiagnosticSeverity.Error :
+  sev == 'warning' ? LSP.DiagnosticSeverity.Warning :
+  sev == 'info' ? LSP.DiagnosticSeverity.Information :
+  sev == 'style' ? LSP.DiagnosticSeverity.Hint :
+  LSP.DiagnosticSeverity.Error // FIXME: Is "error" appropriate as a default?

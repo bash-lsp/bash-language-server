@@ -2,7 +2,8 @@ export const DEFAULT_GLOB_PATTERN = '**/*@(.sh|.inc|.bash|.command)'
 
 export function getShellcheckPath(): string | null {
   const { SHELLCHECK_PATH } = process.env
-  return typeof SHELLCHECK_PATH === 'string' ? SHELLCHECK_PATH : 'shellcheck'
+  // If this is an empty string, this should coalesce to null and disable linting via shellcheck:
+  return typeof SHELLCHECK_PATH === 'string' ? SHELLCHECK_PATH || null : 'shellcheck'
 }
 
 export function getExplainshellEndpoint(): string | null {
