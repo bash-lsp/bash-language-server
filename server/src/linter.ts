@@ -74,10 +74,12 @@ export default class Linter {
       const proc = spawn(executablePath, [...args, '-'], { cwd: this.cwd })
       proc.on('error', reject)
       proc.on('close', resolve)
+      proc.on('spawn', () => {
+        proc.stdin.write(document.getText())
+        proc.stdin.end()
+      })
       proc.stdout.on('data', data => (out += data))
       proc.stderr.on('data', data => (err += data))
-      proc.stdin.write(document.getText())
-      proc.stdin.end()
     })
 
     // XXX: do we care about exit code? 0 means "ok", 1 possibly means "errors",
