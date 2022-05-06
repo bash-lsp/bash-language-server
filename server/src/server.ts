@@ -1,5 +1,4 @@
 import * as Process from 'child_process'
-import * as path from 'path'
 import * as Path from 'path'
 import * as TurndownService from 'turndown'
 import * as LSP from 'vscode-languageserver'
@@ -89,9 +88,7 @@ export default class BashServer {
         diagnostics = diagnostics.concat(analyzeDiagnostics)
       }
 
-      if (diagnostics.length) {
-        connection.sendDiagnostics({ uri, diagnostics })
-      }
+      connection.sendDiagnostics({ uri, diagnostics })
     })
 
     // Register all the handlers for the LSP events.
@@ -175,7 +172,7 @@ export default class BashServer {
     const symbolDocumentation = commentAboveSymbol ? `\n\n${commentAboveSymbol}` : ''
 
     return symbolUri !== currentUri
-      ? `${symbolKindToDescription(symbol.kind)} defined in ${path.relative(
+      ? `${symbolKindToDescription(symbol.kind)} defined in ${Path.relative(
           currentUri,
           symbolUri,
         )}${symbolDocumentation}`
