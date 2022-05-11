@@ -35,7 +35,7 @@
     "@types/fuzzy-search": "2.1.2",
     "@types/glob": "7.1.1",
     "@types/request-promise-native": "1.0.18",
-    "@types/turndown": "5.0.0",
+    "@types/turndown": "5.0.1",
     "@types/urijs": "1.19.4"
   }
 }
