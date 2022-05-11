@@ -28,7 +28,7 @@
     "jest": "25.0.0",
     "prettier": "1.19.1",
     "ts-jest": "25.5.1",
-    "typescript": "3.8.3",
+    "typescript": "3.9.10",
     "vscode-languageserver": "6.1.1"
   },
   "dependencies": {},
