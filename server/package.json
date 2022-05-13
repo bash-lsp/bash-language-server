@@ -22,7 +22,7 @@
     "glob": "^8.0.0",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
-    "turndown": "^4.0.2",
+    "turndown": "^7.0.0",
     "urijs": "^1.19.1",
     "vscode-languageserver": "^6.1.1",
     "vscode-languageserver-textdocument": "^1.0.1",
