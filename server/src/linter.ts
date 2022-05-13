@@ -62,7 +62,6 @@ export default class Linter {
     document: LSP.TextDocument,
     folders: LSP.WorkspaceFolder[],
   ): Promise<ShellcheckResult> {
-    // FIXME: inject?
     const args = ['--format=json1', '--external-sources', `--source-path=${this.cwd}`]
     for (const folder of folders) {
       args.push(`--source-path=${folder.name}`)
