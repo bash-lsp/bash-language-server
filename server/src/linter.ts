@@ -73,12 +73,15 @@ export default class Linter {
       const proc = spawn(executablePath, [...args, '-'], { cwd: this.cwd })
       proc.on('error', reject)
       proc.on('close', resolve)
-      proc.on('spawn', () => {
-        proc.stdin.write(document.getText())
-        proc.stdin.end()
-      })
       proc.stdout.on('data', data => (out += data))
       proc.stderr.on('data', data => (err += data))
+      proc.stdin.on('error', () => {
+        // XXX: Ignore STDIN errors in case the process ends too quickly, before we try to
+        // write. If we write after the process ends without this, we get an uncatchable EPIPE.
+        // This is solved in Node >= 15.1 by the "on('spawn', ...)" event, but we need to
+        // support earlier versions.
+      })
+      proc.stdin.end(document.getText())
     })
 
     // XXX: do we care about exit code? 0 means "ok", 1 possibly means "errors",
