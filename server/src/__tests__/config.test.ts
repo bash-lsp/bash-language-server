@@ -1,5 +1,29 @@
 import * as config from '../config'
 
+describe('getShellcheckPath', () => {
+  it('defaults to shellcheck without path', () => {
+    process.env = {}
+    const result = config.getShellcheckPath()
+    expect(result).toEqual('shellcheck')
+  })
+
+  it('default to null in case of an empty string', () => {
+    process.env = {
+      SHELLCHECK_PATH: '',
+    }
+    const result = config.getShellcheckPath()
+    expect(result).toBeNull()
+  })
+
+  it('parses environment variable', () => {
+    process.env = {
+      SHELLCHECK_PATH: '/path/to/shellcheck',
+    }
+    const result = config.getShellcheckPath()
+    expect(result).toEqual('/path/to/shellcheck')
+  })
+})
+
 describe('getExplainshellEndpoint', () => {
   it('default to null', () => {
     process.env = {}
