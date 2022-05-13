@@ -15,7 +15,8 @@ export default class Linter {
   private cwd: string
   _canLint: boolean
 
-  constructor(opts: LinterOptions = {}) {
+  constructor(opts: LinterOptions) {
+    this.executablePath = opts.executablePath
     this.executablePath = opts.executablePath || null
     this.cwd = opts.cwd || process.cwd()
     this._canLint = !!this.executablePath
