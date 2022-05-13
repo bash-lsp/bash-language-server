@@ -17,7 +17,6 @@ export default class Linter {
 
   constructor(opts: LinterOptions) {
     this.executablePath = opts.executablePath
-    this.executablePath = opts.executablePath || null
     this.cwd = opts.cwd || process.cwd()
     this._canLint = !!this.executablePath
   }
