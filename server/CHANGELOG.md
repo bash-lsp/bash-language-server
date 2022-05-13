@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 3.0.1
+
+- Upgrade treesitter to fix node 18 issue
+
 ## 3.0.0
 
 - Linting based on shellcheck (https://github.com/bash-lsp/bash-language-server/pull/342)
