@@ -33,7 +33,7 @@
   },
   "dependencies": {},
   "resolutions": {
-    "sane": "^3.0.2"
+    "sane": "^5.0.0"
   },
   "jest": {
     "testEnvironment": "node",
