@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "fuzzy-search": "^3.2.1",
-    "glob": "^7.1.6",
+    "glob": "^8.0.0",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
     "turndown": "^4.0.2",
