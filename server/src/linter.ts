@@ -47,7 +47,7 @@ export default class Linter {
 
       diags.push({
         message: formatMessage(comment),
-        severity: mapShellcheckServerity(comment.level),
+        severity: mapServerity(comment.level),
         code: comment.code,
         source: 'shellcheck',
         range: { start, end },
@@ -187,12 +187,14 @@ export function assertShellcheckResult(val: any): asserts val is ShellcheckResul
   }
 }
 
+const severityMapping: Record<string, undefined | LSP.DiagnosticSeverity> = {
+  error: LSP.DiagnosticSeverity.Error,
+  warning: LSP.DiagnosticSeverity.Warning,
+  info: LSP.DiagnosticSeverity.Information,
+  style: LSP.DiagnosticSeverity.Hint,
+}
+
 // Severity mappings:
 // https://github.com/koalaman/shellcheck/blob/364c33395e2f2d5500307f01989f70241c247d5a/src/ShellCheck/Formatter/Format.hs#L50
-// prettier-ignore
-const mapShellcheckServerity = (sev: string): LSP.DiagnosticSeverity =>
-  sev == 'error' ? LSP.DiagnosticSeverity.Error :
-  sev == 'warning' ? LSP.DiagnosticSeverity.Warning :
-  sev == 'info' ? LSP.DiagnosticSeverity.Information :
-  sev == 'style' ? LSP.DiagnosticSeverity.Hint :
-  LSP.DiagnosticSeverity.Error
+const mapServerity = (sev: string) => severityMapping[sev] || LSP.DiagnosticSeverity.Error
+
