@@ -19,9 +19,7 @@ export async function activate(context: ExtensionContext) {
     .getConfiguration('bashIde')
     .get('highlightParsingErrors', false)
 
-  const shellcheckPath = workspace
-    .getConfiguration('bashIde')
-    .get('shellcheckPath', '')
+  const shellcheckPath = workspace.getConfiguration('bashIde').get('shellcheckPath', '')
 
   const env: any = {
     ...process.env,

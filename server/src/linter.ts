@@ -197,4 +197,3 @@ const severityMapping: Record<string, undefined | LSP.DiagnosticSeverity> = {
 // Severity mappings:
 // https://github.com/koalaman/shellcheck/blob/364c33395e2f2d5500307f01989f70241c247d5a/src/ShellCheck/Formatter/Format.hs#L50
 const mapSeverity = (sev: string) => severityMapping[sev] || LSP.DiagnosticSeverity.Error
-
