@@ -25,6 +25,9 @@ describe('linter', () => {
     })
     expect(await linter.lint(textToDoc(''), [])).toEqual([])
     expect(linter.canLint).toBe(false)
+    expect(console.error).toBeCalledWith(
+      expect.stringContaining('shellcheck not available at path'),
+    )
   })
 
   it('should lint when shellcheck present', async () => {
