@@ -6,7 +6,7 @@ function formatMessage(comment: ShellcheckComment): string {
 }
 
 type LinterOptions = {
-  executablePath?: string | null
+  executablePath: string | null
   cwd?: string
 }
 
