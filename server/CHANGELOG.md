@@ -1,8 +1,13 @@
 # Bash Language Server
 
+## 3.0.0
+
+- Linting based on shellcheck (https://github.com/bash-lsp/bash-language-server/pull/342)
+- BREAKING: Drop node 11 support (ton of dependencies upgraded).
+
 ## 2.1.0
 
-- Fix failing to get options if bash-completion<=2.9 #340 (https://github.com/bash-lsp/bash-language-server/pull/340)
+- Fix failing to get options if bash-completion<=2.9 (https://github.com/bash-lsp/bash-language-server/pull/340)
 - onHover now supports for multiline code comments (https://github.com/bash-lsp/bash-language-server/pull/348)
 - Dependency upgrades
 
