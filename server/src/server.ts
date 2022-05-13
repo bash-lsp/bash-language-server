@@ -1,5 +1,4 @@
 import * as Process from 'child_process'
-import * as path from 'path'
 import * as Path from 'path'
 import * as TurndownService from 'turndown'
 import * as LSP from 'vscode-languageserver'
@@ -9,6 +8,7 @@ import Analyzer from './analyser'
 import * as Builtins from './builtins'
 import * as config from './config'
 import Executables from './executables'
+import Linter from './linter'
 import { initializeParser } from './parser'
 import * as ReservedWords from './reservedWords'
 import { BashCompletionItem, CompletionItemDataType } from './types'
@@ -41,15 +41,15 @@ export default class BashServer {
     return Promise.all([
       Executables.fromPath(PATH),
       Analyzer.fromRoot({ connection, rootPath, parser }),
-    ]).then(xs => {
-      const executables = xs[0]
-      const analyzer = xs[1]
-      return new BashServer(connection, executables, analyzer)
+      new Linter({ executablePath: config.getShellcheckPath() }),
+    ]).then(([executables, analyzer, linter]) => {
+      return new BashServer(connection, executables, analyzer, linter)
     })
   }
 
   private executables: Executables
   private analyzer: Analyzer
+  private linter: Linter
 
   private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
   private connection: LSP.Connection
@@ -58,10 +58,12 @@ export default class BashServer {
     connection: LSP.Connection,
     executables: Executables,
     analyzer: Analyzer,
+    linter: Linter,
   ) {
     this.connection = connection
     this.executables = executables
     this.analyzer = analyzer
+    this.linter = linter
   }
 
   /**
@@ -72,15 +74,21 @@ export default class BashServer {
     // The content of a text document has changed. This event is emitted
     // when the text document first opened or when its content has changed.
     this.documents.listen(this.connection)
-    this.documents.onDidChangeContent(change => {
+    this.documents.onDidChangeContent(async change => {
       const { uri } = change.document
-      const diagnostics = this.analyzer.analyze(uri, change.document)
+      let diagnostics: LSP.Diagnostic[] = []
+
+      // FIXME: re-lint on workspace folder change
+      const folders = await connection.workspace.getWorkspaceFolders()
+      const lintDiagnostics = await this.linter.lint(change.document, folders || [])
+      diagnostics = diagnostics.concat(lintDiagnostics)
+
       if (config.getHighlightParsingError()) {
-        connection.sendDiagnostics({
-          uri: change.document.uri,
-          diagnostics,
-        })
+        const analyzeDiagnostics = this.analyzer.analyze(uri, change.document)
+        diagnostics = diagnostics.concat(analyzeDiagnostics)
       }
+
+      connection.sendDiagnostics({ uri, diagnostics })
     })
 
     // Register all the handlers for the LSP events.
@@ -164,7 +172,7 @@ export default class BashServer {
     const symbolDocumentation = commentAboveSymbol ? `\n\n${commentAboveSymbol}` : ''
 
     return symbolUri !== currentUri
-      ? `${symbolKindToDescription(symbol.kind)} defined in ${path.relative(
+      ? `${symbolKindToDescription(symbol.kind)} defined in ${Path.relative(
           currentUri,
           symbolUri,
         )}${symbolDocumentation}`
