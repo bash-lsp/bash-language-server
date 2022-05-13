@@ -18,16 +18,13 @@ describe('linter', () => {
   })
 
   it('should set canLint to false when linting fails', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {}) // eslint-disable-line
-    try {
-      const linter = new Linter({
-        executablePath: '77b4d3f6-c87a-11ec-9b62-a3c90f66d29f',
-      })
-      expect(await linter.lint(textToDoc(''), [])).toEqual([])
-      expect(linter.canLint).toBe(false)
-    } finally {
-      ;(console.error as any).mockRestore()
-    }
+    jest.spyOn(console, 'error').mockImplementation()
+    const executablePath = '77b4d3f6-c87a-11ec-9b62-a3c90f66d29f'
+    const linter = new Linter({
+      executablePath,
+    })
+    expect(await linter.lint(textToDoc(''), [])).toEqual([])
+    expect(linter.canLint).toBe(false)
   })
 
   it('should lint when shellcheck present', async () => {
