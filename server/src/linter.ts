@@ -195,4 +195,4 @@ const mapShellcheckServerity = (sev: string): LSP.DiagnosticSeverity =>
   sev == 'warning' ? LSP.DiagnosticSeverity.Warning :
   sev == 'info' ? LSP.DiagnosticSeverity.Information :
   sev == 'style' ? LSP.DiagnosticSeverity.Hint :
-  LSP.DiagnosticSeverity.Error // FIXME: Is "error" appropriate as a default?
+  LSP.DiagnosticSeverity.Error
