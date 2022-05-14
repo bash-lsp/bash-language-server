@@ -49,7 +49,8 @@ module.exports = {
     ],
     'prefer-const': 'error',
     'prefer-template': 'error',
-    'simple-import-sort/sort': 'error',
+    'simple-import-sort/imports': 'error',
+    'simple-import-sort/exports': 'error',
     'object-shorthand': 'error',
 
     '@typescript-eslint/explicit-function-return-type': 'off',
