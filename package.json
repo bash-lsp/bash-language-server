@@ -36,8 +36,8 @@
     "sane": "^5.0.0"
   },
   "jest": {
+    "preset": "ts-jest",
     "testEnvironment": "node",
-    "timers": "fake",
     "clearMocks": true,
     "moduleFileExtensions": [
       "js",
@@ -54,7 +54,7 @@
     },
     "globals": {
       "ts-jest": {
-        "tsConfig": "./server/tsconfig.json"
+        "tsconfig": "./server/tsconfig.json"
       }
     },
     "testMatch": [
