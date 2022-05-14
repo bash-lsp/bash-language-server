@@ -1,12 +1,7 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint', 'jest', 'simple-import-sort', 'prettier'],
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'prettier',
-    'prettier/@typescript-eslint',
-  ],
+  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
   parserOptions: {
     ecmaFeatures: {
       jsx: true,
@@ -16,15 +11,7 @@ module.exports = {
     project: './tsconfig.eslint.json',
   },
   rules: {
-    'prettier/prettier': [
-      'error',
-      {
-        trailingComma: 'all',
-        singleQuote: true,
-        printWidth: 90,
-        semi: false,
-      },
-    ],
+    'prettier/prettier': ['error'],
     '@typescript-eslint/no-unused-vars': [
       'error',
       {
