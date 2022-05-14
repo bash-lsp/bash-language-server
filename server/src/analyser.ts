@@ -59,8 +59,9 @@ export default class Analyzer {
       try {
         filePaths = await getFilePaths({ globPattern, rootPath })
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : error
         connection.window.showWarningMessage(
-          `Failed to analyze bash files using the glob "${globPattern}". The experience will be degraded. Error: ${error.message}`,
+          `Failed to analyze bash files using the glob "${globPattern}". The experience will be degraded. Error: ${errorMessage}`,
         )
       }
 
@@ -84,7 +85,8 @@ export default class Analyzer {
 
           analyzer.analyze(uri, LSP.TextDocument.create(uri, 'shell', 1, fileContent))
         } catch (error) {
-          connection.console.warn(`Failed analyzing ${uri}. Error: ${error.message}`)
+          const errorMessage = error instanceof Error ? error.message : error
+          connection.console.warn(`Failed analyzing ${uri}. Error: ${errorMessage}`)
         }
       }
 

@@ -248,8 +248,9 @@ export default class BashServer {
           }
         }
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : error
         this.connection.console.warn(
-          `getExplainshellDocumentation exception: ${error.message}`,
+          `getExplainshellDocumentation exception: ${errorMessage}`,
         )
       }
     }
