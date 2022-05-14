@@ -1,8 +1,12 @@
 # Bash Language Server
 
+## 3.0.2
+
+- Fix analyzer not being called when getHighlightParsingError is off https://github.com/bash-lsp/bash-language-server/pull/396
+
 ## 3.0.1
 
-- Upgrade treesitter to fix node 18 issue
+- Upgrade web-tree-sitter to fix node 18 issue https://github.com/bash-lsp/bash-language-server/pull/394
 
 ## 3.0.0
 
