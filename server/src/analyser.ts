@@ -376,7 +376,7 @@ export default class Analyzer {
   ): Parser.SyntaxNode | null {
     const document = this.uriToTreeSitterTrees[uri]
 
-    if (!document.rootNode) {
+    if (!document?.rootNode) {
       // Check for lacking rootNode (due to failed parse?)
       return null
     }
