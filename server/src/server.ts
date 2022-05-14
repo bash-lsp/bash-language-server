@@ -76,15 +76,20 @@ export default class BashServer {
     this.documents.listen(this.connection)
     this.documents.onDidChangeContent(async change => {
       const { uri } = change.document
+
+      // Load the tree for the modified contents into the analyzer:
+      const analyzeDiagnostics = this.analyzer.analyze(uri, change.document)
+
+      // Run shellcheck diagnostics:
       let diagnostics: LSP.Diagnostic[] = []
 
-      // FIXME: re-lint on workspace folder change
       const folders = await connection.workspace.getWorkspaceFolders()
       const lintDiagnostics = await this.linter.lint(change.document, folders || [])
       diagnostics = diagnostics.concat(lintDiagnostics)
 
+      // Treesitter's diagnostics can be a bit inaccurate, so we only merge the
+      // analyzer's diagnostics if the setting is enabled:
       if (config.getHighlightParsingError()) {
-        const analyzeDiagnostics = this.analyzer.analyze(uri, change.document)
         diagnostics = diagnostics.concat(analyzeDiagnostics)
       }
 
@@ -100,6 +105,8 @@ export default class BashServer {
     connection.onReferences(this.onReferences.bind(this))
     connection.onCompletion(this.onCompletion.bind(this))
     connection.onCompletionResolve(this.onCompletionResolve.bind(this))
+
+    // FIXME: re-lint on workspace folder change
   }
 
   /**
