@@ -512,7 +512,7 @@ BSD                             April 12, 2003                             BSD`)
 
 describe('memorize', () => {
   it('memorizes a function', async () => {
-    const fnRaw = jest.fn(async args => args)
+    const fnRaw = jest.fn(async (args) => args)
     const arg1 = { one: '1' }
     const arg2 = { another: { word: 'word' } }
     const fnMemorized = sh.memorize(fnRaw)

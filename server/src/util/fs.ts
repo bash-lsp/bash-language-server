@@ -20,7 +20,7 @@ export async function getFilePaths({
     glob(
       globPattern,
       { cwd: rootPath, nodir: true, absolute: true, strict: false },
-      function(err, files) {
+      function (err, files) {
         if (err) {
           return reject(err)
         }

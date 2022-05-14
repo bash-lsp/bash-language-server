@@ -12,17 +12,17 @@ beforeAll(async () => {
 
 describe('list', () => {
   it('finds executables on the PATH', async () => {
-    const result = executables.list().find(x => x === 'iam-executable')
+    const result = executables.list().find((x) => x === 'iam-executable')
     expect(result).toBeTruthy()
   })
 
   it.skip('only considers files that have the executable bit set', async () => {
-    const result = executables.list().find(x => x === 'iam-not-executable')
+    const result = executables.list().find((x) => x === 'iam-not-executable')
     expect(result).toBeFalsy()
   })
 
   it('only considers executable directly on the PATH', async () => {
-    const result = executables.list().find(x => x === 'iam-executable-in-sub-folder')
+    const result = executables.list().find((x) => x === 'iam-executable-in-sub-folder')
     expect(result).toBeFalsy()
   })
 })

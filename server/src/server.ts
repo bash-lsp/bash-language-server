@@ -74,7 +74,7 @@ export default class BashServer {
     // The content of a text document has changed. This event is emitted
     // when the text document first opened or when its content has changed.
     this.documents.listen(this.connection)
-    this.documents.onDidChangeContent(async change => {
+    this.documents.onDidChangeContent(async (change) => {
       const { uri } = change.document
 
       // Load the tree for the modified contents into the analyzer:
@@ -183,8 +183,9 @@ export default class BashServer {
           currentUri,
           symbolUri,
         )}${symbolDocumentation}`
-      : `${symbolKindToDescription(symbol.kind)} defined on line ${symbolStarLine +
-          1}${symbolDocumentation}`
+      : `${symbolKindToDescription(symbol.kind)} defined on line ${
+          symbolStarLine + 1
+        }${symbolDocumentation}`
   }
 
   private getCompletionItemsForSymbols({
@@ -272,7 +273,7 @@ export default class BashServer {
         currentUri,
       })
         // do not return hover referencing for the current line
-        .filter(symbol => symbol.location.range.start.line !== params.position.line)
+        .filter((symbol) => symbol.location.range.start.line !== params.position.line)
         .map((symbol: LSP.SymbolInformation) =>
           this.getDocumentationForSymbol({ currentUri, symbol }),
         )
@@ -316,7 +317,7 @@ export default class BashServer {
 
     return this.analyzer
       .findOccurrences(params.textDocument.uri, word)
-      .map(n => ({ range: n.range }))
+      .map((n) => ({ range: n.range }))
   }
 
   private onReferences(params: LSP.ReferenceParams): LSP.Location[] | null {
@@ -396,7 +397,7 @@ export default class BashServer {
       return symbolCompletions
     }
 
-    const reservedWordsCompletions = ReservedWords.LIST.map(reservedWord => ({
+    const reservedWordsCompletions = ReservedWords.LIST.map((reservedWord) => ({
       label: reservedWord,
       kind: LSP.SymbolKind.Interface, // ??
       data: {
@@ -407,8 +408,8 @@ export default class BashServer {
 
     const programCompletions = this.executables
       .list()
-      .filter(executable => !Builtins.isBuiltin(executable))
-      .map(executable => {
+      .filter((executable) => !Builtins.isBuiltin(executable))
+      .map((executable) => {
         return {
           label: executable,
           kind: LSP.SymbolKind.Function,
@@ -419,7 +420,7 @@ export default class BashServer {
         }
       })
 
-    const builtinsCompletions = Builtins.LIST.map(builtin => ({
+    const builtinsCompletions = Builtins.LIST.map((builtin) => ({
       label: builtin,
       kind: LSP.SymbolKind.Interface, // ??
       data: {
@@ -428,7 +429,7 @@ export default class BashServer {
       },
     }))
 
-    const optionsCompletions = options.map(option => ({
+    const optionsCompletions = options.map((option) => ({
       label: option,
       kind: LSP.SymbolKind.Interface,
       data: {
@@ -447,7 +448,7 @@ export default class BashServer {
 
     if (word) {
       // Filter to only return suffixes of the current word
-      return allCompletions.filter(item => item.label.startsWith(word))
+      return allCompletions.filter((item) => item.label.startsWith(word))
     }
 
     return allCompletions
@@ -500,15 +501,15 @@ function deduplicateSymbols({
 
   const getSymbolId = ({ name, kind }: LSP.SymbolInformation) => `${name}${kind}`
 
-  const symbolsCurrentFile = symbols.filter(s => isCurrentFile(s))
+  const symbolsCurrentFile = symbols.filter((s) => isCurrentFile(s))
 
   const symbolsOtherFiles = symbols
-    .filter(s => !isCurrentFile(s))
+    .filter((s) => !isCurrentFile(s))
     // Remove identical symbols matching current file
     .filter(
-      symbolOtherFiles =>
+      (symbolOtherFiles) =>
         !symbolsCurrentFile.some(
-          symbolCurrentFile =>
+          (symbolCurrentFile) =>
             getSymbolId(symbolCurrentFile) === getSymbolId(symbolOtherFiles),
         ),
     )
@@ -599,6 +600,6 @@ function getCommandOptions(name: string, word: string): string[] {
   return options.stdout
     .toString()
     .split('\t')
-    .map(l => l.trim())
-    .filter(l => l.length > 0)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0)
 }

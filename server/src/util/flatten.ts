@@ -3,5 +3,5 @@ export function flattenArray<T>(nestedArray: T[][]): T[] {
 }
 
 export function flattenObjectValues<T>(object: { [key: string]: T[] }): T[] {
-  return flattenArray(Object.keys(object).map(objectKey => object[objectKey]))
+  return flattenArray(Object.keys(object).map((objectKey) => object[objectKey]))
 }

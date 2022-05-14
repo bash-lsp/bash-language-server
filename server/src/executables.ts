@@ -17,11 +17,11 @@ export default class Executables {
    */
   public static fromPath(path: string): Promise<Executables> {
     const paths = path.split(':')
-    const promises = paths.map(x => findExecutablesInPath(x))
+    const promises = paths.map((x) => findExecutablesInPath(x))
     return Promise.all(promises)
       .then(ArrayUtil.flatten)
       .then(ArrayUtil.uniq)
-      .then(executables => new Executables(executables))
+      .then((executables) => new Executables(executables))
   }
 
   private executables: Set<string>

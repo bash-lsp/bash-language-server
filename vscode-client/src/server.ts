@@ -9,20 +9,18 @@ import {
 
 const connection: IConnection = createConnection(ProposedFeatures.all)
 
-connection.onInitialize(
-  async (params: InitializeParams): Promise<InitializeResult> => {
-    connection.console.info('BashLanguageServer initializing...')
+connection.onInitialize(async (params: InitializeParams): Promise<InitializeResult> => {
+  connection.console.info('BashLanguageServer initializing...')
 
-    const server = await BashLanguageServer.initialize(connection, params)
-    server.register(connection)
+  const server = await BashLanguageServer.initialize(connection, params)
+  server.register(connection)
 
-    connection.console.info('BashLanguageServer initialized')
+  connection.console.info('BashLanguageServer initialized')
 
-    return {
-      capabilities: server.capabilities(),
-    }
-  },
-)
+  return {
+    capabilities: server.capabilities(),
+  }
+})
 
 connection.listen()
 
