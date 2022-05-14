@@ -73,8 +73,8 @@ export default class Linter {
       const proc = spawn(executablePath, [...args, '-'], { cwd: this.cwd })
       proc.on('error', reject)
       proc.on('close', resolve)
-      proc.stdout.on('data', data => (out += data))
-      proc.stderr.on('data', data => (err += data))
+      proc.stdout.on('data', (data) => (out += data))
+      proc.stderr.on('data', (data) => (err += data))
       proc.stdin.on('error', () => {
         // XXX: Ignore STDIN errors in case the process ends too quickly, before we try to
         // write. If we write after the process ends without this, we get an uncatchable EPIPE.

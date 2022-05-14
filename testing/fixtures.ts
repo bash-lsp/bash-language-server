@@ -27,9 +27,9 @@ export const FIXTURE_URI = {
   SHELLCHECK_SOURCE: `file://${path.join(FIXTURE_FOLDER, 'shellcheck', 'source.sh')}`,
 }
 
-export const FIXTURE_DOCUMENT: Record<FIXTURE_KEY, LSP.TextDocument> = (Object.keys(
-  FIXTURE_URI,
-) as Array<FIXTURE_KEY>).reduce((acc, cur: FIXTURE_KEY) => {
+export const FIXTURE_DOCUMENT: Record<FIXTURE_KEY, LSP.TextDocument> = (
+  Object.keys(FIXTURE_URI) as Array<FIXTURE_KEY>
+).reduce((acc, cur: FIXTURE_KEY) => {
   acc[cur] = getDocument(FIXTURE_URI[cur])
   return acc
 }, {} as any)

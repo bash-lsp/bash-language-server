@@ -6,9 +6,9 @@ const package = require('../package')
 
 const args = process.argv
 
-const start = args.find(s => s == 'start')
-const version = args.find(s => s == '-v' || s == '--version')
-const help = args.find(s => s == '-h' || s == '--help')
+const start = args.find((s) => s == 'start')
+const version = args.find((s) => s == '-v' || s == '--version')
+const help = args.find((s) => s == '-h' || s == '--help')
 
 if (start) {
   server.listen()

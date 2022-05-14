@@ -4,7 +4,7 @@ import { SyntaxNode } from 'web-tree-sitter'
 export function forEach(node: SyntaxNode, cb: (n: SyntaxNode) => void) {
   cb(node)
   if (node.children.length) {
-    node.children.forEach(n => forEach(n, cb))
+    node.children.forEach((n) => forEach(n, cb))
   }
 }
 
