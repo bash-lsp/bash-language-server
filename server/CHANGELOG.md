@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 3.0.3
+
+- Workaround for emscripten node 18 support https://github.com/bash-lsp/bash-language-server/pull/404
+
 ## 3.0.2
 
 - Fix analyzer not being called when getHighlightParsingError is off https://github.com/bash-lsp/bash-language-server/pull/396
