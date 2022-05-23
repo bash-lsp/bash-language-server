@@ -426,7 +426,7 @@ export default class Analyzer {
   public commentsAbove(uri: string, line: number): string | null {
     const doc = this.uriToTextDocument[uri]
 
-    const commentBlock = ['```']
+    const commentBlock = []
 
     // start from the line above
     let commentBlockIndex = line - 1
@@ -463,6 +463,7 @@ export default class Analyzer {
       // since we searched from bottom up, we then reverse
       // the lines so that it reads top down.
       commentBlock.reverse()
+      commentBlock.push('```')
       return commentBlock.join('\n')
     }
 

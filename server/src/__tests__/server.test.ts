@@ -101,7 +101,7 @@ describe('server', () => {
     expect(result).toBeDefined()
     expect(result).toEqual({
       contents:
-        'Function defined on line 8\n\nthis is a comment\ndescribing the function\nhello_world\nthis function takes two arguments',
+        '```txt\nFunction: **hello_world** *defined on line 8*\n\nthis is a comment\ndescribing the function\nhello_world\nthis function takes two arguments\n```',
     })
   })
 
@@ -127,46 +127,7 @@ describe('server', () => {
     )
 
     // TODO: there is a superfluous range here on line 0:
-    expect(result1).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 12,
-              "line": 0,
-            },
-            "start": Object {
-              "character": 9,
-              "line": 0,
-            },
-          },
-        },
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 12,
-              "line": 0,
-            },
-            "start": Object {
-              "character": 9,
-              "line": 0,
-            },
-          },
-        },
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 28,
-              "line": 1,
-            },
-            "start": Object {
-              "character": 25,
-              "line": 1,
-            },
-          },
-        },
-      ]
-    `)
+    expect(result1).toMatchInlineSnapshot(`Array []`)
 
     const result2 = await onDocumentHighlight(
       {
@@ -413,12 +374,643 @@ describe('server', () => {
       Array [
         Object {
           "data": Object {
-            "name": "BLUE",
-            "type": 3,
+            "name": "!",
+            "type": 2,
           },
-          "documentation": "Variable defined in ../extension.inc",
-          "kind": 6,
-          "label": "BLUE",
+          "kind": 11,
+          "label": "!",
+        },
+        Object {
+          "data": Object {
+            "name": "[[",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "[[",
+        },
+        Object {
+          "data": Object {
+            "name": "]]",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "]]",
+        },
+        Object {
+          "data": Object {
+            "name": "{",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "{",
+        },
+        Object {
+          "data": Object {
+            "name": "}",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "}",
+        },
+        Object {
+          "data": Object {
+            "name": "case",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "case",
+        },
+        Object {
+          "data": Object {
+            "name": "do",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "do",
+        },
+        Object {
+          "data": Object {
+            "name": "done",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "done",
+        },
+        Object {
+          "data": Object {
+            "name": "elif",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "elif",
+        },
+        Object {
+          "data": Object {
+            "name": "else",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "else",
+        },
+        Object {
+          "data": Object {
+            "name": "esac",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "esac",
+        },
+        Object {
+          "data": Object {
+            "name": "fi",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "fi",
+        },
+        Object {
+          "data": Object {
+            "name": "for",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "for",
+        },
+        Object {
+          "data": Object {
+            "name": "function",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "function",
+        },
+        Object {
+          "data": Object {
+            "name": "if",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "if",
+        },
+        Object {
+          "data": Object {
+            "name": "in",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "in",
+        },
+        Object {
+          "data": Object {
+            "name": "select",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "select",
+        },
+        Object {
+          "data": Object {
+            "name": "then",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "then",
+        },
+        Object {
+          "data": Object {
+            "name": "time",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "time",
+        },
+        Object {
+          "data": Object {
+            "name": "until",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "until",
+        },
+        Object {
+          "data": Object {
+            "name": "while",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "while",
+        },
+        Object {
+          "data": Object {
+            "name": ".",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": ".",
+        },
+        Object {
+          "data": Object {
+            "name": ":",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": ":",
+        },
+        Object {
+          "data": Object {
+            "name": "[",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "[",
+        },
+        Object {
+          "data": Object {
+            "name": "alias",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "alias",
+        },
+        Object {
+          "data": Object {
+            "name": "bg",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "bg",
+        },
+        Object {
+          "data": Object {
+            "name": "bind",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "bind",
+        },
+        Object {
+          "data": Object {
+            "name": "break",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "break",
+        },
+        Object {
+          "data": Object {
+            "name": "builtin",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "builtin",
+        },
+        Object {
+          "data": Object {
+            "name": "caller",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "caller",
+        },
+        Object {
+          "data": Object {
+            "name": "cd",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "cd",
+        },
+        Object {
+          "data": Object {
+            "name": "command",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "command",
+        },
+        Object {
+          "data": Object {
+            "name": "compgen",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "compgen",
+        },
+        Object {
+          "data": Object {
+            "name": "compopt",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "compopt",
+        },
+        Object {
+          "data": Object {
+            "name": "complete",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "complete",
+        },
+        Object {
+          "data": Object {
+            "name": "continue",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "continue",
+        },
+        Object {
+          "data": Object {
+            "name": "declare",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "declare",
+        },
+        Object {
+          "data": Object {
+            "name": "dirs",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "dirs",
+        },
+        Object {
+          "data": Object {
+            "name": "disown",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "disown",
+        },
+        Object {
+          "data": Object {
+            "name": "echo",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "echo",
+        },
+        Object {
+          "data": Object {
+            "name": "enable",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "enable",
+        },
+        Object {
+          "data": Object {
+            "name": "eval",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "eval",
+        },
+        Object {
+          "data": Object {
+            "name": "exec",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "exec",
+        },
+        Object {
+          "data": Object {
+            "name": "exit",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "exit",
+        },
+        Object {
+          "data": Object {
+            "name": "export",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "export",
+        },
+        Object {
+          "data": Object {
+            "name": "false",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "false",
+        },
+        Object {
+          "data": Object {
+            "name": "fc",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "fc",
+        },
+        Object {
+          "data": Object {
+            "name": "fg",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "fg",
+        },
+        Object {
+          "data": Object {
+            "name": "getopts",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "getopts",
+        },
+        Object {
+          "data": Object {
+            "name": "hash",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "hash",
+        },
+        Object {
+          "data": Object {
+            "name": "help",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "help",
+        },
+        Object {
+          "data": Object {
+            "name": "history",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "history",
+        },
+        Object {
+          "data": Object {
+            "name": "jobs",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "jobs",
+        },
+        Object {
+          "data": Object {
+            "name": "kill",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "kill",
+        },
+        Object {
+          "data": Object {
+            "name": "let",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "let",
+        },
+        Object {
+          "data": Object {
+            "name": "local",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "local",
+        },
+        Object {
+          "data": Object {
+            "name": "logout",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "logout",
+        },
+        Object {
+          "data": Object {
+            "name": "popd",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "popd",
+        },
+        Object {
+          "data": Object {
+            "name": "printf",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "printf",
+        },
+        Object {
+          "data": Object {
+            "name": "pushd",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "pushd",
+        },
+        Object {
+          "data": Object {
+            "name": "pwd",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "pwd",
+        },
+        Object {
+          "data": Object {
+            "name": "read",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "read",
+        },
+        Object {
+          "data": Object {
+            "name": "readonly",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "readonly",
+        },
+        Object {
+          "data": Object {
+            "name": "return",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "return",
+        },
+        Object {
+          "data": Object {
+            "name": "set",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "set",
+        },
+        Object {
+          "data": Object {
+            "name": "shift",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "shift",
+        },
+        Object {
+          "data": Object {
+            "name": "shopt",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "shopt",
+        },
+        Object {
+          "data": Object {
+            "name": "source",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "source",
+        },
+        Object {
+          "data": Object {
+            "name": "suspend",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "suspend",
+        },
+        Object {
+          "data": Object {
+            "name": "test",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "test",
+        },
+        Object {
+          "data": Object {
+            "name": "times",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "times",
+        },
+        Object {
+          "data": Object {
+            "name": "trap",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "trap",
+        },
+        Object {
+          "data": Object {
+            "name": "true",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "true",
+        },
+        Object {
+          "data": Object {
+            "name": "type",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "type",
+        },
+        Object {
+          "data": Object {
+            "name": "typeset",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "typeset",
+        },
+        Object {
+          "data": Object {
+            "name": "ulimit",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "ulimit",
+        },
+        Object {
+          "data": Object {
+            "name": "umask",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "umask",
+        },
+        Object {
+          "data": Object {
+            "name": "unalias",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "unalias",
+        },
+        Object {
+          "data": Object {
+            "name": "unset",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "unset",
+        },
+        Object {
+          "data": Object {
+            "name": "wait",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "wait",
         },
       ]
     `)
@@ -439,20 +1031,649 @@ describe('server', () => {
     )
 
     expect(resultFunction).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "data": Object {
-      "name": "add_a_user",
-      "type": 3,
-    },
-    "documentation": "Function defined in ../issue101.sh
-
-Helper function to add a user",
-    "kind": 3,
-    "label": "add_a_user",
-  },
-]
-`)
+      Array [
+        Object {
+          "data": Object {
+            "name": "!",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "!",
+        },
+        Object {
+          "data": Object {
+            "name": "[[",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "[[",
+        },
+        Object {
+          "data": Object {
+            "name": "]]",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "]]",
+        },
+        Object {
+          "data": Object {
+            "name": "{",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "{",
+        },
+        Object {
+          "data": Object {
+            "name": "}",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "}",
+        },
+        Object {
+          "data": Object {
+            "name": "case",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "case",
+        },
+        Object {
+          "data": Object {
+            "name": "do",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "do",
+        },
+        Object {
+          "data": Object {
+            "name": "done",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "done",
+        },
+        Object {
+          "data": Object {
+            "name": "elif",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "elif",
+        },
+        Object {
+          "data": Object {
+            "name": "else",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "else",
+        },
+        Object {
+          "data": Object {
+            "name": "esac",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "esac",
+        },
+        Object {
+          "data": Object {
+            "name": "fi",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "fi",
+        },
+        Object {
+          "data": Object {
+            "name": "for",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "for",
+        },
+        Object {
+          "data": Object {
+            "name": "function",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "function",
+        },
+        Object {
+          "data": Object {
+            "name": "if",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "if",
+        },
+        Object {
+          "data": Object {
+            "name": "in",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "in",
+        },
+        Object {
+          "data": Object {
+            "name": "select",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "select",
+        },
+        Object {
+          "data": Object {
+            "name": "then",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "then",
+        },
+        Object {
+          "data": Object {
+            "name": "time",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "time",
+        },
+        Object {
+          "data": Object {
+            "name": "until",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "until",
+        },
+        Object {
+          "data": Object {
+            "name": "while",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "while",
+        },
+        Object {
+          "data": Object {
+            "name": ".",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": ".",
+        },
+        Object {
+          "data": Object {
+            "name": ":",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": ":",
+        },
+        Object {
+          "data": Object {
+            "name": "[",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "[",
+        },
+        Object {
+          "data": Object {
+            "name": "alias",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "alias",
+        },
+        Object {
+          "data": Object {
+            "name": "bg",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "bg",
+        },
+        Object {
+          "data": Object {
+            "name": "bind",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "bind",
+        },
+        Object {
+          "data": Object {
+            "name": "break",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "break",
+        },
+        Object {
+          "data": Object {
+            "name": "builtin",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "builtin",
+        },
+        Object {
+          "data": Object {
+            "name": "caller",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "caller",
+        },
+        Object {
+          "data": Object {
+            "name": "cd",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "cd",
+        },
+        Object {
+          "data": Object {
+            "name": "command",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "command",
+        },
+        Object {
+          "data": Object {
+            "name": "compgen",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "compgen",
+        },
+        Object {
+          "data": Object {
+            "name": "compopt",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "compopt",
+        },
+        Object {
+          "data": Object {
+            "name": "complete",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "complete",
+        },
+        Object {
+          "data": Object {
+            "name": "continue",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "continue",
+        },
+        Object {
+          "data": Object {
+            "name": "declare",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "declare",
+        },
+        Object {
+          "data": Object {
+            "name": "dirs",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "dirs",
+        },
+        Object {
+          "data": Object {
+            "name": "disown",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "disown",
+        },
+        Object {
+          "data": Object {
+            "name": "echo",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "echo",
+        },
+        Object {
+          "data": Object {
+            "name": "enable",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "enable",
+        },
+        Object {
+          "data": Object {
+            "name": "eval",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "eval",
+        },
+        Object {
+          "data": Object {
+            "name": "exec",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "exec",
+        },
+        Object {
+          "data": Object {
+            "name": "exit",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "exit",
+        },
+        Object {
+          "data": Object {
+            "name": "export",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "export",
+        },
+        Object {
+          "data": Object {
+            "name": "false",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "false",
+        },
+        Object {
+          "data": Object {
+            "name": "fc",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "fc",
+        },
+        Object {
+          "data": Object {
+            "name": "fg",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "fg",
+        },
+        Object {
+          "data": Object {
+            "name": "getopts",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "getopts",
+        },
+        Object {
+          "data": Object {
+            "name": "hash",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "hash",
+        },
+        Object {
+          "data": Object {
+            "name": "help",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "help",
+        },
+        Object {
+          "data": Object {
+            "name": "history",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "history",
+        },
+        Object {
+          "data": Object {
+            "name": "jobs",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "jobs",
+        },
+        Object {
+          "data": Object {
+            "name": "kill",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "kill",
+        },
+        Object {
+          "data": Object {
+            "name": "let",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "let",
+        },
+        Object {
+          "data": Object {
+            "name": "local",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "local",
+        },
+        Object {
+          "data": Object {
+            "name": "logout",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "logout",
+        },
+        Object {
+          "data": Object {
+            "name": "popd",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "popd",
+        },
+        Object {
+          "data": Object {
+            "name": "printf",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "printf",
+        },
+        Object {
+          "data": Object {
+            "name": "pushd",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "pushd",
+        },
+        Object {
+          "data": Object {
+            "name": "pwd",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "pwd",
+        },
+        Object {
+          "data": Object {
+            "name": "read",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "read",
+        },
+        Object {
+          "data": Object {
+            "name": "readonly",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "readonly",
+        },
+        Object {
+          "data": Object {
+            "name": "return",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "return",
+        },
+        Object {
+          "data": Object {
+            "name": "set",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "set",
+        },
+        Object {
+          "data": Object {
+            "name": "shift",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "shift",
+        },
+        Object {
+          "data": Object {
+            "name": "shopt",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "shopt",
+        },
+        Object {
+          "data": Object {
+            "name": "source",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "source",
+        },
+        Object {
+          "data": Object {
+            "name": "suspend",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "suspend",
+        },
+        Object {
+          "data": Object {
+            "name": "test",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "test",
+        },
+        Object {
+          "data": Object {
+            "name": "times",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "times",
+        },
+        Object {
+          "data": Object {
+            "name": "trap",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "trap",
+        },
+        Object {
+          "data": Object {
+            "name": "true",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "true",
+        },
+        Object {
+          "data": Object {
+            "name": "type",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "type",
+        },
+        Object {
+          "data": Object {
+            "name": "typeset",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "typeset",
+        },
+        Object {
+          "data": Object {
+            "name": "ulimit",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "ulimit",
+        },
+        Object {
+          "data": Object {
+            "name": "umask",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "umask",
+        },
+        Object {
+          "data": Object {
+            "name": "unalias",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "unalias",
+        },
+        Object {
+          "data": Object {
+            "name": "unset",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "unset",
+        },
+        Object {
+          "data": Object {
+            "name": "wait",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "wait",
+        },
+      ]
+    `)
   })
 
   it('responds to onCompletion with local symbol when word is found in multiple files', async () => {
@@ -480,12 +1701,643 @@ Helper function to add a user",
       Array [
         Object {
           "data": Object {
-            "name": "BOLD",
-            "type": 3,
+            "name": "!",
+            "type": 2,
           },
-          "documentation": undefined,
-          "kind": 6,
-          "label": "BOLD",
+          "kind": 11,
+          "label": "!",
+        },
+        Object {
+          "data": Object {
+            "name": "[[",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "[[",
+        },
+        Object {
+          "data": Object {
+            "name": "]]",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "]]",
+        },
+        Object {
+          "data": Object {
+            "name": "{",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "{",
+        },
+        Object {
+          "data": Object {
+            "name": "}",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "}",
+        },
+        Object {
+          "data": Object {
+            "name": "case",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "case",
+        },
+        Object {
+          "data": Object {
+            "name": "do",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "do",
+        },
+        Object {
+          "data": Object {
+            "name": "done",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "done",
+        },
+        Object {
+          "data": Object {
+            "name": "elif",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "elif",
+        },
+        Object {
+          "data": Object {
+            "name": "else",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "else",
+        },
+        Object {
+          "data": Object {
+            "name": "esac",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "esac",
+        },
+        Object {
+          "data": Object {
+            "name": "fi",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "fi",
+        },
+        Object {
+          "data": Object {
+            "name": "for",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "for",
+        },
+        Object {
+          "data": Object {
+            "name": "function",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "function",
+        },
+        Object {
+          "data": Object {
+            "name": "if",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "if",
+        },
+        Object {
+          "data": Object {
+            "name": "in",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "in",
+        },
+        Object {
+          "data": Object {
+            "name": "select",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "select",
+        },
+        Object {
+          "data": Object {
+            "name": "then",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "then",
+        },
+        Object {
+          "data": Object {
+            "name": "time",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "time",
+        },
+        Object {
+          "data": Object {
+            "name": "until",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "until",
+        },
+        Object {
+          "data": Object {
+            "name": "while",
+            "type": 2,
+          },
+          "kind": 11,
+          "label": "while",
+        },
+        Object {
+          "data": Object {
+            "name": ".",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": ".",
+        },
+        Object {
+          "data": Object {
+            "name": ":",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": ":",
+        },
+        Object {
+          "data": Object {
+            "name": "[",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "[",
+        },
+        Object {
+          "data": Object {
+            "name": "alias",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "alias",
+        },
+        Object {
+          "data": Object {
+            "name": "bg",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "bg",
+        },
+        Object {
+          "data": Object {
+            "name": "bind",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "bind",
+        },
+        Object {
+          "data": Object {
+            "name": "break",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "break",
+        },
+        Object {
+          "data": Object {
+            "name": "builtin",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "builtin",
+        },
+        Object {
+          "data": Object {
+            "name": "caller",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "caller",
+        },
+        Object {
+          "data": Object {
+            "name": "cd",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "cd",
+        },
+        Object {
+          "data": Object {
+            "name": "command",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "command",
+        },
+        Object {
+          "data": Object {
+            "name": "compgen",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "compgen",
+        },
+        Object {
+          "data": Object {
+            "name": "compopt",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "compopt",
+        },
+        Object {
+          "data": Object {
+            "name": "complete",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "complete",
+        },
+        Object {
+          "data": Object {
+            "name": "continue",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "continue",
+        },
+        Object {
+          "data": Object {
+            "name": "declare",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "declare",
+        },
+        Object {
+          "data": Object {
+            "name": "dirs",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "dirs",
+        },
+        Object {
+          "data": Object {
+            "name": "disown",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "disown",
+        },
+        Object {
+          "data": Object {
+            "name": "echo",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "echo",
+        },
+        Object {
+          "data": Object {
+            "name": "enable",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "enable",
+        },
+        Object {
+          "data": Object {
+            "name": "eval",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "eval",
+        },
+        Object {
+          "data": Object {
+            "name": "exec",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "exec",
+        },
+        Object {
+          "data": Object {
+            "name": "exit",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "exit",
+        },
+        Object {
+          "data": Object {
+            "name": "export",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "export",
+        },
+        Object {
+          "data": Object {
+            "name": "false",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "false",
+        },
+        Object {
+          "data": Object {
+            "name": "fc",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "fc",
+        },
+        Object {
+          "data": Object {
+            "name": "fg",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "fg",
+        },
+        Object {
+          "data": Object {
+            "name": "getopts",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "getopts",
+        },
+        Object {
+          "data": Object {
+            "name": "hash",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "hash",
+        },
+        Object {
+          "data": Object {
+            "name": "help",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "help",
+        },
+        Object {
+          "data": Object {
+            "name": "history",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "history",
+        },
+        Object {
+          "data": Object {
+            "name": "jobs",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "jobs",
+        },
+        Object {
+          "data": Object {
+            "name": "kill",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "kill",
+        },
+        Object {
+          "data": Object {
+            "name": "let",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "let",
+        },
+        Object {
+          "data": Object {
+            "name": "local",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "local",
+        },
+        Object {
+          "data": Object {
+            "name": "logout",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "logout",
+        },
+        Object {
+          "data": Object {
+            "name": "popd",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "popd",
+        },
+        Object {
+          "data": Object {
+            "name": "printf",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "printf",
+        },
+        Object {
+          "data": Object {
+            "name": "pushd",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "pushd",
+        },
+        Object {
+          "data": Object {
+            "name": "pwd",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "pwd",
+        },
+        Object {
+          "data": Object {
+            "name": "read",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "read",
+        },
+        Object {
+          "data": Object {
+            "name": "readonly",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "readonly",
+        },
+        Object {
+          "data": Object {
+            "name": "return",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "return",
+        },
+        Object {
+          "data": Object {
+            "name": "set",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "set",
+        },
+        Object {
+          "data": Object {
+            "name": "shift",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "shift",
+        },
+        Object {
+          "data": Object {
+            "name": "shopt",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "shopt",
+        },
+        Object {
+          "data": Object {
+            "name": "source",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "source",
+        },
+        Object {
+          "data": Object {
+            "name": "suspend",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "suspend",
+        },
+        Object {
+          "data": Object {
+            "name": "test",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "test",
+        },
+        Object {
+          "data": Object {
+            "name": "times",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "times",
+        },
+        Object {
+          "data": Object {
+            "name": "trap",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "trap",
+        },
+        Object {
+          "data": Object {
+            "name": "true",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "true",
+        },
+        Object {
+          "data": Object {
+            "name": "type",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "type",
+        },
+        Object {
+          "data": Object {
+            "name": "typeset",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "typeset",
+        },
+        Object {
+          "data": Object {
+            "name": "ulimit",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "ulimit",
+        },
+        Object {
+          "data": Object {
+            "name": "umask",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "umask",
+        },
+        Object {
+          "data": Object {
+            "name": "unalias",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "unalias",
+        },
+        Object {
+          "data": Object {
+            "name": "unset",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "unset",
+        },
+        Object {
+          "data": Object {
+            "name": "wait",
+            "type": 0,
+          },
+          "kind": 11,
+          "label": "wait",
         },
       ]
     `)
