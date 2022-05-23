@@ -177,15 +177,12 @@ export default class BashServer {
 
     const commentAboveSymbol = this.analyzer.commentsAbove(symbolUri, symbolStarLine)
     const symbolDocumentation = commentAboveSymbol ? `\n\n${commentAboveSymbol}` : ''
-
-    return symbolUri !== currentUri
-      ? `${symbolKindToDescription(symbol.kind)} defined in ${Path.relative(
-          currentUri,
-          symbolUri,
-        )}${symbolDocumentation}`
-      : `${symbolKindToDescription(symbol.kind)} defined on line ${
-          symbolStarLine + 1
-        }${symbolDocumentation}`
+    const hoverHeader = `### ${symbolKindToDescription(symbol.kind)}: **\`${symbol.name}\`**`
+    const symbolLocation = symbolUri !== currentUri
+      ? `in ${Path.relative(currentUri, symbolUri,)}`
+      : `on line ${symbolStarLine + 1}`
+    
+    return `${hoverHeader} - *defined ${symbolLocation}*${symbolDocumentation}`
   }
 
   private getCompletionItemsForSymbols({
