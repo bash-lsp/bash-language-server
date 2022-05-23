@@ -20,7 +20,7 @@
     "@types/node": "12.20.52",
     "@typescript-eslint/eslint-plugin": "^5.23.0",
     "@typescript-eslint/parser": "^5.23.0",
-    "eslint": "8.15.0",
+    "eslint": "8.16.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-jest": "26.2.2",
     "eslint-plugin-prettier": "^4.0.0",
