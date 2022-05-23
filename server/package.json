@@ -24,7 +24,7 @@
     "request-promise-native": "^1.0.5",
     "turndown": "^7.0.0",
     "urijs": "^1.19.1",
-    "vscode-languageserver": "^6.1.1",
+    "vscode-languageserver": "^8.0.0",
     "vscode-languageserver-textdocument": "^1.0.1",
     "web-tree-sitter": "^0.20.5"
   },
