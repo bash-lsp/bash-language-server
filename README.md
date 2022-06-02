@@ -22,6 +22,12 @@ We strongly recommend that you install [shellcheck][shellcheck] to enable lintin
 npm i -g bash-language-server
 ```
 
+On Fedora based distros:
+
+```bash
+dnf install -y nodejs-bash-language-server
+```
+
 If you encounter installation errors, ensure you have node version 12 or newer (`node --version`).
 
 ### Clients
