@@ -22,7 +22,7 @@
     "@typescript-eslint/parser": "5.26.0",
     "eslint": "8.17.0",
     "eslint-config-prettier": "8.5.0",
-    "eslint-plugin-jest": "26.4.4",
+    "eslint-plugin-jest": "26.5.3",
     "eslint-plugin-prettier": "4.0.0",
     "eslint-plugin-simple-import-sort": "7.0.0",
     "jest": "28.1.1",
