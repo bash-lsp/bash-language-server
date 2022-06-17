@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import * as FuzzySearch from 'fuzzy-search'
 import * as request from 'request-promise-native'
 import * as URI from 'urijs'
+import * as url from 'url'
 import { promisify } from 'util'
 import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
@@ -72,7 +73,7 @@ export default class Analyzer {
       )
 
       for (const filePath of filePaths) {
-        const uri = `file://${filePath}`
+        const uri = url.pathToFileURL(filePath).href
         connection.console.log(`Analyzing ${uri}`)
 
         try {
