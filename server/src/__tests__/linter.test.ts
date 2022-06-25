@@ -14,7 +14,7 @@ describe('linter', () => {
   })
 
   it('should set canLint to true if executable not empty', () => {
-    expect(new Linter({ executablePath: null }).canLint).toBe(false)
+    expect(new Linter({ executablePath: 'foo' }).canLint).toBe(true)
   })
 
   it('should set canLint to false when linting fails', async () => {
