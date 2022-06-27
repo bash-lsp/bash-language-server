@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@types/vscode@1.44.0":
-  version "1.44.0"
-  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.44.0.tgz#62ecfe3d0e38942fce556574da54ee1013c775b7"
-  integrity sha512-WJZtZlinE3meRdH+I7wTsIhpz/GLhqEQwmPGeh4s1irWLwMzCeTV8WZ+pgPTwrDXoafVUWwo1LiZ9HJVHFlJSQ==
+"@types/vscode@1.68.0":
+  version "1.68.0"
+  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.68.0.tgz#c0864e4ea43c509bfc6b53f4e91aa923fd0475b8"
+  integrity sha512-duBwEK5ta/eBBMJMQ7ECMEsMvlE3XJdRGh3xoS1uOO4jl2Z4LPBl5vx8WvBP10ERAgDRmIt/FaSD4RHyBGbChw==
 
 ajv@^6.5.5:
   version "6.12.6"
@@ -42,10 +42,10 @@ balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
 
-bash-language-server@3.0.3:
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-3.0.3.tgz#327a3197056e1c091d33c9bd5de2f6f0ea96c0b2"
-  integrity sha512-UhYd0YYaXjYn0M3dVeL6jv1X9L2VR8dJp3fUCcdyHTgzJOvmntpUrkjcoKASV0qqZt0u8DSPT4xE+HjegQoEvQ==
+bash-language-server@3.0.4:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-3.0.4.tgz#a1626f553af37a546bfb31807959e3300a3d061b"
+  integrity sha512-LMaBSmXuPfPkMjOZzI9zEgiInEBE2Ok2p1/cnGOPW/sG07pVysweXkHaUy10dl+kof+x2kklZlAMMD5CluA5fQ==
   dependencies:
     fuzzy-search "^3.2.1"
     glob "^8.0.0"
