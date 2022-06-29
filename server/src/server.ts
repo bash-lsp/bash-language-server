@@ -53,7 +53,7 @@ export default class BashServer {
 
   private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
   private connection: LSP.Connection
-  private clientCaps: LSP.ClientCapabilities
+  private clientCapabilities: LSP.ClientCapabilities
 
   private constructor(
     connection: LSP.Connection,
@@ -66,7 +66,7 @@ export default class BashServer {
     this.executables = executables
     this.analyzer = analyzer
     this.linter = linter
-    this.clientCaps = capabilities
+    this.clientCapabilities = capabilities
   }
 
   /**
@@ -86,7 +86,7 @@ export default class BashServer {
       // Run shellcheck diagnostics:
       let diagnostics: LSP.Diagnostic[] = []
 
-      const folders = this.clientCaps.workspace?.workspaceFolders
+      const folders = this.clientCapabilities.workspace?.workspaceFolders
         ? await connection.workspace.getWorkspaceFolders()
         : []
       const lintDiagnostics = await this.linter.lint(change.document, folders || [])
