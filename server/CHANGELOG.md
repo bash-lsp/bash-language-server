@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 3.0.5
+
+- Fix Shellcheck issue when using vim-lsp https://github.com/bash-lsp/bash-language-server/pull/443
+
 ## 3.0.4
 
 - Fix Windows support for analyzer https://github.com/bash-lsp/bash-language-server/pull/433
