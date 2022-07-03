@@ -28,7 +28,7 @@ export default class BashServer {
    */
   public static async initialize(
     connection: LSP.Connection,
-    { rootPath }: LSP.InitializeParams,
+    { rootPath, capabilities }: LSP.InitializeParams,
   ): Promise<BashServer> {
     const parser = await initializeParser()
 
@@ -43,7 +43,7 @@ export default class BashServer {
       Analyzer.fromRoot({ connection, rootPath, parser }),
       new Linter({ executablePath: config.getShellcheckPath() }),
     ]).then(([executables, analyzer, linter]) => {
-      return new BashServer(connection, executables, analyzer, linter)
+      return new BashServer(connection, executables, analyzer, linter, capabilities)
     })
   }
 
@@ -53,17 +53,20 @@ export default class BashServer {
 
   private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
   private connection: LSP.Connection
+  private clientCapabilities: LSP.ClientCapabilities
 
   private constructor(
     connection: LSP.Connection,
     executables: Executables,
     analyzer: Analyzer,
     linter: Linter,
+    capabilities: LSP.ClientCapabilities,
   ) {
     this.connection = connection
     this.executables = executables
     this.analyzer = analyzer
     this.linter = linter
+    this.clientCapabilities = capabilities
   }
 
   /**
@@ -83,7 +86,9 @@ export default class BashServer {
       // Run shellcheck diagnostics:
       let diagnostics: LSP.Diagnostic[] = []
 
-      const folders = await connection.workspace.getWorkspaceFolders()
+      const folders = this.clientCapabilities.workspace?.workspaceFolders
+        ? await connection.workspace.getWorkspaceFolders()
+        : []
       const lintDiagnostics = await this.linter.lint(change.document, folders || [])
       diagnostics = diagnostics.concat(lintDiagnostics)
 
@@ -177,15 +182,13 @@ export default class BashServer {
 
     const commentAboveSymbol = this.analyzer.commentsAbove(symbolUri, symbolStarLine)
     const symbolDocumentation = commentAboveSymbol ? `\n\n${commentAboveSymbol}` : ''
+    const hoverHeader = `### ${symbolKindToDescription(symbol.kind)}: **${symbol.name}**`
+    const symbolLocation =
+      symbolUri !== currentUri
+        ? `in ${Path.relative(currentUri, symbolUri)}`
+        : `on line ${symbolStarLine + 1}`
 
-    return symbolUri !== currentUri
-      ? `${symbolKindToDescription(symbol.kind)} defined in ${Path.relative(
-          currentUri,
-          symbolUri,
-        )}${symbolDocumentation}`
-      : `${symbolKindToDescription(symbol.kind)} defined on line ${
-          symbolStarLine + 1
-        }${symbolDocumentation}`
+    return `${hoverHeader} - *defined ${symbolLocation}*${symbolDocumentation}`
   }
 
   private getCompletionItemsForSymbols({
