@@ -1,11 +1,13 @@
-**/node_modules
-
 vscode-client/out
 server/out
 .DS_Store
 *.log
 coverage
 .eslintcache
+
+# NPM cache
+node_modules/
+package-lock.json
 
 # YARN cache
 .yarn/
