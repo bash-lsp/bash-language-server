@@ -403,7 +403,7 @@ export default class BashServer {
 
     const reservedWordsCompletions = ReservedWords.LIST.map((reservedWord) => ({
       label: reservedWord,
-      kind: LSP.SymbolKind.Interface, // ??
+      kind: LSP.CompletionItemKind.Keyword,
       data: {
         name: reservedWord,
         type: CompletionItemDataType.ReservedWord,
@@ -416,7 +416,7 @@ export default class BashServer {
       .map((executable) => {
         return {
           label: executable,
-          kind: LSP.SymbolKind.Function,
+          kind: LSP.CompletionItemKind.Function,
           data: {
             name: executable,
             type: CompletionItemDataType.Executable,
@@ -426,7 +426,7 @@ export default class BashServer {
 
     const builtinsCompletions = Builtins.LIST.map((builtin) => ({
       label: builtin,
-      kind: LSP.SymbolKind.Interface, // ??
+      kind: LSP.CompletionItemKind.Function,
       data: {
         name: builtin,
         type: CompletionItemDataType.Builtin,
@@ -435,7 +435,7 @@ export default class BashServer {
 
     const optionsCompletions = options.map((option) => ({
       label: option,
-      kind: LSP.SymbolKind.Interface,
+      kind: LSP.CompletionItemKind.Constant,
       data: {
         name: option,
         type: CompletionItemDataType.Symbol,
