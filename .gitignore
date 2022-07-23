@@ -6,3 +6,6 @@ server/out
 *.log
 coverage
 .eslintcache
+
+# YARN cache
+.yarn/
