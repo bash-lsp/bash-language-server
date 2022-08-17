@@ -223,19 +223,23 @@ describe('findSymbolCompletions', () => {
 describe('commentsAbove', () => {
   it('returns a string of a comment block above a line', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
-    expect(analyzer.commentsAbove(CURRENT_URI, 22)).toEqual('doc for func_one')
+    expect(analyzer.commentsAbove(CURRENT_URI, 22)).toEqual(
+      '```txt\ndoc for func_one\n```',
+    )
   })
 
   it('handles line breaks in comments', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
     expect(analyzer.commentsAbove(CURRENT_URI, 28)).toEqual(
-      'doc for func_two\nhas two lines',
+      '```txt\ndoc for func_two\nhas two lines\n```',
     )
   })
 
   it('only returns connected comments', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
-    expect(analyzer.commentsAbove(CURRENT_URI, 36)).toEqual('doc for func_three')
+    expect(analyzer.commentsAbove(CURRENT_URI, 36)).toEqual(
+      '```txt\ndoc for func_three\n```',
+    )
   })
 
   it('returns null if no comment found', () => {
@@ -245,13 +249,15 @@ describe('commentsAbove', () => {
 
   it('works for variables', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
-    expect(analyzer.commentsAbove(CURRENT_URI, 42)).toEqual('works for variables')
+    expect(analyzer.commentsAbove(CURRENT_URI, 42)).toEqual(
+      '```txt\nworks for variables\n```',
+    )
   })
 
   it('returns connected comments with empty comment line', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
     expect(analyzer.commentsAbove(CURRENT_URI, 51)).toEqual(
-      'this is also included\n\ndoc for func_four',
+      '```txt\nthis is also included\n\ndoc for func_four\n```',
     )
   })
 })

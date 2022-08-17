@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import * as FuzzySearch from 'fuzzy-search'
 import * as request from 'request-promise-native'
 import * as URI from 'urijs'
+import * as url from 'url'
 import { promisify } from 'util'
 import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
@@ -72,7 +73,7 @@ export default class Analyzer {
       )
 
       for (const filePath of filePaths) {
-        const uri = `file://${filePath}`
+        const uri = url.pathToFileURL(filePath).href
         connection.console.log(`Analyzing ${uri}`)
 
         try {
@@ -436,9 +437,9 @@ export default class Analyzer {
     // is not a comment line
     const getComment = (l: string): null | string => {
       // this regexp has to be defined within the function
-      const commentRegExp = /^\s*#\s*(.*)/g
+      const commentRegExp = /^\s*#\s?(.*)/g
       const matches = commentRegExp.exec(l)
-      return matches ? matches[1].trim() : null
+      return matches ? matches[1].trimRight() : null
     }
 
     let currentLine = doc.getText({
@@ -459,9 +460,12 @@ export default class Analyzer {
     }
 
     if (commentBlock.length) {
+      commentBlock.push('```txt')
       // since we searched from bottom up, we then reverse
       // the lines so that it reads top down.
-      return commentBlock.reverse().join('\n')
+      commentBlock.reverse()
+      commentBlock.push('```')
+      return commentBlock.join('\n')
     }
 
     // no comments found above line:

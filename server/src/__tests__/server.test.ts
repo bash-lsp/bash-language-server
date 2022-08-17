@@ -101,7 +101,7 @@ describe('server', () => {
     expect(result).toBeDefined()
     expect(result).toEqual({
       contents:
-        'Function defined on line 8\n\nthis is a comment\ndescribing the function\nhello_world\nthis function takes two arguments',
+        '### Function: **hello_world** - *defined on line 8*\n\n```txt\nthis is a comment\ndescribing the function\nhello_world\nthis function takes two arguments\n```',
     })
   })
 
@@ -416,7 +416,7 @@ describe('server', () => {
             "name": "BLUE",
             "type": 3,
           },
-          "documentation": "Variable defined in ../extension.inc",
+          "documentation": "### Variable: **BLUE** - *defined in ../extension.inc*",
           "kind": 6,
           "label": "BLUE",
         },
@@ -439,20 +439,22 @@ describe('server', () => {
     )
 
     expect(resultFunction).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "data": Object {
-      "name": "add_a_user",
-      "type": 3,
-    },
-    "documentation": "Function defined in ../issue101.sh
+      Array [
+        Object {
+          "data": Object {
+            "name": "add_a_user",
+            "type": 3,
+          },
+          "documentation": "### Function: **add_a_user** - *defined in ../issue101.sh*
 
-Helper function to add a user",
-    "kind": 3,
-    "label": "add_a_user",
-  },
-]
-`)
+      \`\`\`txt
+      Helper function to add a user
+      \`\`\`",
+          "kind": 3,
+          "label": "add_a_user",
+        },
+      ]
+    `)
   })
 
   it('responds to onCompletion with local symbol when word is found in multiple files', async () => {
