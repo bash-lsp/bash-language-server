@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 3.0.6
+
+- Bunch of dependency upgrades
+- Better completion kind https://github.com/bash-lsp/bash-language-server/pull/466
+
 ## 3.0.5
 
 - Fix Shellcheck issue when using vim-lsp https://github.com/bash-lsp/bash-language-server/pull/443
