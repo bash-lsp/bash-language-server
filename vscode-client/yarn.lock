@@ -42,17 +42,17 @@ balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
 
-bash-language-server@3.0.5:
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-3.0.5.tgz#9cae23826456220b95ea49c089c81629bd045d9f"
-  integrity sha512-2rkjU29BL5ZjmLI6WZ/yiFO0duef0lOg0lnLqNGqt6xUDuxfgbRvV1JysLTOKWZt0yBL8W52V+2XisF1UnRcWA==
+bash-language-server@3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-3.1.0.tgz#f5206d687637028070cf8ac34b4941b36dd468c4"
+  integrity sha512-DaTlZD60S3ZldAkhch5oH1vxUn8joeFw73IOnwMwmZSlbQctaDrnP7DdDPRVrrQ3uhUQlaaOGPeJCsY/a+V6pg==
   dependencies:
     fuzzy-search "^3.2.1"
     glob "^8.0.0"
     request "^2.83.0"
     request-promise-native "^1.0.5"
     turndown "^7.0.0"
-    urijs "^1.19.1"
+    urijs "^1.19.11"
     vscode-languageserver "^6.1.1"
     vscode-languageserver-textdocument "^1.0.1"
     web-tree-sitter "^0.20.5"
@@ -416,7 +416,7 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-urijs@^1.19.1:
+urijs@^1.19.11:
   version "1.19.11"
   resolved "https://registry.yarnpkg.com/urijs/-/urijs-1.19.11.tgz#204b0d6b605ae80bea54bea39280cdb7c9f923cc"
   integrity sha512-HXgFDgDommxn5/bIv0cnQZsPhHDA90NPHD6+c/v21U5+Sx5hoP8+dP9IZXBU1gIfvdRfhG8cel9QNPeionfcCQ==
