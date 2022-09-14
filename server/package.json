@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@types/fuzzy-search": "2.1.2",
-    "@types/glob": "7.2.0",
+    "@types/glob": "8.0.0",
     "@types/request-promise-native": "1.0.18",
     "@types/turndown": "5.0.1",
     "@types/urijs": "1.19.19"
