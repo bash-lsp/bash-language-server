@@ -1,6 +1,6 @@
 # Bash Language Server
 
-## 3.0.6
+## 3.1.0
 
 - Bunch of dependency upgrades
 - Better completion kind https://github.com/bash-lsp/bash-language-server/pull/466
