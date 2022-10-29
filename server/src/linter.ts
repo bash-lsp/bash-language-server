@@ -68,8 +68,10 @@ export default class Linter {
       '--external-sources',
       `--source-path=${this.cwd}`,
     ]
-    for (const folder of folders) {
-      args.push(`--source-path=${folder.name}`)
+    if (Array.isArray(folders)) {
+      for (const folder of folders) {
+        args.push(`--source-path=${folder.name}`)
+      }
     }
 
     let out = ''
