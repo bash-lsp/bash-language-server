@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 3.1.1
+
+- Dependency upgrades
+- Improve ShellCheck robustness for files without shebang https://github.com/bash-lsp/bash-language-server/pull/536
+
 ## 3.1.0
 
 - Bunch of dependency upgrades
