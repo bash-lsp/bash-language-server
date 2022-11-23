@@ -1,0 +1,155 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`bash-file parsing creates declarations 1`] = `
+Object {
+  "COMMENTS": Array [
+    Object {
+      "containerName": "add_a_user",
+      "kind": 13,
+      "location": Object {
+        "range": Object {
+          "end": Object {
+            "character": 13,
+            "line": 9,
+          },
+          "start": Object {
+            "character": 2,
+            "line": 9,
+          },
+        },
+        "uri": "dummy-uri.sh",
+      },
+      "name": "COMMENTS",
+    },
+  ],
+  "PASSWORD": Array [
+    Object {
+      "containerName": "add_a_user",
+      "kind": 13,
+      "location": Object {
+        "range": Object {
+          "end": Object {
+            "character": 13,
+            "line": 6,
+          },
+          "start": Object {
+            "character": 2,
+            "line": 6,
+          },
+        },
+        "uri": "dummy-uri.sh",
+      },
+      "name": "PASSWORD",
+    },
+  ],
+  "USER": Array [
+    Object {
+      "containerName": "add_a_user",
+      "kind": 13,
+      "location": Object {
+        "range": Object {
+          "end": Object {
+            "character": 9,
+            "line": 5,
+          },
+          "start": Object {
+            "character": 2,
+            "line": 5,
+          },
+        },
+        "uri": "dummy-uri.sh",
+      },
+      "name": "USER",
+    },
+  ],
+  "add_a_user": Array [
+    Object {
+      "kind": 12,
+      "location": Object {
+        "range": Object {
+          "end": Object {
+            "character": 1,
+            "line": 14,
+          },
+          "start": Object {
+            "character": 0,
+            "line": 3,
+          },
+        },
+        "uri": "dummy-uri.sh",
+      },
+      "name": "add_a_user",
+    },
+  ],
+}
+`;
+
+exports[`findOccurrences returns a list of locations if parameter is found 1`] = `
+Array [
+  Object {
+    "range": Object {
+      "end": Object {
+        "character": 12,
+        "line": 148,
+      },
+      "start": Object {
+        "character": 0,
+        "line": 148,
+      },
+    },
+    "uri": "dummy-uri.sh",
+  },
+  Object {
+    "range": Object {
+      "end": Object {
+        "character": 12,
+        "line": 148,
+      },
+      "start": Object {
+        "character": 0,
+        "line": 148,
+      },
+    },
+    "uri": "dummy-uri.sh",
+  },
+  Object {
+    "range": Object {
+      "end": Object {
+        "character": 45,
+        "line": 152,
+      },
+      "start": Object {
+        "character": 33,
+        "line": 152,
+      },
+    },
+    "uri": "dummy-uri.sh",
+  },
+  Object {
+    "range": Object {
+      "end": Object {
+        "character": 20,
+        "line": 162,
+      },
+      "start": Object {
+        "character": 8,
+        "line": 162,
+      },
+    },
+    "uri": "dummy-uri.sh",
+  },
+  Object {
+    "range": Object {
+      "end": Object {
+        "character": 31,
+        "line": 165,
+      },
+      "start": Object {
+        "character": 19,
+        "line": 165,
+      },
+    },
+    "uri": "dummy-uri.sh",
+  },
+]
+`;

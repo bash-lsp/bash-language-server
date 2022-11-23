@@ -7,22 +7,19 @@ import { promisify } from 'util'
 import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
 
+import { BashFile } from './bash-file/treesitter-bash-file'
 import { getGlobPattern } from './config'
 import { flattenArray, flattenObjectValues } from './util/flatten'
 import { getFilePaths } from './util/fs'
 import { getShebang, isBashShebang } from './util/shebang'
-import * as TreeSitterUtil from './util/tree-sitter'
 
 const readFileAsync = promisify(fs.readFile)
 
 type Kinds = { [type: string]: LSP.SymbolKind }
 
+type Texts = { [uri: string]: string }
 type Declarations = { [name: string]: LSP.SymbolInformation[] }
 type FileDeclarations = { [uri: string]: Declarations }
-
-type Trees = { [uri: string]: Parser.Tree }
-type Texts = { [uri: string]: string }
-
 /**
  * The Analyzer uses the Abstract Syntax Trees (ASTs) that are provided by
  * tree-sitter to find definitions, reference, etc.
@@ -100,13 +97,11 @@ export default class Analyzer {
   private parser: Parser
 
   private uriToTextDocument: { [uri: string]: LSP.TextDocument } = {}
-
-  private uriToTreeSitterTrees: Trees = {}
+  private uriToDeclarations: FileDeclarations = {}
+  private uriToBashFiles: { [uri: string]: BashFile } = {}
 
   // We need this to find the word at a given point etc.
   private uriToFileContent: Texts = {}
-
-  private uriToDeclarations: FileDeclarations = {}
 
   private treeSitterTypeToLSPKind: Kinds = {
     // These keys are using underscores as that's the naming convention in tree-sitter.
@@ -148,12 +143,11 @@ export default class Analyzer {
     params: LSP.TextDocumentPositionParams
     endpoint: string
   }): Promise<any> {
-    const leafNode = this.uriToTreeSitterTrees[
-      params.textDocument.uri
-    ].rootNode.descendantForPosition({
-      row: params.position.line,
-      column: params.position.character,
-    })
+    // FIXME: this could likely be using commandNameAtPoint instead!
+    const leafNode: any = this.uriToBashFiles[params.textDocument.uri].nodeAtPoint(
+      params.position.line,
+      params.position.character,
+    )
 
     // explainshell needs the whole command, not just the "word" (tree-sitter
     // parlance) that the user hovered over. A relatively successful heuristic
@@ -213,7 +207,7 @@ export default class Analyzer {
    * Find all the locations where something named name has been defined.
    */
   public findReferences(name: string): LSP.Location[] {
-    const uris = Object.keys(this.uriToTreeSitterTrees)
+    const uris = Object.keys(this.uriToBashFiles)
     return flattenArray(uris.map((uri) => this.findOccurrences(uri, name)))
   }
 
@@ -222,33 +216,7 @@ export default class Analyzer {
    * It's currently not scope-aware.
    */
   public findOccurrences(uri: string, query: string): LSP.Location[] {
-    const tree = this.uriToTreeSitterTrees[uri]
-    const contents = this.uriToFileContent[uri]
-
-    const locations: LSP.Location[] = []
-
-    TreeSitterUtil.forEach(tree.rootNode, (n) => {
-      let name: null | string = null
-      let range: null | LSP.Range = null
-
-      if (TreeSitterUtil.isReference(n)) {
-        const node = n.firstNamedChild || n
-        name = contents.slice(node.startIndex, node.endIndex)
-        range = TreeSitterUtil.range(node)
-      } else if (TreeSitterUtil.isDefinition(n)) {
-        const namedNode = n.firstNamedChild
-        if (namedNode) {
-          name = contents.slice(namedNode.startIndex, namedNode.endIndex)
-          range = TreeSitterUtil.range(namedNode)
-        }
-      }
-
-      if (name === query && range !== null) {
-        locations.push(LSP.Location.create(uri, range))
-      }
-    })
-
-    return locations
+    return this.uriToBashFiles[uri].findOccurrences(uri, query)
   }
 
   /**
@@ -294,131 +262,28 @@ export default class Analyzer {
   public analyze(uri: string, document: LSP.TextDocument): LSP.Diagnostic[] {
     const contents = document.getText()
 
-    const tree = this.parser.parse(contents)
+    const bashFile = BashFile.parse({ contents, uri, parser: this.parser })
 
     this.uriToTextDocument[uri] = document
-    this.uriToTreeSitterTrees[uri] = tree
-    this.uriToDeclarations[uri] = {}
+    this.uriToBashFiles[uri] = bashFile
+    this.uriToDeclarations[uri] = bashFile.declarations
     this.uriToFileContent[uri] = contents
 
-    const problems: LSP.Diagnostic[] = []
-
-    TreeSitterUtil.forEach(tree.rootNode, (n: Parser.SyntaxNode) => {
-      if (n.type === 'ERROR') {
-        problems.push(
-          LSP.Diagnostic.create(
-            TreeSitterUtil.range(n),
-            'Failed to parse expression',
-            LSP.DiagnosticSeverity.Error,
-          ),
-        )
-        return
-      } else if (TreeSitterUtil.isDefinition(n)) {
-        const named = n.firstNamedChild
-
-        if (named === null) {
-          return
-        }
-
-        const name = contents.slice(named.startIndex, named.endIndex)
-        const namedDeclarations = this.uriToDeclarations[uri][name] || []
-
-        const parent = TreeSitterUtil.findParent(
-          n,
-          (p) => p.type === 'function_definition',
-        )
-        const parentName =
-          parent && parent.firstNamedChild
-            ? contents.slice(
-                parent.firstNamedChild.startIndex,
-                parent.firstNamedChild.endIndex,
-              )
-            : '' // TODO: unsure what we should do here?
-
-        namedDeclarations.push(
-          LSP.SymbolInformation.create(
-            name,
-            this.treeSitterTypeToLSPKind[n.type],
-            TreeSitterUtil.range(n),
-            uri,
-            parentName,
-          ),
-        )
-        this.uriToDeclarations[uri][name] = namedDeclarations
-      }
-    })
-
-    function findMissingNodes(node: Parser.SyntaxNode) {
-      if (node.isMissing()) {
-        problems.push(
-          LSP.Diagnostic.create(
-            TreeSitterUtil.range(node),
-            `Syntax error: expected "${node.type}" somewhere in the file`,
-            LSP.DiagnosticSeverity.Warning,
-          ),
-        )
-      } else if (node.hasError()) {
-        node.children.forEach(findMissingNodes)
-      }
-    }
-
-    findMissingNodes(tree.rootNode)
-
-    return problems
-  }
-
-  /**
-   * Find the node at the given point.
-   */
-  private nodeAtPoint(
-    uri: string,
-    line: number,
-    column: number,
-  ): Parser.SyntaxNode | null {
-    const document = this.uriToTreeSitterTrees[uri]
-
-    if (!document?.rootNode) {
-      // Check for lacking rootNode (due to failed parse?)
-      return null
-    }
-
-    return document.rootNode.descendantForPosition({ row: line, column })
+    return bashFile.problems
   }
 
   /**
    * Find the full word at the given point.
    */
   public wordAtPoint(uri: string, line: number, column: number): string | null {
-    const node = this.nodeAtPoint(uri, line, column)
-
-    if (!node || node.childCount > 0 || node.text.trim() === '') {
-      return null
-    }
-
-    return node.text.trim()
+    return this.uriToBashFiles[uri].wordAtPoint(line, column)
   }
 
   /**
    * Find the name of the command at the given point.
    */
   public commandNameAtPoint(uri: string, line: number, column: number): string | null {
-    let node = this.nodeAtPoint(uri, line, column)
-
-    while (node && node.type !== 'command') {
-      node = node.parent
-    }
-
-    if (!node) {
-      return null
-    }
-
-    const firstChild = node.firstNamedChild
-
-    if (!firstChild || firstChild.type !== 'command_name') {
-      return null
-    }
-
-    return firstChild.text.trim()
+    return this.uriToBashFiles[uri].commandNameAtPoint(line, column)
   }
 
   /**
