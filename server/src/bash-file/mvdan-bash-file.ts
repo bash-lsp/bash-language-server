@@ -3,6 +3,7 @@ import * as LSP from 'vscode-languageserver'
 import { Range } from 'vscode-languageserver/lib/main'
 
 const ShellScript = require('mvdan-sh') // NOTE: import is not working
+const _parser = ShellScript.syntax.NewParser()
 
 import { BaseBashFile, Declarations, Kinds } from './types'
 
@@ -32,6 +33,7 @@ function isDefinition(node: SyntaxNode): node is NamedNode {
   switch (ShellScript.syntax.NodeType(node)) {
     // TODO: other cases?
     case 'Assign':
+      return (node as any).Name !== null
     case 'FuncDecl':
       return true
     default:
@@ -84,9 +86,6 @@ export class BashFile implements BaseBashFile {
     contents: string
     parser: any
   }): BashFile {
-    // TODO: create somewhere else
-    const _parser = ShellScript.syntax.NewParser()
-
     const fileNode = _parser.Parse(contents)
 
     const problems: LSP.Diagnostic[] = []

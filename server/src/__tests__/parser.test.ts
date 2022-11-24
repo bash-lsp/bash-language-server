@@ -1,5 +1,5 @@
 import FIXTURES from '../../../testing/fixtures'
-//import { BashFile } from '../bash-file/treesitter-bash-file'
+// import { BashFile } from '../bash-file/treesitter-bash-file'
 import { BashFile } from '../bash-file/mvdan-bash-file'
 import { initializeParser } from '../parser'
 
@@ -114,5 +114,31 @@ describe('commandNameAtPoint', () => {
     expect(bashFile.commandNameAtPoint(38, 13)).toEqual('env')
     expect(bashFile.commandNameAtPoint(38, 24)).toEqual('grep')
     expect(bashFile.commandNameAtPoint(38, 44)).toEqual('sed')
+  })
+})
+
+describe('performance test', () => {
+  it('performs...', () => {
+    const fs = require('fs')
+    const glob = require('glob')
+
+    // get all file names matching glob
+    const files = glob.sync('../tree-sitter-bash/examples/bash-it/**/*.bash')
+    const fileAndContent = files.map((file: any) => [file, fs.readFileSync(file, 'utf8')])
+
+    const tStart = new Date().getTime()
+    fileAndContent.forEach(([file, contents]: any) => {
+      const b = BashFile.parse({
+        uri: file,
+        contents,
+        parser,
+      })
+    })
+
+    const tEnd = new Date().getTime()
+    console.log(`done loading ${fileAndContent.length} files in ${tEnd - tStart}`)
+
+    // 149 ms for old tree sitter parser
+    // 2947 ms for new parser
   })
 })
