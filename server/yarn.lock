@@ -25,6 +25,11 @@
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.3.tgz#3dca0e3f33b200fc7d1139c0cd96c1268cadfd9d"
   integrity sha512-tHq6qdbT9U1IRSGf14CL0pUlULksvY9OZ+5eEgl1N7t+OA3tGvNpxJCzuKQlsNgCVwbAs670L1vcVQi8j9HjnA==
 
+"@types/mvdan-sh@0.10.0":
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/@types/mvdan-sh/-/mvdan-sh-0.10.0.tgz#18d617de4efd62fa9267e374a36386075de0b1e6"
+  integrity sha512-CJjmvfw82dE+Kt1eeCToWPJDbbj2jGDdg/x8/hQe9eGBhpPBstiXt71huYzIAnTApl8iP4bw4vUxc7C4jJGSWQ==
+
 "@types/node@*":
   version "12.7.7"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.7.7.tgz#f9bd8c00fa9e1a8129af910fc829f6139c397d6c"
@@ -344,6 +349,11 @@ minimatch@^5.0.1:
   integrity sha512-nLDxIFRyhDblz3qMuq+SoRZED4+miJ/G+tdDrjkkkRnjAsBexeGpgjLEQ0blJy7rHhR2b93rhQY4SvyWu9v03g==
   dependencies:
     brace-expansion "^2.0.1"
+
+mvdan-sh@0.10.1:
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/mvdan-sh/-/mvdan-sh-0.10.1.tgz#5b3a4462a89cf20739b12d851589342c875f4d1f"
+  integrity sha512-kMbrH0EObaKmK3nVRKUIIya1dpASHIEusM13S4V1ViHFuxuNxCo+arxoa6j/dbV22YBGjl7UKJm9QQKJ2Crzhg==
 
 oauth-sign@~0.8.2:
   version "0.8.2"

@@ -1,5 +1,6 @@
 import FIXTURES from '../../../testing/fixtures'
-import { BashFile } from '../bash-file/treesitter-bash-file'
+//import { BashFile } from '../bash-file/treesitter-bash-file'
+import { BashFile } from '../bash-file/mvdan-bash-file'
 import { initializeParser } from '../parser'
 
 let parser: any
