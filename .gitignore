@@ -5,6 +5,7 @@ server/out
 # Linter cache
 coverage/
 .eslintcache/
+.eslintcache
 
 # OS related
 .DS_Store
