@@ -23,6 +23,7 @@
     "mvdan-sh": "0.10.1",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
+    "sh-syntax": "0.3.7",
     "turndown": "^7.0.0",
     "urijs": "^1.19.11",
     "vscode-languageserver": "^6.1.1",

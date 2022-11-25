@@ -1,6 +1,7 @@
 import FIXTURES from '../../../testing/fixtures'
 // import { BashFile } from '../bash-file/treesitter-bash-file'
-import { BashFile } from '../bash-file/mvdan-bash-file'
+// import { BashFile } from '../bash-file/mvdan-bash-file'
+import { BashFile } from '../bash-file/sh-syntax'
 import { initializeParser } from '../parser'
 
 let parser: any
@@ -12,8 +13,8 @@ beforeAll(async () => {
 })
 
 describe('bash-file parsing', () => {
-  it('returns an empty list of errors for a file with no parsing errors', () => {
-    const bashFile = BashFile.parse({
+  it('returns an empty list of errors for a file with no parsing errors', async () => {
+    const bashFile = await BashFile.parse({
       uri: CURRENT_URI,
       contents: FIXTURES.INSTALL.getText(),
       parser,
@@ -21,8 +22,8 @@ describe('bash-file parsing', () => {
     expect(bashFile.problems).toEqual([])
   })
 
-  it('returns a list of errors for a file with a missing node', () => {
-    const bashFile = BashFile.parse({
+  it('returns a list of errors for a file with a missing node', async () => {
+    const bashFile = await BashFile.parse({
       uri: CURRENT_URI,
       contents: FIXTURES.MISSING_NODE.getText(),
       parser,
@@ -30,8 +31,8 @@ describe('bash-file parsing', () => {
     expect(bashFile.problems).not.toEqual([])
   })
 
-  it('creates declarations', () => {
-    const bashFile = BashFile.parse({
+  it('creates declarations', async () => {
+    const bashFile = await BashFile.parse({
       uri: CURRENT_URI,
       contents: FIXTURES.ISSUE101.getText(),
       parser,
@@ -41,8 +42,8 @@ describe('bash-file parsing', () => {
 })
 
 describe('findOccurrences', () => {
-  it('returns empty list if parameter is not found', () => {
-    const bashFile = BashFile.parse({
+  it('returns empty list if parameter is not found', async () => {
+    const bashFile = await BashFile.parse({
       uri: CURRENT_URI,
       contents: FIXTURES.INSTALL.getText(),
       parser,
@@ -51,8 +52,8 @@ describe('findOccurrences', () => {
     expect(result).toEqual([])
   })
 
-  it('returns a list of locations if parameter is found', () => {
-    const bashFile = BashFile.parse({
+  it('returns a list of locations if parameter is found', async () => {
+    const bashFile = await BashFile.parse({
       uri: CURRENT_URI,
       contents: FIXTURES.INSTALL.getText(),
       parser,
@@ -64,8 +65,8 @@ describe('findOccurrences', () => {
 })
 
 describe('wordAtPoint', () => {
-  it('returns current word at a given point', () => {
-    const bashFile = BashFile.parse({
+  it('returns current word at a given point', async () => {
+    const bashFile = await BashFile.parse({
       uri: CURRENT_URI,
       contents: FIXTURES.INSTALL.getText(),
       parser,
@@ -96,8 +97,8 @@ describe('wordAtPoint', () => {
 })
 
 describe('commandNameAtPoint', () => {
-  it('returns current command name at a given point', () => {
-    const bashFile = BashFile.parse({
+  it('returns current command name at a given point', async () => {
+    const bashFile = await BashFile.parse({
       uri: CURRENT_URI,
       contents: FIXTURES.INSTALL.getText(),
       parser,
@@ -118,7 +119,7 @@ describe('commandNameAtPoint', () => {
 })
 
 describe('performance test', () => {
-  it('performs...', () => {
+  it('performs...', async () => {
     const fs = require('fs')
     const glob = require('glob')
 
@@ -127,13 +128,14 @@ describe('performance test', () => {
     const fileAndContent = files.map((file: any) => [file, fs.readFileSync(file, 'utf8')])
 
     const tStart = new Date().getTime()
-    fileAndContent.forEach(([file, contents]: any) => {
-      const b = BashFile.parse({
+
+    for (const [file, contents] of fileAndContent) {
+      const b = await BashFile.parse({
         uri: file,
         contents,
         parser,
       })
-    })
+    }
 
     const tEnd = new Date().getTime()
     console.log(`done loading ${fileAndContent.length} files in ${tEnd - tStart}`)
