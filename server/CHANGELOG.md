@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 3.2.1
+
+- Fix shebang parser that ignores some bash files https://github.com/bash-lsp/bash-language-server/pull/560
+
 ## 3.2.0
 
 - Dependency upgrades
