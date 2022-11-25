@@ -9,23 +9,18 @@ describe('hasBashShebang', () => {
     expect(hasBashShebang(`#!/usr/bin/env python2.7\n# set -x`)).toBe(false)
   })
 
-  it('returns true for "#!/bin/sh -"', () => {
-    expect(hasBashShebang('#!/bin/sh -')).toBe(true)
-    expect(hasBashShebang('#!/bin/sh - ')).toBe(true)
+  it('returns false for "#!/usr/bin/pwsh"', () => {
+    expect(hasBashShebang('#!/usr/bin/pwsh')).toBe(false)
   })
 
-  it('returns true for "#!/usr/bin/env bash"', () => {
-    expect(hasBashShebang('#!/usr/bin/env bash')).toBe(true)
-    expect(hasBashShebang('#!/usr/bin/env bash ')).toBe(true)
-  })
-
-  it('returns true for "#!/bin/sh"', () => {
-    expect(hasBashShebang('#!/bin/sh')).toBe(true)
-    expect(hasBashShebang('#!/bin/sh ')).toBe(true)
-  })
-
-  it('returns true for "#!/bin/bash"', () => {
-    expect(hasBashShebang('#!/bin/bash')).toBe(true)
-    expect(hasBashShebang('#!/bin/bash ')).toBe(true)
+  test.each([
+    ['#!/bin/sh -'],
+    ['#!/usr/bin/env bash'],
+    ['#!/bin/sh'],
+    ['#!/bin/bash'],
+    ['#!/bin/bash -u'],
+  ])('returns true for %p', (command) => {
+    expect(hasBashShebang(command)).toBe(true)
+    expect(hasBashShebang(`${command} `)).toBe(true)
   })
 })
