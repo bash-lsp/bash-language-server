@@ -8,7 +8,7 @@ import Analyzer from './analyser'
 import * as Builtins from './builtins'
 import * as config from './config'
 import Executables from './executables'
-import Linter from './linter'
+import { getLinterExecutablePath, Linter } from './linter'
 import { initializeParser } from './parser'
 import * as ReservedWords from './reservedWords'
 import { BashCompletionItem, CompletionItemDataType } from './types'
@@ -41,8 +41,9 @@ export default class BashServer {
     return Promise.all([
       Executables.fromPath(PATH),
       Analyzer.fromRoot({ connection, rootPath, parser }),
-      new Linter({ executablePath: config.getShellcheckPath() }),
-    ]).then(([executables, analyzer, linter]) => {
+      getLinterExecutablePath(),
+    ]).then(([executables, analyzer, linterExecutablePath]) => {
+      const linter = new Linter({ executablePath: linterExecutablePath })
       return new BashServer(connection, executables, analyzer, linter, capabilities)
     })
   }

@@ -1,6 +1,12 @@
 # Bash IDE
 
-Visual Studio Code extension utilizing the [bash language server](bash-lsp), that is based on [Tree Sitter][tree-sitter] and its [grammar for Bash][tree-sitter-bash] and supports [explainshell][explainshell] integration.
+[![VS Marketplace installs](https://badgen.net/vs-marketplace/i/mads-hartmann.bash-ide-vscode?label=VS%20Marketplace%20installs)](https://marketplace.visualstudio.com/items?itemName=mads-hartmann.bash-ide-vscode)
+[![VS Marketplace downloads](https://badgen.net/vs-marketplace/d/mads-hartmann.bash-ide-vscode?label=VS%20Marketplace%20downloads)](https://marketplace.visualstudio.com/items?itemName=mads-hartmann.bash-ide-vscode)
+[![Open VSX downloads](https://badgen.net/open-vsx/d/mads-hartmann/bash-ide-vscode?color=purple&label=Open%20VSX%20downloads)](https://open-vsx.org/extension/mads-hartmann/bash-ide-vscode)
+
+Visual Studio Code extension utilizing the [Bash Language Server](bash-lsp) and integrates with [explainshell][explainshell] and [shellcheck][shellcheck].
+
+We strongly recommend that you install [shellcheck][shellcheck] to enable linting: https://github.com/koalaman/shellcheck#installing
 
 ## Features
 
@@ -28,3 +34,4 @@ For security reasons, it defaults to `""`, which disables explainshell integrati
 [tree-sitter]: https://github.com/tree-sitter/tree-sitter
 [tree-sitter-bash]: https://github.com/tree-sitter/tree-sitter-bash
 [explainshell]: https://explainshell.com/
+[shellcheck]: https://www.shellcheck.net/

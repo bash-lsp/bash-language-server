@@ -29,7 +29,7 @@ export function execShellScript(body: string, cmd = 'bash'): Promise<string> {
 
 // Currently only reserved words where documentation doesn't make sense.
 // At least on OS X these just return the builtin man. On ubuntu there
-// are no documentaiton for them.
+// are no documentation for them.
 const WORDS_WITHOUT_DOCUMENTATION = new Set([
   'else',
   'fi',

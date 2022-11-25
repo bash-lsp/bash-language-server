@@ -1,6 +1,9 @@
 import { spawn } from 'child_process'
 import * as LSP from 'vscode-languageserver'
 
+import * as config from './config'
+import { execShellScript } from './util/sh'
+
 function formatMessage(comment: ShellcheckComment): string {
   return (comment.code ? `SC${comment.code}: ` : '') + comment.message
 }
@@ -10,8 +13,23 @@ type LinterOptions = {
   cwd?: string
 }
 
-export default class Linter {
-  private executablePath: string | null
+export async function getLinterExecutablePath(): Promise<string | null> {
+  const pathFromConfig = config.getShellcheckPath()
+
+  if (pathFromConfig) {
+    return pathFromConfig
+  }
+
+  try {
+    const path = (await execShellScript('which shellcheck')).trim()
+    return path === '' ? null : path
+  } catch (e) {
+    return null
+  }
+}
+
+export class Linter {
+  public executablePath: string | null
   private cwd: string
   _canLint: boolean
 

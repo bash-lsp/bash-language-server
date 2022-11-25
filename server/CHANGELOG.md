@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 3.2.0
+
+- Dependency upgrades
+- Default to shellcheck binary found on path https://github.com/bash-lsp/bash-language-server/pull/555
+
 ## 3.1.1
 
 - Dependency upgrades

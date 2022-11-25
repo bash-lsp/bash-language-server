@@ -45,6 +45,11 @@
           "type": "string",
           "default": "",
           "description": "Configure explainshell server in order to get hover documentation on flags and options."
+        },
+        "bashIde.shellcheckPath": {
+          "type": "string",
+          "default": "",
+          "description": "Configure a custom path for the Shellcheck executable in order to get linting information."
         }
       }
     }
