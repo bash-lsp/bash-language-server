@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.16.0
+
+- Upgrade language server to 3.2.0
+
 ## 1.15.0
 
 - Upgrade language server to 3.1.0
