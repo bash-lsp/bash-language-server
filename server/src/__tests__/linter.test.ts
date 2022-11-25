@@ -2,7 +2,7 @@ import * as path from 'path'
 import * as LSP from 'vscode-languageserver'
 
 import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../testing/fixtures'
-import Linter, { assertShellcheckResult } from '../linter'
+import { assertShellcheckResult, Linter } from '../linter'
 
 function textToDoc(txt: string) {
   return LSP.TextDocument.create('foo', 'bar', 0, txt)
