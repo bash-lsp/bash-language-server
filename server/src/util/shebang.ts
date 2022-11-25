@@ -6,11 +6,19 @@ export function getShebang(fileContent: string): string | null {
     return null
   }
 
-  return match[1].replace('-', '').trim()
+  return match[1]
 }
 
+/**
+ * Check if the given shebang is a bash shebang.
+ */
 export function isBashShebang(shebang: string): boolean {
-  return shebang.endsWith('bash') || shebang.endsWith('sh')
+  return (
+    shebang.startsWith('/bin/bash') ||
+    shebang.startsWith('/bin/sh') ||
+    shebang.startsWith('/usr/bin/env bash') ||
+    shebang.startsWith('/usr/bin/env sh')
+  )
 }
 
 export function hasBashShebang(fileContent: string): boolean {
