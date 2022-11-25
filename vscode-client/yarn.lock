@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@types/vscode@1.73.1":
+"@types/vscode@^1.44.0":
   version "1.73.1"
   resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.73.1.tgz#f2b198dca65c693c4570475aca04a34ad773609d"
   integrity sha512-eArfOrAoZVV+Ao9zQOCaFNaeXj4kTCD+bGS2gyNgIFZH9xVMuLMlRrEkhb22NyxycFWKV1UyTh03vhaVHmqVMg==
