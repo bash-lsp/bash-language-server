@@ -26,7 +26,8 @@
     "urijs": "^1.19.11",
     "vscode-languageserver": "^6.1.1",
     "vscode-languageserver-textdocument": "^1.0.1",
-    "web-tree-sitter": "^0.20.5"
+    "web-tree-sitter": "^0.20.5",
+    "which": "^2.0.2"
   },
   "scripts": {
     "prepublishOnly": "cd ../ && yarn run compile"
@@ -36,6 +37,7 @@
     "@types/glob": "8.0.0",
     "@types/request-promise-native": "1.0.18",
     "@types/turndown": "5.0.1",
-    "@types/urijs": "1.19.19"
+    "@types/urijs": "1.19.19",
+    "@types/which": "2.0.1"
   }
 }
