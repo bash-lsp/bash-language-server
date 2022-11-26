@@ -21,7 +21,7 @@
     "@types/node-fetch": "2.6.2",
     "fuzzy-search": "^3.2.1",
     "glob": "^8.0.0",
-    "node-fetch": "^2.6.7",
+    "node-fetch": "^3.0.0",
     "turndown": "^7.0.0",
     "urijs": "^1.19.11",
     "vscode-languageserver": "^6.1.1",
