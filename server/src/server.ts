@@ -232,22 +232,17 @@ export default class BashServer {
 
     const explainshellEndpoint = config.getExplainshellEndpoint()
     if (explainshellEndpoint) {
-      this.connection.console.log(`Query ${explainshellEndpoint}`)
       try {
-        const response = await this.analyzer.getExplainshellDocumentation({
+        const { helpHTML } = await this.analyzer.getExplainshellDocumentation({
           params,
           endpoint: explainshellEndpoint,
         })
 
-        if (response.status === 'error') {
-          this.connection.console.log(
-            `getExplainshellDocumentation returned: ${JSON.stringify(response, null, 4)}`,
-          )
-        } else {
+        if (helpHTML) {
           return {
             contents: {
               kind: 'markdown',
-              value: new TurndownService().turndown(response.helpHTML),
+              value: new TurndownService().turndown(helpHTML),
             },
           }
         }

@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import * as FuzzySearch from 'fuzzy-search'
-import * as request from 'request-promise-native'
+import fetch from 'node-fetch'
 import * as URI from 'urijs'
 import * as url from 'url'
 import { promisify } from 'util'
@@ -33,7 +33,8 @@ export default class Analyzer {
    * root path.
    *
    * If the rootPath is provided it will initialize all shell files it can find
-   * anywhere on that path. This non-exhaustive glob is used to preload the parser.
+   * anywhere on that path. This non-exhaustive glob is used to preload the parser
+   * to support features across files.
    */
   public static async fromRoot({
     connection,
@@ -147,7 +148,7 @@ export default class Analyzer {
   }: {
     params: LSP.TextDocumentPositionParams
     endpoint: string
-  }): Promise<any> {
+  }): Promise<{ helpHTML?: string }> {
     const leafNode = this.uriToTreeSitterTrees[
       params.textDocument.uri
     ].rootNode.descendantForPosition({
@@ -163,49 +164,38 @@ export default class Analyzer {
     const interestingNode = leafNode.type === 'word' ? leafNode.parent : leafNode
 
     if (!interestingNode) {
-      return {
-        status: 'error',
-        message: 'no interestingNode found',
-      }
+      return {}
     }
 
     const cmd = this.uriToFileContent[params.textDocument.uri].slice(
       interestingNode.startIndex,
       interestingNode.endIndex,
     )
+    type ExplainshellResponse = {
+      matches?: Array<{ helpHTML: string; start: number; end: number }>
+    }
 
-    // FIXME: type the response and unit test it
-    const explainshellResponse = await request({
-      uri: URI(endpoint).path('/api/explain').addQuery('cmd', cmd).toString(),
-      json: true,
-    })
+    const url = URI(endpoint).path('/api/explain').addQuery('cmd', cmd).toString()
+    const explainshellRawResponse = await fetch(url)
+    const explainshellResponse =
+      (await explainshellRawResponse.json()) as ExplainshellResponse
 
-    // Attaches debugging information to the return value (useful for logging to
-    // VS Code output).
-    const response = { ...explainshellResponse, cmd, cmdType: interestingNode.type }
-
-    if (explainshellResponse.status === 'error') {
-      return response
+    if (!explainshellRawResponse.ok) {
+      throw new Error(`HTTP request failed: ${url}`)
     } else if (!explainshellResponse.matches) {
-      return { ...response, status: 'error' }
+      return {}
     } else {
       const offsetOfMousePointerInCommand =
         this.uriToTextDocument[params.textDocument.uri].offsetAt(params.position) -
         interestingNode.startIndex
 
       const match = explainshellResponse.matches.find(
-        (helpItem: any) =>
+        (helpItem) =>
           helpItem.start <= offsetOfMousePointerInCommand &&
           offsetOfMousePointerInCommand < helpItem.end,
       )
 
-      const helpHTML = match && match.helpHTML
-
-      if (!helpHTML) {
-        return { ...response, status: 'error' }
-      }
-
-      return { ...response, helpHTML }
+      return { helpHTML: match && match.helpHTML }
     }
   }
 
@@ -261,6 +251,8 @@ export default class Analyzer {
 
   /**
    * Find symbol completions for the given word.
+   *
+   * TODO: if a file is not included we probably shouldn't include it declarations from it.
    */
   public findSymbolsMatchingWord({
     exactMatch,

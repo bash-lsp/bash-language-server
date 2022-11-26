@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 3.2.2
+
+- Get rid of deprecated dependencies for the explainshell integration https://github.com/bash-lsp/bash-language-server/pull/564
+
 ## 3.2.1
 
 - Fix shebang parser that ignores some bash files https://github.com/bash-lsp/bash-language-server/pull/560
