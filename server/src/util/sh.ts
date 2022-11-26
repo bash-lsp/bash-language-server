@@ -3,9 +3,19 @@ import * as ChildProcess from 'child_process'
 /**
  * Execute the following sh program.
  */
-export function execShellScript(body: string, cmd = 'bash'): Promise<string> {
-  const args = ['-c', body]
-  const process = ChildProcess.spawn(cmd, args)
+export function execShellScript(
+  body: string,
+  cmd = process.platform === 'win32' ? 'cmd.exe' : 'bash',
+): Promise<string> {
+  const args = []
+
+  if (cmd === 'cmd.exe') {
+    args.push('/c', body)
+  } else {
+    args.push('-c', body)
+  }
+
+  const proc = ChildProcess.spawn(cmd, args)
 
   return new Promise((resolve, reject) => {
     let output = ''
@@ -18,12 +28,12 @@ export function execShellScript(body: string, cmd = 'bash'): Promise<string> {
       }
     }
 
-    process.stdout.on('data', (buffer) => {
+    proc.stdout.on('data', (buffer) => {
       output += buffer
     })
 
-    process.on('close', handleClose)
-    process.on('error', handleClose)
+    proc.on('close', handleClose)
+    proc.on('error', handleClose)
   })
 }
 
