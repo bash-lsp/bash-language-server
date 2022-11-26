@@ -33,7 +33,8 @@ export default class Analyzer {
    * root path.
    *
    * If the rootPath is provided it will initialize all shell files it can find
-   * anywhere on that path. This non-exhaustive glob is used to preload the parser.
+   * anywhere on that path. This non-exhaustive glob is used to preload the parser
+   * to support features across files.
    */
   public static async fromRoot({
     connection,
@@ -250,6 +251,8 @@ export default class Analyzer {
 
   /**
    * Find symbol completions for the given word.
+   *
+   * TODO: if a file is not included we probably shouldn't include it declarations from it.
    */
   public findSymbolsMatchingWord({
     exactMatch,
