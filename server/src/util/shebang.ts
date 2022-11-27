@@ -6,7 +6,7 @@ export function getShebang(fileContent: string): string | null {
     return null
   }
 
-  return match[1]
+  return match[1].trim()
 }
 
 /**
@@ -16,6 +16,7 @@ export function isBashShebang(shebang: string): boolean {
   return (
     shebang.startsWith('/bin/bash') ||
     shebang.startsWith('/bin/sh') ||
+    shebang.startsWith('/usr/bin/bash') ||
     shebang.startsWith('/usr/bin/env bash') ||
     shebang.startsWith('/usr/bin/env sh')
   )
