@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.16.2
+
+- Upgrade language server to 3.2.3
+
 ## 1.16.1
 
 - Fix incorrect link in README
