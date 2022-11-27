@@ -19,6 +19,8 @@ describe('hasBashShebang', () => {
     ['#!/bin/sh'],
     ['#!/bin/bash'],
     ['#!/bin/bash -u'],
+    ['#! /bin/bash'],
+    ['#!/usr/bin/bash'],
   ])('returns true for %p', (command) => {
     expect(hasBashShebang(command)).toBe(true)
     expect(hasBashShebang(`${command} `)).toBe(true)
