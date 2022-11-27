@@ -1,4 +1,5 @@
 export const DEFAULT_GLOB_PATTERN = '**/*@(.sh|.inc|.bash|.command)'
+export const DEFAULT_BACKGROUND_ANALYSIS_MAX_FILES = 5000
 
 export function getShellcheckPath(): string | null {
   const { SHELLCHECK_PATH } = process.env
@@ -25,4 +26,10 @@ export function getHighlightParsingError(): boolean {
   return typeof HIGHLIGHT_PARSING_ERRORS !== 'undefined'
     ? HIGHLIGHT_PARSING_ERRORS === 'true' || HIGHLIGHT_PARSING_ERRORS === '1'
     : false
+}
+
+export function getBackgroundAnalysisMaxFiles(): number {
+  const { BACKGROUND_ANALYSIS_MAX_FILES } = process.env
+  const parsed = parseInt(BACKGROUND_ANALYSIS_MAX_FILES || '', 10)
+  return !isNaN(parsed) ? parsed : DEFAULT_BACKGROUND_ANALYSIS_MAX_FILES
 }

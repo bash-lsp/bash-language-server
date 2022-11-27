@@ -7,7 +7,7 @@ import { promisify } from 'util'
 import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
 
-import { getGlobPattern } from './config'
+import * as config from './config'
 import { flattenArray, flattenObjectValues } from './util/flatten'
 import { getFilePaths } from './util/fs'
 import { getShebang, isBashShebang } from './util/shebang'
@@ -84,7 +84,8 @@ export default class Analyzer {
     connection: LSP.Connection
     rootPath: string
   }) {
-    const globPattern = getGlobPattern()
+    const globPattern = config.getGlobPattern()
+    const backgroundAnalysisMaxFiles = config.getBackgroundAnalysisMaxFiles()
     connection.console.log(
       `BackgroundAnalysis: resolving glob "${globPattern}" inside "${rootPath}"...`,
     )
@@ -97,6 +98,7 @@ export default class Analyzer {
       filePaths = await getFilePaths({
         globPattern,
         rootPath,
+        maxItems: backgroundAnalysisMaxFiles,
       })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : error
