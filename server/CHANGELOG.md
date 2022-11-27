@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 3.2.3
+
+- Fix auto detection for path of shellcheck.exe on Windows https://github.com/bash-lsp/bash-language-server/pull/563
+
 ## 3.2.2
 
 - Get rid of deprecated dependencies for the explainshell integration https://github.com/bash-lsp/bash-language-server/pull/564
