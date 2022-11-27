@@ -1,10 +1,22 @@
 import * as ChildProcess from 'child_process'
 
+import { isWindows } from './platform'
+
 /**
  * Execute the following sh program.
  */
-export function execShellScript(body: string, cmd = 'bash'): Promise<string> {
-  const args = ['-c', body]
+export function execShellScript(
+  body: string,
+  cmd = isWindows() ? 'cmd.exe' : 'bash',
+): Promise<string> {
+  const args = []
+
+  if (cmd === 'cmd.exe') {
+    args.push('/c', body)
+  } else {
+    args.push('-c', body)
+  }
+
   const process = ChildProcess.spawn(cmd, args)
 
   return new Promise((resolve, reject) => {
