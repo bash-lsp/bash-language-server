@@ -14,6 +14,9 @@ export function getExplainshellEndpoint(): string | null {
     : null
 }
 
+/**
+ * Get the glob pattern for files to run background analysis on.
+ */
 export function getGlobPattern(): string {
   const { GLOB_PATTERN } = process.env
   return typeof GLOB_PATTERN === 'string' && GLOB_PATTERN.trim() !== ''
@@ -28,6 +31,9 @@ export function getHighlightParsingError(): boolean {
     : false
 }
 
+/**
+ * Get the maximum number of files to run background analysis on.
+ */
 export function getBackgroundAnalysisMaxFiles(): number {
   const { BACKGROUND_ANALYSIS_MAX_FILES } = process.env
   const parsed = parseInt(BACKGROUND_ANALYSIS_MAX_FILES || '', 10)
