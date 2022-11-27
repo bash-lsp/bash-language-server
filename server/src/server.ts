@@ -38,14 +38,14 @@ export default class BashServer {
       throw new Error('Expected PATH environment variable to be set')
     }
 
-    return Promise.all([
-      Executables.fromPath(PATH),
-      Analyzer.fromRoot({ connection, rootPath, parser }),
-      getLinterExecutablePath(),
-    ]).then(([executables, analyzer, linterExecutablePath]) => {
-      const linter = new Linter({ executablePath: linterExecutablePath })
-      return new BashServer(connection, executables, analyzer, linter, capabilities)
-    })
+    const analyzer = Analyzer.fromRoot({ connection, rootPath, parser })
+
+    return Promise.all([Executables.fromPath(PATH), getLinterExecutablePath()]).then(
+      ([executables, linterExecutablePath]) => {
+        const linter = new Linter({ executablePath: linterExecutablePath })
+        return new BashServer(connection, executables, analyzer, linter, capabilities)
+      },
+    )
   }
 
   private executables: Executables
