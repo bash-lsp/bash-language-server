@@ -1,8 +1,5 @@
 import { spawn } from 'child_process'
 import * as LSP from 'vscode-languageserver'
-import which = require('which')
-
-import * as config from './config'
 
 function formatMessage(comment: ShellcheckComment): string {
   return (comment.code ? `SC${comment.code}: ` : '') + comment.message
@@ -10,22 +7,22 @@ function formatMessage(comment: ShellcheckComment): string {
 
 type LinterOptions = {
   executablePath: string | null
+  console: LSP.RemoteConsole
   cwd?: string
-}
-
-export async function getLinterExecutablePath(): Promise<string | null> {
-  return config.getShellcheckPath() || (await which('shellcheck'))
 }
 
 export class Linter {
   public executablePath: string | null
   private cwd: string
+  private console: LSP.RemoteConsole
+
   _canLint: boolean
 
-  constructor(opts: LinterOptions) {
-    this.executablePath = opts.executablePath
-    this.cwd = opts.cwd || process.cwd()
-    this._canLint = !!this.executablePath
+  constructor({ console, cwd, executablePath }: LinterOptions) {
+    this.executablePath = executablePath
+    this.cwd = cwd || process.cwd()
+    this._canLint = !!this.executablePath // TODO: any reason to create a linter if the path is null?
+    this.console = console
   }
 
   public get canLint(): boolean {
@@ -105,12 +102,14 @@ export class Linter {
     } catch (e) {
       if ((e as any).code === 'ENOENT') {
         // shellcheck path wasn't found, don't try to lint any more:
-        console.error(`shellcheck not available at path '${this.executablePath}'`)
+        this.console.warn(
+          `ShellCheck: disabling linting as no executable '${this.executablePath}'`,
+        )
         this._canLint = false
         return { comments: [] }
       }
       throw new Error(
-        `shellcheck failed with code ${exit}: ${e}\nout:\n${out}\nerr:\n${err}`,
+        `ShellCheck: failed with code ${exit}: ${e}\nout:\n${out}\nerr:\n${err}`,
       )
     }
 
@@ -119,7 +118,7 @@ export class Linter {
       raw = JSON.parse(out)
     } catch (e) {
       throw new Error(
-        `shellcheck: json parse failed with error ${e}\nout:\n${out}\nerr:\n${err}`,
+        `ShellCheck: json parse failed with error ${e}\nout:\n${out}\nerr:\n${err}`,
       )
     }
     assertShellcheckResult(raw)
