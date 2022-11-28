@@ -41,3 +41,4 @@ jobs:
           reviewers: skovhus
           title: Auto upgrade tree-sitter-bash parser
           commit-message: Auto upgrade tree-sitter-bash parser
+          token: ${{ secrets.GH_TOKEN }}
