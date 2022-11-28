@@ -1,5 +1,11 @@
 # Bash Language Server
 
+## 3.3.0
+
+- Performant globbing and background analysis that should fix the server crashing for large workspaces. We currently limit the files parsed to 500, but can be configured using the `BACKGROUND_ANALYSIS_MAX_FILES` environment variable https://github.com/bash-lsp/bash-language-server/pull/569
+- Enable ShellCheck integration to be disabled from the configuration. The default configuration used should be "shellcheck". https://github.com/bash-lsp/bash-language-server/pull/571
+- Support more bash shebangs when doing background analysis https://github.com/bash-lsp/bash-language-server/pull/568
+
 ## 3.2.3
 
 - Fix auto detection for path of shellcheck.exe on Windows https://github.com/bash-lsp/bash-language-server/pull/563
