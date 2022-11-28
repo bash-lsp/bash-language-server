@@ -28,34 +28,8 @@ type Texts = { [uri: string]: string }
  * tree-sitter to find definitions, reference, etc.
  */
 export default class Analyzer {
-  /**
-   * Initialize the Analyzer based on a connection to the client and an optional
-   * root path.
-   *
-   * If the rootPath is provided it will initialize all shell files it can find
-   * anywhere on that path. This non-exhaustive glob is used to preload the parser
-   * to support features across files.
-   */
-  public static fromRoot({
-    connection,
-    rootPath,
-    parser,
-  }: {
-    connection: LSP.Connection
-    rootPath: LSP.InitializeParams['rootPath']
-    parser: Parser
-  }): Analyzer {
-    const analyzer = new Analyzer(parser)
-
-    if (rootPath) {
-      // NOTE: we do not block the initialization on this background analysis.
-      analyzer.initiateBackgroundAnalysis({ connection, rootPath })
-    }
-
-    return analyzer
-  }
-
   private parser: Parser
+  private console: LSP.RemoteConsole
 
   private uriToTextDocument: { [uri: string]: LSP.TextDocument } = {}
 
@@ -73,20 +47,29 @@ export default class Analyzer {
     variable_assignment: LSP.SymbolKind.Variable,
   }
 
-  public constructor(parser: Parser) {
+  public constructor({
+    console,
+    parser,
+  }: {
+    console: LSP.RemoteConsole
+    parser: Parser
+  }) {
     this.parser = parser
+    this.console = console
   }
 
-  private async initiateBackgroundAnalysis({
-    connection,
+  /**
+   * Initiates a background analysis of the files in the given rootPath to
+   * enable features across files.
+   */
+  public async initiateBackgroundAnalysis({
     rootPath,
   }: {
-    connection: LSP.Connection
     rootPath: string
-  }) {
+  }): Promise<{ filesParsed: number }> {
     const globPattern = config.getGlobPattern()
     const backgroundAnalysisMaxFiles = config.getBackgroundAnalysisMaxFiles()
-    connection.console.log(
+    this.console.log(
       `BackgroundAnalysis: resolving glob "${globPattern}" inside "${rootPath}"...`,
     )
 
@@ -102,13 +85,13 @@ export default class Analyzer {
       })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : error
-      connection.window.showWarningMessage(
+      this.console.warn(
         `BackgroundAnalysis: failed resolved glob "${globPattern}". The experience across files will be degraded. Error: ${errorMessage}`,
       )
-      return
+      return { filesParsed: 0 }
     }
 
-    connection.console.log(
+    this.console.log(
       `BackgroundAnalysis: Glob resolved with ${
         filePaths.length
       } files after ${getTimePassed()}`,
@@ -121,7 +104,7 @@ export default class Analyzer {
         const fileContent = await readFileAsync(filePath, 'utf8')
         const shebang = getShebang(fileContent)
         if (shebang && !isBashShebang(shebang)) {
-          connection.console.log(
+          this.console.log(
             `BackgroundAnalysis: Skipping file ${uri} with shebang "${shebang}"`,
           )
           continue
@@ -130,13 +113,16 @@ export default class Analyzer {
         this.analyze(uri, LSP.TextDocument.create(uri, 'shell', 1, fileContent))
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : error
-        connection.console.warn(
+        this.console.warn(
           `BackgroundAnalysis: Failed analyzing ${uri}. Error: ${errorMessage}`,
         )
       }
     }
 
-    connection.console.log(`BackgroundAnalysis: Completed after ${getTimePassed()}.`)
+    this.console.log(`BackgroundAnalysis: Completed after ${getTimePassed()}.`)
+    return {
+      filesParsed: filePaths.length,
+    }
   }
 
   /**

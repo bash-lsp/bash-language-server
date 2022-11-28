@@ -20,6 +20,12 @@ async function initializeServer() {
     workspaceFolders: null,
   })
 
+  const { backgroundAnalysisCompleted } = server
+
+  if (backgroundAnalysisCompleted) {
+    await backgroundAnalysisCompleted
+  }
+
   return {
     connection,
     console,
