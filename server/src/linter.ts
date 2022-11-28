@@ -103,7 +103,7 @@ export class Linter {
       if ((e as any).code === 'ENOENT') {
         // shellcheck path wasn't found, don't try to lint any more:
         this.console.warn(
-          `ShellCheck: disabling linting as no executable '${this.executablePath}'`,
+          `ShellCheck: disabling linting as no executable was found at path '${this.executablePath}'`,
         )
         this._canLint = false
         return { comments: [] }
