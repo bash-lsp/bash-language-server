@@ -2,7 +2,10 @@ import * as path from 'path'
 import * as LSP from 'vscode-languageserver'
 
 import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../testing/fixtures'
+import { getMockConnection } from '../../../testing/mocks'
 import { assertShellcheckResult, Linter } from '../linter'
+
+const mockConsole = getMockConnection().console
 
 function textToDoc(txt: string) {
   return LSP.TextDocument.create('foo', 'bar', 0, txt)
@@ -10,23 +13,25 @@ function textToDoc(txt: string) {
 
 describe('linter', () => {
   it('should set canLint to false if executable empty', () => {
-    expect(new Linter({ executablePath: null }).canLint).toBe(false)
+    expect(new Linter({ console: mockConsole, executablePath: null }).canLint).toBe(false)
   })
 
   it('should set canLint to true if executable not empty', () => {
-    expect(new Linter({ executablePath: 'foo' }).canLint).toBe(true)
+    expect(new Linter({ console: mockConsole, executablePath: 'foo' }).canLint).toBe(true)
   })
 
   it('should set canLint to false when linting fails', async () => {
-    jest.spyOn(console, 'error').mockImplementation()
     const executablePath = '77b4d3f6-c87a-11ec-9b62-a3c90f66d29f'
     const linter = new Linter({
+      console: mockConsole,
       executablePath,
     })
     expect(await linter.lint(textToDoc(''), [])).toEqual([])
     expect(linter.canLint).toBe(false)
-    expect(console.error).toBeCalledWith(
-      expect.stringContaining('shellcheck not available at path'),
+    expect(mockConsole.warn).toBeCalledWith(
+      expect.stringContaining(
+        'ShellCheck: disabling linting as no executable was found at path',
+      ),
     )
   })
 
@@ -54,21 +59,26 @@ describe('linter', () => {
       },
     ]
 
-    const linter = new Linter({ executablePath: 'shellcheck' })
+    const linter = new Linter({ console: mockConsole, executablePath: 'shellcheck' })
     const result = await linter.lint(textToDoc(shell), [])
     expect(result).toEqual(expected)
   })
 
   it('should correctly follow sources with correct cwd', async () => {
-    const linter = new Linter({ executablePath: 'shellcheck', cwd: FIXTURE_FOLDER })
+    const linter = new Linter({
+      console: mockConsole,
+      executablePath: 'shellcheck',
+      cwd: FIXTURE_FOLDER,
+    })
     const result = await linter.lint(FIXTURE_DOCUMENT.SHELLCHECK_SOURCE, [])
     expect(result).toEqual([])
   })
 
   it('should fail to follow sources with incorrect cwd', async () => {
     const linter = new Linter({
-      executablePath: 'shellcheck',
+      console: mockConsole,
       cwd: path.resolve(path.join(FIXTURE_FOLDER, '../')),
+      executablePath: 'shellcheck',
     })
     // prettier-ignore
     const expected = [
@@ -81,8 +91,9 @@ describe('linter', () => {
 
   it('should follow sources with incorrect cwd if correct path is passed as a workspace path', async () => {
     const linter = new Linter({
-      executablePath: 'shellcheck',
+      console: mockConsole,
       cwd: path.resolve(path.join(FIXTURE_FOLDER, '../')),
+      executablePath: 'shellcheck',
     })
     const result = await linter.lint(FIXTURE_DOCUMENT.SHELLCHECK_SOURCE, [
       { uri: `file://${path.resolve(FIXTURE_FOLDER)}`, name: 'fixtures' },

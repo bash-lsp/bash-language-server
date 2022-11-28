@@ -34,7 +34,7 @@
         "bashIde.globPattern": {
           "type": "string",
           "default": "**/*@(.sh|.inc|.bash|.command)",
-          "description": "Glob pattern for finding and parsing shell script files."
+          "description": "Glob pattern for finding and parsing shell script files in the workspace."
         },
         "bashIde.highlightParsingErrors": {
           "type": "boolean",
@@ -44,12 +44,12 @@
         "bashIde.explainshellEndpoint": {
           "type": "string",
           "default": "",
-          "description": "Configure explainshell server in order to get hover documentation on flags and options."
+          "description": "Configure explainshell server endpoint in order to get hover documentation on flags and options."
         },
         "bashIde.shellcheckPath": {
           "type": "string",
-          "default": "",
-          "description": "Configure a custom path for the Shellcheck executable in order to get linting information."
+          "default": "shellcheck",
+          "description": "Controls the executable used for ShellCheck linting information. An empty string will disable linting."
         }
       }
     }

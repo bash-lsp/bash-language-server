@@ -8,7 +8,7 @@ import Analyzer from './analyser'
 import * as Builtins from './builtins'
 import * as config from './config'
 import Executables from './executables'
-import { getLinterExecutablePath, Linter } from './linter'
+import { Linter } from './linter'
 import { initializeParser } from './parser'
 import * as ReservedWords from './reservedWords'
 import { BashCompletionItem, CompletionItemDataType } from './types'
@@ -30,35 +30,41 @@ export default class BashServer {
     connection: LSP.Connection,
     { rootPath, capabilities }: LSP.InitializeParams,
   ): Promise<BashServer> {
-    const parser = await initializeParser()
-
     const { PATH } = process.env
 
     if (!PATH) {
       throw new Error('Expected PATH environment variable to be set')
     }
 
-    return Promise.all([Executables.fromPath(PATH), getLinterExecutablePath()]).then(
-      ([executables, linterExecutablePath]) => {
-        const analyzer = new Analyzer({ console: connection.console, parser })
-        const linter = new Linter({ executablePath: linterExecutablePath })
+    const parser = await initializeParser()
+    const analyzer = new Analyzer({ console: connection.console, parser })
 
-        let backgroundAnalysisCompleted
-        if (rootPath) {
-          // NOTE: we do not block the server initialization on this background analysis.
-          backgroundAnalysisCompleted = analyzer.initiateBackgroundAnalysis({ rootPath })
-        }
+    let backgroundAnalysisCompleted
+    if (rootPath) {
+      // NOTE: we do not block the server initialization on this background analysis.
+      backgroundAnalysisCompleted = analyzer.initiateBackgroundAnalysis({ rootPath })
+    }
 
-        return new BashServer({
-          analyzer,
-          backgroundAnalysisCompleted,
-          capabilities,
-          connection,
-          executables,
-          linter,
-        })
-      },
-    )
+    const shellcheckPath = config.getShellcheckPath()
+    const linter = new Linter({
+      console: connection.console,
+      executablePath: shellcheckPath,
+    })
+
+    if (!shellcheckPath) {
+      connection.console.info('ShellCheck linting is disabled.')
+    }
+
+    const executables = await Executables.fromPath(PATH)
+
+    return new BashServer({
+      analyzer,
+      backgroundAnalysisCompleted,
+      capabilities,
+      connection,
+      executables,
+      linter,
+    })
   }
 
   private executables: Executables
