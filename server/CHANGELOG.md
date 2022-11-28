@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 3.3.1
+
+- Fix missing documentation for some help pages https://github.com/bash-lsp/bash-language-server/pull/577
+
 ## 3.3.0
 
 - Performant globbing and background analysis that should fix the server crashing for large workspaces. We currently limit the files parsed to 500, but can be configured using the `BACKGROUND_ANALYSIS_MAX_FILES` environment variable https://github.com/bash-lsp/bash-language-server/pull/569
