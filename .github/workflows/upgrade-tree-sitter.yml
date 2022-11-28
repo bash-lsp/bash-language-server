@@ -20,7 +20,7 @@ jobs:
         run: yarn install
 
       - name: Upgrade tree-sitter wasm
-        run: sh scripts/upgrade-tree-sitter.sh
+        run: bash scripts/upgrade-tree-sitter.sh
 
       - name: Verify changes
         run: yarn verify:bail
