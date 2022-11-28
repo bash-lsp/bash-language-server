@@ -321,7 +321,7 @@ export default class BashServer {
     if (!word) {
       return null
     }
-    return this.analyzer.findDefinition(word)
+    return this.analyzer.findDefinition({ word })
   }
 
   private onDocumentSymbol(params: LSP.DocumentSymbolParams): LSP.SymbolInformation[] {

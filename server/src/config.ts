@@ -27,7 +27,7 @@ export function getGlobPattern(): string {
 export function getHighlightParsingError(): boolean {
   const { HIGHLIGHT_PARSING_ERRORS } = process.env
   return typeof HIGHLIGHT_PARSING_ERRORS !== 'undefined'
-    ? HIGHLIGHT_PARSING_ERRORS === 'true' || HIGHLIGHT_PARSING_ERRORS === '1'
+    ? toBoolean(HIGHLIGHT_PARSING_ERRORS)
     : false
 }
 
@@ -39,3 +39,5 @@ export function getBackgroundAnalysisMaxFiles(): number {
   const parsed = parseInt(BACKGROUND_ANALYSIS_MAX_FILES || '', 10)
   return !isNaN(parsed) ? parsed : DEFAULT_BACKGROUND_ANALYSIS_MAX_FILES
 }
+
+const toBoolean = (s: string): boolean => s === 'true' || s === '1'
