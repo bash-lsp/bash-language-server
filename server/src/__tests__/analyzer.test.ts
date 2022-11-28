@@ -37,15 +37,15 @@ describe('analyze', () => {
 })
 
 describe('findDefinition', () => {
-  it('returns empty list if parameter is not found', () => {
+  it('returns an empty list if word is not found', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
-    const result = analyzer.findDefinition('foobar')
+    const result = analyzer.findDefinition({ word: 'foobar' })
     expect(result).toEqual([])
   })
 
   it('returns a list of locations if parameter is found', () => {
     analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
-    const result = analyzer.findDefinition('node_version')
+    const result = analyzer.findDefinition({ word: 'node_version' })
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()
   })

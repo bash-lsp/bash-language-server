@@ -17,7 +17,7 @@ const readFileAsync = promisify(fs.readFile)
 
 type Kinds = { [type: string]: LSP.SymbolKind }
 
-type Declarations = { [name: string]: LSP.SymbolInformation[] }
+type Declarations = { [word: string]: LSP.SymbolInformation[] }
 type FileDeclarations = { [uri: string]: Declarations }
 
 type Trees = { [uri: string]: Parser.Tree }
@@ -126,12 +126,12 @@ export default class Analyzer {
   }
 
   /**
-   * Find all the locations where something named name has been defined.
+   * Find all the locations where something has been defined.
    */
-  public findDefinition(name: string): LSP.Location[] {
+  public findDefinition({ word }: { word: string }): LSP.Location[] {
     const symbols: LSP.SymbolInformation[] = []
     Object.keys(this.uriToDeclarations).forEach((uri) => {
-      const declarationNames = this.uriToDeclarations[uri][name] || []
+      const declarationNames = this.uriToDeclarations[uri][word] || []
       declarationNames.forEach((d) => symbols.push(d))
     })
     return symbols.map((s) => s.location)
@@ -317,8 +317,8 @@ export default class Analyzer {
           return
         }
 
-        const name = contents.slice(named.startIndex, named.endIndex)
-        const namedDeclarations = this.uriToDeclarations[uri][name] || []
+        const word = contents.slice(named.startIndex, named.endIndex)
+        const namedDeclarations = this.uriToDeclarations[uri][word] || []
 
         const parent = TreeSitterUtil.findParent(
           n,
@@ -334,14 +334,14 @@ export default class Analyzer {
 
         namedDeclarations.push(
           LSP.SymbolInformation.create(
-            name,
+            word,
             this.treeSitterTypeToLSPKind[n.type],
             TreeSitterUtil.range(n),
             uri,
             parentName,
           ),
         )
-        this.uriToDeclarations[uri][name] = namedDeclarations
+        this.uriToDeclarations[uri][word] = namedDeclarations
       }
     })
 
