@@ -27,7 +27,7 @@
     "vscode-languageserver": "^6.1.1",
     "vscode-languageserver-textdocument": "^1.0.1",
     "web-tree-sitter": "^0.20.5",
-    "which": "^2.0.2"
+    "which": "^3.0.0"
   },
   "scripts": {
     "prepublishOnly": "cd ../ && yarn run compile"
