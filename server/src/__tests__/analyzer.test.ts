@@ -7,10 +7,14 @@ import * as fsUtil from '../util/fs'
 let analyzer: Analyzer
 
 const CURRENT_URI = 'dummy-uri.sh'
+const mockConsole = getMockConnection().console
+
+// if you add a .sh file to testing/fixtures, update this value
+const FIXTURE_FILES_MATCHING_GLOB = 13
 
 beforeAll(async () => {
   const parser = await initializeParser()
-  analyzer = new Analyzer(parser)
+  analyzer = new Analyzer({ console: mockConsole, parser })
 })
 
 describe('analyze', () => {
@@ -262,39 +266,28 @@ describe('commentsAbove', () => {
   })
 })
 
-describe('fromRoot', () => {
-  it('initializes an analyzer from a root', async () => {
+describe('initiateBackgroundAnalysis', () => {
+  it('finds bash files', async () => {
     const parser = await initializeParser()
 
     jest.spyOn(Date, 'now').mockImplementation(() => 0)
 
     const connection = getMockConnection()
 
-    const newAnalyzer = await Analyzer.fromRoot({
-      connection,
+    const newAnalyzer = new Analyzer({ console: connection.console, parser })
+    const { filesParsed } = await newAnalyzer.initiateBackgroundAnalysis({
       rootPath: FIXTURE_FOLDER,
-      parser,
     })
 
-    expect(newAnalyzer).toBeDefined()
-
     expect(connection.window.showWarningMessage).not.toHaveBeenCalled()
-
-    // if you add a .sh file to testing/fixtures, update this value
-    const FIXTURE_FILES_MATCHING_GLOB = 14
+    expect(connection.console.warn).not.toHaveBeenCalled()
 
     // Intro, stats on glob, one file skipped due to shebang, and outro
-    const LOG_LINES = FIXTURE_FILES_MATCHING_GLOB + 4
+    expect(filesParsed).toEqual(FIXTURE_FILES_MATCHING_GLOB)
 
-    expect(connection.console.log).toHaveBeenCalledTimes(LOG_LINES)
     expect(connection.console.log).toHaveBeenNthCalledWith(
       1,
-      expect.stringContaining('Analyzing files matching'),
-    )
-
-    expect(connection.console.log).toHaveBeenNthCalledWith(
-      LOG_LINES,
-      'Analyzer finished after 0 seconds',
+      expect.stringContaining('BackgroundAnalysis: resolving glob'),
     )
   })
 
@@ -307,16 +300,13 @@ describe('fromRoot', () => {
 
     const connection = getMockConnection()
 
-    const newAnalyzer = await Analyzer.fromRoot({
-      connection,
+    const newAnalyzer = new Analyzer({ console: connection.console, parser })
+    const { filesParsed } = await newAnalyzer.initiateBackgroundAnalysis({
       rootPath: FIXTURE_FOLDER,
-      parser,
     })
 
-    expect(newAnalyzer).toBeDefined()
-
-    expect(connection.window.showWarningMessage).toHaveBeenCalledWith(
-      expect.stringContaining('BOOM'),
-    )
+    expect(connection.window.showWarningMessage).not.toHaveBeenCalled()
+    expect(connection.console.warn).toHaveBeenCalledWith(expect.stringContaining('BOOM'))
+    expect(filesParsed).toEqual(0)
   })
 })

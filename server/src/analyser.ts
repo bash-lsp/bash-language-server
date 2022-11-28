@@ -7,7 +7,7 @@ import { promisify } from 'util'
 import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
 
-import { getGlobPattern } from './config'
+import * as config from './config'
 import { flattenArray, flattenObjectValues } from './util/flatten'
 import { getFilePaths } from './util/fs'
 import { getShebang, isBashShebang } from './util/shebang'
@@ -28,77 +28,8 @@ type Texts = { [uri: string]: string }
  * tree-sitter to find definitions, reference, etc.
  */
 export default class Analyzer {
-  /**
-   * Initialize the Analyzer based on a connection to the client and an optional
-   * root path.
-   *
-   * If the rootPath is provided it will initialize all shell files it can find
-   * anywhere on that path. This non-exhaustive glob is used to preload the parser
-   * to support features across files.
-   */
-  public static async fromRoot({
-    connection,
-    rootPath,
-    parser,
-  }: {
-    connection: LSP.Connection
-    rootPath: LSP.InitializeParams['rootPath']
-    parser: Parser
-  }): Promise<Analyzer> {
-    const analyzer = new Analyzer(parser)
-
-    if (rootPath) {
-      const globPattern = getGlobPattern()
-      connection.console.log(
-        `Analyzing files matching glob "${globPattern}" inside ${rootPath}`,
-      )
-
-      const lookupStartTime = Date.now()
-      const getTimePassed = (): string =>
-        `${(Date.now() - lookupStartTime) / 1000} seconds`
-
-      let filePaths: string[] = []
-      try {
-        filePaths = await getFilePaths({ globPattern, rootPath })
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : error
-        connection.window.showWarningMessage(
-          `Failed to analyze bash files using the glob "${globPattern}". The experience will be degraded. Error: ${errorMessage}`,
-        )
-      }
-
-      // TODO: we could load all files without extensions: globPattern: '**/[^.]'
-
-      connection.console.log(
-        `Glob resolved with ${filePaths.length} files after ${getTimePassed()}`,
-      )
-
-      for (const filePath of filePaths) {
-        const uri = url.pathToFileURL(filePath).href
-        connection.console.log(`Analyzing ${uri}`)
-
-        try {
-          const fileContent = await readFileAsync(filePath, 'utf8')
-          const shebang = getShebang(fileContent)
-          if (shebang && !isBashShebang(shebang)) {
-            connection.console.log(`Skipping file ${uri} with shebang "${shebang}"`)
-            continue
-          }
-
-          analyzer.analyze(uri, LSP.TextDocument.create(uri, 'shell', 1, fileContent))
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : error
-          connection.console.warn(`Failed analyzing ${uri}. Error: ${errorMessage}`)
-        }
-      }
-
-      connection.console.log(`Analyzer finished after ${getTimePassed()}`)
-    }
-
-    return analyzer
-  }
-
   private parser: Parser
+  private console: LSP.RemoteConsole
 
   private uriToTextDocument: { [uri: string]: LSP.TextDocument } = {}
 
@@ -116,8 +47,82 @@ export default class Analyzer {
     variable_assignment: LSP.SymbolKind.Variable,
   }
 
-  public constructor(parser: Parser) {
+  public constructor({
+    console,
+    parser,
+  }: {
+    console: LSP.RemoteConsole
+    parser: Parser
+  }) {
     this.parser = parser
+    this.console = console
+  }
+
+  /**
+   * Initiates a background analysis of the files in the given rootPath to
+   * enable features across files.
+   */
+  public async initiateBackgroundAnalysis({
+    rootPath,
+  }: {
+    rootPath: string
+  }): Promise<{ filesParsed: number }> {
+    const globPattern = config.getGlobPattern()
+    const backgroundAnalysisMaxFiles = config.getBackgroundAnalysisMaxFiles()
+    this.console.log(
+      `BackgroundAnalysis: resolving glob "${globPattern}" inside "${rootPath}"...`,
+    )
+
+    const lookupStartTime = Date.now()
+    const getTimePassed = (): string => `${(Date.now() - lookupStartTime) / 1000} seconds`
+
+    let filePaths: string[] = []
+    try {
+      filePaths = await getFilePaths({
+        globPattern,
+        rootPath,
+        maxItems: backgroundAnalysisMaxFiles,
+      })
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : error
+      this.console.warn(
+        `BackgroundAnalysis: failed resolved glob "${globPattern}". The experience across files will be degraded. Error: ${errorMessage}`,
+      )
+      return { filesParsed: 0 }
+    }
+
+    this.console.log(
+      `BackgroundAnalysis: Glob resolved with ${
+        filePaths.length
+      } files after ${getTimePassed()}`,
+    )
+
+    for (const filePath of filePaths) {
+      const uri = url.pathToFileURL(filePath).href
+
+      try {
+        const fileContent = await readFileAsync(filePath, 'utf8')
+        const shebang = getShebang(fileContent)
+        if (shebang && !isBashShebang(shebang)) {
+          this.console.log(
+            `BackgroundAnalysis: Skipping file ${uri} with shebang "${shebang}"`,
+          )
+          continue
+        }
+
+        this.analyze(uri, LSP.TextDocument.create(uri, 'shell', 1, fileContent))
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : error
+        this.console.warn(
+          `BackgroundAnalysis: Failed analyzing ${uri}. Error: ${errorMessage}`,
+        )
+      }
+    }
+
+    this.console.log(`BackgroundAnalysis: Completed after ${getTimePassed()}.`)
+    return {
+      filesParsed: filePaths.length,
+    }
   }
 
   /**

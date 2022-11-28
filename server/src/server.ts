@@ -38,14 +38,27 @@ export default class BashServer {
       throw new Error('Expected PATH environment variable to be set')
     }
 
-    return Promise.all([
-      Executables.fromPath(PATH),
-      Analyzer.fromRoot({ connection, rootPath, parser }),
-      getLinterExecutablePath(),
-    ]).then(([executables, analyzer, linterExecutablePath]) => {
-      const linter = new Linter({ executablePath: linterExecutablePath })
-      return new BashServer(connection, executables, analyzer, linter, capabilities)
-    })
+    return Promise.all([Executables.fromPath(PATH), getLinterExecutablePath()]).then(
+      ([executables, linterExecutablePath]) => {
+        const analyzer = new Analyzer({ console: connection.console, parser })
+        const linter = new Linter({ executablePath: linterExecutablePath })
+
+        let backgroundAnalysisCompleted
+        if (rootPath) {
+          // NOTE: we do not block the server initialization on this background analysis.
+          backgroundAnalysisCompleted = analyzer.initiateBackgroundAnalysis({ rootPath })
+        }
+
+        return new BashServer({
+          analyzer,
+          backgroundAnalysisCompleted,
+          capabilities,
+          connection,
+          executables,
+          linter,
+        })
+      },
+    )
   }
 
   private executables: Executables
@@ -55,19 +68,29 @@ export default class BashServer {
   private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
   private connection: LSP.Connection
   private clientCapabilities: LSP.ClientCapabilities
+  public backgroundAnalysisCompleted?: Promise<any>
 
-  private constructor(
-    connection: LSP.Connection,
-    executables: Executables,
-    analyzer: Analyzer,
-    linter: Linter,
-    capabilities: LSP.ClientCapabilities,
-  ) {
+  private constructor({
+    connection,
+    executables,
+    analyzer,
+    linter,
+    capabilities,
+    backgroundAnalysisCompleted,
+  }: {
+    connection: LSP.Connection
+    executables: Executables
+    analyzer: Analyzer
+    linter: Linter
+    capabilities: LSP.ClientCapabilities
+    backgroundAnalysisCompleted?: Promise<any>
+  }) {
     this.connection = connection
     this.executables = executables
     this.analyzer = analyzer
     this.linter = linter
     this.clientCapabilities = capabilities
+    this.backgroundAnalysisCompleted = backgroundAnalysisCompleted
   }
 
   /**
