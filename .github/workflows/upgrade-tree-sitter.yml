@@ -1,0 +1,39 @@
+on:
+  schedule:
+    - cron: '0 12 * * 2'
+
+jobs:
+  upgrade_tree_sitter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 12
+        uses: actions/setup-node@v3
+        with:
+          node-version: 12
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Upgrade tree-sitter wasm
+        run: sh scripts/upgrade-tree-sitter.sh
+
+      - name: Verify changes
+        run: yarn verify:bail
+
+      - name: Verify file changes
+        uses: tj-actions/verify-changed-files@v12
+        id: verify-changed-files
+        with:
+          files: |
+             server/parser.info
+             server/tree-sitter-bash.wasm
+
+      - name: Create pull request
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        uses: peter-evans/create-pull-request@v4
+        with:
+          add-paths: server
+          reviewers: skovhus
+          title: Auto upgrade tree-sitter-bash parser
