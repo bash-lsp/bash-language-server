@@ -22,9 +22,6 @@ jobs:
       - name: Upgrade tree-sitter wasm
         run: bash scripts/upgrade-tree-sitter.sh
 
-      - name: Verify changes
-        run: yarn verify:bail
-
       - name: Verify file changes
         uses: tj-actions/verify-changed-files@v12
         id: verify-changed-files
@@ -38,7 +35,6 @@ jobs:
         uses: peter-evans/create-pull-request@v4
         with:
           add-paths: server
-          reviewers: skovhus
           title: Auto upgrade tree-sitter-bash parser
           commit-message: Auto upgrade tree-sitter-bash parser
           token: ${{ secrets.GH_TOKEN }}
