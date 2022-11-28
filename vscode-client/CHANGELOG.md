@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.17.0
+
+- Upgrade language server to 3.3.0 that enables faster background analysis and defaults to enabling ShellCheck linting the ShellCheck executable is found. We strongly recommend installing ShellCheck.
+
 ## 1.16.2
 
 - Upgrade language server to 3.2.3
