@@ -85,7 +85,9 @@ export async function getShellDocumentationWithoutCache({
           formattedDocumentation = formatManOutput(formattedDocumentation)
         }
 
-        return formattedDocumentation
+        if (formattedDocumentation) {
+          return formattedDocumentation
+        }
       }
     } catch (error) {
       // Ignoring if command fails and store failure in cache
