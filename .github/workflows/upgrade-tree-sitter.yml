@@ -36,3 +36,4 @@ jobs:
         with:
           add-paths: server
           reviewers: skovhus
+          title: Auto upgrade tree-sitter-bash parser
