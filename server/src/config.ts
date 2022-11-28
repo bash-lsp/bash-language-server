@@ -1,5 +1,5 @@
 export const DEFAULT_GLOB_PATTERN = '**/*@(.sh|.inc|.bash|.command)'
-export const DEFAULT_BACKGROUND_ANALYSIS_MAX_FILES = 5000
+export const DEFAULT_BACKGROUND_ANALYSIS_MAX_FILES = 500
 
 export function getShellcheckPath(): string | null {
   const { SHELLCHECK_PATH } = process.env
