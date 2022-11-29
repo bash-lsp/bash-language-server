@@ -44,14 +44,14 @@ describe('linter', () => {
 
     const expected: LSP.Diagnostic[] = [
       {
-        message: 'SC2154: foo is referenced but not assigned.',
+        message: 'foo is referenced but not assigned.',
         severity: 2,
         code: 2154,
         source: 'shellcheck',
         range: { start: { line: 1, character: 5 }, end: { line: 1, character: 9 } },
       },
       {
-        message: 'SC2086: Double quote to prevent globbing and word splitting.',
+        message: 'Double quote to prevent globbing and word splitting.',
         severity: 3,
         code: 2086,
         source: 'shellcheck',
@@ -82,8 +82,8 @@ describe('linter', () => {
     })
     // prettier-ignore
     const expected = [
-      { message: 'SC1091: Not following: shellcheck/sourced.sh: openBinaryFile: does not exist (No such file or directory)', severity: 3, code: 1091, source: 'shellcheck', range: { start: { line: 3, character: 7 }, end: { line: 3, character: 19 } }, },
-      { message: 'SC2154: foo is referenced but not assigned.', severity: 2, code: 2154, source: 'shellcheck', range: { start: { line: 5, character: 6 }, end: { line: 5, character: 10 } }, },
+      { message: 'Not following: shellcheck/sourced.sh: openBinaryFile: does not exist (No such file or directory)', severity: 3, code: 1091, source: 'shellcheck', range: { start: { line: 3, character: 7 }, end: { line: 3, character: 19 } }, },
+      { message: 'foo is referenced but not assigned.', severity: 2, code: 2154, source: 'shellcheck', range: { start: { line: 5, character: 6 }, end: { line: 5, character: 10 } }, },
     ]
     const result = await linter.lint(FIXTURE_DOCUMENT.SHELLCHECK_SOURCE, [])
     expect(result).toEqual(expected)

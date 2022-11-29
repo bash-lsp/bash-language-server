@@ -1,10 +1,6 @@
 import { spawn } from 'child_process'
 import * as LSP from 'vscode-languageserver'
 
-function formatMessage(comment: ShellcheckComment): string {
-  return (comment.code ? `SC${comment.code}: ` : '') + comment.message
-}
-
 type LinterOptions = {
   executablePath: string | null
   console: LSP.RemoteConsole
@@ -50,7 +46,7 @@ export class Linter {
       }
 
       diags.push({
-        message: formatMessage(comment),
+        message: comment.message,
         severity: mapSeverity(comment.level),
         code: comment.code,
         source: 'shellcheck',
