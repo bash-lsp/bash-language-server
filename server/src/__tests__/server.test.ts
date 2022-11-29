@@ -1,6 +1,6 @@
 import * as Process from 'child_process'
 import * as Path from 'path'
-import * as lsp from 'vscode-languageserver'
+import * as LSP from 'vscode-languageserver/node'
 
 import { FIXTURE_FOLDER, FIXTURE_URI } from '../../../testing/fixtures'
 import { getMockConnection } from '../../../testing/mocks'
@@ -8,7 +8,7 @@ import LspServer from '../server'
 import { CompletionItemDataType } from '../types'
 
 async function initializeServer() {
-  const diagnostics: Array<lsp.PublishDiagnosticsParams | undefined> = []
+  const diagnostics: Array<LSP.PublishDiagnosticsParams | undefined> = []
 
   const connection = getMockConnection()
 
@@ -522,7 +522,7 @@ describe('server', () => {
 
     // they are all variables
     expect(Array.from(new Set(result.map((item: any) => item.kind)))).toEqual([
-      lsp.CompletionItemKind.Variable,
+      LSP.CompletionItemKind.Variable,
     ])
   })
 })

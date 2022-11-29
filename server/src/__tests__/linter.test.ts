@@ -1,5 +1,6 @@
 import * as path from 'path'
-import * as LSP from 'vscode-languageserver'
+import * as LSP from 'vscode-languageserver/node'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../testing/fixtures'
 import { getMockConnection } from '../../../testing/mocks'
@@ -8,7 +9,7 @@ import { assertShellcheckResult, Linter } from '../linter'
 const mockConsole = getMockConnection().console
 
 function textToDoc(txt: string) {
-  return LSP.TextDocument.create('foo', 'bar', 0, txt)
+  return TextDocument.create('foo', 'bar', 0, txt)
 }
 
 describe('linter', () => {

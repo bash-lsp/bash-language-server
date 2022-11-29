@@ -4,7 +4,8 @@ import fetch from 'node-fetch'
 import * as URI from 'urijs'
 import * as url from 'url'
 import { promisify } from 'util'
-import * as LSP from 'vscode-languageserver'
+import * as LSP from 'vscode-languageserver/node'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as Parser from 'web-tree-sitter'
 
 import * as config from './config'
@@ -31,7 +32,7 @@ export default class Analyzer {
   private parser: Parser
   private console: LSP.RemoteConsole
 
-  private uriToTextDocument: { [uri: string]: LSP.TextDocument } = {}
+  private uriToTextDocument: { [uri: string]: TextDocument } = {}
 
   private uriToTreeSitterTrees: Trees = {}
 
@@ -110,7 +111,7 @@ export default class Analyzer {
           continue
         }
 
-        this.analyze(uri, LSP.TextDocument.create(uri, 'shell', 1, fileContent))
+        this.analyze(uri, TextDocument.create(uri, 'shell', 1, fileContent))
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : error
         this.console.warn(
@@ -288,7 +289,7 @@ export default class Analyzer {
    * Returns all, if any, syntax errors that occurred while parsing the file.
    *
    */
-  public analyze(uri: string, document: LSP.TextDocument): LSP.Diagnostic[] {
+  public analyze(uri: string, document: TextDocument): LSP.Diagnostic[] {
     const contents = document.getText()
 
     const tree = this.parser.parse(contents)

@@ -1,6 +1,6 @@
 'use strict'
 
-import * as LSP from 'vscode-languageserver'
+import * as LSP from 'vscode-languageserver/node'
 
 import BashServer from './server'
 
@@ -9,7 +9,7 @@ const pkg = require('../package')
 export function listen() {
   // Create a connection for the server.
   // The connection uses stdin/stdout for communication.
-  const connection: LSP.IConnection = LSP.createConnection(
+  const connection = LSP.createConnection(
     new LSP.StreamMessageReader(process.stdin),
     new LSP.StreamMessageWriter(process.stdout),
   )

@@ -1,6 +1,6 @@
-import * as lsp from 'vscode-languageserver'
+import * as LSP from 'vscode-languageserver/node'
 
-export function getMockConnection(): jest.Mocked<lsp.Connection> {
+export function getMockConnection(): jest.Mocked<LSP.Connection> {
   const console: any = {
     error: jest.fn(),
     warn: jest.fn(),
@@ -14,7 +14,9 @@ export function getMockConnection(): jest.Mocked<lsp.Connection> {
     dispose: jest.fn(),
     languages: {} as any,
     listen: jest.fn(),
+    notebooks: {} as any,
     onCodeAction: jest.fn(),
+    onCodeActionResolve: jest.fn(),
     onCodeLens: jest.fn(),
     onCodeLensResolve: jest.fn(),
     onColorPresentation: jest.fn(),
@@ -56,6 +58,7 @@ export function getMockConnection(): jest.Mocked<lsp.Connection> {
     onWillSaveTextDocument: jest.fn(),
     onWillSaveTextDocumentWaitUntil: jest.fn(),
     onWorkspaceSymbol: jest.fn(),
+    onWorkspaceSymbolResolve: jest.fn(),
     sendDiagnostics: jest.fn(),
     sendNotification: jest.fn(),
     sendProgress: jest.fn(),
@@ -66,6 +69,9 @@ export function getMockConnection(): jest.Mocked<lsp.Connection> {
       attachWorkDoneProgress: jest.fn(),
       connection: {} as any,
       createWorkDoneProgress: jest.fn(),
+      fillServerCapabilities: jest.fn(),
+      initialize: jest.fn(),
+      showDocument: jest.fn(),
       showErrorMessage: jest.fn(),
       showInformationMessage: jest.fn(),
       showWarningMessage: jest.fn(),
