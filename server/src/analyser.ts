@@ -11,7 +11,7 @@ import * as Parser from 'web-tree-sitter'
 import * as config from './config'
 import { flattenArray, flattenObjectValues } from './util/flatten'
 import { getFilePaths } from './util/fs'
-import { getShebang, isBashShebang } from './util/shebang'
+import { analyzeShebang } from './util/shebang'
 import * as TreeSitterUtil from './util/tree-sitter'
 
 const readFileAsync = promisify(fs.readFile)
@@ -103,8 +103,8 @@ export default class Analyzer {
 
       try {
         const fileContent = await readFileAsync(filePath, 'utf8')
-        const shebang = getShebang(fileContent)
-        if (shebang && !isBashShebang(shebang)) {
+        const { shebang, shellDialect } = analyzeShebang(fileContent)
+        if (shebang && !shellDialect) {
           this.console.log(
             `BackgroundAnalysis: Skipping file ${uri} with shebang "${shebang}"`,
           )

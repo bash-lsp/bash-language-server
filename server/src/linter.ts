@@ -2,6 +2,11 @@ import { spawn } from 'child_process'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
+import { getShellCheckArguments } from './config'
+import { analyzeShebang } from './util/shebang'
+
+const SUPPORTED_BASH_DIALECTS = ['sh', 'bash', 'dash', 'ksh']
+
 type LinterOptions = {
   executablePath: string | null
   console: LSP.RemoteConsole
@@ -32,7 +37,14 @@ export class Linter {
   ): Promise<LSP.Diagnostic[]> {
     if (!this.executablePath || !this._canLint) return []
 
-    const result = await this.runShellcheck(this.executablePath, document, folders)
+    const additionalArgs = getShellCheckArguments()
+
+    const result = await this.runShellcheck(
+      this.executablePath,
+      document,
+      folders,
+      additionalArgs,
+    )
     if (!this._canLint) return []
 
     const diags: LSP.Diagnostic[] = []
@@ -66,16 +78,30 @@ export class Linter {
     executablePath: string,
     document: TextDocument,
     folders: LSP.WorkspaceFolder[],
+    additionalArgs: string[] = [],
   ): Promise<ShellcheckResult> {
+    const documentText = document.getText()
+
+    const { shellDialect } = analyzeShebang(documentText)
+    const shellName =
+      shellDialect && SUPPORTED_BASH_DIALECTS.includes(shellDialect)
+        ? shellDialect
+        : 'bash'
+
     const args = [
-      '--shell=bash',
+      `--shell=${shellName}`,
       '--format=json1',
       '--external-sources',
       `--source-path=${this.cwd}`,
+      ...additionalArgs,
     ]
     for (const folder of folders) {
-      args.push(`--source-path=${folder.name}`)
+      if (folder.name.trim()) {
+        args.push(`--source-path=${folder.name}`)
+      }
     }
+
+    this.console.log(`ShellCheck: running "${executablePath} ${args.join(' ')}"`)
 
     let out = ''
     let err = ''
@@ -91,7 +117,7 @@ export class Linter {
         // This is solved in Node >= 15.1 by the "on('spawn', ...)" event, but we need to
         // support earlier versions.
       })
-      proc.stdin.end(document.getText())
+      proc.stdin.end(documentText)
     })
 
     // XXX: do we care about exit code? 0 means "ok", 1 possibly means "errors",

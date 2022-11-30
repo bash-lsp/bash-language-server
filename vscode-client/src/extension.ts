@@ -9,24 +9,15 @@ import {
 } from 'vscode-languageclient'
 
 export async function activate(context: ExtensionContext) {
-  const explainshellEndpoint = workspace
-    .getConfiguration('bashIde')
-    .get('explainshellEndpoint', '')
-
-  const globPattern = workspace.getConfiguration('bashIde').get('globPattern', '')
-
-  const highlightParsingErrors = workspace
-    .getConfiguration('bashIde')
-    .get('highlightParsingErrors', false)
-
-  const shellcheckPath = workspace.getConfiguration('bashIde').get('shellcheckPath', '')
+  const config = workspace.getConfiguration('bashIde')
 
   const env: any = {
     ...process.env,
-    SHELLCHECK_PATH: shellcheckPath,
-    EXPLAINSHELL_ENDPOINT: explainshellEndpoint,
-    GLOB_PATTERN: globPattern,
-    HIGHLIGHT_PARSING_ERRORS: highlightParsingErrors,
+    SHELLCHECK_PATH: config.get('shellcheckPath', ''),
+    SHELLCHECK_ARGUMENTS: config.get('shellcheckArguments', ''),
+    EXPLAINSHELL_ENDPOINT: config.get('explainshellEndpoint', ''),
+    GLOB_PATTERN: config.get('globPattern', ''),
+    HIGHLIGHT_PARSING_ERRORS: config.get('highlightParsingErrors', false),
   }
 
   const serverExecutable = {
