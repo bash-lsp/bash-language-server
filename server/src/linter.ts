@@ -96,7 +96,9 @@ export class Linter {
       ...additionalArgs,
     ]
     for (const folder of folders) {
-      args.push(`--source-path=${folder.name}`)
+      if (folder.name.trim()) {
+        args.push(`--source-path=${folder.name}`)
+      }
     }
 
     let out = ''
