@@ -1,5 +1,4 @@
 import * as path from 'path'
-import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../testing/fixtures'
@@ -43,26 +42,52 @@ describe('linter', () => {
       'echo $foo',
     ].join('\n')
 
-    const expected: LSP.Diagnostic[] = [
-      {
-        message: 'foo is referenced but not assigned.',
-        severity: 2,
-        code: 2154,
-        source: 'shellcheck',
-        range: { start: { line: 1, character: 5 }, end: { line: 1, character: 9 } },
-      },
-      {
-        message: 'Double quote to prevent globbing and word splitting.',
-        severity: 3,
-        code: 2086,
-        source: 'shellcheck',
-        range: { start: { line: 1, character: 5 }, end: { line: 1, character: 9 } },
-      },
-    ]
-
     const linter = new Linter({ console: mockConsole, executablePath: 'shellcheck' })
     const result = await linter.lint(textToDoc(shell), [])
-    expect(result).toEqual(expected)
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "code": "SC2154",
+          "codeDescription": Object {
+            "href": "https://www.shellcheck.net/wiki/SC2154",
+          },
+          "message": "foo is referenced but not assigned.",
+          "range": Object {
+            "end": Object {
+              "character": 9,
+              "line": 1,
+            },
+            "start": Object {
+              "character": 5,
+              "line": 1,
+            },
+          },
+          "severity": 2,
+          "source": "shellcheck",
+          "tags": undefined,
+        },
+        Object {
+          "code": "SC2086",
+          "codeDescription": Object {
+            "href": "https://www.shellcheck.net/wiki/SC2086",
+          },
+          "message": "Double quote to prevent globbing and word splitting.",
+          "range": Object {
+            "end": Object {
+              "character": 9,
+              "line": 1,
+            },
+            "start": Object {
+              "character": 5,
+              "line": 1,
+            },
+          },
+          "severity": 3,
+          "source": "shellcheck",
+          "tags": undefined,
+        },
+      ]
+    `)
   })
 
   it('should correctly follow sources with correct cwd', async () => {
@@ -81,13 +106,51 @@ describe('linter', () => {
       cwd: path.resolve(path.join(FIXTURE_FOLDER, '../')),
       executablePath: 'shellcheck',
     })
-    // prettier-ignore
-    const expected = [
-      { message: 'Not following: shellcheck/sourced.sh: openBinaryFile: does not exist (No such file or directory)', severity: 3, code: 1091, source: 'shellcheck', range: { start: { line: 3, character: 7 }, end: { line: 3, character: 19 } }, },
-      { message: 'foo is referenced but not assigned.', severity: 2, code: 2154, source: 'shellcheck', range: { start: { line: 5, character: 6 }, end: { line: 5, character: 10 } }, },
-    ]
     const result = await linter.lint(FIXTURE_DOCUMENT.SHELLCHECK_SOURCE, [])
-    expect(result).toEqual(expected)
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "code": "SC1091",
+          "codeDescription": Object {
+            "href": "https://www.shellcheck.net/wiki/SC1091",
+          },
+          "message": "Not following: shellcheck/sourced.sh: openBinaryFile: does not exist (No such file or directory)",
+          "range": Object {
+            "end": Object {
+              "character": 19,
+              "line": 3,
+            },
+            "start": Object {
+              "character": 7,
+              "line": 3,
+            },
+          },
+          "severity": 3,
+          "source": "shellcheck",
+          "tags": undefined,
+        },
+        Object {
+          "code": "SC2154",
+          "codeDescription": Object {
+            "href": "https://www.shellcheck.net/wiki/SC2154",
+          },
+          "message": "foo is referenced but not assigned.",
+          "range": Object {
+            "end": Object {
+              "character": 10,
+              "line": 5,
+            },
+            "start": Object {
+              "character": 6,
+              "line": 5,
+            },
+          },
+          "severity": 2,
+          "source": "shellcheck",
+          "tags": undefined,
+        },
+      ]
+    `)
   })
 
   it('should follow sources with incorrect cwd if correct path is passed as a workspace path', async () => {
