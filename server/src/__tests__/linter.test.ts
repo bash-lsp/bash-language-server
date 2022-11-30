@@ -1,5 +1,4 @@
 import * as path from 'path'
-import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../testing/fixtures'
