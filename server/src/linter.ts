@@ -101,6 +101,8 @@ export class Linter {
       }
     }
 
+    this.console.log(`ShellCheck: running "${executablePath} ${args.join(' ')}"`)
+
     let out = ''
     let err = ''
     const proc = new Promise((resolve, reject) => {
