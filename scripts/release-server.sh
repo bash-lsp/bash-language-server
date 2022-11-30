@@ -19,5 +19,5 @@ yarn install
 yarn run verify:bail
 
 cd server
-npm publish
+npm publish --tag beta
 tagRelease $tag
