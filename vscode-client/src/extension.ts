@@ -1,4 +1,5 @@
 'use strict'
+
 import * as path from 'path'
 import { ExtensionContext, workspace } from 'vscode'
 import {
@@ -6,7 +7,9 @@ import {
   LanguageClientOptions,
   ServerOptions,
   TransportKind,
-} from 'vscode-languageclient'
+} from 'vscode-languageclient/node'
+
+let client: LanguageClient
 
 export async function activate(context: ExtensionContext) {
   const config = workspace.getConfiguration('bashIde')
@@ -56,8 +59,14 @@ export async function activate(context: ExtensionContext) {
   }
 
   const client = new LanguageClient('Bash IDE', 'Bash IDE', serverOptions, clientOptions)
+  client.registerProposedFeatures()
+  try {
+    await client.start()
+  } catch (error) {
+    client.error(`Start failed`, error, 'force')
+  }
+}
 
-  // Push the disposable to the context's subscriptions so that the
-  // client can be deactivated on extension deactivation
-  context.subscriptions.push(client.start())
+export function deactivate() {
+  return client.stop()
 }
