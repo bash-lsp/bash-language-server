@@ -49,7 +49,7 @@ export class Linter {
       diags.push({
         message: comment.message,
         severity: mapSeverity(comment.level),
-        code: comment.code,
+        code: `SC${comment.code}`,
         source: 'shellcheck',
         range: LSP.Range.create(start, end),
         codeDescription: {
