@@ -1,4 +1,4 @@
-import { Range } from 'vscode-languageserver/lib/main'
+import { Range } from 'vscode-languageserver/node'
 import { SyntaxNode } from 'web-tree-sitter'
 
 export function forEach(node: SyntaxNode, cb: (n: SyntaxNode) => void) {

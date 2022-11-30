@@ -1,11 +1,12 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import * as LSP from 'vscode-languageserver'
+import * as LSP from 'vscode-languageserver/node'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 
 export const FIXTURE_FOLDER = path.join(__dirname, './fixtures/')
 
 function getDocument(uri: string) {
-  return LSP.TextDocument.create(
+  return TextDocument.create(
     'foo',
     'bar',
     0,

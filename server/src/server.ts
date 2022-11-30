@@ -1,7 +1,7 @@
 import * as Process from 'child_process'
 import * as Path from 'path'
 import * as TurndownService from 'turndown'
-import * as LSP from 'vscode-languageserver'
+import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import Analyzer from './analyser'
@@ -29,7 +29,8 @@ export default class BashServer {
   public static async initialize(
     connection: LSP.Connection,
     { rootPath, capabilities }: LSP.InitializeParams,
-  ): Promise<BashServer> {
+  ): // TODO: use workspaceFolders instead of rootPath
+  Promise<BashServer> {
     const { PATH } = process.env
 
     if (!PATH) {
