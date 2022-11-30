@@ -51,7 +51,11 @@ export class Linter {
         severity: mapSeverity(comment.level),
         code: comment.code,
         source: 'shellcheck',
-        range: { start, end },
+        range: LSP.Range.create(start, end),
+        codeDescription: {
+          href: `https://www.shellcheck.net/wiki/SC${comment.code}`,
+        },
+        tags: codeToTags[comment.code],
       })
     }
 
@@ -196,6 +200,16 @@ export function assertShellcheckResult(val: any): asserts val is ShellcheckResul
         `shellcheck: expected comment code at index ${idx} to be number, found ${typeof comment.code}`,
       )
   }
+}
+
+// https://github.com/koalaman/shellcheck/wiki
+const codeToTags: Record<number, LSP.DiagnosticTag[]> = {
+  2006: [LSP.DiagnosticTag.Deprecated],
+  2007: [LSP.DiagnosticTag.Deprecated],
+  2034: [LSP.DiagnosticTag.Unnecessary],
+  2186: [LSP.DiagnosticTag.Deprecated],
+  2196: [LSP.DiagnosticTag.Deprecated],
+  2197: [LSP.DiagnosticTag.Deprecated],
 }
 
 const severityMapping: Record<string, undefined | LSP.DiagnosticSeverity> = {
