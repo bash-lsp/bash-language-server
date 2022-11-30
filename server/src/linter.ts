@@ -3,6 +3,9 @@ import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { getShellCheckArguments } from './config'
+import { analyzeShebang } from './util/shebang'
+
+const SUPPORTED_BASH_DIALECTS = ['sh', 'bash', 'dash', 'ksh']
 
 type LinterOptions = {
   executablePath: string | null
@@ -77,8 +80,16 @@ export class Linter {
     folders: LSP.WorkspaceFolder[],
     additionalArgs: string[] = [],
   ): Promise<ShellcheckResult> {
+    const documentText = document.getText()
+
+    const { shellDialect } = analyzeShebang(documentText)
+    const shellName =
+      shellDialect && SUPPORTED_BASH_DIALECTS.includes(shellDialect)
+        ? shellDialect
+        : 'bash'
+
     const args = [
-      '--shell=bash',
+      `--shell=${shellName}`,
       '--format=json1',
       '--external-sources',
       `--source-path=${this.cwd}`,
@@ -102,7 +113,7 @@ export class Linter {
         // This is solved in Node >= 15.1 by the "on('spawn', ...)" event, but we need to
         // support earlier versions.
       })
-      proc.stdin.end(document.getText())
+      proc.stdin.end(documentText)
     })
 
     // XXX: do we care about exit code? 0 means "ok", 1 possibly means "errors",

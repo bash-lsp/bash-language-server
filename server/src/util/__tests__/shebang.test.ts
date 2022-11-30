@@ -1,28 +1,34 @@
-import { hasBashShebang } from '../shebang'
+import { analyzeShebang } from '../shebang'
 
-describe('hasBashShebang', () => {
-  it('returns false for empty file', () => {
-    expect(hasBashShebang('')).toBe(false)
+describe('analyzeShebang', () => {
+  it('returns null for an empty file', () => {
+    expect(analyzeShebang('')).toEqual({ shellDialect: null, shebang: null })
   })
 
-  it('returns false for python files', () => {
-    expect(hasBashShebang(`#!/usr/bin/env python2.7\n# set -x`)).toBe(false)
+  it('returns no shell dialect for python files', () => {
+    expect(analyzeShebang(`#!/usr/bin/env python2.7\n# set -x`)).toEqual({
+      shellDialect: null,
+      shebang: '/usr/bin/env python2.7',
+    })
   })
 
-  it('returns false for "#!/usr/bin/pwsh"', () => {
-    expect(hasBashShebang('#!/usr/bin/pwsh')).toBe(false)
+  it('returns no shell dialect for unsupported shell "#!/usr/bin/zsh"', () => {
+    expect(analyzeShebang('#!/usr/bin/zsh')).toEqual({
+      shellDialect: null,
+      shebang: '/usr/bin/zsh',
+    })
   })
 
   test.each([
-    ['#!/bin/sh -'],
-    ['#!/usr/bin/env bash'],
-    ['#!/bin/sh'],
-    ['#!/bin/bash'],
-    ['#!/bin/bash -u'],
-    ['#! /bin/bash'],
-    ['#!/usr/bin/bash'],
-  ])('returns true for %p', (command) => {
-    expect(hasBashShebang(command)).toBe(true)
-    expect(hasBashShebang(`${command} `)).toBe(true)
+    ['#!/bin/sh -', 'sh'],
+    ['#!/usr/bin/env bash', 'bash'],
+    ['#!/bin/sh', 'sh'],
+    ['#!/bin/bash', 'bash'],
+    ['#!/bin/bash -u', 'bash'],
+    ['#! /bin/bash', 'bash'],
+    ['#!/usr/bin/bash', 'bash'],
+  ])('returns a bash dialect for %p', (command, expectedDialect) => {
+    expect(analyzeShebang(command).shellDialect).toBe(expectedDialect)
+    expect(analyzeShebang(`${command} `).shellDialect).toBe(expectedDialect)
   })
 })
