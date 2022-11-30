@@ -1,5 +1,6 @@
 import { spawn } from 'child_process'
 import * as LSP from 'vscode-languageserver/node'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 
 type LinterOptions = {
   executablePath: string | null
@@ -26,7 +27,7 @@ export class Linter {
   }
 
   public async lint(
-    document: LSP.TextDocument,
+    document: TextDocument,
     folders: LSP.WorkspaceFolder[],
   ): Promise<LSP.Diagnostic[]> {
     if (!this.executablePath || !this._canLint) return []
@@ -59,7 +60,7 @@ export class Linter {
 
   private async runShellcheck(
     executablePath: string,
-    document: LSP.TextDocument,
+    document: TextDocument,
     folders: LSP.WorkspaceFolder[],
   ): Promise<ShellcheckResult> {
     const args = [
