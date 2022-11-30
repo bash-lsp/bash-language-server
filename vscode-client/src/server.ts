@@ -1,13 +1,12 @@
 import BashLanguageServer from 'bash-language-server'
 import {
   createConnection,
-  IConnection,
   InitializeParams,
   InitializeResult,
   ProposedFeatures,
-} from 'vscode-languageserver'
+} from 'vscode-languageserver/node'
 
-const connection: IConnection = createConnection(ProposedFeatures.all)
+const connection = createConnection(ProposedFeatures.all)
 
 connection.onInitialize(async (params: InitializeParams): Promise<InitializeResult> => {
   connection.console.info('BashLanguageServer initializing...')

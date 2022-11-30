@@ -8,8 +8,8 @@ export function getShellcheckPath(): string | null {
 }
 
 /**
- * Get additional shellcheck arguments from the environment.
- * NOTE: That we already add the following arguments: --shell, --format, --external-sources
+ * Get additional ShellCheck arguments from the environment.
+ * NOTE: We already add the following arguments: --shell, --format, --external-sources
  */
 export function getShellCheckArguments(): string[] {
   const { SHELLCHECK_ARGUMENTS } = process.env
