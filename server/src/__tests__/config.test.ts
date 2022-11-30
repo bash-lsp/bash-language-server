@@ -24,6 +24,30 @@ describe('getShellcheckPath', () => {
   })
 })
 
+describe('getShellCheckArguments', () => {
+  it('defaults to an empty string', () => {
+    process.env = {}
+    const result = config.getShellCheckArguments()
+    expect(result).toEqual([])
+  })
+
+  it('parses environment variable', () => {
+    process.env = {
+      SHELLCHECK_ARGUMENTS: '-e SC2001',
+    }
+    const result = config.getShellCheckArguments()
+    expect(result).toEqual(['-e', 'SC2001'])
+  })
+
+  it('parses environment variable with excessive white space', () => {
+    process.env = {
+      SHELLCHECK_ARGUMENTS: ' -e SC2001  -e SC2002 ',
+    }
+    const result = config.getShellCheckArguments()
+    expect(result).toEqual(['-e', 'SC2001', '-e', 'SC2002'])
+  })
+})
+
 describe('getExplainshellEndpoint', () => {
   it('default to null', () => {
     process.env = {}

@@ -50,6 +50,11 @@
           "type": "string",
           "default": "shellcheck",
           "description": "Controls the executable used for ShellCheck linting information. An empty string will disable linting."
+        },
+        "bashIde.shellcheckArguments": {
+          "type": "string",
+          "default": "",
+          "description": "Additional ShellCheck arguments. Note that we already add the following arguments: --shell, --format, --external-sources."
         }
       }
     }

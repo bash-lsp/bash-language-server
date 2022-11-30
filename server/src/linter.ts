@@ -2,6 +2,8 @@ import { spawn } from 'child_process'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
+import { getShellCheckArguments } from './config'
+
 type LinterOptions = {
   executablePath: string | null
   console: LSP.RemoteConsole
@@ -32,7 +34,14 @@ export class Linter {
   ): Promise<LSP.Diagnostic[]> {
     if (!this.executablePath || !this._canLint) return []
 
-    const result = await this.runShellcheck(this.executablePath, document, folders)
+    const additionalArgs = getShellCheckArguments()
+
+    const result = await this.runShellcheck(
+      this.executablePath,
+      document,
+      folders,
+      additionalArgs,
+    )
     if (!this._canLint) return []
 
     const diags: LSP.Diagnostic[] = []
@@ -66,12 +75,14 @@ export class Linter {
     executablePath: string,
     document: TextDocument,
     folders: LSP.WorkspaceFolder[],
+    additionalArgs: string[] = [],
   ): Promise<ShellcheckResult> {
     const args = [
       '--shell=bash',
       '--format=json1',
       '--external-sources',
       `--source-path=${this.cwd}`,
+      ...additionalArgs,
     ]
     for (const folder of folders) {
       args.push(`--source-path=${folder.name}`)

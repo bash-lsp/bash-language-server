@@ -7,6 +7,20 @@ export function getShellcheckPath(): string | null {
   return typeof SHELLCHECK_PATH === 'string' ? SHELLCHECK_PATH || null : 'shellcheck'
 }
 
+/**
+ * Get additional shellcheck arguments from the environment.
+ * NOTE: That we already add the following arguments: --shell, --format, --external-sources
+ */
+export function getShellCheckArguments(): string[] {
+  const { SHELLCHECK_ARGUMENTS } = process.env
+  if (typeof SHELLCHECK_ARGUMENTS === 'string') {
+    return SHELLCHECK_ARGUMENTS.split(' ')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0)
+  }
+  return []
+}
+
 export function getExplainshellEndpoint(): string | null {
   const { EXPLAINSHELL_ENDPOINT } = process.env
   return typeof EXPLAINSHELL_ENDPOINT === 'string' && EXPLAINSHELL_ENDPOINT.trim() !== ''
