@@ -88,18 +88,20 @@ export class Linter {
         ? shellDialect
         : 'bash'
 
+    const workspaceFolderSourcePaths = folders
+      // NOTE: on some system folder.name is undefined
+      .map((folder) => folder?.name.trim())
+      .filter((folderName) => folderName)
+      .map((folderName) => `--source-path=${folderName}`)
+
     const args = [
       `--shell=${shellName}`,
       '--format=json1',
       '--external-sources',
       `--source-path=${this.cwd}`,
+      ...workspaceFolderSourcePaths,
       ...additionalArgs,
     ]
-    for (const folder of folders) {
-      if (folder.name.trim()) {
-        args.push(`--source-path=${folder.name}`)
-      }
-    }
 
     this.console.log(`ShellCheck: running "${executablePath} ${args.join(' ')}"`)
 
