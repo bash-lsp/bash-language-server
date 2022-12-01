@@ -3,19 +3,27 @@ export type ShellCheckResult = Readonly<{
 }>
 
 // Constituent structures defined here:
-// https://github.com/koalaman/shellcheck/blob/4e703e5c61c6366bfd486d728bc624025e344e68/src/ShellCheck/Interface.hs#L221
+// https://github.com/koalaman/shellcheck/blob/master/src/ShellCheck/Interface.hs
 export type ShellCheckComment = Readonly<{
   file: string
   line: number // 1-based
   endLine: number // 1-based
   column: number // 1-based
   endColumn: number // 1-based
-  level: string // See mapShellcheckServerity
+  level: string // See LEVEL_TO_SEVERITY
   code: number
   message: string
-
-  // The Fix data type appears to be defined here. We aren't making use of
-  // it yet but this might help down the road:
-  // https://github.com/koalaman/shellcheck/blob/4e703e5c61c6366bfd486d728bc624025e344e68/src/ShellCheck/Interface.hs#L271
-  // fix: any;
+  fix?: {
+    replacements: ReadonlyArray<ShellCheckReplacement>
+  }
 }>
+
+type ShellCheckReplacement = {
+  precedence: number
+  line: number
+  endLine: number
+  column: number
+  endColumn: number
+  insertionPoint: string
+  replacement: string
+}
