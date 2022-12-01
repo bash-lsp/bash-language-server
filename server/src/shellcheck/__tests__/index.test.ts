@@ -1,9 +1,9 @@
 import * as path from 'path'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
-import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../testing/fixtures'
-import { getMockConnection } from '../../../testing/mocks'
-import { assertShellcheckResult, Linter } from '../linter'
+import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../../testing/fixtures'
+import { getMockConnection } from '../../../../testing/mocks'
+import { assertShellCheckResult, Linter } from '../index'
 
 const mockConsole = getMockConnection().console
 
@@ -174,7 +174,7 @@ describe('shellcheck', () => {
         { file: 'testing/fixtures/comment-doc-on-hover.sh', line: 43, endLine: 43, column: 1, endColumn: 7, level: 'warning', code: 2034, message: 'bork bork', fix: null, },
       ],
     }
-    assertShellcheckResult(shellcheckJSON)
+    assertShellCheckResult(shellcheckJSON)
   })
 
   it('asserts two valid shellcheck JSON comment', async () => {
@@ -185,17 +185,17 @@ describe('shellcheck', () => {
         { file: 'testing/fixtures/comment-doc-on-hover.sh', line: 45, endLine: 45, column: 2, endColumn: 8, level: 'warning', code: 2035, message: 'bork bork', fix: null, },
       ],
     }
-    assertShellcheckResult(shellcheckJSON)
+    assertShellCheckResult(shellcheckJSON)
   })
 
   it('fails shellcheck JSON with null comments', async () => {
     const shellcheckJSON = { comments: null }
-    expect(() => assertShellcheckResult(shellcheckJSON)).toThrow()
+    expect(() => assertShellCheckResult(shellcheckJSON)).toThrow()
   })
 
   it('fails shellcheck JSON with string commment', async () => {
     const shellcheckJSON = { comments: ['foo'] }
-    expect(() => assertShellcheckResult(shellcheckJSON)).toThrow()
+    expect(() => assertShellCheckResult(shellcheckJSON)).toThrow()
   })
 
   it('fails shellcheck JSON with invalid commment', async () => {
@@ -215,15 +215,15 @@ describe('shellcheck', () => {
         },
       ],
     })
-    assertShellcheckResult(make()) // Defaults should work
+    assertShellCheckResult(make()) // Defaults should work
 
-    expect(() => assertShellcheckResult(make({ file: 9 }))).toThrow()
-    expect(() => assertShellcheckResult(make({ line: '9' }))).toThrow()
-    expect(() => assertShellcheckResult(make({ endLine: '9' }))).toThrow()
-    expect(() => assertShellcheckResult(make({ column: '9' }))).toThrow()
-    expect(() => assertShellcheckResult(make({ endColumn: '9' }))).toThrow()
-    expect(() => assertShellcheckResult(make({ level: 9 }))).toThrow()
-    expect(() => assertShellcheckResult(make({ code: '9' }))).toThrow()
-    expect(() => assertShellcheckResult(make({ message: 9 }))).toThrow()
+    expect(() => assertShellCheckResult(make({ file: 9 }))).toThrow()
+    expect(() => assertShellCheckResult(make({ line: '9' }))).toThrow()
+    expect(() => assertShellCheckResult(make({ endLine: '9' }))).toThrow()
+    expect(() => assertShellCheckResult(make({ column: '9' }))).toThrow()
+    expect(() => assertShellCheckResult(make({ endColumn: '9' }))).toThrow()
+    expect(() => assertShellCheckResult(make({ level: 9 }))).toThrow()
+    expect(() => assertShellCheckResult(make({ code: '9' }))).toThrow()
+    expect(() => assertShellCheckResult(make({ message: 9 }))).toThrow()
   })
 })
