@@ -1,6 +1,12 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'jest', 'simple-import-sort', 'prettier'],
+  plugins: [
+    '@typescript-eslint',
+    'jest',
+    'simple-import-sort',
+    'sort-class-members',
+    'prettier',
+  ],
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
   parserOptions: {
     ecmaFeatures: {
@@ -39,6 +45,21 @@ module.exports = {
     'simple-import-sort/imports': 'error',
     'simple-import-sort/exports': 'error',
     'object-shorthand': 'error',
+    'sort-class-members/sort-class-members': [
+      'error',
+      {
+        order: [
+          '[properties]',
+          '[conventional-private-properties]',
+          'constructor',
+          '[static-properties]',
+          '[static-methods]',
+          '[methods]',
+          '[conventional-private-methods]',
+        ],
+        accessorPairPositioning: 'getThenSet',
+      },
+    ],
 
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-member-accessibility': 'off',

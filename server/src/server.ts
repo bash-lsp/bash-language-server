@@ -22,6 +22,36 @@ const PARAMETER_EXPANSION_PREFIXES = new Set(['$', '${'])
  * the various parts of the Language Server Protocol.
  */
 export default class BashServer {
+  private executables: Executables
+  private analyzer: Analyzer
+  private linter: Linter
+  private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
+  private connection: LSP.Connection
+  private clientCapabilities: LSP.ClientCapabilities
+  public backgroundAnalysisCompleted?: Promise<any>
+
+  private constructor({
+    connection,
+    executables,
+    analyzer,
+    linter,
+    capabilities,
+    backgroundAnalysisCompleted,
+  }: {
+    connection: LSP.Connection
+    executables: Executables
+    analyzer: Analyzer
+    linter: Linter
+    capabilities: LSP.ClientCapabilities
+    backgroundAnalysisCompleted?: Promise<any>
+  }) {
+    this.connection = connection
+    this.executables = executables
+    this.analyzer = analyzer
+    this.linter = linter
+    this.clientCapabilities = capabilities
+    this.backgroundAnalysisCompleted = backgroundAnalysisCompleted
+  }
   /**
    * Initialize the server based on a connection to the client and the protocols
    * initialization parameters.
@@ -66,38 +96,6 @@ export default class BashServer {
       executables,
       linter,
     })
-  }
-
-  private executables: Executables
-  private analyzer: Analyzer
-  private linter: Linter
-
-  private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
-  private connection: LSP.Connection
-  private clientCapabilities: LSP.ClientCapabilities
-  public backgroundAnalysisCompleted?: Promise<any>
-
-  private constructor({
-    connection,
-    executables,
-    analyzer,
-    linter,
-    capabilities,
-    backgroundAnalysisCompleted,
-  }: {
-    connection: LSP.Connection
-    executables: Executables
-    analyzer: Analyzer
-    linter: Linter
-    capabilities: LSP.ClientCapabilities
-    backgroundAnalysisCompleted?: Promise<any>
-  }) {
-    this.connection = connection
-    this.executables = executables
-    this.analyzer = analyzer
-    this.linter = linter
-    this.clientCapabilities = capabilities
-    this.backgroundAnalysisCompleted = backgroundAnalysisCompleted
   }
 
   /**

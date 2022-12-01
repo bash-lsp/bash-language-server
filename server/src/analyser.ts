@@ -31,16 +31,12 @@ type Texts = { [uri: string]: string }
 export default class Analyzer {
   private parser: Parser
   private console: LSP.RemoteConsole
-
   private uriToTextDocument: { [uri: string]: TextDocument } = {}
-
   private uriToTreeSitterTrees: Trees = {}
 
   // We need this to find the word at a given point etc.
   private uriToFileContent: Texts = {}
-
   private uriToDeclarations: FileDeclarations = {}
-
   private treeSitterTypeToLSPKind: Kinds = {
     // These keys are using underscores as that's the naming convention in tree-sitter.
     environment_variable_assignment: LSP.SymbolKind.Variable,

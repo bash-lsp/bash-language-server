@@ -17,8 +17,7 @@ export class Linter {
   public executablePath: string | null
   private cwd: string
   private console: LSP.RemoteConsole
-
-  _canLint: boolean
+  private _canLint: boolean
 
   constructor({ console, cwd, executablePath }: LinterOptions) {
     this.executablePath = executablePath

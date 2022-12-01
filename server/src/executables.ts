@@ -12,6 +12,12 @@ const readdirAsync = promisify(fs.readdir)
  * Provides information based on the programs on your PATH
  */
 export default class Executables {
+  private executables: Set<string>
+
+  private constructor(executables: string[]) {
+    this.executables = new Set(executables)
+  }
+
   /**
    * @param path is expected to to be a ':' separated list of paths.
    */
@@ -22,12 +28,6 @@ export default class Executables {
       .then(ArrayUtil.flatten)
       .then(ArrayUtil.uniq)
       .then((executables) => new Executables(executables))
-  }
-
-  private executables: Set<string>
-
-  private constructor(executables: string[]) {
-    this.executables = new Set(executables)
   }
 
   /**
