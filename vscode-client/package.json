@@ -63,7 +63,7 @@
     "vscode:prepublish": "cd .. && yarn run compile"
   },
   "dependencies": {
-    "bash-language-server": "4.0.0-beta.1",
+    "bash-language-server": "4.0.0-beta.2",
     "vscode-languageclient": "8.0.2",
     "vscode-languageserver": "8.0.2"
   },
