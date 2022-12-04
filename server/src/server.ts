@@ -2,6 +2,7 @@ import * as Process from 'child_process'
 import * as Path from 'path'
 import * as TurndownService from 'turndown'
 import * as LSP from 'vscode-languageserver/node'
+import { CodeAction } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import Analyzer from './analyser'
@@ -22,12 +23,13 @@ const PARAMETER_EXPANSION_PREFIXES = new Set(['$', '${'])
  * the various parts of the Language Server Protocol.
  */
 export default class BashServer {
-  private executables: Executables
   private analyzer: Analyzer
-  private linter: Linter
-  private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
-  private connection: LSP.Connection
   private clientCapabilities: LSP.ClientCapabilities
+  private connection: LSP.Connection
+  private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
+  private executables: Executables
+  private linter: Linter
+  private uriToCodeActions: { [uri: string]: CodeAction[] | undefined } = {} // TODO: invalidate diagnostics on file close/change
   public backgroundAnalysisCompleted?: Promise<any>
 
   private constructor({
@@ -106,13 +108,13 @@ export default class BashServer {
     // The content of a text document has changed. This event is emitted
     // when the text document first opened or when its content has changed.
     this.documents.listen(this.connection)
-    this.documents.onDidChangeContent(async (change) => {
-      const { uri } = change.document
+    this.documents.onDidChangeContent(async ({ document }) => {
+      const { uri } = document
 
       let diagnostics: LSP.Diagnostic[] = []
 
       // Load the tree for the modified contents into the analyzer:
-      const analyzeDiagnostics = this.analyzer.analyze(uri, change.document)
+      const analyzeDiagnostics = this.analyzer.analyze(uri, document)
       // Treesitter's diagnostics can be a bit inaccurate, so we only merge the
       // analyzer's diagnostics if the setting is enabled:
       if (config.getHighlightParsingError()) {
@@ -124,8 +126,12 @@ export default class BashServer {
         const folders = this.clientCapabilities.workspace?.workspaceFolders
           ? await connection.workspace.getWorkspaceFolders()
           : []
-        const lintDiagnostics = await this.linter.lint(change.document, folders || [])
+        const { diagnostics: lintDiagnostics, codeActions } = await this.linter.lint(
+          document,
+          folders || [],
+        )
         diagnostics = diagnostics.concat(lintDiagnostics)
+        this.uriToCodeActions[uri] = codeActions
       } catch (err) {
         this.connection.console.error(`Error while linting: ${err}`)
       }

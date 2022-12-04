@@ -18,7 +18,7 @@ export type ShellCheckComment = Readonly<{
   }
 }>
 
-type ShellCheckReplacement = {
+export type ShellCheckReplacement = {
   precedence: number
   line: number
   endLine: number

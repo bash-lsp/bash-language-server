@@ -26,7 +26,10 @@ describe('linter', () => {
       console: mockConsole,
       executablePath,
     })
-    expect(await linter.lint(textToDoc(''), [])).toEqual([])
+    expect(await linter.lint(textToDoc(''), [])).toEqual({
+      codeActions: [],
+      diagnostics: [],
+    })
     expect(linter.canLint).toBe(false)
     expect(mockConsole.warn).toBeCalledWith(
       expect.stringContaining(
@@ -45,59 +48,124 @@ describe('linter', () => {
     const linter = new Linter({ console: mockConsole, executablePath: 'shellcheck' })
     const result = await linter.lint(textToDoc(shell), [])
     expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "code": "SC2154",
-          "codeDescription": Object {
-            "href": "https://www.shellcheck.net/wiki/SC2154",
-          },
-          "message": "foo is referenced but not assigned.",
-          "range": Object {
-            "end": Object {
-              "character": 9,
-              "line": 1,
+      Object {
+        "codeActions": Array [
+          Object {
+            "diagnostics": Array [
+              Object {
+                "code": "SC2086",
+                "codeDescription": Object {
+                  "href": "https://www.shellcheck.net/wiki/SC2086",
+                },
+                "message": "Double quote to prevent globbing and word splitting.",
+                "range": Object {
+                  "end": Object {
+                    "character": 9,
+                    "line": 1,
+                  },
+                  "start": Object {
+                    "character": 5,
+                    "line": 1,
+                  },
+                },
+                "severity": 3,
+                "source": "shellcheck",
+                "tags": undefined,
+              },
+            ],
+            "edit": Object {
+              "changes": Object {
+                "foo": Array [
+                  Object {
+                    "newText": "\\"",
+                    "range": Object {
+                      "end": Object {
+                        "character": 9,
+                        "line": 1,
+                      },
+                      "start": Object {
+                        "character": 9,
+                        "line": 1,
+                      },
+                    },
+                  },
+                  Object {
+                    "newText": "\\"",
+                    "range": Object {
+                      "end": Object {
+                        "character": 5,
+                        "line": 1,
+                      },
+                      "start": Object {
+                        "character": 5,
+                        "line": 1,
+                      },
+                    },
+                  },
+                ],
+              },
             },
-            "start": Object {
-              "character": 5,
-              "line": 1,
-            },
+            "kind": "quickfix",
+            "title": "Apply fix for SC2086",
           },
-          "severity": 2,
-          "source": "shellcheck",
-          "tags": undefined,
-        },
-        Object {
-          "code": "SC2086",
-          "codeDescription": Object {
-            "href": "https://www.shellcheck.net/wiki/SC2086",
-          },
-          "message": "Double quote to prevent globbing and word splitting.",
-          "range": Object {
-            "end": Object {
-              "character": 9,
-              "line": 1,
+        ],
+        "diagnostics": Array [
+          Object {
+            "code": "SC2154",
+            "codeDescription": Object {
+              "href": "https://www.shellcheck.net/wiki/SC2154",
             },
-            "start": Object {
-              "character": 5,
-              "line": 1,
+            "message": "foo is referenced but not assigned.",
+            "range": Object {
+              "end": Object {
+                "character": 9,
+                "line": 1,
+              },
+              "start": Object {
+                "character": 5,
+                "line": 1,
+              },
             },
+            "severity": 2,
+            "source": "shellcheck",
+            "tags": undefined,
           },
-          "severity": 3,
-          "source": "shellcheck",
-          "tags": undefined,
-        },
-      ]
+          Object {
+            "code": "SC2086",
+            "codeDescription": Object {
+              "href": "https://www.shellcheck.net/wiki/SC2086",
+            },
+            "message": "Double quote to prevent globbing and word splitting.",
+            "range": Object {
+              "end": Object {
+                "character": 9,
+                "line": 1,
+              },
+              "start": Object {
+                "character": 5,
+                "line": 1,
+              },
+            },
+            "severity": 3,
+            "source": "shellcheck",
+            "tags": undefined,
+          },
+        ],
+      }
     `)
   })
 
   it('should correctly follow sources with correct cwd', async () => {
     const linter = new Linter({
       console: mockConsole,
-      executablePath: 'shellcheck',
       cwd: FIXTURE_FOLDER,
+      executablePath: 'shellcheck',
     })
     const result = await linter.lint(FIXTURE_DOCUMENT.SHELLCHECK_SOURCE, [])
-    expect(result).toEqual([])
+    expect(result).toEqual({
+      codeActions: [],
+      diagnostics: [],
+    })
   })
 
   it('should fail to follow sources with incorrect cwd', async () => {
@@ -108,48 +176,51 @@ describe('linter', () => {
     })
     const result = await linter.lint(FIXTURE_DOCUMENT.SHELLCHECK_SOURCE, [])
     expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "code": "SC1091",
-          "codeDescription": Object {
-            "href": "https://www.shellcheck.net/wiki/SC1091",
-          },
-          "message": "Not following: shellcheck/sourced.sh: openBinaryFile: does not exist (No such file or directory)",
-          "range": Object {
-            "end": Object {
-              "character": 19,
-              "line": 3,
+      Object {
+        "codeActions": Array [],
+        "diagnostics": Array [
+          Object {
+            "code": "SC1091",
+            "codeDescription": Object {
+              "href": "https://www.shellcheck.net/wiki/SC1091",
             },
-            "start": Object {
-              "character": 7,
-              "line": 3,
+            "message": "Not following: shellcheck/sourced.sh: openBinaryFile: does not exist (No such file or directory)",
+            "range": Object {
+              "end": Object {
+                "character": 19,
+                "line": 3,
+              },
+              "start": Object {
+                "character": 7,
+                "line": 3,
+              },
             },
+            "severity": 3,
+            "source": "shellcheck",
+            "tags": undefined,
           },
-          "severity": 3,
-          "source": "shellcheck",
-          "tags": undefined,
-        },
-        Object {
-          "code": "SC2154",
-          "codeDescription": Object {
-            "href": "https://www.shellcheck.net/wiki/SC2154",
-          },
-          "message": "foo is referenced but not assigned.",
-          "range": Object {
-            "end": Object {
-              "character": 10,
-              "line": 5,
+          Object {
+            "code": "SC2154",
+            "codeDescription": Object {
+              "href": "https://www.shellcheck.net/wiki/SC2154",
             },
-            "start": Object {
-              "character": 6,
-              "line": 5,
+            "message": "foo is referenced but not assigned.",
+            "range": Object {
+              "end": Object {
+                "character": 10,
+                "line": 5,
+              },
+              "start": Object {
+                "character": 6,
+                "line": 5,
+              },
             },
+            "severity": 2,
+            "source": "shellcheck",
+            "tags": undefined,
           },
-          "severity": 2,
-          "source": "shellcheck",
-          "tags": undefined,
-        },
-      ]
+        ],
+      }
     `)
   })
 
@@ -162,7 +233,10 @@ describe('linter', () => {
     const result = await linter.lint(FIXTURE_DOCUMENT.SHELLCHECK_SOURCE, [
       { uri: `file://${path.resolve(FIXTURE_FOLDER)}`, name: 'fixtures' },
     ])
-    expect(result).toEqual([])
+    expect(result).toEqual({
+      codeActions: [],
+      diagnostics: [],
+    })
   })
 })
 
@@ -198,7 +272,7 @@ describe('shellcheck', () => {
     expect(() => assertShellCheckResult(shellcheckJSON)).toThrow()
   })
 
-  it('fails shellcheck JSON with invalid commment', async () => {
+  it('fails shellcheck JSON with invalid comment', async () => {
     const make = (tweaks = {}) => ({
       comments: [
         {

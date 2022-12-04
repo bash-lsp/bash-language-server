@@ -5,7 +5,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import { getShellCheckArguments } from '../config'
 import { analyzeShebang } from '../util/shebang'
 import { CODE_TO_TAGS, LEVEL_TO_SEVERITY } from './config'
-import { ShellCheckResult } from './types'
+import { ShellCheckComment, ShellCheckReplacement, ShellCheckResult } from './types'
 
 const SUPPORTED_BASH_DIALECTS = ['sh', 'bash', 'dash', 'ksh']
 
@@ -35,8 +35,10 @@ export class Linter {
   public async lint(
     document: TextDocument,
     folders: LSP.WorkspaceFolder[],
-  ): Promise<LSP.Diagnostic[]> {
-    if (!this.executablePath || !this._canLint) return []
+  ): Promise<{ diagnostics: LSP.Diagnostic[]; codeActions: LSP.CodeAction[] }> {
+    if (!this.executablePath || !this._canLint) {
+      return { diagnostics: [], codeActions: [] }
+    }
 
     const additionalArgs = getShellCheckArguments()
 
@@ -46,33 +48,11 @@ export class Linter {
       folders,
       additionalArgs,
     )
-    if (!this._canLint) return []
-
-    const diags: LSP.Diagnostic[] = []
-    for (const comment of result.comments) {
-      const start: LSP.Position = {
-        line: comment.line - 1,
-        character: comment.column - 1,
-      }
-      const end: LSP.Position = {
-        line: comment.endLine - 1,
-        character: comment.endColumn - 1,
-      }
-
-      diags.push({
-        message: comment.message,
-        severity: LEVEL_TO_SEVERITY[comment.level] || LSP.DiagnosticSeverity.Error,
-        code: `SC${comment.code}`,
-        source: 'shellcheck',
-        range: LSP.Range.create(start, end),
-        codeDescription: {
-          href: `https://www.shellcheck.net/wiki/SC${comment.code}`,
-        },
-        tags: CODE_TO_TAGS[comment.code],
-      })
+    if (!this._canLint) {
+      return { diagnostics: [], codeActions: [] }
     }
 
-    return diags
+    return mapShellCheckResult({ document, result })
   }
 
   private async runShellCheck(
@@ -130,6 +110,7 @@ export class Linter {
     try {
       exit = await proc
     } catch (e) {
+      // TODO: we could do this up front?
       if ((e as any).code === 'ENOENT') {
         // shellcheck path wasn't found, don't try to lint any more:
         this.console.warn(
@@ -156,6 +137,7 @@ export class Linter {
   }
 }
 export function assertShellCheckResult(val: any): asserts val is ShellCheckResult {
+  // TODO: use zod
   if (val !== null && typeof val !== 'object') {
     throw new Error(`shellcheck: unexpected json output ${typeof val}`)
   }
@@ -205,5 +187,121 @@ export function assertShellCheckResult(val: any): asserts val is ShellCheckResul
       throw new Error(
         `shellcheck: expected comment code at index ${idx} to be number, found ${typeof comment.code}`,
       )
+  }
+}
+
+function mapShellCheckResult({
+  document,
+  result,
+}: {
+  document: TextDocument
+  result: ShellCheckResult
+}): {
+  diagnostics: LSP.Diagnostic[]
+  codeActions: LSP.CodeAction[]
+} {
+  const diagnostics: LSP.Diagnostic[] = []
+  const codeActions: LSP.CodeAction[] = []
+
+  for (const comment of result.comments) {
+    const start: LSP.Position = {
+      line: comment.line - 1,
+      character: comment.column - 1,
+    }
+    const end: LSP.Position = {
+      line: comment.endLine - 1,
+      character: comment.endColumn - 1,
+    }
+
+    const diagnostic: LSP.Diagnostic = {
+      message: comment.message,
+      severity: LEVEL_TO_SEVERITY[comment.level] || LSP.DiagnosticSeverity.Error,
+      code: `SC${comment.code}`,
+      source: 'shellcheck',
+      range: LSP.Range.create(start, end),
+      codeDescription: {
+        href: `https://www.shellcheck.net/wiki/SC${comment.code}`,
+      },
+      tags: CODE_TO_TAGS[comment.code],
+      // NOTE: we could use the 'data' property this enable easier fingerprinting
+    }
+
+    diagnostics.push(diagnostic)
+
+    const codeAction = CodeActionProvider.getCodeAction({
+      comment,
+      document,
+      diagnostics: [diagnostic],
+    })
+
+    if (codeAction) {
+      codeActions.push(codeAction)
+    }
+  }
+
+  return { diagnostics, codeActions }
+}
+
+/**
+ * Code has been adopted from https://github.com/vscode-shellcheck/vscode-shellcheck/
+ * and modified to fit the needs of this project.
+ *
+ * The MIT License (MIT)
+ * Copyright (c) Timon Wong
+ */
+class CodeActionProvider {
+  public static getCodeAction({
+    comment,
+    document,
+    diagnostics,
+  }: {
+    comment: ShellCheckComment
+    document: TextDocument
+    diagnostics: LSP.Diagnostic[]
+  }): LSP.CodeAction | null {
+    const { code, fix } = comment
+    if (!fix || fix.replacements.length === 0) {
+      return null
+    }
+
+    const { replacements } = fix
+    if (replacements.length === 0) {
+      return null
+    }
+
+    const edits = this.getTextEdits(replacements)
+    if (!edits.length) {
+      return null
+    }
+
+    return {
+      title: `Apply fix for SC${code}`,
+      diagnostics,
+      edit: {
+        changes: {
+          [document.uri]: edits,
+        },
+      },
+      kind: LSP.CodeActionKind.QuickFix,
+    }
+  }
+  private static getTextEdits(
+    replacements: ReadonlyArray<ShellCheckReplacement>,
+  ): LSP.TextEdit[] {
+    if (replacements.length === 1) {
+      return [this.getTextEdit(replacements[0])]
+    } else if (replacements.length === 2) {
+      return [this.getTextEdit(replacements[1]), this.getTextEdit(replacements[0])]
+    }
+
+    return []
+  }
+  private static getTextEdit(replacement: ShellCheckReplacement): LSP.TextEdit {
+    const startPos = LSP.Position.create(replacement.line - 1, replacement.column - 1)
+    const endPos = LSP.Position.create(replacement.endLine - 1, replacement.endColumn - 1)
+    return {
+      range: LSP.Range.create(startPos, endPos),
+      newText: replacement.replacement,
+    }
   }
 }
