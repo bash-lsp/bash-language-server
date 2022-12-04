@@ -136,7 +136,7 @@ export default class BashServer {
         this.connection.console.error(`Error while linting: ${err}`)
       }
 
-      connection.sendDiagnostics({ uri, diagnostics })
+      connection.sendDiagnostics({ uri, version: document.version, diagnostics })
     })
 
     // Register all the handlers for the LSP events.
