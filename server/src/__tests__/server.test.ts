@@ -1,8 +1,9 @@
 import * as Process from 'child_process'
 import * as Path from 'path'
 import * as LSP from 'vscode-languageserver/node'
+import { CodeAction } from 'vscode-languageserver/node'
 
-import { FIXTURE_FOLDER, FIXTURE_URI } from '../../../testing/fixtures'
+import FIXTURE_DOCUMENT, { FIXTURE_FOLDER, FIXTURE_URI } from '../../../testing/fixtures'
 import { getMockConnection } from '../../../testing/mocks'
 import LspServer from '../server'
 import { CompletionItemDataType } from '../types'
@@ -53,6 +54,7 @@ describe('server', () => {
     expect(connection.onReferences).toHaveBeenCalledTimes(1)
     expect(connection.onCompletion).toHaveBeenCalledTimes(1)
     expect(connection.onCompletionResolve).toHaveBeenCalledTimes(1)
+    expect(connection.onCodeAction).toHaveBeenCalledTimes(1)
   })
 
   it('responds to onHover', async () => {
@@ -524,5 +526,95 @@ describe('server', () => {
     expect(Array.from(new Set(result.map((item: any) => item.kind)))).toEqual([
       LSP.CompletionItemKind.Variable,
     ])
+  })
+
+  it('responds to onCodeAction', async () => {
+    const { connection, server } = await initializeServer()
+    const document = FIXTURE_DOCUMENT.COMMENT_DOC
+
+    server.register(connection)
+    await server.onDocumentContentChange(document)
+
+    expect(connection.sendDiagnostics).toHaveBeenCalledTimes(1)
+    const { diagnostics } = connection.sendDiagnostics.mock.calls[0][0]
+    const fixableDiagnostic = diagnostics.filter(({ code }) => code === 'SC2086')[0]
+
+    expect(fixableDiagnostic).toMatchInlineSnapshot(`
+      Object {
+        "code": "SC2086",
+        "codeDescription": Object {
+          "href": "https://www.shellcheck.net/wiki/SC2086",
+        },
+        "message": "Double quote to prevent globbing and word splitting.",
+        "range": Object {
+          "end": Object {
+            "character": 13,
+            "line": 55,
+          },
+          "start": Object {
+            "character": 5,
+            "line": 55,
+          },
+        },
+        "severity": 3,
+        "source": "shellcheck",
+        "tags": undefined,
+      }
+    `)
+
+    // TODO: we could find the diagnostics and then use the range to test the code action
+
+    const onCodeAction = connection.onCodeAction.mock.calls[0][0]
+
+    const result = await onCodeAction(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.COMMENT_DOC,
+        },
+        range: fixableDiagnostic.range,
+        context: {
+          diagnostics: [fixableDiagnostic],
+        },
+      },
+      {} as any,
+      {} as any,
+    )
+
+    expect(result).toHaveLength(1)
+    const codeAction = (result as CodeAction[])[0]
+    expect(codeAction.diagnostics).toEqual([fixableDiagnostic])
+    expect(codeAction.diagnostics).toEqual([fixableDiagnostic])
+
+    expect(codeAction.edit?.changes && codeAction.edit?.changes[FIXTURE_URI.COMMENT_DOC])
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "newText": "\\"",
+          "range": Object {
+            "end": Object {
+              "character": 13,
+              "line": 55,
+            },
+            "start": Object {
+              "character": 13,
+              "line": 55,
+            },
+          },
+        },
+        Object {
+          "newText": "\\"",
+          "range": Object {
+            "end": Object {
+              "character": 5,
+              "line": 55,
+            },
+            "start": Object {
+              "character": 5,
+              "line": 55,
+            },
+          },
+        },
+      ]
+    `)
   })
 })

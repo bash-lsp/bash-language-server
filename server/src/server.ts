@@ -105,38 +105,11 @@ export default class BashServer {
    * care about.
    */
   public register(connection: LSP.Connection): void {
-    // The content of a text document has changed. This event is emitted
-    // when the text document first opened or when its content has changed.
     this.documents.listen(this.connection)
     this.documents.onDidChangeContent(async ({ document }) => {
-      const { uri } = document
-
-      let diagnostics: LSP.Diagnostic[] = []
-
-      // Load the tree for the modified contents into the analyzer:
-      const analyzeDiagnostics = this.analyzer.analyze(uri, document)
-      // Treesitter's diagnostics can be a bit inaccurate, so we only merge the
-      // analyzer's diagnostics if the setting is enabled:
-      if (config.getHighlightParsingError()) {
-        diagnostics = diagnostics.concat(analyzeDiagnostics)
-      }
-
-      // Run ShellCheck diagnostics:
-      try {
-        const folders = this.clientCapabilities.workspace?.workspaceFolders
-          ? await connection.workspace.getWorkspaceFolders()
-          : []
-        const { diagnostics: lintDiagnostics, codeActions } = await this.linter.lint(
-          document,
-          folders || [],
-        )
-        diagnostics = diagnostics.concat(lintDiagnostics)
-        this.uriToCodeActions[uri] = codeActions
-      } catch (err) {
-        this.connection.console.error(`Error while linting: ${err}`)
-      }
-
-      connection.sendDiagnostics({ uri, version: document.version, diagnostics })
+      // The content of a text document has changed. This event is emitted
+      // when the text document first opened or when its content has changed.
+      await this.onDocumentContentChange(document)
     })
 
     this.documents.onDidClose((event) => {
@@ -155,6 +128,41 @@ export default class BashServer {
     connection.onCodeAction(this.onCodeAction.bind(this))
 
     // FIXME: re-lint on workspace folder change
+  }
+
+  /**
+   * The content of a text document has changed. This event is emitted
+   * when the text document first opened or when its content has changed.
+   */
+  public async onDocumentContentChange(document: TextDocument) {
+    const { uri } = document
+
+    let diagnostics: LSP.Diagnostic[] = []
+
+    // Load the tree for the modified contents into the analyzer:
+    const analyzeDiagnostics = this.analyzer.analyze(uri, document)
+    // Treesitter's diagnostics can be a bit inaccurate, so we only merge the
+    // analyzer's diagnostics if the setting is enabled:
+    if (config.getHighlightParsingError()) {
+      diagnostics = diagnostics.concat(analyzeDiagnostics)
+    }
+
+    // Run ShellCheck diagnostics:
+    try {
+      const folders = this.clientCapabilities.workspace?.workspaceFolders
+        ? await this.connection.workspace.getWorkspaceFolders()
+        : []
+      const { diagnostics: lintDiagnostics, codeActions } = await this.linter.lint(
+        document,
+        folders || [],
+      )
+      diagnostics = diagnostics.concat(lintDiagnostics)
+      this.uriToCodeActions[uri] = codeActions
+    } catch (err) {
+      this.connection.console.error(`Error while linting: ${err}`)
+    }
+
+    this.connection.sendDiagnostics({ uri, version: document.version, diagnostics })
   }
 
   /**
@@ -503,6 +511,7 @@ export default class BashServer {
 
   private async onCodeAction(params: LSP.CodeActionParams): Promise<LSP.CodeAction[]> {
     const codeActions = this.uriToCodeActions[params.textDocument.uri]
+
     if (!codeActions) {
       return []
     }

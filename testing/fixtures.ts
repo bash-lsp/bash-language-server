@@ -1,14 +1,13 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 export const FIXTURE_FOLDER = path.join(__dirname, './fixtures/')
 
 function getDocument(uri: string) {
   return TextDocument.create(
-    'foo',
-    'bar',
+    uri,
+    'shellscript',
     0,
     fs.readFileSync(uri.replace('file://', ''), 'utf8'),
   )
@@ -28,7 +27,7 @@ export const FIXTURE_URI = {
   SHELLCHECK_SOURCE: `file://${path.join(FIXTURE_FOLDER, 'shellcheck', 'source.sh')}`,
 }
 
-export const FIXTURE_DOCUMENT: Record<FIXTURE_KEY, LSP.TextDocument> = (
+export const FIXTURE_DOCUMENT: Record<FIXTURE_KEY, TextDocument> = (
   Object.keys(FIXTURE_URI) as Array<FIXTURE_KEY>
 ).reduce((acc, cur: FIXTURE_KEY) => {
   acc[cur] = getDocument(FIXTURE_URI[cur])

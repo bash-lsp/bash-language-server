@@ -52,3 +52,5 @@ my_other_var="no comments above me :("
 func_four() {
     echo "func_four"
 }
+
+echo $unknown
