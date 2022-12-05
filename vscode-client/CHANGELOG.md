@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.19.0
+
+- Upgrade language server to 4.0.0-beta.5 that enables ShellCheck code actions (quick fixes) and allows for changing settings while the extension is running.
+
 ## 1.18.0
 
 - Upgrade language server to 4.0.0-beta.1 that enables a better ShellCheck integration.
