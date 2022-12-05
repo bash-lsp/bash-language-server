@@ -33,10 +33,10 @@ balanced-match@^1.0.0:
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
-bash-language-server@4.0.0-beta.6:
-  version "4.0.0-beta.6"
-  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-4.0.0-beta.6.tgz#a075d9cd1d6cfdb37d871a9128ef729046c4be0c"
-  integrity sha512-aDjKi8Fz/UV8qQzbMGyzzX+06kURzbPlkNknUCfJNbz40+jUs9J3nOHzmBQa7lM1i6VB3jz2u6/QmCikjJe1Dw==
+bash-language-server@4.0.0-beta.5:
+  version "4.0.0-beta.5"
+  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-4.0.0-beta.5.tgz#02173e1af9f7800d4b8e72feb0d3d50950ef374b"
+  integrity sha512-8Nu8LUv+yts1L1Bl3yIyjFBlKjZy/M8tRB99ms850WOiRpmdijXUSxHNQu5xn6sA/Pt8f4KrjuCv/D8AFUPTCA==
   dependencies:
     fast-glob "3.2.12"
     fuzzy-search "3.2.1"
@@ -46,7 +46,6 @@ bash-language-server@4.0.0-beta.6:
     vscode-languageserver "8.0.2"
     vscode-languageserver-textdocument "1.0.7"
     web-tree-sitter "0.20.7"
-    zod "3.19.1"
 
 brace-expansion@^1.1.7:
   version "1.1.11"
@@ -275,8 +274,3 @@ yallist@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/yallist/-/yallist-4.0.0.tgz#9bb92790d9c0effec63be73519e11a35019a3a72"
   integrity sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==
-
-zod@3.19.1:
-  version "3.19.1"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-3.19.1.tgz#112f074a97b50bfc4772d4ad1576814bd8ac4473"
-  integrity sha512-LYjZsEDhCdYET9ikFu6dVPGp2YH9DegXjdJToSzD9rO6fy4qiRYFoyEYwps88OseJlPyl2NOe2iJuhEhL7IpEA==
