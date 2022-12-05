@@ -74,7 +74,7 @@ export class Linter {
     const args = [
       `--shell=${shellName}`,
       '--format=json1',
-      '--external-sources',
+      '--external-sources=true',
       `--source-path=${this.cwd}`,
       ...workspaceFolderSourcePaths,
       ...additionalArgs,
