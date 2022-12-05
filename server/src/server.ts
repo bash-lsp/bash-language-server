@@ -139,6 +139,10 @@ export default class BashServer {
       connection.sendDiagnostics({ uri, version: document.version, diagnostics })
     })
 
+    this.documents.onDidClose((event) => {
+      delete this.uriToCodeActions[event.document.uri]
+    })
+
     // Register all the handlers for the LSP events.
     connection.onHover(this.onHover.bind(this))
     connection.onDefinition(this.onDefinition.bind(this))
