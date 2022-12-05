@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const ConfigSchema = z
   .object({
-    // "Glob pattern for finding and parsing shell script files in the workspace."
+    // Glob pattern for finding and parsing shell script files in the workspace. Used by the background analysis features across files.
     globPattern: z.string().trim().default('**/*@(.sh|.inc|.bash|.command)'),
 
     // Controls if Treesitter parsing errors will be highlighted as problems.
@@ -31,6 +31,7 @@ export const ConfigSchema = z
       }, z.array(z.string()))
       .default([]),
 
+    // Maximum number of files to analyze in the background. Set to 0 to disable background analysis.
     backgroundAnalysisMaxFiles: z.number().int().min(0).default(500),
   })
   .strict()

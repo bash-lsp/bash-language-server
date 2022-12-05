@@ -34,7 +34,8 @@
         "bashIde.backgroundAnalysisMaxFiles": {
           "type": "number",
           "default": 500,
-          "description": "Maximum number of files to analyze in the background. Set to 0 to disable background analysis."
+          "description": "Maximum number of files to analyze in the background. Set to 0 to disable background analysis.",
+          "minimum": 0
         },
         "bashIde.explainshellEndpoint": {
           "type": "string",
@@ -49,7 +50,7 @@
         "bashIde.highlightParsingErrors": {
           "type": "boolean",
           "default": false,
-          "description": "Controls if treesitter parsing errors will be highlighted as problems."
+          "description": "Controls if Treesitter parsing errors will be highlighted as problems."
         },
         "bashIde.shellcheckPath": {
           "type": "string",
