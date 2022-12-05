@@ -67,6 +67,13 @@ export default class Analyzer {
     globPattern: string
     rootPath: string
   }): Promise<{ filesParsed: number }> {
+    if (backgroundAnalysisMaxFiles === 0) {
+      this.console.log(
+        `BackgroundAnalysis: skipping as backgroundAnalysisMaxFiles was 0...`,
+      )
+      return { filesParsed: 0 }
+    }
+
     this.console.log(
       `BackgroundAnalysis: resolving glob "${globPattern}" inside "${rootPath}"...`,
     )

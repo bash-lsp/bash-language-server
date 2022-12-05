@@ -316,4 +316,24 @@ describe('initiateBackgroundAnalysis', () => {
     expect(connection.console.warn).toHaveBeenCalledWith(expect.stringContaining('BOOM'))
     expect(filesParsed).toEqual(0)
   })
+
+  it('allows skipping the analysis', async () => {
+    const parser = await initializeParser()
+
+    jest.spyOn(Date, 'now').mockImplementation(() => 0)
+
+    const connection = getMockConnection()
+
+    const newAnalyzer = new Analyzer({ console: connection.console, parser })
+    const { filesParsed } = await newAnalyzer.initiateBackgroundAnalysis({
+      backgroundAnalysisMaxFiles: 0,
+      globPattern: defaultConfig.globPattern,
+      rootPath: FIXTURE_FOLDER,
+    })
+
+    expect(connection.window.showWarningMessage).not.toHaveBeenCalled()
+    expect(connection.console.warn).not.toHaveBeenCalled()
+
+    expect(filesParsed).toEqual(0)
+  })
 })
