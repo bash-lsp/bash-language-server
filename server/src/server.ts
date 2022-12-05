@@ -148,6 +148,7 @@ export default class BashServer {
     connection.onReferences(this.onReferences.bind(this))
     connection.onCompletion(this.onCompletion.bind(this))
     connection.onCompletionResolve(this.onCompletionResolve.bind(this))
+    connection.onCodeAction(this.onCodeAction.bind(this))
 
     // FIXME: re-lint on workspace folder change
   }
@@ -170,6 +171,11 @@ export default class BashServer {
       documentSymbolProvider: true,
       workspaceSymbolProvider: true,
       referencesProvider: true,
+      codeActionProvider: {
+        codeActionKinds: [LSP.CodeActionKind.QuickFix],
+        resolveProvider: false,
+        workDoneProgress: false,
+      },
     }
   }
 
@@ -489,6 +495,45 @@ export default class BashServer {
     }
 
     return allCompletions
+  }
+
+  private async onCodeAction(params: LSP.CodeActionParams): Promise<LSP.CodeAction[]> {
+    const codeActions = this.uriToCodeActions[params.textDocument.uri]
+    if (!codeActions) {
+      return []
+    }
+
+    const getDiagnosticsFingerPrint = (diagnostics?: LSP.Diagnostic[]): string[] =>
+      (diagnostics &&
+        diagnostics
+          .map(({ code, source, range }) =>
+            code !== undefined && source && range
+              ? JSON.stringify({
+                  code,
+                  source,
+                  range,
+                })
+              : null,
+          )
+          .filter((fingerPrint): fingerPrint is string => fingerPrint != null)) ||
+      []
+
+    const paramsDiagnosticsKeys = getDiagnosticsFingerPrint(params.context.diagnostics)
+
+    // find actions that match the paramsDiagnosticsKeys
+    const actions = codeActions.filter((action) => {
+      const actionDiagnosticsKeys = getDiagnosticsFingerPrint(action.diagnostics)
+      // actions without diagnostics are always returned
+      if (actionDiagnosticsKeys.length === 0) {
+        return true
+      }
+
+      return actionDiagnosticsKeys.some((actionDiagnosticKey) =>
+        paramsDiagnosticsKeys.includes(actionDiagnosticKey),
+      )
+    })
+
+    return actions
   }
 
   private async onCompletionResolve(
