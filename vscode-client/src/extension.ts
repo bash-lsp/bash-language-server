@@ -12,15 +12,8 @@ import {
 let client: LanguageClient
 
 export async function activate(context: ExtensionContext) {
-  const config = workspace.getConfiguration('bashIde')
-
   const env: any = {
     ...process.env,
-    SHELLCHECK_PATH: config.get('shellcheckPath', ''),
-    SHELLCHECK_ARGUMENTS: config.get('shellcheckArguments', ''),
-    EXPLAINSHELL_ENDPOINT: config.get('explainshellEndpoint', ''),
-    GLOB_PATTERN: config.get('globPattern', ''),
-    HIGHLIGHT_PARSING_ERRORS: config.get('highlightParsingErrors', false),
   }
 
   const serverExecutable = {
