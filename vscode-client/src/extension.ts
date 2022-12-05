@@ -52,7 +52,7 @@ export async function activate(context: ExtensionContext) {
       },
     ],
     synchronize: {
-      configurationSection: 'Bash IDE',
+      configurationSection: 'bashIde',
       // Notify the server about file changes to '.clientrc files contain in the workspace
       fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
     },
