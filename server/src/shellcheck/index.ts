@@ -71,7 +71,7 @@ export class Linter {
 
     const workspaceFolderSourcePaths = folders
       // NOTE: on some system folder.name is undefined
-      .map((folder) => folder?.name.trim())
+      .map((folder) => folder?.name?.trim())
       .filter((folderName) => folderName)
       .map((folderName) => `--source-path=${folderName}`)
 
