@@ -21,11 +21,10 @@ async function initializeServer() {
     workspaceFolders: null,
   })
 
-  const { backgroundAnalysisCompleted } = server
-
-  if (backgroundAnalysisCompleted) {
-    await backgroundAnalysisCompleted
-  }
+  server.register(connection)
+  const onInitialized = connection.onInitialized.mock.calls[0][0]
+  const { backgroundAnalysisCompleted } = (await onInitialized({})) as any
+  await backgroundAnalysisCompleted
 
   return {
     connection,
@@ -42,9 +41,7 @@ describe('server', () => {
   })
 
   it('register LSP connection', async () => {
-    const { connection, server } = await initializeServer()
-
-    server.register(connection)
+    const { connection } = await initializeServer()
 
     expect(connection.onHover).toHaveBeenCalledTimes(1)
     expect(connection.onDefinition).toHaveBeenCalledTimes(1)
@@ -58,8 +55,7 @@ describe('server', () => {
   })
 
   it('responds to onHover', async () => {
-    const { connection, server } = await initializeServer()
-    server.register(connection)
+    const { connection } = await initializeServer()
 
     const onHover = connection.onHover.mock.calls[0][0]
 
@@ -87,8 +83,7 @@ describe('server', () => {
   })
 
   it('responds to onHover with function documentation extracted from comments', async () => {
-    const { connection, server } = await initializeServer()
-    server.register(connection)
+    const { connection } = await initializeServer()
 
     const onHover = connection.onHover.mock.calls[0][0]
 
@@ -114,8 +109,7 @@ describe('server', () => {
   })
 
   it('responds to onDocumentHighlight', async () => {
-    const { connection, server } = await initializeServer()
-    server.register(connection)
+    const { connection } = await initializeServer()
 
     const onDocumentHighlight = connection.onDocumentHighlight.mock.calls[0][0]
 
@@ -195,8 +189,7 @@ describe('server', () => {
   })
 
   it('responds to onWorkspaceSymbol', async () => {
-    const { connection, server } = await initializeServer()
-    server.register(connection)
+    const { connection } = await initializeServer()
 
     const onWorkspaceSymbol = connection.onWorkspaceSymbol.mock.calls[0][0]
 
@@ -241,8 +234,7 @@ describe('server', () => {
   })
 
   it('responds to onCompletion with filtered list when word is found', async () => {
-    const { connection, server } = await initializeServer()
-    server.register(connection)
+    const { connection } = await initializeServer()
 
     const onCompletion = connection.onCompletion.mock.calls[0][0]
 
@@ -289,8 +281,7 @@ describe('server', () => {
       return
     }
 
-    const { connection, server } = await initializeServer()
-    server.register(connection)
+    const { connection } = await initializeServer()
 
     const onCompletion = connection.onCompletion.mock.calls[0][0]
 
@@ -324,8 +315,7 @@ describe('server', () => {
   })
 
   it('responds to onCompletion with entire list when no word is found', async () => {
-    const { connection, server } = await initializeServer()
-    server.register(connection)
+    const { connection } = await initializeServer()
 
     const onCompletion = connection.onCompletion.mock.calls[0][0]
 
@@ -349,8 +339,7 @@ describe('server', () => {
   })
 
   it('responds to onCompletion with empty list when word is a comment', async () => {
-    const { connection, server } = await initializeServer()
-    server.register(connection)
+    const { connection } = await initializeServer()
 
     const onCompletion = connection.onCompletion.mock.calls[0][0]
 
@@ -373,8 +362,7 @@ describe('server', () => {
   })
 
   it('responds to onCompletion with empty list when word is {', async () => {
-    const { connection, server } = await initializeServer()
-    server.register(connection)
+    const { connection } = await initializeServer()
 
     const onCompletion = connection.onCompletion.mock.calls[0][0]
 
@@ -397,8 +385,7 @@ describe('server', () => {
   })
 
   it('responds to onCompletion when word is found in another file', async () => {
-    const { connection, server } = await initializeServer()
-    server.register(connection)
+    const { connection } = await initializeServer()
 
     const onCompletion = connection.onCompletion.mock.calls[0][0]
 
@@ -466,8 +453,7 @@ describe('server', () => {
   })
 
   it('responds to onCompletion with local symbol when word is found in multiple files', async () => {
-    const { connection, server } = await initializeServer()
-    server.register(connection)
+    const { connection } = await initializeServer()
 
     const onCompletion = connection.onCompletion.mock.calls[0][0]
 
@@ -502,8 +488,7 @@ describe('server', () => {
   })
 
   it('responds to onCompletion with all variables when starting to expand parameters', async () => {
-    const { connection, server } = await initializeServer()
-    server.register(connection)
+    const { connection } = await initializeServer()
 
     const onCompletion = connection.onCompletion.mock.calls[0][0]
 
@@ -532,7 +517,6 @@ describe('server', () => {
     const { connection, server } = await initializeServer()
     const document = FIXTURE_DOCUMENT.COMMENT_DOC
 
-    server.register(connection)
     await server.onDocumentContentChange(document)
 
     expect(connection.sendDiagnostics).toHaveBeenCalledTimes(1)

@@ -2,7 +2,6 @@ import { spawn } from 'child_process'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
-import { getShellCheckArguments } from '../config'
 import { analyzeShebang } from '../util/shebang'
 import { CODE_TO_TAGS, LEVEL_TO_SEVERITY } from './config'
 import { ShellCheckComment, ShellCheckReplacement, ShellCheckResult } from './types'
@@ -10,13 +9,13 @@ import { ShellCheckComment, ShellCheckReplacement, ShellCheckResult } from './ty
 const SUPPORTED_BASH_DIALECTS = ['sh', 'bash', 'dash', 'ksh']
 
 type LinterOptions = {
-  executablePath: string | null
+  executablePath: string
   console: LSP.RemoteConsole
   cwd?: string
 }
 
 export class Linter {
-  public executablePath: string | null
+  public executablePath: string
   private cwd: string
   private console: LSP.RemoteConsole
   private _canLint: boolean
@@ -24,7 +23,7 @@ export class Linter {
   constructor({ console, cwd, executablePath }: LinterOptions) {
     this.executablePath = executablePath
     this.cwd = cwd || process.cwd()
-    this._canLint = !!this.executablePath // TODO: any reason to create a linter if the path is null?
+    this._canLint = true
     this.console = console
   }
 
@@ -35,18 +34,16 @@ export class Linter {
   public async lint(
     document: TextDocument,
     folders: LSP.WorkspaceFolder[],
+    additionalShellCheckArguments: string[] = [],
   ): Promise<{ diagnostics: LSP.Diagnostic[]; codeActions: LSP.CodeAction[] }> {
-    if (!this.executablePath || !this._canLint) {
+    if (!this._canLint) {
       return { diagnostics: [], codeActions: [] }
     }
 
-    const additionalArgs = getShellCheckArguments()
-
     const result = await this.runShellCheck(
-      this.executablePath,
       document,
       folders,
-      additionalArgs,
+      additionalShellCheckArguments,
     )
     if (!this._canLint) {
       return { diagnostics: [], codeActions: [] }
@@ -56,7 +53,6 @@ export class Linter {
   }
 
   private async runShellCheck(
-    executablePath: string,
     document: TextDocument,
     folders: LSP.WorkspaceFolder[],
     additionalArgs: string[] = [],
@@ -84,12 +80,12 @@ export class Linter {
       ...additionalArgs,
     ]
 
-    this.console.log(`ShellCheck: running "${executablePath} ${args.join(' ')}"`)
+    this.console.log(`ShellCheck: running "${this.executablePath} ${args.join(' ')}"`)
 
     let out = ''
     let err = ''
     const proc = new Promise((resolve, reject) => {
-      const proc = spawn(executablePath, [...args, '-'], { cwd: this.cwd })
+      const proc = spawn(this.executablePath, [...args, '-'], { cwd: this.cwd })
       proc.on('error', reject)
       proc.on('close', resolve)
       proc.stdout.on('data', (data) => (out += data))

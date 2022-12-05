@@ -12,11 +12,7 @@ function textToDoc(txt: string) {
 }
 
 describe('linter', () => {
-  it('should set canLint to false if executable empty', () => {
-    expect(new Linter({ console: mockConsole, executablePath: null }).canLint).toBe(false)
-  })
-
-  it('should set canLint to true if executable not empty', () => {
+  it('default to canLint to true', () => {
     expect(new Linter({ console: mockConsole, executablePath: 'foo' }).canLint).toBe(true)
   })
 

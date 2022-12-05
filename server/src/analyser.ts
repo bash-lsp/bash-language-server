@@ -8,7 +8,6 @@ import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as Parser from 'web-tree-sitter'
 
-import * as config from './config'
 import { flattenArray, flattenObjectValues } from './util/flatten'
 import { getFilePaths } from './util/fs'
 import { analyzeShebang } from './util/shebang'
@@ -60,12 +59,14 @@ export default class Analyzer {
    * enable features across files.
    */
   public async initiateBackgroundAnalysis({
+    backgroundAnalysisMaxFiles,
+    globPattern,
     rootPath,
   }: {
+    backgroundAnalysisMaxFiles: number
+    globPattern: string
     rootPath: string
   }): Promise<{ filesParsed: number }> {
-    const globPattern = config.getGlobPattern()
-    const backgroundAnalysisMaxFiles = config.getBackgroundAnalysisMaxFiles()
     this.console.log(
       `BackgroundAnalysis: resolving glob "${globPattern}" inside "${rootPath}"...`,
     )

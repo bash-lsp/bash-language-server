@@ -1,6 +1,7 @@
 import FIXTURES, { FIXTURE_FOLDER } from '../../../testing/fixtures'
 import { getMockConnection } from '../../../testing/mocks'
 import Analyzer from '../analyser'
+import { getDefaultConfiguration } from '../config'
 import { initializeParser } from '../parser'
 import * as fsUtil from '../util/fs'
 
@@ -11,6 +12,8 @@ const mockConsole = getMockConnection().console
 
 // if you add a .sh file to testing/fixtures, update this value
 const FIXTURE_FILES_MATCHING_GLOB = 13
+
+const defaultConfig = getDefaultConfiguration()
 
 beforeAll(async () => {
   const parser = await initializeParser()
@@ -276,6 +279,8 @@ describe('initiateBackgroundAnalysis', () => {
 
     const newAnalyzer = new Analyzer({ console: connection.console, parser })
     const { filesParsed } = await newAnalyzer.initiateBackgroundAnalysis({
+      backgroundAnalysisMaxFiles: defaultConfig.backgroundAnalysisMaxFiles,
+      globPattern: defaultConfig.globPattern,
       rootPath: FIXTURE_FOLDER,
     })
 
@@ -302,6 +307,8 @@ describe('initiateBackgroundAnalysis', () => {
 
     const newAnalyzer = new Analyzer({ console: connection.console, parser })
     const { filesParsed } = await newAnalyzer.initiateBackgroundAnalysis({
+      backgroundAnalysisMaxFiles: defaultConfig.backgroundAnalysisMaxFiles,
+      globPattern: defaultConfig.globPattern,
       rootPath: FIXTURE_FOLDER,
     })
 
