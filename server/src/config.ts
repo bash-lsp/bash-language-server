@@ -1,57 +1,71 @@
-export const DEFAULT_GLOB_PATTERN = '**/*@(.sh|.inc|.bash|.command)'
-export const DEFAULT_BACKGROUND_ANALYSIS_MAX_FILES = 500
+import { z } from 'zod'
 
-export function getShellcheckPath(): string | null {
-  const { SHELLCHECK_PATH } = process.env
-  // If this is an empty string, this should coalesce to null and disable linting via shellcheck:
-  return typeof SHELLCHECK_PATH === 'string' ? SHELLCHECK_PATH || null : 'shellcheck'
-}
+export const ConfigSchema = z
+  .object({
+    // "Glob pattern for finding and parsing shell script files in the workspace."
+    globPattern: z.string().trim().default('**/*@(.sh|.inc|.bash|.command)'),
 
-/**
- * Get additional ShellCheck arguments from the environment.
- * NOTE: We already add the following arguments: --shell, --format, --external-sources
- */
-export function getShellCheckArguments(): string[] {
-  const { SHELLCHECK_ARGUMENTS } = process.env
-  if (typeof SHELLCHECK_ARGUMENTS === 'string') {
-    return SHELLCHECK_ARGUMENTS.split(' ')
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0)
-  }
-  return []
-}
+    // Controls if Treesitter parsing errors will be highlighted as problems.
+    highlightParsingErrors: z.boolean().default(false),
 
-export function getExplainshellEndpoint(): string | null {
-  const { EXPLAINSHELL_ENDPOINT } = process.env
-  return typeof EXPLAINSHELL_ENDPOINT === 'string' && EXPLAINSHELL_ENDPOINT.trim() !== ''
-    ? EXPLAINSHELL_ENDPOINT
-    : null
-}
+    // Configure explainshell server endpoint in order to get hover documentation on flags and options.
+    // And empty string will disable the feature.
+    explainshellEndpoint: z.string().trim().default(''),
 
-/**
- * Get the glob pattern for files to run background analysis on.
- */
-export function getGlobPattern(): string {
-  const { GLOB_PATTERN } = process.env
-  return typeof GLOB_PATTERN === 'string' && GLOB_PATTERN.trim() !== ''
-    ? GLOB_PATTERN
-    : DEFAULT_GLOB_PATTERN
-}
+    // Controls the executable used for ShellCheck linting information. An empty string will disable linting.
+    shellcheckPath: z.string().trim().default('shellcheck'),
 
-export function getHighlightParsingError(): boolean {
+    // Additional ShellCheck arguments. Note that we already add the following arguments: --shell, --format, --external-sources."
+    shellcheckArguments: z
+      .preprocess((arg) => {
+        let argsList: string[] = []
+        if (typeof arg === 'string') {
+          argsList = arg.split(' ')
+          //.map((s) => s.trim())
+          //.filter((s) => s.length > 0)
+        } else if (Array.isArray(arg)) {
+          argsList = arg as string[]
+        }
+
+        return argsList.map((s) => s.trim()).filter((s) => s.length > 0)
+      }, z.array(z.string()))
+      .default([]),
+
+    backgroundAnalysisMaxFiles: z.number().int().min(0).default(500),
+  })
+  .strict()
+
+export type Config = z.infer<typeof ConfigSchema>
+
+export function getConfigFromEnvironmentVariables(): {
+  config: z.infer<typeof ConfigSchema>
+  environmentVariablesUsed: string[]
+} {
   const { HIGHLIGHT_PARSING_ERRORS } = process.env
-  return typeof HIGHLIGHT_PARSING_ERRORS !== 'undefined'
-    ? toBoolean(HIGHLIGHT_PARSING_ERRORS)
-    : false
+
+  const rawConfig = {
+    globPattern: process.env.GLOB_PATTERN,
+    highlightParsingErrors:
+      typeof HIGHLIGHT_PARSING_ERRORS !== 'undefined'
+        ? toBoolean(HIGHLIGHT_PARSING_ERRORS)
+        : undefined,
+    explainshellEndpoint: process.env.EXPLAINSHELL_ENDPOINT,
+    shellcheckPath: process.env.SHELLCHECK_PATH,
+    shellcheckArguments: process.env.SHELLCHECK_ARGUMENTS,
+    backgroundAnalysisMaxFiles: process.env.BACKGROUND_ANALYSIS_MAX_FILES,
+  }
+
+  const environmentVariablesUsed = Object.entries(rawConfig)
+    .map(([key, value]) => (typeof value !== 'undefined' ? key : null))
+    .filter((key) => key !== null) as string[]
+
+  const config = ConfigSchema.parse(rawConfig)
+
+  return { config, environmentVariablesUsed }
 }
 
-/**
- * Get the maximum number of files to run background analysis on.
- */
-export function getBackgroundAnalysisMaxFiles(): number {
-  const { BACKGROUND_ANALYSIS_MAX_FILES } = process.env
-  const parsed = parseInt(BACKGROUND_ANALYSIS_MAX_FILES || '', 10)
-  return !isNaN(parsed) ? parsed : DEFAULT_BACKGROUND_ANALYSIS_MAX_FILES
+export function getDefaultConfiguration(): z.infer<typeof ConfigSchema> {
+  return ConfigSchema.parse({})
 }
 
 const toBoolean = (s: string): boolean => s === 'true' || s === '1'

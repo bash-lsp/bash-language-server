@@ -1,6 +1,7 @@
 import * as Process from 'child_process'
 import * as Path from 'path'
 import * as TurndownService from 'turndown'
+import { isDeepStrictEqual } from 'util'
 import * as LSP from 'vscode-languageserver/node'
 import { CodeAction } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
@@ -17,6 +18,7 @@ import { uniqueBasedOnHash } from './util/array'
 import { getShellDocumentation } from './util/sh'
 
 const PARAMETER_EXPANSION_PREFIXES = new Set(['$', '${'])
+const CONFIGURATION_SECTION = 'bashIde'
 
 /**
  * The BashServer glues together the separate components to implement
@@ -25,34 +27,36 @@ const PARAMETER_EXPANSION_PREFIXES = new Set(['$', '${'])
 export default class BashServer {
   private analyzer: Analyzer
   private clientCapabilities: LSP.ClientCapabilities
+  private config: config.Config
   private connection: LSP.Connection
   private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
   private executables: Executables
-  private linter: Linter
-  private uriToCodeActions: { [uri: string]: CodeAction[] | undefined } = {} // TODO: invalidate diagnostics on file close/change
-  public backgroundAnalysisCompleted?: Promise<any>
+  private linter?: Linter
+  private rootPath: string | null | undefined
+  private uriToCodeActions: { [uri: string]: CodeAction[] | undefined } = {}
 
   private constructor({
+    analyzer,
+    capabilities,
     connection,
     executables,
-    analyzer,
     linter,
-    capabilities,
-    backgroundAnalysisCompleted,
+    rootPath,
   }: {
+    analyzer: Analyzer
+    capabilities: LSP.ClientCapabilities
     connection: LSP.Connection
     executables: Executables
-    analyzer: Analyzer
-    linter: Linter
-    capabilities: LSP.ClientCapabilities
-    backgroundAnalysisCompleted?: Promise<any>
+    linter?: Linter
+    rootPath: string | null | undefined
   }) {
+    this.analyzer = analyzer
+    this.clientCapabilities = capabilities
+    this.config = config.getDefaultConfiguration()
     this.connection = connection
     this.executables = executables
-    this.analyzer = analyzer
     this.linter = linter
-    this.clientCapabilities = capabilities
-    this.backgroundAnalysisCompleted = backgroundAnalysisCompleted
+    this.rootPath = rootPath
   }
   /**
    * Initialize the server based on a connection to the client and the protocols
@@ -72,31 +76,14 @@ export default class BashServer {
     const parser = await initializeParser()
     const analyzer = new Analyzer({ console: connection.console, parser })
 
-    let backgroundAnalysisCompleted
-    if (rootPath) {
-      // NOTE: we do not block the server initialization on this background analysis.
-      backgroundAnalysisCompleted = analyzer.initiateBackgroundAnalysis({ rootPath })
-    }
-
-    const shellcheckPath = config.getShellcheckPath()
-    const linter = new Linter({
-      console: connection.console,
-      executablePath: shellcheckPath,
-    })
-
-    if (!shellcheckPath) {
-      connection.console.info('ShellCheck linting is disabled.')
-    }
-
     const executables = await Executables.fromPath(PATH)
 
     return new BashServer({
       analyzer,
-      backgroundAnalysisCompleted,
       capabilities,
       connection,
       executables,
-      linter,
+      rootPath,
     })
   }
 
@@ -127,7 +114,100 @@ export default class BashServer {
     connection.onCompletionResolve(this.onCompletionResolve.bind(this))
     connection.onCodeAction(this.onCodeAction.bind(this))
 
+    const hasConfigurationCapability = !!this.clientCapabilities?.workspace?.configuration
+    let initialized = false
+
+    /**
+     * The initialized notification is sent from the client to the server after
+     * the client received the result of the initialize request but before the
+     * client is sending any other request or notification to the server.
+     * The server can use the initialized notification for example to dynamically
+     * register capabilities. The initialized notification may only be sent once.
+     */
+    connection.onInitialized(async () => {
+      const { config: newConfig, environmentVariablesUsed } =
+        config.getConfigFromEnvironmentVariables()
+      this.config = newConfig
+
+      if (environmentVariablesUsed.length > 0) {
+        connection.console.warn(
+          `Environment variable configuration is being deprecated, please use workspace configuration. The following environment variables were used: ${environmentVariablesUsed.join(
+            ', ',
+          )}`,
+        )
+      }
+
+      if (hasConfigurationCapability) {
+        // Register event for all configuration changes.
+        connection.client.register(LSP.DidChangeConfigurationNotification.type, {
+          section: CONFIGURATION_SECTION,
+        })
+
+        // get current configuration from client
+        const configObject = await connection.workspace.getConfiguration(
+          CONFIGURATION_SECTION,
+        )
+        this.updateConfiguration(configObject)
+        this.connection.console.log('Configuration loaded from client')
+      }
+
+      const { shellcheckPath } = this.config
+      if (!shellcheckPath) {
+        connection.console.info('ShellCheck linting is disabled.')
+      } else {
+        this.linter = new Linter({
+          console: connection.console,
+          executablePath: shellcheckPath,
+        })
+      }
+
+      initialized = true
+
+      // NOTE: we do not block the server initialization on this background analysis.
+      return { backgroundAnalysisCompleted: this.startBackgroundAnalysis() }
+    })
+
+    // Respond to changes in the configuration.
+    connection.onDidChangeConfiguration(({ settings }) => {
+      const configChanged = this.updateConfiguration(settings[CONFIGURATION_SECTION])
+      if (configChanged && initialized) {
+        this.connection.console.log('Configuration changed')
+        this.startBackgroundAnalysis()
+        // TODO: we should trigger the linter again
+      }
+    })
+
     // FIXME: re-lint on workspace folder change
+  }
+
+  private async startBackgroundAnalysis(): Promise<{ filesParsed: number }> {
+    const { rootPath } = this
+    if (rootPath) {
+      return this.analyzer.initiateBackgroundAnalysis({
+        globPattern: this.config.globPattern,
+        backgroundAnalysisMaxFiles: this.config.backgroundAnalysisMaxFiles,
+        rootPath,
+      })
+    }
+
+    return Promise.resolve({ filesParsed: 0 })
+  }
+
+  private updateConfiguration(configObject: any): boolean {
+    if (typeof configObject === 'object') {
+      try {
+        const newConfig = config.ConfigSchema.parse(configObject)
+
+        if (!isDeepStrictEqual(this.config, newConfig)) {
+          this.config = newConfig
+          return true
+        }
+      } catch (err) {
+        this.connection.console.warn(`updateConfiguration: failed with ${err}`)
+      }
+    }
+
+    return false
   }
 
   /**
@@ -143,23 +223,26 @@ export default class BashServer {
     const analyzeDiagnostics = this.analyzer.analyze(uri, document)
     // Treesitter's diagnostics can be a bit inaccurate, so we only merge the
     // analyzer's diagnostics if the setting is enabled:
-    if (config.getHighlightParsingError()) {
+    if (this.config.highlightParsingErrors) {
       diagnostics = diagnostics.concat(analyzeDiagnostics)
     }
 
     // Run ShellCheck diagnostics:
-    try {
-      const folders = this.clientCapabilities.workspace?.workspaceFolders
-        ? await this.connection.workspace.getWorkspaceFolders()
-        : []
-      const { diagnostics: lintDiagnostics, codeActions } = await this.linter.lint(
-        document,
-        folders || [],
-      )
-      diagnostics = diagnostics.concat(lintDiagnostics)
-      this.uriToCodeActions[uri] = codeActions
-    } catch (err) {
-      this.connection.console.error(`Error while linting: ${err}`)
+    if (this.linter) {
+      try {
+        const folders = this.clientCapabilities.workspace?.workspaceFolders
+          ? await this.connection.workspace.getWorkspaceFolders()
+          : []
+        const { diagnostics: lintDiagnostics, codeActions } = await this.linter.lint(
+          document,
+          folders || [],
+          this.config.shellcheckArguments,
+        )
+        diagnostics = diagnostics.concat(lintDiagnostics)
+        this.uriToCodeActions[uri] = codeActions
+      } catch (err) {
+        this.connection.console.error(`Error while linting: ${err}`)
+      }
     }
 
     this.connection.sendDiagnostics({ uri, version: document.version, diagnostics })
@@ -285,7 +368,7 @@ export default class BashServer {
       return null
     }
 
-    const explainshellEndpoint = config.getExplainshellEndpoint()
+    const { explainshellEndpoint } = this.config
     if (explainshellEndpoint) {
       try {
         const { helpHTML } = await this.analyzer.getExplainshellDocumentation({
