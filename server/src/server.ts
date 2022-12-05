@@ -2,15 +2,16 @@ import * as Process from 'child_process'
 import * as Path from 'path'
 import * as TurndownService from 'turndown'
 import * as LSP from 'vscode-languageserver/node'
+import { CodeAction } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import Analyzer from './analyser'
 import * as Builtins from './builtins'
 import * as config from './config'
 import Executables from './executables'
-import { Linter } from './linter'
 import { initializeParser } from './parser'
 import * as ReservedWords from './reservedWords'
+import { Linter } from './shellcheck'
 import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
 import { getShellDocumentation } from './util/sh'
@@ -22,12 +23,13 @@ const PARAMETER_EXPANSION_PREFIXES = new Set(['$', '${'])
  * the various parts of the Language Server Protocol.
  */
 export default class BashServer {
-  private executables: Executables
   private analyzer: Analyzer
-  private linter: Linter
-  private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
-  private connection: LSP.Connection
   private clientCapabilities: LSP.ClientCapabilities
+  private connection: LSP.Connection
+  private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
+  private executables: Executables
+  private linter: Linter
+  private uriToCodeActions: { [uri: string]: CodeAction[] | undefined } = {} // TODO: invalidate diagnostics on file close/change
   public backgroundAnalysisCompleted?: Promise<any>
 
   private constructor({
@@ -103,34 +105,15 @@ export default class BashServer {
    * care about.
    */
   public register(connection: LSP.Connection): void {
-    // The content of a text document has changed. This event is emitted
-    // when the text document first opened or when its content has changed.
     this.documents.listen(this.connection)
-    this.documents.onDidChangeContent(async (change) => {
-      const { uri } = change.document
+    this.documents.onDidChangeContent(async ({ document }) => {
+      // The content of a text document has changed. This event is emitted
+      // when the text document first opened or when its content has changed.
+      await this.onDocumentContentChange(document)
+    })
 
-      let diagnostics: LSP.Diagnostic[] = []
-
-      // Load the tree for the modified contents into the analyzer:
-      const analyzeDiagnostics = this.analyzer.analyze(uri, change.document)
-      // Treesitter's diagnostics can be a bit inaccurate, so we only merge the
-      // analyzer's diagnostics if the setting is enabled:
-      if (config.getHighlightParsingError()) {
-        diagnostics = diagnostics.concat(analyzeDiagnostics)
-      }
-
-      // Run ShellCheck diagnostics:
-      try {
-        const folders = this.clientCapabilities.workspace?.workspaceFolders
-          ? await connection.workspace.getWorkspaceFolders()
-          : []
-        const lintDiagnostics = await this.linter.lint(change.document, folders || [])
-        diagnostics = diagnostics.concat(lintDiagnostics)
-      } catch (err) {
-        this.connection.console.error(`Error while linting: ${err}`)
-      }
-
-      connection.sendDiagnostics({ uri, diagnostics })
+    this.documents.onDidClose((event) => {
+      delete this.uriToCodeActions[event.document.uri]
     })
 
     // Register all the handlers for the LSP events.
@@ -142,8 +125,44 @@ export default class BashServer {
     connection.onReferences(this.onReferences.bind(this))
     connection.onCompletion(this.onCompletion.bind(this))
     connection.onCompletionResolve(this.onCompletionResolve.bind(this))
+    connection.onCodeAction(this.onCodeAction.bind(this))
 
     // FIXME: re-lint on workspace folder change
+  }
+
+  /**
+   * The content of a text document has changed. This event is emitted
+   * when the text document first opened or when its content has changed.
+   */
+  public async onDocumentContentChange(document: TextDocument) {
+    const { uri } = document
+
+    let diagnostics: LSP.Diagnostic[] = []
+
+    // Load the tree for the modified contents into the analyzer:
+    const analyzeDiagnostics = this.analyzer.analyze(uri, document)
+    // Treesitter's diagnostics can be a bit inaccurate, so we only merge the
+    // analyzer's diagnostics if the setting is enabled:
+    if (config.getHighlightParsingError()) {
+      diagnostics = diagnostics.concat(analyzeDiagnostics)
+    }
+
+    // Run ShellCheck diagnostics:
+    try {
+      const folders = this.clientCapabilities.workspace?.workspaceFolders
+        ? await this.connection.workspace.getWorkspaceFolders()
+        : []
+      const { diagnostics: lintDiagnostics, codeActions } = await this.linter.lint(
+        document,
+        folders || [],
+      )
+      diagnostics = diagnostics.concat(lintDiagnostics)
+      this.uriToCodeActions[uri] = codeActions
+    } catch (err) {
+      this.connection.console.error(`Error while linting: ${err}`)
+    }
+
+    this.connection.sendDiagnostics({ uri, version: document.version, diagnostics })
   }
 
   /**
@@ -164,6 +183,11 @@ export default class BashServer {
       documentSymbolProvider: true,
       workspaceSymbolProvider: true,
       referencesProvider: true,
+      codeActionProvider: {
+        codeActionKinds: [LSP.CodeActionKind.QuickFix],
+        resolveProvider: false,
+        workDoneProgress: false,
+      },
     }
   }
 
@@ -483,6 +507,46 @@ export default class BashServer {
     }
 
     return allCompletions
+  }
+
+  private async onCodeAction(params: LSP.CodeActionParams): Promise<LSP.CodeAction[]> {
+    const codeActions = this.uriToCodeActions[params.textDocument.uri]
+
+    if (!codeActions) {
+      return []
+    }
+
+    const getDiagnosticsFingerPrint = (diagnostics?: LSP.Diagnostic[]): string[] =>
+      (diagnostics &&
+        diagnostics
+          .map(({ code, source, range }) =>
+            code !== undefined && source && range
+              ? JSON.stringify({
+                  code,
+                  source,
+                  range,
+                })
+              : null,
+          )
+          .filter((fingerPrint): fingerPrint is string => fingerPrint != null)) ||
+      []
+
+    const paramsDiagnosticsKeys = getDiagnosticsFingerPrint(params.context.diagnostics)
+
+    // find actions that match the paramsDiagnosticsKeys
+    const actions = codeActions.filter((action) => {
+      const actionDiagnosticsKeys = getDiagnosticsFingerPrint(action.diagnostics)
+      // actions without diagnostics are always returned
+      if (actionDiagnosticsKeys.length === 0) {
+        return true
+      }
+
+      return actionDiagnosticsKeys.some((actionDiagnosticKey) =>
+        paramsDiagnosticsKeys.includes(actionDiagnosticKey),
+      )
+    })
+
+    return actions
   }
 
   private async onCompletionResolve(
