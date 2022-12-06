@@ -32,7 +32,7 @@ export default class BashServer {
   private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
   private executables: Executables
   private linter?: Linter
-  private rootPath: string | null | undefined
+  private workspaceFolder: string | null | undefined
   private uriToCodeActions: { [uri: string]: CodeAction[] | undefined } = {}
 
   private constructor({
@@ -41,14 +41,14 @@ export default class BashServer {
     connection,
     executables,
     linter,
-    rootPath,
+    workspaceFolder,
   }: {
     analyzer: Analyzer
     capabilities: LSP.ClientCapabilities
     connection: LSP.Connection
     executables: Executables
     linter?: Linter
-    rootPath: string | null | undefined
+    workspaceFolder: string | null | undefined
   }) {
     this.analyzer = analyzer
     this.clientCapabilities = capabilities
@@ -56,7 +56,7 @@ export default class BashServer {
     this.connection = connection
     this.executables = executables
     this.linter = linter
-    this.rootPath = rootPath
+    this.workspaceFolder = workspaceFolder
   }
   /**
    * Initialize the server based on a connection to the client and the protocols
@@ -64,10 +64,11 @@ export default class BashServer {
    */
   public static async initialize(
     connection: LSP.Connection,
-    { rootPath, capabilities }: LSP.InitializeParams,
+    { rootPath, rootUri, capabilities }: LSP.InitializeParams,
   ): // TODO: use workspaceFolders instead of rootPath
   Promise<BashServer> {
     const { PATH } = process.env
+    const workspaceFolder = rootUri || rootPath
 
     if (!PATH) {
       throw new Error('Expected PATH environment variable to be set')
@@ -83,7 +84,7 @@ export default class BashServer {
       capabilities,
       connection,
       executables,
-      rootPath,
+      workspaceFolder,
     })
   }
 
@@ -192,12 +193,12 @@ export default class BashServer {
   }
 
   private async startBackgroundAnalysis(): Promise<{ filesParsed: number }> {
-    const { rootPath } = this
-    if (rootPath) {
+    const { workspaceFolder } = this
+    if (workspaceFolder) {
       return this.analyzer.initiateBackgroundAnalysis({
         globPattern: this.config.globPattern,
         backgroundAnalysisMaxFiles: this.config.backgroundAnalysisMaxFiles,
-        rootPath,
+        rootPath: workspaceFolder,
       })
     }
 
