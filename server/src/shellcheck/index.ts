@@ -4,7 +4,12 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { analyzeShebang } from '../util/shebang'
 import { CODE_TO_TAGS, LEVEL_TO_SEVERITY } from './config'
-import { ShellCheckComment, ShellCheckReplacement, ShellCheckResult } from './types'
+import {
+  ShellCheckComment,
+  ShellCheckReplacement,
+  ShellCheckResult,
+  ShellCheckResultSchema,
+} from './types'
 
 const SUPPORTED_BASH_DIALECTS = ['sh', 'bash', 'dash', 'ksh']
 
@@ -60,6 +65,9 @@ export class Linter {
     const documentText = document.getText()
 
     const { shellDialect } = analyzeShebang(documentText)
+    // NOTE: that ShellCheck actually does shebang parsing, but we manually
+    // do it here in order to fallback to bash. This enables parsing files
+    // with a bash syntax.
     const shellName =
       shellDialect && SUPPORTED_BASH_DIALECTS.includes(shellDialect)
         ? shellDialect
@@ -128,64 +136,10 @@ export class Linter {
         `ShellCheck: json parse failed with error ${e}\nout:\n${out}\nerr:\n${err}`,
       )
     }
-    assertShellCheckResult(raw)
-    return raw
+
+    return ShellCheckResultSchema.parse(raw)
   }
 }
-export function assertShellCheckResult(val: any): asserts val is ShellCheckResult {
-  // TODO: use zod
-  if (val !== null && typeof val !== 'object') {
-    throw new Error(`shellcheck: unexpected json output ${typeof val}`)
-  }
-
-  if (!Array.isArray(val.comments)) {
-    throw new Error(
-      `shellcheck: unexpected json output: expected 'comments' array ${typeof val.comments}`,
-    )
-  }
-
-  for (const idx in val.comments) {
-    const comment = val.comments[idx]
-    if (comment !== null && typeof comment != 'object') {
-      throw new Error(
-        `shellcheck: expected comment at index ${idx} to be object, found ${typeof comment}`,
-      )
-    }
-    if (typeof comment.file !== 'string')
-      throw new Error(
-        `shellcheck: expected comment file at index ${idx} to be string, found ${typeof comment.file}`,
-      )
-    if (typeof comment.level !== 'string')
-      throw new Error(
-        `shellcheck: expected comment level at index ${idx} to be string, found ${typeof comment.level}`,
-      )
-    if (typeof comment.message !== 'string')
-      throw new Error(
-        `shellcheck: expected comment message at index ${idx} to be string, found ${typeof comment.level}`,
-      )
-    if (typeof comment.line !== 'number')
-      throw new Error(
-        `shellcheck: expected comment line at index ${idx} to be number, found ${typeof comment.line}`,
-      )
-    if (typeof comment.endLine !== 'number')
-      throw new Error(
-        `shellcheck: expected comment endLine at index ${idx} to be number, found ${typeof comment.endLine}`,
-      )
-    if (typeof comment.column !== 'number')
-      throw new Error(
-        `shellcheck: expected comment column at index ${idx} to be number, found ${typeof comment.column}`,
-      )
-    if (typeof comment.endColumn !== 'number')
-      throw new Error(
-        `shellcheck: expected comment endColumn at index ${idx} to be number, found ${typeof comment.endColumn}`,
-      )
-    if (typeof comment.code !== 'number')
-      throw new Error(
-        `shellcheck: expected comment code at index ${idx} to be number, found ${typeof comment.code}`,
-      )
-  }
-}
-
 function mapShellCheckResult({
   document,
   result,
