@@ -3,7 +3,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../../testing/fixtures'
 import { getMockConnection } from '../../../../testing/mocks'
-import { assertShellCheckResult, Linter } from '../index'
+import { Linter } from '../index'
 
 const mockConsole = getMockConnection().console
 
@@ -233,67 +233,5 @@ describe('linter', () => {
       codeActions: [],
       diagnostics: [],
     })
-  })
-})
-
-describe('shellcheck', () => {
-  it('asserts one valid shellcheck JSON comment', async () => {
-    // prettier-ignore
-    const shellcheckJSON = {
-      comments: [
-        { file: 'testing/fixtures/comment-doc-on-hover.sh', line: 43, endLine: 43, column: 1, endColumn: 7, level: 'warning', code: 2034, message: 'bork bork', fix: null, },
-      ],
-    }
-    assertShellCheckResult(shellcheckJSON)
-  })
-
-  it('asserts two valid shellcheck JSON comment', async () => {
-    // prettier-ignore
-    const shellcheckJSON = {
-      comments: [
-        { file: 'testing/fixtures/comment-doc-on-hover.sh', line: 43, endLine: 43, column: 1, endColumn: 7, level: 'warning', code: 2034, message: 'bork bork', fix: null, },
-        { file: 'testing/fixtures/comment-doc-on-hover.sh', line: 45, endLine: 45, column: 2, endColumn: 8, level: 'warning', code: 2035, message: 'bork bork', fix: null, },
-      ],
-    }
-    assertShellCheckResult(shellcheckJSON)
-  })
-
-  it('fails shellcheck JSON with null comments', async () => {
-    const shellcheckJSON = { comments: null }
-    expect(() => assertShellCheckResult(shellcheckJSON)).toThrow()
-  })
-
-  it('fails shellcheck JSON with string commment', async () => {
-    const shellcheckJSON = { comments: ['foo'] }
-    expect(() => assertShellCheckResult(shellcheckJSON)).toThrow()
-  })
-
-  it('fails shellcheck JSON with invalid comment', async () => {
-    const make = (tweaks = {}) => ({
-      comments: [
-        {
-          file: 'testing/fixtures/comment-doc-on-hover.sh',
-          line: 43,
-          endLine: 43,
-          column: 1,
-          endColumn: 7,
-          level: 'warning',
-          code: 2034,
-          message: 'bork bork',
-          fix: null,
-          ...tweaks,
-        },
-      ],
-    })
-    assertShellCheckResult(make()) // Defaults should work
-
-    expect(() => assertShellCheckResult(make({ file: 9 }))).toThrow()
-    expect(() => assertShellCheckResult(make({ line: '9' }))).toThrow()
-    expect(() => assertShellCheckResult(make({ endLine: '9' }))).toThrow()
-    expect(() => assertShellCheckResult(make({ column: '9' }))).toThrow()
-    expect(() => assertShellCheckResult(make({ endColumn: '9' }))).toThrow()
-    expect(() => assertShellCheckResult(make({ level: 9 }))).toThrow()
-    expect(() => assertShellCheckResult(make({ code: '9' }))).toThrow()
-    expect(() => assertShellCheckResult(make({ message: 9 }))).toThrow()
   })
 })
