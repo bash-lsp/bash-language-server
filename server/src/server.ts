@@ -177,7 +177,10 @@ export default class BashServer {
       if (configChanged && initialized) {
         this.connection.console.log('Configuration changed')
         this.startBackgroundAnalysis()
-        // TODO: we should trigger the linter again for the current file
+        if (currentDocument) {
+          this.uriToCodeActions[currentDocument.uri] = undefined
+          this.analyzeAndLintDocument(currentDocument)
+        }
       }
     })
 
