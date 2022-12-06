@@ -52,11 +52,12 @@ export default class BashServer {
   }) {
     this.analyzer = analyzer
     this.clientCapabilities = capabilities
-    this.config = config.getDefaultConfiguration()
     this.connection = connection
     this.executables = executables
     this.linter = linter
     this.workspaceFolder = workspaceFolder
+    this.config = {} as any // NOTE: configured in updateConfiguration
+    this.updateConfiguration(config.getDefaultConfiguration())
   }
   /**
    * Initialize the server based on a connection to the client and the protocols
@@ -134,16 +135,14 @@ export default class BashServer {
     connection.onInitialized(async () => {
       const { config: environmentConfig, environmentVariablesUsed } =
         config.getConfigFromEnvironmentVariables()
-      if (environmentConfig) {
-        this.updateConfiguration(environmentConfig)
 
-        if (environmentVariablesUsed.length > 0) {
-          connection.console.warn(
-            `Environment variable configuration is being deprecated, please use workspace configuration. The following environment variables were used: ${environmentVariablesUsed.join(
-              ', ',
-            )}`,
-          )
-        }
+      if (environmentVariablesUsed.length > 0) {
+        this.updateConfiguration(environmentConfig)
+        connection.console.warn(
+          `Environment variable configuration is being deprecated, please use workspace configuration. The following environment variables were used: ${environmentVariablesUsed.join(
+            ', ',
+          )}`,
+        )
       }
 
       if (hasConfigurationCapability) {
@@ -207,6 +206,10 @@ export default class BashServer {
 
         if (!isDeepStrictEqual(this.config, newConfig)) {
           this.config = newConfig
+
+          // NOTE: I don't really like this... An alternative would be to pass in the
+          // shellcheck executable path when linting. We would need to handle
+          // resetting the canLint flag though.
 
           const { shellcheckPath } = this.config
           if (!shellcheckPath) {
