@@ -1,8 +1,8 @@
 # Bash IDE
 
-## 1.20.0
+## 1.20.1
 
-- Upgrade language server to 4.0.0-beta.6 that enables ShellCheck code actions (quick fixes) and allows for changing settings while the extension is running.
+- Upgrade language server to 4.0.1 that enables ShellCheck code actions (quick fixes), remove duplicated error codes, add URLs and tags, support parsing dialects (sh, bash, dash, ksh) but still fallback to bash, enable configuring ShellCheck arguments using the `shellcheckArguments` configuration parameter and allows for changing settings while the extension is running.
 
 ## 1.18.0
 
