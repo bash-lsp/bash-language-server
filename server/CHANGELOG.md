@@ -1,6 +1,6 @@
 # Bash Language Server
 
-## 4.0.0
+## 4.0.1
 
 - **Breaking**: Drop support for Node 12, which reached its official end of life on April 30th 2022. Doing so enables new features. https://github.com/bash-lsp/bash-language-server/pull/584
 - ShellCheck: support code actions, remove duplicated error codes, add URLs and tags, support parsing dialects (sh, bash, dash, ksh) but still fallback to bash, enable configuring ShellCheck arguments using the `shellcheckArguments` configuration parameter (legacy environment variable: `SHELLCHECK_ARGUMENTS`)

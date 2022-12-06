@@ -32,7 +32,7 @@ export default class BashServer {
   private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
   private executables: Executables
   private linter?: Linter
-  private rootPath: string | null | undefined
+  private workspaceFolder: string | null | undefined
   private uriToCodeActions: { [uri: string]: CodeAction[] | undefined } = {}
 
   private constructor({
@@ -41,22 +41,23 @@ export default class BashServer {
     connection,
     executables,
     linter,
-    rootPath,
+    workspaceFolder,
   }: {
     analyzer: Analyzer
     capabilities: LSP.ClientCapabilities
     connection: LSP.Connection
     executables: Executables
     linter?: Linter
-    rootPath: string | null | undefined
+    workspaceFolder: string | null | undefined
   }) {
     this.analyzer = analyzer
     this.clientCapabilities = capabilities
-    this.config = config.getDefaultConfiguration()
     this.connection = connection
     this.executables = executables
     this.linter = linter
-    this.rootPath = rootPath
+    this.workspaceFolder = workspaceFolder
+    this.config = {} as any // NOTE: configured in updateConfiguration
+    this.updateConfiguration(config.getDefaultConfiguration())
   }
   /**
    * Initialize the server based on a connection to the client and the protocols
@@ -64,10 +65,11 @@ export default class BashServer {
    */
   public static async initialize(
     connection: LSP.Connection,
-    { rootPath, capabilities }: LSP.InitializeParams,
+    { rootPath, rootUri, capabilities }: LSP.InitializeParams,
   ): // TODO: use workspaceFolders instead of rootPath
   Promise<BashServer> {
     const { PATH } = process.env
+    const workspaceFolder = rootUri || rootPath
 
     if (!PATH) {
       throw new Error('Expected PATH environment variable to be set')
@@ -83,7 +85,7 @@ export default class BashServer {
       capabilities,
       connection,
       executables,
-      rootPath,
+      workspaceFolder,
     })
   }
 
@@ -92,11 +94,20 @@ export default class BashServer {
    * care about.
    */
   public register(connection: LSP.Connection): void {
+    const hasConfigurationCapability = !!this.clientCapabilities?.workspace?.configuration
+
+    let currentDocument: TextDocument | null = null
+    let initialized = false // Whether the client finished initializing
+
     this.documents.listen(this.connection)
-    this.documents.onDidChangeContent(async ({ document }) => {
+
+    this.documents.onDidChangeContent(({ document }) => {
       // The content of a text document has changed. This event is emitted
       // when the text document first opened or when its content has changed.
-      await this.onDocumentContentChange(document)
+      currentDocument = document
+      if (initialized) {
+        this.analyzeAndLintDocument(document)
+      }
     })
 
     this.documents.onDidClose((event) => {
@@ -114,9 +125,6 @@ export default class BashServer {
     connection.onCompletionResolve(this.onCompletionResolve.bind(this))
     connection.onCodeAction(this.onCodeAction.bind(this))
 
-    const hasConfigurationCapability = !!this.clientCapabilities?.workspace?.configuration
-    let initialized = false
-
     /**
      * The initialized notification is sent from the client to the server after
      * the client received the result of the initialize request but before the
@@ -125,11 +133,11 @@ export default class BashServer {
      * register capabilities. The initialized notification may only be sent once.
      */
     connection.onInitialized(async () => {
-      const { config: newConfig, environmentVariablesUsed } =
+      const { config: environmentConfig, environmentVariablesUsed } =
         config.getConfigFromEnvironmentVariables()
-      this.config = newConfig
 
       if (environmentVariablesUsed.length > 0) {
+        this.updateConfiguration(environmentConfig)
         connection.console.warn(
           `Environment variable configuration is being deprecated, please use workspace configuration. The following environment variables were used: ${environmentVariablesUsed.join(
             ', ',
@@ -151,17 +159,12 @@ export default class BashServer {
         this.connection.console.log('Configuration loaded from client')
       }
 
-      const { shellcheckPath } = this.config
-      if (!shellcheckPath) {
-        connection.console.info('ShellCheck linting is disabled.')
-      } else {
-        this.linter = new Linter({
-          console: connection.console,
-          executablePath: shellcheckPath,
-        })
-      }
-
       initialized = true
+      if (currentDocument) {
+        // If we already have a document, analyze it now that we're initialized
+        // and the linter is ready.
+        this.analyzeAndLintDocument(currentDocument)
+      }
 
       // NOTE: we do not block the server initialization on this background analysis.
       return { backgroundAnalysisCompleted: this.startBackgroundAnalysis() }
@@ -173,7 +176,10 @@ export default class BashServer {
       if (configChanged && initialized) {
         this.connection.console.log('Configuration changed')
         this.startBackgroundAnalysis()
-        // TODO: we should trigger the linter again
+        if (currentDocument) {
+          this.uriToCodeActions[currentDocument.uri] = undefined
+          this.analyzeAndLintDocument(currentDocument)
+        }
       }
     })
 
@@ -181,12 +187,12 @@ export default class BashServer {
   }
 
   private async startBackgroundAnalysis(): Promise<{ filesParsed: number }> {
-    const { rootPath } = this
-    if (rootPath) {
+    const { workspaceFolder } = this
+    if (workspaceFolder) {
       return this.analyzer.initiateBackgroundAnalysis({
         globPattern: this.config.globPattern,
         backgroundAnalysisMaxFiles: this.config.backgroundAnalysisMaxFiles,
-        rootPath,
+        rootPath: workspaceFolder,
       })
     }
 
@@ -200,6 +206,24 @@ export default class BashServer {
 
         if (!isDeepStrictEqual(this.config, newConfig)) {
           this.config = newConfig
+
+          // NOTE: I don't really like this... An alternative would be to pass in the
+          // shellcheck executable path when linting. We would need to handle
+          // resetting the canLint flag though.
+
+          const { shellcheckPath } = this.config
+          if (!shellcheckPath) {
+            this.connection.console.log(
+              'ShellCheck linting is disabled as "shellcheckPath" was not set',
+            )
+            this.linter = undefined
+          } else {
+            this.linter = new Linter({
+              console: this.connection.console,
+              executablePath: shellcheckPath,
+            })
+          }
+
           return true
         }
       } catch (err) {
@@ -211,10 +235,9 @@ export default class BashServer {
   }
 
   /**
-   * The content of a text document has changed. This event is emitted
-   * when the text document first opened or when its content has changed.
+   * Analyze and lint the given document.
    */
-  public async onDocumentContentChange(document: TextDocument) {
+  public async analyzeAndLintDocument(document: TextDocument) {
     const { uri } = document
 
     let diagnostics: LSP.Diagnostic[] = []
@@ -399,7 +422,6 @@ export default class BashServer {
     ) {
       const shellDocumentation = await getShellDocumentation({ word })
       if (shellDocumentation) {
-        // eslint-disable-next-line no-console
         return { contents: getMarkdownContent(shellDocumentation) }
       }
     } else {
