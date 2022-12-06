@@ -92,11 +92,20 @@ export default class BashServer {
    * care about.
    */
   public register(connection: LSP.Connection): void {
+    const hasConfigurationCapability = !!this.clientCapabilities?.workspace?.configuration
+
+    let currentDocument: TextDocument | null = null
+    let initialized = false // Whether the client finished initializing
+
     this.documents.listen(this.connection)
-    this.documents.onDidChangeContent(async ({ document }) => {
+
+    this.documents.onDidChangeContent(({ document }) => {
       // The content of a text document has changed. This event is emitted
       // when the text document first opened or when its content has changed.
-      await this.onDocumentContentChange(document)
+      currentDocument = document
+      if (initialized) {
+        this.analyzeAndLintDocument(document)
+      }
     })
 
     this.documents.onDidClose((event) => {
@@ -113,9 +122,6 @@ export default class BashServer {
     connection.onCompletion(this.onCompletion.bind(this))
     connection.onCompletionResolve(this.onCompletionResolve.bind(this))
     connection.onCodeAction(this.onCodeAction.bind(this))
-
-    const hasConfigurationCapability = !!this.clientCapabilities?.workspace?.configuration
-    let initialized = false
 
     /**
      * The initialized notification is sent from the client to the server after
@@ -162,6 +168,11 @@ export default class BashServer {
       }
 
       initialized = true
+      if (currentDocument) {
+        // If we already have a document, analyze it now that we're initialized
+        // and the linter is ready.
+        this.analyzeAndLintDocument(currentDocument)
+      }
 
       // NOTE: we do not block the server initialization on this background analysis.
       return { backgroundAnalysisCompleted: this.startBackgroundAnalysis() }
@@ -173,7 +184,7 @@ export default class BashServer {
       if (configChanged && initialized) {
         this.connection.console.log('Configuration changed')
         this.startBackgroundAnalysis()
-        // TODO: we should trigger the linter again
+        // TODO: we should trigger the linter again for the current file
       }
     })
 
@@ -211,10 +222,9 @@ export default class BashServer {
   }
 
   /**
-   * The content of a text document has changed. This event is emitted
-   * when the text document first opened or when its content has changed.
+   * Analyze and lint the given document.
    */
-  public async onDocumentContentChange(document: TextDocument) {
+  public async analyzeAndLintDocument(document: TextDocument) {
     const { uri } = document
 
     let diagnostics: LSP.Diagnostic[] = []
@@ -399,7 +409,6 @@ export default class BashServer {
     ) {
       const shellDocumentation = await getShellDocumentation({ word })
       if (shellDocumentation) {
-        // eslint-disable-next-line no-console
         return { contents: getMarkdownContent(shellDocumentation) }
       }
     } else {

@@ -517,7 +517,7 @@ describe('server', () => {
     const { connection, server } = await initializeServer()
     const document = FIXTURE_DOCUMENT.COMMENT_DOC
 
-    await server.onDocumentContentChange(document)
+    await server.analyzeAndLintDocument(document)
 
     expect(connection.sendDiagnostics).toHaveBeenCalledTimes(1)
     const { diagnostics } = connection.sendDiagnostics.mock.calls[0][0]
