@@ -132,16 +132,18 @@ export default class BashServer {
      * register capabilities. The initialized notification may only be sent once.
      */
     connection.onInitialized(async () => {
-      const { config: newConfig, environmentVariablesUsed } =
+      const { config: environmentConfig, environmentVariablesUsed } =
         config.getConfigFromEnvironmentVariables()
-      this.config = newConfig
+      if (environmentConfig) {
+        this.updateConfiguration(environmentConfig)
 
-      if (environmentVariablesUsed.length > 0) {
-        connection.console.warn(
-          `Environment variable configuration is being deprecated, please use workspace configuration. The following environment variables were used: ${environmentVariablesUsed.join(
-            ', ',
-          )}`,
-        )
+        if (environmentVariablesUsed.length > 0) {
+          connection.console.warn(
+            `Environment variable configuration is being deprecated, please use workspace configuration. The following environment variables were used: ${environmentVariablesUsed.join(
+              ', ',
+            )}`,
+          )
+        }
       }
 
       if (hasConfigurationCapability) {
@@ -156,16 +158,6 @@ export default class BashServer {
         )
         this.updateConfiguration(configObject)
         this.connection.console.log('Configuration loaded from client')
-      }
-
-      const { shellcheckPath } = this.config
-      if (!shellcheckPath) {
-        connection.console.info('ShellCheck linting is disabled.')
-      } else {
-        this.linter = new Linter({
-          console: connection.console,
-          executablePath: shellcheckPath,
-        })
       }
 
       initialized = true
@@ -212,6 +204,20 @@ export default class BashServer {
 
         if (!isDeepStrictEqual(this.config, newConfig)) {
           this.config = newConfig
+
+          const { shellcheckPath } = this.config
+          if (!shellcheckPath) {
+            this.connection.console.log(
+              'ShellCheck linting is disabled as "shellcheckPath" was not set',
+            )
+            this.linter = undefined
+          } else {
+            this.linter = new Linter({
+              console: this.connection.console,
+              executablePath: shellcheckPath,
+            })
+          }
+
           return true
         }
       } catch (err) {
