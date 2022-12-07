@@ -37,9 +37,7 @@ export default class Analyzer {
   // We need this to find the word at a given point etc.
   private uriToFileContent: Texts = {}
   private uriToDeclarations: FileDeclarations = {}
-
   private uriToSourcedUris: { [uri: string]: Set<string> } = {}
-
   private treeSitterTypeToLSPKind: Kinds = {
     // These keys are using underscores as that's the naming convention in tree-sitter.
     environment_variable_assignment: LSP.SymbolKind.Variable,
@@ -124,7 +122,11 @@ export default class Analyzer {
           continue
         }
 
-        this.analyze(uri, TextDocument.create(uri, 'shell', 1, fileContent))
+        this.analyze({
+          document: TextDocument.create(uri, 'shell', 1, fileContent),
+          rootPath,
+          uri,
+        })
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : error
         this.console.warn(
@@ -325,7 +327,15 @@ export default class Analyzer {
    * Returns all, if any, syntax errors that occurred while parsing the file.
    *
    */
-  public analyze(uri: string, document: TextDocument): LSP.Diagnostic[] {
+  public analyze({
+    document,
+    rootPath,
+    uri, // NOTE: we don't use document.uri to make testing easier
+  }: {
+    document: TextDocument
+    rootPath?: string
+    uri: string
+  }): LSP.Diagnostic[] {
     const contents = document.getText()
 
     const tree = this.parser.parse(contents)
@@ -339,6 +349,7 @@ export default class Analyzer {
     this.uriToSourcedUris[uri] = sourcing.getSourcedUris({
       fileContent: contents,
       fileUri: uri,
+      rootPath,
     })
 
     const problems: LSP.Diagnostic[] = []

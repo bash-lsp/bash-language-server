@@ -22,18 +22,21 @@ beforeAll(async () => {
 
 describe('analyze', () => {
   it('returns an empty list of errors for a file with no parsing errors', () => {
-    const result = analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
+    const result = analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.INSTALL })
     expect(result).toEqual([])
   })
 
   it('returns a list of errors for a file with a missing node', () => {
-    const result = analyzer.analyze(CURRENT_URI, FIXTURES.MISSING_NODE)
+    const result = analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.MISSING_NODE })
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()
   })
 
   it('returns a list of errors for a file with parsing errors', () => {
-    const result = analyzer.analyze(CURRENT_URI, FIXTURES.PARSE_PROBLEMS)
+    const result = analyzer.analyze({
+      uri: CURRENT_URI,
+      document: FIXTURES.PARSE_PROBLEMS,
+    })
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()
   })
@@ -41,15 +44,17 @@ describe('analyze', () => {
 
 describe('findDefinition', () => {
   it('returns an empty list if word is not found', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.INSTALL })
     const result = analyzer.findDefinition({ uri: CURRENT_URI, word: 'foobar' })
     expect(result).toEqual([])
   })
 
   it('returns a location to a file if word is the path in a sourcing statement', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.SOURCING)
+    const document = FIXTURES.SOURCING
+    const { uri } = document
+    analyzer.analyze({ uri, document })
     const result = analyzer.findDefinition({
-      uri: CURRENT_URI,
+      uri,
       word: './extension.inc',
       position: { character: 10, line: 2 },
     })
@@ -66,14 +71,14 @@ describe('findDefinition', () => {
               "line": 0,
             },
           },
-          "uri": "extension.inc",
+          "uri": "file://${FIXTURE_FOLDER}extension.inc",
         },
       ]
     `)
   })
 
   it('returns a list of locations if parameter is found', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.INSTALL })
     const result = analyzer.findDefinition({
       uri: CURRENT_URI,
       word: 'node_version',
@@ -101,13 +106,13 @@ describe('findDefinition', () => {
 
 describe('findReferences', () => {
   it('returns empty list if parameter is not found', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.INSTALL })
     const result = analyzer.findReferences('foobar')
     expect(result).toEqual([])
   })
 
   it('returns a list of locations if parameter is found', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.INSTALL })
     const result = analyzer.findReferences('node_version')
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()
@@ -116,20 +121,20 @@ describe('findReferences', () => {
 
 describe('findSymbolsForFile', () => {
   it('returns empty list if uri is not found', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.INSTALL })
     const result = analyzer.findSymbolsForFile({ uri: 'foobar.sh' })
     expect(result).toEqual([])
   })
 
   it('returns a list of SymbolInformation if uri is found', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.INSTALL })
     const result = analyzer.findSymbolsForFile({ uri: CURRENT_URI })
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()
   })
 
   it('issue 101', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.ISSUE101)
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.ISSUE101 })
     const result = analyzer.findSymbolsForFile({ uri: CURRENT_URI })
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()
@@ -169,7 +174,10 @@ describe('findAllSourcedUris', () => {
     })
 
     // Parse the file without extension
-    newAnalyzer.analyze(FIXTURE_URI.MISSING_EXTENSION, FIXTURES.MISSING_EXTENSION)
+    newAnalyzer.analyze({
+      uri: FIXTURE_URI.MISSING_EXTENSION,
+      document: FIXTURES.MISSING_EXTENSION,
+    })
 
     const result = newAnalyzer.findAllSourcedUris({ uri: FIXTURE_URI.MISSING_EXTENSION })
     expect(result).toEqual(
@@ -184,7 +192,7 @@ describe('findAllSourcedUris', () => {
 
 describe('wordAtPoint', () => {
   it('returns current word at a given point', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.INSTALL })
     expect(analyzer.wordAtPoint(CURRENT_URI, 25, 0)).toEqual(null)
     expect(analyzer.wordAtPoint(CURRENT_URI, 25, 1)).toEqual(null)
     expect(analyzer.wordAtPoint(CURRENT_URI, 25, 2)).toEqual(null)
@@ -212,7 +220,7 @@ describe('wordAtPoint', () => {
 
 describe('commandNameAtPoint', () => {
   it('returns current command name at a given point', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.INSTALL)
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.INSTALL })
     expect(analyzer.commandNameAtPoint(CURRENT_URI, 15, 0)).toEqual(null)
 
     expect(analyzer.commandNameAtPoint(CURRENT_URI, 20, 2)).toEqual('curl')
@@ -409,40 +417,40 @@ Array [
 
 describe('commentsAbove', () => {
   it('returns a string of a comment block above a line', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.COMMENT_DOC })
     expect(analyzer.commentsAbove(CURRENT_URI, 22)).toEqual(
       '```txt\ndoc for func_one\n```',
     )
   })
 
   it('handles line breaks in comments', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.COMMENT_DOC })
     expect(analyzer.commentsAbove(CURRENT_URI, 28)).toEqual(
       '```txt\ndoc for func_two\nhas two lines\n```',
     )
   })
 
   it('only returns connected comments', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.COMMENT_DOC })
     expect(analyzer.commentsAbove(CURRENT_URI, 36)).toEqual(
       '```txt\ndoc for func_three\n```',
     )
   })
 
   it('returns null if no comment found', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.COMMENT_DOC })
     expect(analyzer.commentsAbove(CURRENT_URI, 45)).toEqual(null)
   })
 
   it('works for variables', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.COMMENT_DOC })
     expect(analyzer.commentsAbove(CURRENT_URI, 42)).toEqual(
       '```txt\nworks for variables\n```',
     )
   })
 
   it('returns connected comments with empty comment line', () => {
-    analyzer.analyze(CURRENT_URI, FIXTURES.COMMENT_DOC)
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURES.COMMENT_DOC })
     expect(analyzer.commentsAbove(CURRENT_URI, 51)).toEqual(
       '```txt\nthis is also included\n\ndoc for func_four\n```',
     )

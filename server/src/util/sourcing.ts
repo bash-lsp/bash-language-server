@@ -1,3 +1,4 @@
+import * as fs from 'fs'
 import * as path from 'path'
 import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
@@ -7,19 +8,28 @@ import { untildify } from './fs'
 // Until the grammar supports sourcing, we use this little regular expression
 const SOURCED_FILES_REG_EXP = /^(?:\t|[ ])*(?:source|[.])\s*(\S*)/gm
 
+/**
+ * Analysis the given file content and returns a set of URIs that are
+ * sourced. Note that the URIs are not resolved.
+ *
+ * FIXME: should this be URIs or paths?
+ */
 export function getSourcedUris({
   fileContent,
   fileUri,
+  rootPath,
 }: {
   fileContent: string
   fileUri: string
+  rootPath?: string
 }): Set<string> {
   const uris: Set<string> = new Set([])
   let match: RegExpExecArray | null
+  const rootPaths = [path.dirname(fileUri), rootPath].filter(Boolean) as string[]
 
   while ((match = SOURCED_FILES_REG_EXP.exec(fileContent)) !== null) {
-    const relativePath = match[1]
-    const sourcedUri = getSourcedUri({ relativePath, uri: fileUri })
+    const word = match[1]
+    const sourcedUri = getSourcedUri({ rootPaths, word })
     if (sourcedUri) {
       uris.add(sourcedUri)
     }
@@ -43,6 +53,7 @@ export function getSourcedLocation({
   position: { line: number; character: number }
   uri: string
   word: string
+  // FIXME: take in a rootPath
 }): LSP.Location | null {
   // NOTE: when a word is a file path to a sourced file, we return a location to
   // that file.
@@ -60,7 +71,9 @@ export function getSourcedLocation({
       ? ['.', 'source'].includes(node.previousNamedSibling.text.trim())
       : false
 
-    const sourcedUri = isSourced ? getSourcedUri({ relativePath: word, uri }) : null
+    const sourcedUri = isSourced
+      ? getSourcedUri({ word, rootPaths: [path.dirname(uri)] })
+      : null
 
     if (sourcedUri) {
       return LSP.Location.create(sourcedUri, LSP.Range.create(0, 0, 0, 0))
@@ -69,8 +82,6 @@ export function getSourcedLocation({
 
   return null
 }
-
-const mapPathToUri = (path: string): string => path.replace('file:', 'file://')
 
 const stripQuotes = (path: string): string => {
   const first = path[0]
@@ -83,26 +94,49 @@ const stripQuotes = (path: string): string => {
   return path
 }
 
-const getSourcedUri = ({
-  relativePath,
-  uri,
+/**
+ * Tries to parse the given path and returns a URI if possible.
+ * - Filters out dynamic sources
+ * - Converts a relative paths to absolute paths
+ */
+function getSourcedUri({
+  rootPaths,
+  word,
 }: {
-  relativePath: string
-  uri: string
-}): string | null => {
+  rootPaths: string[]
+  word: string
+}): string | null {
   // NOTE: improvements:
   // - we could try to resolve the path
   // - "If filename does not contain a slash, file names in PATH are used to find
   //   the directory containing filename." (see https://ss64.com/osx/source.html)
-  const unquotedRelativePath = stripQuotes(relativePath)
+  let unquotedPath = stripQuotes(word)
 
-  if (unquotedRelativePath.includes('$')) {
+  if (unquotedPath.includes('$')) {
+    // NOTE: we don't support dynamic sourcing
     return null
   }
 
-  const resultPath = unquotedRelativePath.startsWith('~')
-    ? untildify(unquotedRelativePath)
-    : path.join(path.dirname(uri), unquotedRelativePath)
+  if (unquotedPath.startsWith('~')) {
+    unquotedPath = untildify(unquotedPath)
+  }
 
-  return mapPathToUri(resultPath)
+  if (unquotedPath.startsWith('/')) {
+    if (fs.existsSync(unquotedPath)) {
+      return `file://${unquotedPath}`
+    }
+    return null
+  }
+
+  // resolve  relative path
+  for (const rootPath of rootPaths) {
+    const potentialPath = path.join(rootPath.replace('file://', ''), unquotedPath)
+
+    // check if path is a file
+    if (fs.existsSync(potentialPath)) {
+      return `file://${potentialPath}`
+    }
+  }
+
+  return null
 }

@@ -245,7 +245,7 @@ export default class BashServer {
     let diagnostics: LSP.Diagnostic[] = []
 
     // Load the tree for the modified contents into the analyzer:
-    const analyzeDiagnostics = this.analyzer.analyze(uri, document)
+    const analyzeDiagnostics = this.analyzer.analyze({ uri, document })
     // Treesitter's diagnostics can be a bit inaccurate, so we only merge the
     // analyzer's diagnostics if the setting is enabled:
     if (this.config.highlightParsingErrors) {

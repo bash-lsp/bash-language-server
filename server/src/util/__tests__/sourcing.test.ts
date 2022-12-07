@@ -1,9 +1,17 @@
-import { homedir } from 'os'
+import * as os from 'os'
 
 import { getSourcedUris } from '../sourcing'
 
 const fileDirectory = '/Users/bash'
 const fileUri = `${fileDirectory}/file.sh`
+
+// mock fs.existsSync to always return true
+jest.mock('fs', () => ({
+  existsSync: () => true,
+}))
+
+// mock os.homedir() to return a fixed path
+jest.spyOn(os, 'homedir').mockImplementation(() => '/Users/bash-user')
 
 describe('getSourcedUris', () => {
   it('returns an empty set if no files were sourced', () => {
@@ -17,17 +25,17 @@ describe('getSourcedUris', () => {
 
       source file-in-path.sh # does not contain a slash (i.e. is maybe somewhere on the path)
 
-      source /bin/f.inc
+      source /bin/extension.inc # absolute path
 
       source ./x a b c # some arguments
 
-      . ./relative/to-this.sh
+      . ../scripts/release-client.sh
 
       source ~/myscript
 
       # source ...
 
-      source "./my_quoted_file.sh"
+      source "./issue206.sh" # quoted file in fixtures folder
 
       source "$LIBPATH" # dynamic imports not supported
 
@@ -36,15 +44,16 @@ describe('getSourcedUris', () => {
     `,
       fileUri,
     })
-    expect(result).toEqual(
-      new Set([
-        `${fileDirectory}/file-in-path.sh`, // as we don't resolve it, we hope it is here
-        `${fileDirectory}/bin/f.inc`,
-        `${fileDirectory}/x`,
-        `${fileDirectory}/relative/to-this.sh`,
-        `${homedir()}/myscript`,
-        `${fileDirectory}/my_quoted_file.sh`,
-      ]),
-    )
+
+    expect(result).toMatchInlineSnapshot(`
+      Set {
+        "file:///Users/bash/file-in-path.sh",
+        "file:///bin/extension.inc",
+        "file:///Users/bash/x",
+        "file:///Users/scripts/release-client.sh",
+        "file:///Users/bash-user/myscript",
+        "file:///Users/bash/issue206.sh",
+      }
+    `)
   })
 })
