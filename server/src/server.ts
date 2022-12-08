@@ -32,7 +32,7 @@ export default class BashServer {
   private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
   private executables: Executables
   private linter?: Linter
-  private workspaceFolder: string | null | undefined
+  private workspaceFolder: string | null
   private uriToCodeActions: { [uri: string]: CodeAction[] | undefined } = {}
 
   private constructor({
@@ -48,7 +48,7 @@ export default class BashServer {
     connection: LSP.Connection
     executables: Executables
     linter?: Linter
-    workspaceFolder: string | null | undefined
+    workspaceFolder: string | null
   }) {
     this.analyzer = analyzer
     this.clientCapabilities = capabilities
@@ -69,14 +69,18 @@ export default class BashServer {
   ): // TODO: use workspaceFolders instead of rootPath
   Promise<BashServer> {
     const { PATH } = process.env
-    const workspaceFolder = rootUri || rootPath
+    const workspaceFolder = rootUri || rootPath || null
 
     if (!PATH) {
       throw new Error('Expected PATH environment variable to be set')
     }
 
     const parser = await initializeParser()
-    const analyzer = new Analyzer({ console: connection.console, parser })
+    const analyzer = new Analyzer({
+      console: connection.console,
+      parser,
+      workspaceFolder,
+    })
 
     const executables = await Executables.fromPath(PATH)
 
@@ -192,7 +196,6 @@ export default class BashServer {
       return this.analyzer.initiateBackgroundAnalysis({
         globPattern: this.config.globPattern,
         backgroundAnalysisMaxFiles: this.config.backgroundAnalysisMaxFiles,
-        rootPath: workspaceFolder,
       })
     }
 

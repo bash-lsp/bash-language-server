@@ -15,7 +15,7 @@ jest.spyOn(os, 'homedir').mockImplementation(() => '/Users/bash-user')
 
 describe('getSourcedUris', () => {
   it('returns an empty set if no files were sourced', () => {
-    const result = getSourcedUris({ fileContent: '', fileUri })
+    const result = getSourcedUris({ fileContent: '', fileUri, rootPath: null })
     expect(result).toEqual(new Set([]))
   })
 
@@ -43,6 +43,7 @@ describe('getSourcedUris', () => {
       if [[ -z $__COMPLETION_LIB_LOADED ]]; then source "$LIBPATH" ; fi
     `,
       fileUri,
+      rootPath: null,
     })
 
     expect(result).toMatchInlineSnapshot(`

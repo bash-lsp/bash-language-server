@@ -108,6 +108,79 @@ describe('server', () => {
     })
   })
 
+  it('responds to onDefinition', async () => {
+    const { connection } = await initializeServer()
+
+    const onDefinition = connection.onDefinition.mock.calls[0][0]
+
+    const result = await onDefinition(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.SOURCING,
+        },
+        position: { character: 10, line: 2 },
+      },
+      {} as any,
+      {} as any,
+    )
+
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 0,
+              "line": 0,
+            },
+            "start": Object {
+              "character": 0,
+              "line": 0,
+            },
+          },
+          "uri": "file://${FIXTURE_FOLDER}extension.inc",
+        },
+      ]
+    `)
+  })
+
+  it('responds to onDocumentSymbol', async () => {
+    const { connection } = await initializeServer()
+
+    const onDocumentSymbol = connection.onDocumentSymbol.mock.calls[0][0]
+
+    const result = await onDocumentSymbol(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.SOURCING,
+        },
+      },
+      {} as any,
+      {} as any,
+    )
+
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "kind": 13,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 16,
+                "line": 10,
+              },
+              "start": Object {
+                "character": 0,
+                "line": 10,
+              },
+            },
+            "uri": "file://${FIXTURE_FOLDER}sourcing.sh",
+          },
+          "name": "BOLD",
+        },
+      ]
+    `)
+  })
+
   it('responds to onDocumentHighlight', async () => {
     const { connection } = await initializeServer()
 

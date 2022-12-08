@@ -46,34 +46,44 @@ export default class Analyzer {
   }
 
   private isSourcingAware: boolean
+  private workspaceFolder: string | null
 
   public constructor({
     console,
     isSourcingAware = true,
     parser,
+    workspaceFolder,
   }: {
     console: LSP.RemoteConsole
     isSourcingAware?: boolean
     parser: Parser
+    workspaceFolder: string | null
   }) {
     this.console = console
     this.isSourcingAware = isSourcingAware
     this.parser = parser
+    this.workspaceFolder = workspaceFolder
   }
 
   /**
-   * Initiates a background analysis of the files in the given rootPath to
+   * Initiates a background analysis of the files in the workspaceFolder to
    * enable features across files.
+   *
+   * NOTE: if the source aware feature works well, we can likely remove this and
+   * rely on parsing files as they are sourced.
    */
   public async initiateBackgroundAnalysis({
     backgroundAnalysisMaxFiles,
     globPattern,
-    rootPath,
   }: {
     backgroundAnalysisMaxFiles: number
     globPattern: string
-    rootPath: string
   }): Promise<{ filesParsed: number }> {
+    const rootPath = this.workspaceFolder
+    if (!rootPath) {
+      return { filesParsed: 0 }
+    }
+
     if (backgroundAnalysisMaxFiles <= 0) {
       this.console.log(
         `BackgroundAnalysis: skipping as backgroundAnalysisMaxFiles was 0...`,
@@ -124,7 +134,6 @@ export default class Analyzer {
 
         this.analyze({
           document: TextDocument.create(uri, 'shell', 1, fileContent),
-          rootPath,
           uri,
         })
       } catch (error) {
@@ -153,17 +162,22 @@ export default class Analyzer {
     uri: string
     word: string
   }): LSP.Location[] {
-    const fileDeclarations = this.getAllFileDeclarations({ uri })
-
     const tree = this.uriToTreeSitterTrees[uri]
     if (position && tree) {
-      // NOTE: when a word is a file path to a sourced file, we return a location to
-      // that file.
-      const sourcedLocation = sourcing.getSourcedLocation({ position, tree, uri, word })
+      // NOTE: when a word is a file path to a sourced file, we return a location it.
+      const sourcedLocation = sourcing.getSourcedLocation({
+        position,
+        rootPath: this.workspaceFolder,
+        tree,
+        uri,
+        word,
+      })
       if (sourcedLocation) {
         return [sourcedLocation]
       }
     }
+
+    const fileDeclarations = this.getReachableUriToDeclarations({ uri })
 
     return Object.keys(fileDeclarations)
       .reduce((symbols, uri) => {
@@ -293,8 +307,6 @@ export default class Analyzer {
 
   /**
    * Find symbol completions for the given word.
-   *
-   * TODO: if a file is not included we probably shouldn't include it declarations from it.
    */
   public findSymbolsMatchingWord({
     exactMatch,
@@ -305,7 +317,7 @@ export default class Analyzer {
     uri: string
     word: string
   }): LSP.SymbolInformation[] {
-    const fileDeclarations = this.getAllFileDeclarations({ uri })
+    const fileDeclarations = this.getReachableUriToDeclarations({ uri })
 
     return Object.keys(fileDeclarations).reduce((symbols, uri) => {
       const declarationsInFile = fileDeclarations[uri]
@@ -329,11 +341,9 @@ export default class Analyzer {
    */
   public analyze({
     document,
-    rootPath,
     uri, // NOTE: we don't use document.uri to make testing easier
   }: {
     document: TextDocument
-    rootPath?: string
     uri: string
   }): LSP.Diagnostic[] {
     const contents = document.getText()
@@ -349,7 +359,7 @@ export default class Analyzer {
     this.uriToSourcedUris[uri] = sourcing.getSourcedUris({
       fileContent: contents,
       fileUri: uri,
-      rootPath,
+      rootPath: this.workspaceFolder,
     })
 
     const problems: LSP.Diagnostic[] = []
@@ -557,20 +567,38 @@ export default class Analyzer {
     this.isSourcingAware = isSourcingAware
   }
 
-  private getAllFileDeclarations({ uri }: { uri?: string } = {}): FileDeclarations {
-    const uris =
-      uri && this.isSourcingAware
-        ? [uri, ...Array.from(this.findAllSourcedUris({ uri }))]
-        : Object.keys(this.uriToDeclarations)
+  private getReachableUriToDeclarations({
+    uri: fromUri,
+  }: { uri?: string } = {}): FileDeclarations {
+    if (!fromUri || !this.isSourcingAware) {
+      return this.uriToDeclarations
+    }
 
+    const uris = [fromUri, ...Array.from(this.findAllSourcedUris({ uri: fromUri }))]
+
+    // for each uri (sourced and base file) we find the declarations
     return uris.reduce((fileDeclarations, uri) => {
+      if (!this.uriToDeclarations[uri]) {
+        // Either the background analysis didn't run or the file is outside
+        // the workspace. Let us try to analyze the file.
+        try {
+          const fileContent = fs.readFileSync(new URL(uri), 'utf8')
+          this.analyze({
+            document: TextDocument.create(uri, 'shell', 1, fileContent),
+            uri,
+          })
+        } catch (err) {
+          this.console.log(`Error while analyzing sourced file ${uri}: ${err}`)
+        }
+      }
+
       fileDeclarations[uri] = this.uriToDeclarations[uri] || {}
       return fileDeclarations
     }, {} as FileDeclarations)
   }
 
   private getAllSymbols({ uri }: { uri?: string } = {}): LSP.SymbolInformation[] {
-    const fileDeclarations = this.getAllFileDeclarations({ uri })
+    const fileDeclarations = this.getReachableUriToDeclarations({ uri })
 
     return Object.keys(fileDeclarations).reduce((symbols, uri) => {
       const declarationsInFile = fileDeclarations[uri]

@@ -11,8 +11,6 @@ const SOURCED_FILES_REG_EXP = /^(?:\t|[ ])*(?:source|[.])\s*(\S*)/gm
 /**
  * Analysis the given file content and returns a set of URIs that are
  * sourced. Note that the URIs are not resolved.
- *
- * FIXME: should this be URIs or paths?
  */
 export function getSourcedUris({
   fileContent,
@@ -21,7 +19,7 @@ export function getSourcedUris({
 }: {
   fileContent: string
   fileUri: string
-  rootPath?: string
+  rootPath: string | null
 }): Set<string> {
   const uris: Set<string> = new Set([])
   let match: RegExpExecArray | null
@@ -44,16 +42,17 @@ export function getSourcedUris({
  * @returns an optional location
  */
 export function getSourcedLocation({
-  tree,
   position,
+  rootPath,
+  tree,
   uri,
   word,
 }: {
-  tree: Parser.Tree
   position: { line: number; character: number }
+  rootPath: string | null
+  tree: Parser.Tree
   uri: string
   word: string
-  // FIXME: take in a rootPath
 }): LSP.Location | null {
   // NOTE: when a word is a file path to a sourced file, we return a location to
   // that file.
@@ -71,9 +70,9 @@ export function getSourcedLocation({
       ? ['.', 'source'].includes(node.previousNamedSibling.text.trim())
       : false
 
-    const sourcedUri = isSourced
-      ? getSourcedUri({ word, rootPaths: [path.dirname(uri)] })
-      : null
+    const rootPaths = [path.dirname(uri), rootPath].filter(Boolean) as string[]
+
+    const sourcedUri = isSourced ? getSourcedUri({ word, rootPaths }) : null
 
     if (sourcedUri) {
       return LSP.Location.create(sourcedUri, LSP.Range.create(0, 0, 0, 0))
