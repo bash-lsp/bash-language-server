@@ -343,19 +343,24 @@ export default class BashServer {
   }: {
     symbol: LSP.SymbolInformation
     currentUri: string
-  }): string {
+  }): LSP.MarkupContent {
     const symbolUri = symbol.location.uri
-    const symbolStarLine = symbol.location.range.start.line
+    const symbolStartLine = symbol.location.range.start.line
 
-    const commentAboveSymbol = this.analyzer.commentsAbove(symbolUri, symbolStarLine)
+    const commentAboveSymbol = this.analyzer.commentsAbove(symbolUri, symbolStartLine)
     const symbolDocumentation = commentAboveSymbol ? `\n\n${commentAboveSymbol}` : ''
-    const hoverHeader = `### ${symbolKindToDescription(symbol.kind)}: **${symbol.name}**`
+    const hoverHeader = `${symbolKindToDescription(symbol.kind)}: **${symbol.name}**`
     const symbolLocation =
       symbolUri !== currentUri
         ? `in ${path.relative(path.dirname(currentUri), symbolUri)}`
-        : `on line ${symbolStarLine + 1}`
+        : `on line ${symbolStartLine + 1}`
 
-    return `${hoverHeader} - *defined ${symbolLocation}*${symbolDocumentation}`
+    // TODO: An improvement could be to add show the symbol definition in the hover instead
+    // of the defined location – similar to how VSCode works for languages like TypeScript.
+
+    return getMarkdownContent(
+      `${hoverHeader} - *defined ${symbolLocation}*${symbolDocumentation}`,
+    )
   }
 
   private getCompletionItemsForSymbols({
@@ -427,7 +432,7 @@ export default class BashServer {
     ) {
       const shellDocumentation = await getShellDocumentation({ word })
       if (shellDocumentation) {
-        return { contents: getMarkdownContent(shellDocumentation) }
+        return { contents: getMarkdownContent(shellDocumentation, 'man') }
       }
     } else {
       const symbolDocumentation = deduplicateSymbols({
@@ -688,7 +693,7 @@ export default class BashServer {
       return documentation
         ? {
             ...item,
-            documentation: getMarkdownContent(documentation),
+            documentation: getMarkdownContent(documentation, 'man'),
           }
         : item
     } catch (error) {
@@ -791,11 +796,15 @@ function symbolKindToDescription(s: LSP.SymbolKind): string {
   }
 }
 
-const getMarkdownContent = (documentation: string): LSP.MarkupContent => ({
-  value: ['``` man', documentation, '```'].join('\n'),
-  // Passed as markdown for syntax highlighting
-  kind: 'markdown' as const,
-})
+function getMarkdownContent(documentation: string, language?: string): LSP.MarkupContent {
+  return {
+    value: language
+      ? // eslint-disable-next-line prefer-template
+        ['``` ' + language, documentation, '```'].join('\n')
+      : documentation,
+    kind: LSP.MarkupKind.Markdown,
+  }
+}
 
 function getCommandOptions(name: string, word: string): string[] {
   // TODO: The options could be cached.

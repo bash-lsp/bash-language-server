@@ -109,10 +109,21 @@ describe('server', () => {
     )
 
     expect(result).toBeDefined()
-    expect(result).toEqual({
-      contents:
-        '### Function: **hello_world** - *defined on line 8*\n\n```txt\nthis is a comment\ndescribing the function\nhello_world\nthis function takes two arguments\n```',
-    })
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "contents": Object {
+          "kind": "markdown",
+          "value": "Function: **hello_world** - *defined on line 8*
+
+      \`\`\`txt
+      this is a comment
+      describing the function
+      hello_world
+      this function takes two arguments
+      \`\`\`",
+        },
+      }
+    `)
   })
 
   it('responds to onDefinition', async () => {
@@ -491,7 +502,10 @@ describe('server', () => {
             "name": "BLUE",
             "type": 3,
           },
-          "documentation": "### Variable: **BLUE** - *defined in extension.inc*",
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **BLUE** - *defined in extension.inc*",
+          },
           "kind": 6,
           "label": "BLUE",
         },
@@ -520,11 +534,14 @@ describe('server', () => {
             "name": "add_a_user",
             "type": 3,
           },
-          "documentation": "### Function: **add_a_user** - *defined in issue101.sh*
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Function: **add_a_user** - *defined in issue101.sh*
 
       \`\`\`txt
       Helper function to add a user
       \`\`\`",
+          },
           "kind": 3,
           "label": "add_a_user",
         },
@@ -607,7 +624,10 @@ describe('server', () => {
             "name": "RED",
             "type": 3,
           },
-          "documentation": "### Variable: **RED** - *defined in extension.inc*",
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **RED** - *defined in extension.inc*",
+          },
           "kind": 6,
           "label": "RED",
         },
@@ -616,7 +636,10 @@ describe('server', () => {
             "name": "GREEN",
             "type": 3,
           },
-          "documentation": "### Variable: **GREEN** - *defined in extension.inc*",
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **GREEN** - *defined in extension.inc*",
+          },
           "kind": 6,
           "label": "GREEN",
         },
@@ -625,7 +648,10 @@ describe('server', () => {
             "name": "BLUE",
             "type": 3,
           },
-          "documentation": "### Variable: **BLUE** - *defined in extension.inc*",
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **BLUE** - *defined in extension.inc*",
+          },
           "kind": 6,
           "label": "BLUE",
         },
@@ -634,7 +660,10 @@ describe('server', () => {
             "name": "RESET",
             "type": 3,
           },
-          "documentation": "### Variable: **RESET** - *defined in extension.inc*",
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **RESET** - *defined in extension.inc*",
+          },
           "kind": 6,
           "label": "RESET",
         },
@@ -643,7 +672,10 @@ describe('server', () => {
             "name": "USER",
             "type": 3,
           },
-          "documentation": "### Variable: **USER** - *defined in issue101.sh*",
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **USER** - *defined in issue101.sh*",
+          },
           "kind": 6,
           "label": "USER",
         },
@@ -652,7 +684,10 @@ describe('server', () => {
             "name": "PASSWORD",
             "type": 3,
           },
-          "documentation": "### Variable: **PASSWORD** - *defined in issue101.sh*",
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **PASSWORD** - *defined in issue101.sh*",
+          },
           "kind": 6,
           "label": "PASSWORD",
         },
@@ -661,11 +696,14 @@ describe('server', () => {
             "name": "COMMENTS",
             "type": 3,
           },
-          "documentation": "### Variable: **COMMENTS** - *defined in issue101.sh*
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **COMMENTS** - *defined in issue101.sh*
 
       \`\`\`txt
       Having shifted twice, the rest is now comments ...
       \`\`\`",
+          },
           "kind": 6,
           "label": "COMMENTS",
         },
@@ -674,7 +712,10 @@ describe('server', () => {
             "name": "tag",
             "type": 3,
           },
-          "documentation": "### Variable: **tag** - *defined in ../../scripts/tag-release.inc*",
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **tag** - *defined in ../../scripts/tag-release.inc*",
+          },
           "kind": 6,
           "label": "tag",
         },
