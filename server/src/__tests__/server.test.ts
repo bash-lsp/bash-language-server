@@ -3,18 +3,25 @@ import * as Path from 'path'
 import * as LSP from 'vscode-languageserver/node'
 import { CodeAction } from 'vscode-languageserver/node'
 
-import FIXTURE_DOCUMENT, { FIXTURE_FOLDER, FIXTURE_URI } from '../../../testing/fixtures'
+import {
+  FIXTURE_DOCUMENT,
+  FIXTURE_FOLDER,
+  FIXTURE_URI,
+  REPO_ROOT_FOLDER,
+} from '../../../testing/fixtures'
 import { getMockConnection } from '../../../testing/mocks'
 import LspServer from '../server'
 import { CompletionItemDataType } from '../types'
 
-async function initializeServer() {
+async function initializeServer(
+  { rootPath }: { rootPath?: string } = { rootPath: FIXTURE_FOLDER },
+) {
   const diagnostics: Array<LSP.PublishDiagnosticsParams | undefined> = []
 
   const connection = getMockConnection()
 
   const server = await LspServer.initialize(connection, {
-    rootPath: FIXTURE_FOLDER,
+    rootPath,
     rootUri: null,
     processId: 42,
     capabilities: {} as any,
@@ -484,7 +491,7 @@ describe('server', () => {
             "name": "BLUE",
             "type": 3,
           },
-          "documentation": "### Variable: **BLUE** - *defined in ../extension.inc*",
+          "documentation": "### Variable: **BLUE** - *defined in extension.inc*",
           "kind": 6,
           "label": "BLUE",
         },
@@ -513,7 +520,7 @@ describe('server', () => {
             "name": "add_a_user",
             "type": 3,
           },
-          "documentation": "### Function: **add_a_user** - *defined in ../issue101.sh*
+          "documentation": "### Function: **add_a_user** - *defined in issue101.sh*
 
       \`\`\`txt
       Helper function to add a user
@@ -561,7 +568,7 @@ describe('server', () => {
   })
 
   it('responds to onCompletion with all variables when starting to expand parameters', async () => {
-    const { connection } = await initializeServer()
+    const { connection } = await initializeServer({ rootPath: REPO_ROOT_FOLDER })
 
     const onCompletion = connection.onCompletion.mock.calls[0][0]
 
@@ -600,7 +607,7 @@ describe('server', () => {
             "name": "RED",
             "type": 3,
           },
-          "documentation": "### Variable: **RED** - *defined in ../extension.inc*",
+          "documentation": "### Variable: **RED** - *defined in extension.inc*",
           "kind": 6,
           "label": "RED",
         },
@@ -609,7 +616,7 @@ describe('server', () => {
             "name": "GREEN",
             "type": 3,
           },
-          "documentation": "### Variable: **GREEN** - *defined in ../extension.inc*",
+          "documentation": "### Variable: **GREEN** - *defined in extension.inc*",
           "kind": 6,
           "label": "GREEN",
         },
@@ -618,7 +625,7 @@ describe('server', () => {
             "name": "BLUE",
             "type": 3,
           },
-          "documentation": "### Variable: **BLUE** - *defined in ../extension.inc*",
+          "documentation": "### Variable: **BLUE** - *defined in extension.inc*",
           "kind": 6,
           "label": "BLUE",
         },
@@ -627,7 +634,7 @@ describe('server', () => {
             "name": "RESET",
             "type": 3,
           },
-          "documentation": "### Variable: **RESET** - *defined in ../extension.inc*",
+          "documentation": "### Variable: **RESET** - *defined in extension.inc*",
           "kind": 6,
           "label": "RESET",
         },
@@ -636,7 +643,7 @@ describe('server', () => {
             "name": "USER",
             "type": 3,
           },
-          "documentation": "### Variable: **USER** - *defined in ../issue101.sh*",
+          "documentation": "### Variable: **USER** - *defined in issue101.sh*",
           "kind": 6,
           "label": "USER",
         },
@@ -645,7 +652,7 @@ describe('server', () => {
             "name": "PASSWORD",
             "type": 3,
           },
-          "documentation": "### Variable: **PASSWORD** - *defined in ../issue101.sh*",
+          "documentation": "### Variable: **PASSWORD** - *defined in issue101.sh*",
           "kind": 6,
           "label": "PASSWORD",
         },
@@ -654,13 +661,22 @@ describe('server', () => {
             "name": "COMMENTS",
             "type": 3,
           },
-          "documentation": "### Variable: **COMMENTS** - *defined in ../issue101.sh*
+          "documentation": "### Variable: **COMMENTS** - *defined in issue101.sh*
 
       \`\`\`txt
       Having shifted twice, the rest is now comments ...
       \`\`\`",
           "kind": 6,
           "label": "COMMENTS",
+        },
+        Object {
+          "data": Object {
+            "name": "tag",
+            "type": 3,
+          },
+          "documentation": "### Variable: **tag** - *defined in ../../scripts/tag-release.inc*",
+          "kind": 6,
+          "label": "tag",
         },
       ]
     `)

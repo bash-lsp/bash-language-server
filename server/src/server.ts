@@ -1,5 +1,5 @@
-import * as Process from 'child_process'
-import * as Path from 'path'
+import { spawnSync } from 'child_process'
+import * as path from 'path'
 import * as TurndownService from 'turndown'
 import { isDeepStrictEqual } from 'util'
 import * as LSP from 'vscode-languageserver/node'
@@ -352,7 +352,7 @@ export default class BashServer {
     const hoverHeader = `### ${symbolKindToDescription(symbol.kind)}: **${symbol.name}**`
     const symbolLocation =
       symbolUri !== currentUri
-        ? `in ${Path.relative(currentUri, symbolUri)}`
+        ? `in ${path.relative(path.dirname(currentUri), symbolUri)}`
         : `on line ${symbolStarLine + 1}`
 
     return `${hoverHeader} - *defined ${symbolLocation}*${symbolDocumentation}`
@@ -799,10 +799,7 @@ const getMarkdownContent = (documentation: string): LSP.MarkupContent => ({
 
 function getCommandOptions(name: string, word: string): string[] {
   // TODO: The options could be cached.
-  const options = Process.spawnSync(Path.join(__dirname, '../src/get-options.sh'), [
-    name,
-    word,
-  ])
+  const options = spawnSync(path.join(__dirname, '../src/get-options.sh'), [name, word])
 
   if (options.status !== 0) {
     return []

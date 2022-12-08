@@ -35,4 +35,4 @@ export const FIXTURE_DOCUMENT: Record<FIXTURE_KEY, TextDocument> = (
   return acc
 }, {} as any)
 
-export default FIXTURE_DOCUMENT
+export const REPO_ROOT_FOLDER = path.resolve(path.join(FIXTURE_FOLDER, '../..'))

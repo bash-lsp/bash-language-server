@@ -1,6 +1,9 @@
-import * as path from 'path'
-
-import { FIXTURE_DOCUMENT, FIXTURE_FOLDER, FIXTURE_URI } from '../../../testing/fixtures'
+import {
+  FIXTURE_DOCUMENT,
+  FIXTURE_FOLDER,
+  FIXTURE_URI,
+  REPO_ROOT_FOLDER,
+} from '../../../testing/fixtures'
 import { getMockConnection } from '../../../testing/mocks'
 import Analyzer from '../analyser'
 import { getDefaultConfiguration } from '../config'
@@ -10,7 +13,6 @@ import * as fsUtil from '../util/fs'
 let analyzer: Analyzer
 
 const CURRENT_URI = 'dummy-uri.sh'
-const REPO_ROOT_FOLDER = path.resolve(path.join(FIXTURE_FOLDER, '../..'))
 const mockConsole = getMockConnection().console
 
 // if you add a .sh file to testing/fixtures, update this value
