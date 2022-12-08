@@ -10,7 +10,7 @@ const SOURCED_FILES_REG_EXP = /^(?:\t|[ ])*(?:source|[.])\s*(\S*)/gm
 
 /**
  * Analysis the given file content and returns a set of URIs that are
- * sourced. Note that the URIs are not resolved.
+ * sourced. Note that the URIs are resolved.
  */
 export function getSourcedUris({
   fileContent,
@@ -97,6 +97,12 @@ const stripQuotes = (path: string): string => {
  * Tries to parse the given path and returns a URI if possible.
  * - Filters out dynamic sources
  * - Converts a relative paths to absolute paths
+ * - Converts a tilde path to an absolute path
+ * - Resolves the path
+ *
+ * NOTE: for future improvements:
+ * "If filename does not contain a slash, file names in PATH are used to find
+ *  the directory containing filename." (see https://ss64.com/osx/source.html)
  */
 function getSourcedUri({
   rootPaths,
@@ -105,10 +111,6 @@ function getSourcedUri({
   rootPaths: string[]
   word: string
 }): string | null {
-  // NOTE: improvements:
-  // - we could try to resolve the path
-  // - "If filename does not contain a slash, file names in PATH are used to find
-  //   the directory containing filename." (see https://ss64.com/osx/source.html)
   let unquotedPath = stripQuotes(word)
 
   if (unquotedPath.includes('$')) {
