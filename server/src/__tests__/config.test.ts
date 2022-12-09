@@ -1,34 +1,37 @@
 import { ConfigSchema, getConfigFromEnvironmentVariables } from '../config'
 
 describe('ConfigSchema', () => {
-  it('parses an object', () => {
+  it('returns a default', () => {
     expect(ConfigSchema.parse({})).toMatchInlineSnapshot(`
       Object {
         "backgroundAnalysisMaxFiles": 500,
-        "completionBasedOnImports": true,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
         "highlightParsingErrors": false,
+        "includeAllWorkspaceSymbols": false,
         "shellcheckArguments": Array [],
         "shellcheckPath": "shellcheck",
       }
     `)
+  })
+  it('parses an object', () => {
     expect(
       ConfigSchema.parse({
         backgroundAnalysisMaxFiles: 1,
         explainshellEndpoint: 'localhost:8080',
         globPattern: '**/*@(.sh)',
         highlightParsingErrors: true,
+        includeAllWorkspaceSymbols: true,
         shellcheckArguments: ' -e SC2001  -e SC2002 ',
         shellcheckPath: '',
       }),
     ).toMatchInlineSnapshot(`
       Object {
         "backgroundAnalysisMaxFiles": 1,
-        "completionBasedOnImports": true,
         "explainshellEndpoint": "localhost:8080",
         "globPattern": "**/*@(.sh)",
         "highlightParsingErrors": true,
+        "includeAllWorkspaceSymbols": true,
         "shellcheckArguments": Array [
           "-e",
           "SC2001",

@@ -2,10 +2,6 @@ import { z } from 'zod'
 
 export const ConfigSchema = z
   .object({
-    // Controls if completions are based only on analyzing the import/sourcing of files.
-    // If false, completion will be based on all files in the workspace.
-    completionBasedOnImports: z.boolean().default(true),
-
     // Maximum number of files to analyze in the background. Set to 0 to disable background analysis.
     backgroundAnalysisMaxFiles: z.number().int().min(0).default(500),
 
@@ -18,6 +14,11 @@ export const ConfigSchema = z
 
     // Controls if Treesitter parsing errors will be highlighted as problems.
     highlightParsingErrors: z.boolean().default(false),
+
+    // Controls how symbols (e.g. variables and functions) are included and used for completion and documentation.
+    // If false, then we only include symbols from sourced files (i.e. using non dynamic statements like 'source file.sh' or '. file.sh').
+    // If true, then all symbols from the workspace are included.
+    includeAllWorkspaceSymbols: z.boolean().default(false),
 
     // Additional ShellCheck arguments. Note that we already add the following arguments: --shell, --format, --external-sources."
     shellcheckArguments: z
@@ -48,10 +49,10 @@ export function getConfigFromEnvironmentVariables(): {
 } {
   const rawConfig = {
     backgroundAnalysisMaxFiles: process.env.BACKGROUND_ANALYSIS_MAX_FILES,
-    completionBasedOnImports: toBoolean(process.env.COMPLETION_BASED_ON_IMPORTS),
     explainshellEndpoint: process.env.EXPLAINSHELL_ENDPOINT,
     globPattern: process.env.GLOB_PATTERN,
     highlightParsingErrors: toBoolean(process.env.HIGHLIGHT_PARSING_ERRORS),
+    includeAllWorkspaceSymbols: toBoolean(process.env.INCLUDE_ALL_WORKSPACE_SYMBOLS),
     shellcheckArguments: process.env.SHELLCHECK_ARGUMENTS,
     shellcheckPath: process.env.SHELLCHECK_PATH,
   }

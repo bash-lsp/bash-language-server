@@ -296,14 +296,14 @@ describe('commandNameAtPoint', () => {
 })
 
 describe('findSymbolsMatchingWord', () => {
-  it('return a list of symbols across the workspace when isSourcingAware is false', async () => {
+  it('return a list of symbols across the workspace when includeAllWorkspaceSymbols is true', async () => {
     const parser = await initializeParser()
     const connection = getMockConnection()
 
     const analyzer = new Analyzer({
       console: connection.console,
       parser,
-      isSourcingAware: false,
+      includeAllWorkspaceSymbols: true,
       workspaceFolder: FIXTURE_FOLDER,
     })
     await analyzer.initiateBackgroundAnalysis({
@@ -421,14 +421,14 @@ describe('findSymbolsMatchingWord', () => {
     `)
   })
 
-  it('return a list of symbols accessible to the uri when isSourcingAware is true', async () => {
+  it('return a list of symbols accessible to the uri when includeAllWorkspaceSymbols is false', async () => {
     const parser = await initializeParser()
     const connection = getMockConnection()
 
     const analyzer = new Analyzer({
       console: connection.console,
       parser,
-      isSourcingAware: true,
+      includeAllWorkspaceSymbols: false,
       workspaceFolder: FIXTURE_FOLDER,
     })
     await analyzer.initiateBackgroundAnalysis({

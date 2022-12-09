@@ -227,7 +227,9 @@ export default class BashServer {
             })
           }
 
-          this.analyzer.setIsSourcingAware(this.config.completionBasedOnImports)
+          this.analyzer.setIncludeAllWorkspaceSymbols(
+            this.config.includeAllWorkspaceSymbols,
+          )
 
           return true
         }

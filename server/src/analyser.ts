@@ -45,22 +45,22 @@ export default class Analyzer {
     variable_assignment: LSP.SymbolKind.Variable,
   }
 
-  private isSourcingAware: boolean
+  private includeAllWorkspaceSymbols: boolean
   private workspaceFolder: string | null
 
   public constructor({
     console,
-    isSourcingAware = true,
+    includeAllWorkspaceSymbols = false,
     parser,
     workspaceFolder,
   }: {
     console: LSP.RemoteConsole
-    isSourcingAware?: boolean
+    includeAllWorkspaceSymbols?: boolean
     parser: Parser
     workspaceFolder: string | null
   }) {
     this.console = console
-    this.isSourcingAware = isSourcingAware
+    this.includeAllWorkspaceSymbols = includeAllWorkspaceSymbols
     this.parser = parser
     this.workspaceFolder = workspaceFolder
   }
@@ -564,14 +564,14 @@ export default class Analyzer {
     )
   }
 
-  public setIsSourcingAware(isSourcingAware: boolean): void {
-    this.isSourcingAware = isSourcingAware
+  public setIncludeAllWorkspaceSymbols(includeAllWorkspaceSymbols: boolean): void {
+    this.includeAllWorkspaceSymbols = includeAllWorkspaceSymbols
   }
 
   private getReachableUriToDeclarations({
     uri: fromUri,
   }: { uri?: string } = {}): FileDeclarations {
-    if (!fromUri || !this.isSourcingAware) {
+    if (!fromUri || this.includeAllWorkspaceSymbols) {
       return this.uriToDeclarations
     }
 
