@@ -360,6 +360,7 @@ export default class Analyzer {
       fileContent: contents,
       fileUri: uri,
       rootPath: this.workspaceFolder,
+      tree,
     })
 
     const problems: LSP.Diagnostic[] = []

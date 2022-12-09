@@ -6,7 +6,8 @@ import * as Parser from 'web-tree-sitter'
 import { untildify } from './fs'
 
 // Until the grammar supports sourcing, we use this little regular expression
-const SOURCED_FILES_REG_EXP = /^(?:\t|[ ])*(?:source|[.])\s*(\S*)/gm
+const SOURCING_STATEMENTS = /^(?:\t|[ ])*(?:source|[.])\s*(\S*)/
+const SOURCING_COMMANDS = ['source', '.']
 
 /**
  * Analysis the given file content and returns a set of URIs that are
@@ -16,22 +17,37 @@ export function getSourcedUris({
   fileContent,
   fileUri,
   rootPath,
+  tree,
 }: {
   fileContent: string
   fileUri: string
   rootPath: string | null
+  tree: Parser.Tree
 }): Set<string> {
   const uris: Set<string> = new Set([])
-  let match: RegExpExecArray | null
   const rootPaths = [path.dirname(fileUri), rootPath].filter(Boolean) as string[]
 
-  while ((match = SOURCED_FILES_REG_EXP.exec(fileContent)) !== null) {
-    const word = match[1]
-    const sourcedUri = getSourcedUri({ rootPaths, word })
-    if (sourcedUri) {
-      uris.add(sourcedUri)
+  fileContent.split(/\r?\n/).forEach((line, lineIndex) => {
+    const match = line.match(SOURCING_STATEMENTS)
+    if (match) {
+      const [statement, word] = match
+
+      if (tree.rootNode) {
+        const node = tree.rootNode.descendantForPosition({
+          row: lineIndex,
+          column: statement.length - 2,
+        })
+        if (['heredoc_body', 'raw_string'].includes(node?.type)) {
+          return
+        }
+      }
+
+      const sourcedUri = getSourcedUri({ rootPaths, word })
+      if (sourcedUri) {
+        uris.add(sourcedUri)
+      }
     }
-  }
+  })
 
   return uris
 }
@@ -67,7 +83,7 @@ export function getSourcedLocation({
     }
 
     const isSourced = node.previousNamedSibling
-      ? ['.', 'source'].includes(node.previousNamedSibling.text.trim())
+      ? SOURCING_COMMANDS.includes(node.previousNamedSibling.text.trim())
       : false
 
     const rootPaths = [path.dirname(uri), rootPath].filter(Boolean) as string[]
