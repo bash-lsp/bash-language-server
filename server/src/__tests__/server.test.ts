@@ -3,18 +3,25 @@ import * as Path from 'path'
 import * as LSP from 'vscode-languageserver/node'
 import { CodeAction } from 'vscode-languageserver/node'
 
-import FIXTURE_DOCUMENT, { FIXTURE_FOLDER, FIXTURE_URI } from '../../../testing/fixtures'
+import {
+  FIXTURE_DOCUMENT,
+  FIXTURE_FOLDER,
+  FIXTURE_URI,
+  REPO_ROOT_FOLDER,
+} from '../../../testing/fixtures'
 import { getMockConnection } from '../../../testing/mocks'
 import LspServer from '../server'
 import { CompletionItemDataType } from '../types'
 
-async function initializeServer() {
+async function initializeServer(
+  { rootPath }: { rootPath?: string } = { rootPath: FIXTURE_FOLDER },
+) {
   const diagnostics: Array<LSP.PublishDiagnosticsParams | undefined> = []
 
   const connection = getMockConnection()
 
   const server = await LspServer.initialize(connection, {
-    rootPath: FIXTURE_FOLDER,
+    rootPath,
     rootUri: null,
     processId: 42,
     capabilities: {} as any,
@@ -102,10 +109,94 @@ describe('server', () => {
     )
 
     expect(result).toBeDefined()
-    expect(result).toEqual({
-      contents:
-        '### Function: **hello_world** - *defined on line 8*\n\n```txt\nthis is a comment\ndescribing the function\nhello_world\nthis function takes two arguments\n```',
-    })
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "contents": Object {
+          "kind": "markdown",
+          "value": "Function: **hello_world** - *defined on line 8*
+
+      \`\`\`txt
+      this is a comment
+      describing the function
+      hello_world
+      this function takes two arguments
+      \`\`\`",
+        },
+      }
+    `)
+  })
+
+  it('responds to onDefinition', async () => {
+    const { connection } = await initializeServer()
+
+    const onDefinition = connection.onDefinition.mock.calls[0][0]
+
+    const result = await onDefinition(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.SOURCING,
+        },
+        position: { character: 10, line: 2 },
+      },
+      {} as any,
+      {} as any,
+    )
+
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 0,
+              "line": 0,
+            },
+            "start": Object {
+              "character": 0,
+              "line": 0,
+            },
+          },
+          "uri": "file://${FIXTURE_FOLDER}extension.inc",
+        },
+      ]
+    `)
+  })
+
+  it('responds to onDocumentSymbol', async () => {
+    const { connection } = await initializeServer()
+
+    const onDocumentSymbol = connection.onDocumentSymbol.mock.calls[0][0]
+
+    const result = await onDocumentSymbol(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.SOURCING,
+        },
+      },
+      {} as any,
+      {} as any,
+    )
+
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "kind": 13,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 16,
+                "line": 10,
+              },
+              "start": Object {
+                "character": 0,
+                "line": 10,
+              },
+            },
+            "uri": "file://${FIXTURE_FOLDER}sourcing.sh",
+          },
+          "name": "BOLD",
+        },
+      ]
+    `)
   })
 
   it('responds to onDocumentHighlight', async () => {
@@ -411,7 +502,10 @@ describe('server', () => {
             "name": "BLUE",
             "type": 3,
           },
-          "documentation": "### Variable: **BLUE** - *defined in ../extension.inc*",
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **BLUE** - *defined in extension.inc*",
+          },
           "kind": 6,
           "label": "BLUE",
         },
@@ -440,11 +534,14 @@ describe('server', () => {
             "name": "add_a_user",
             "type": 3,
           },
-          "documentation": "### Function: **add_a_user** - *defined in ../issue101.sh*
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Function: **add_a_user** - *defined in issue101.sh*
 
       \`\`\`txt
       Helper function to add a user
       \`\`\`",
+          },
           "kind": 3,
           "label": "add_a_user",
         },
@@ -488,7 +585,7 @@ describe('server', () => {
   })
 
   it('responds to onCompletion with all variables when starting to expand parameters', async () => {
-    const { connection } = await initializeServer()
+    const { connection } = await initializeServer({ rootPath: REPO_ROOT_FOLDER })
 
     const onCompletion = connection.onCompletion.mock.calls[0][0]
 
@@ -511,6 +608,119 @@ describe('server', () => {
     expect(Array.from(new Set(result.map((item: any) => item.kind)))).toEqual([
       LSP.CompletionItemKind.Variable,
     ])
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data": Object {
+            "name": "BOLD",
+            "type": 3,
+          },
+          "documentation": undefined,
+          "kind": 6,
+          "label": "BOLD",
+        },
+        Object {
+          "data": Object {
+            "name": "RED",
+            "type": 3,
+          },
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **RED** - *defined in extension.inc*",
+          },
+          "kind": 6,
+          "label": "RED",
+        },
+        Object {
+          "data": Object {
+            "name": "GREEN",
+            "type": 3,
+          },
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **GREEN** - *defined in extension.inc*",
+          },
+          "kind": 6,
+          "label": "GREEN",
+        },
+        Object {
+          "data": Object {
+            "name": "BLUE",
+            "type": 3,
+          },
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **BLUE** - *defined in extension.inc*",
+          },
+          "kind": 6,
+          "label": "BLUE",
+        },
+        Object {
+          "data": Object {
+            "name": "RESET",
+            "type": 3,
+          },
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **RESET** - *defined in extension.inc*",
+          },
+          "kind": 6,
+          "label": "RESET",
+        },
+        Object {
+          "data": Object {
+            "name": "USER",
+            "type": 3,
+          },
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **USER** - *defined in issue101.sh*",
+          },
+          "kind": 6,
+          "label": "USER",
+        },
+        Object {
+          "data": Object {
+            "name": "PASSWORD",
+            "type": 3,
+          },
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **PASSWORD** - *defined in issue101.sh*",
+          },
+          "kind": 6,
+          "label": "PASSWORD",
+        },
+        Object {
+          "data": Object {
+            "name": "COMMENTS",
+            "type": 3,
+          },
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **COMMENTS** - *defined in issue101.sh*
+
+      \`\`\`txt
+      Having shifted twice, the rest is now comments ...
+      \`\`\`",
+          },
+          "kind": 6,
+          "label": "COMMENTS",
+        },
+        Object {
+          "data": Object {
+            "name": "tag",
+            "type": 3,
+          },
+          "documentation": Object {
+            "kind": "markdown",
+            "value": "Variable: **tag** - *defined in ../../scripts/tag-release.inc*",
+          },
+          "kind": 6,
+          "label": "tag",
+        },
+      ]
+    `)
   })
 
   it('responds to onCodeAction', async () => {

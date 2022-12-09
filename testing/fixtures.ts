@@ -19,6 +19,7 @@ export const FIXTURE_URI = {
   INSTALL: `file://${path.join(FIXTURE_FOLDER, 'install.sh')}`,
   ISSUE101: `file://${path.join(FIXTURE_FOLDER, 'issue101.sh')}`,
   ISSUE206: `file://${path.join(FIXTURE_FOLDER, 'issue206.sh')}`,
+  MISSING_EXTENSION: `file://${path.join(FIXTURE_FOLDER, 'extension')}`,
   MISSING_NODE: `file://${path.join(FIXTURE_FOLDER, 'missing-node.sh')}`,
   PARSE_PROBLEMS: `file://${path.join(FIXTURE_FOLDER, 'parse-problems.sh')}`,
   SOURCING: `file://${path.join(FIXTURE_FOLDER, 'sourcing.sh')}`,
@@ -34,4 +35,4 @@ export const FIXTURE_DOCUMENT: Record<FIXTURE_KEY, TextDocument> = (
   return acc
 }, {} as any)
 
-export default FIXTURE_DOCUMENT
+export const REPO_ROOT_FOLDER = path.resolve(path.join(FIXTURE_FOLDER, '../..'))

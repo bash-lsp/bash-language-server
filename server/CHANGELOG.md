@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.1.0
+
+- Symbols across files are now only included based on sourced files (using non dynamic statements like `source file.sh` or `. ~/file.inc`) instead of including symbols from all files in the workspace. We now also support jump-to-definition on the file path used in a source command. The new behavior can be disabled by turning on the `includeAllWorkspaceSymbols` configuration option. https://github.com/bash-lsp/bash-language-server/pull/244
+
 ## 4.0.1
 
 - **Breaking**: Drop support for Node 12, which reached its official end of life on April 30th 2022. Doing so enables new features. https://github.com/bash-lsp/bash-language-server/pull/584

@@ -1,5 +1,5 @@
-import * as Process from 'child_process'
-import * as Path from 'path'
+import { spawnSync } from 'child_process'
+import * as path from 'path'
 import * as TurndownService from 'turndown'
 import { isDeepStrictEqual } from 'util'
 import * as LSP from 'vscode-languageserver/node'
@@ -32,7 +32,7 @@ export default class BashServer {
   private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
   private executables: Executables
   private linter?: Linter
-  private workspaceFolder: string | null | undefined
+  private workspaceFolder: string | null
   private uriToCodeActions: { [uri: string]: CodeAction[] | undefined } = {}
 
   private constructor({
@@ -48,7 +48,7 @@ export default class BashServer {
     connection: LSP.Connection
     executables: Executables
     linter?: Linter
-    workspaceFolder: string | null | undefined
+    workspaceFolder: string | null
   }) {
     this.analyzer = analyzer
     this.clientCapabilities = capabilities
@@ -69,14 +69,18 @@ export default class BashServer {
   ): // TODO: use workspaceFolders instead of rootPath
   Promise<BashServer> {
     const { PATH } = process.env
-    const workspaceFolder = rootUri || rootPath
+    const workspaceFolder = rootUri || rootPath || null
 
     if (!PATH) {
       throw new Error('Expected PATH environment variable to be set')
     }
 
     const parser = await initializeParser()
-    const analyzer = new Analyzer({ console: connection.console, parser })
+    const analyzer = new Analyzer({
+      console: connection.console,
+      parser,
+      workspaceFolder,
+    })
 
     const executables = await Executables.fromPath(PATH)
 
@@ -192,7 +196,6 @@ export default class BashServer {
       return this.analyzer.initiateBackgroundAnalysis({
         globPattern: this.config.globPattern,
         backgroundAnalysisMaxFiles: this.config.backgroundAnalysisMaxFiles,
-        rootPath: workspaceFolder,
       })
     }
 
@@ -224,6 +227,10 @@ export default class BashServer {
             })
           }
 
+          this.analyzer.setIncludeAllWorkspaceSymbols(
+            this.config.includeAllWorkspaceSymbols,
+          )
+
           return true
         }
       } catch (err) {
@@ -243,7 +250,7 @@ export default class BashServer {
     let diagnostics: LSP.Diagnostic[] = []
 
     // Load the tree for the modified contents into the analyzer:
-    const analyzeDiagnostics = this.analyzer.analyze(uri, document)
+    const analyzeDiagnostics = this.analyzer.analyze({ uri, document })
     // Treesitter's diagnostics can be a bit inaccurate, so we only merge the
     // analyzer's diagnostics if the setting is enabled:
     if (this.config.highlightParsingErrors) {
@@ -338,19 +345,24 @@ export default class BashServer {
   }: {
     symbol: LSP.SymbolInformation
     currentUri: string
-  }): string {
+  }): LSP.MarkupContent {
     const symbolUri = symbol.location.uri
-    const symbolStarLine = symbol.location.range.start.line
+    const symbolStartLine = symbol.location.range.start.line
 
-    const commentAboveSymbol = this.analyzer.commentsAbove(symbolUri, symbolStarLine)
+    const commentAboveSymbol = this.analyzer.commentsAbove(symbolUri, symbolStartLine)
     const symbolDocumentation = commentAboveSymbol ? `\n\n${commentAboveSymbol}` : ''
-    const hoverHeader = `### ${symbolKindToDescription(symbol.kind)}: **${symbol.name}**`
+    const hoverHeader = `${symbolKindToDescription(symbol.kind)}: **${symbol.name}**`
     const symbolLocation =
       symbolUri !== currentUri
-        ? `in ${Path.relative(currentUri, symbolUri)}`
-        : `on line ${symbolStarLine + 1}`
+        ? `in ${path.relative(path.dirname(currentUri), symbolUri)}`
+        : `on line ${symbolStartLine + 1}`
 
-    return `${hoverHeader} - *defined ${symbolLocation}*${symbolDocumentation}`
+    // TODO: An improvement could be to add show the symbol definition in the hover instead
+    // of the defined location – similar to how VSCode works for languages like TypeScript.
+
+    return getMarkdownContent(
+      `${hoverHeader} - *defined ${symbolLocation}*${symbolDocumentation}`,
+    )
   }
 
   private getCompletionItemsForSymbols({
@@ -422,12 +434,13 @@ export default class BashServer {
     ) {
       const shellDocumentation = await getShellDocumentation({ word })
       if (shellDocumentation) {
-        return { contents: getMarkdownContent(shellDocumentation) }
+        return { contents: getMarkdownContent(shellDocumentation, 'man') }
       }
     } else {
       const symbolDocumentation = deduplicateSymbols({
         symbols: this.analyzer.findSymbolsMatchingWord({
           exactMatch: true,
+          uri: currentUri,
           word,
         }),
         currentUri,
@@ -452,7 +465,11 @@ export default class BashServer {
     if (!word) {
       return null
     }
-    return this.analyzer.findDefinition({ word })
+    return this.analyzer.findDefinition({
+      position: params.position,
+      uri: params.textDocument.uri,
+      word,
+    })
   }
 
   private onDocumentSymbol(params: LSP.DocumentSymbolParams): LSP.SymbolInformation[] {
@@ -541,9 +558,10 @@ export default class BashServer {
         ? []
         : this.getCompletionItemsForSymbols({
             symbols: shouldCompleteOnVariables
-              ? this.analyzer.getAllVariableSymbols()
+              ? this.analyzer.getAllVariableSymbols({ uri: currentUri })
               : this.analyzer.findSymbolsMatchingWord({
                   exactMatch: false,
+                  uri: currentUri,
                   word,
                 }),
             currentUri,
@@ -677,7 +695,7 @@ export default class BashServer {
       return documentation
         ? {
             ...item,
-            documentation: getMarkdownContent(documentation),
+            documentation: getMarkdownContent(documentation, 'man'),
           }
         : item
     } catch (error) {
@@ -780,18 +798,19 @@ function symbolKindToDescription(s: LSP.SymbolKind): string {
   }
 }
 
-const getMarkdownContent = (documentation: string): LSP.MarkupContent => ({
-  value: ['``` man', documentation, '```'].join('\n'),
-  // Passed as markdown for syntax highlighting
-  kind: 'markdown' as const,
-})
+function getMarkdownContent(documentation: string, language?: string): LSP.MarkupContent {
+  return {
+    value: language
+      ? // eslint-disable-next-line prefer-template
+        ['``` ' + language, documentation, '```'].join('\n')
+      : documentation,
+    kind: LSP.MarkupKind.Markdown,
+  }
+}
 
 function getCommandOptions(name: string, word: string): string[] {
   // TODO: The options could be cached.
-  const options = Process.spawnSync(Path.join(__dirname, '../src/get-options.sh'), [
-    name,
-    word,
-  ])
+  const options = spawnSync(path.join(__dirname, '../src/get-options.sh'), [name, word])
 
   if (options.status !== 0) {
     return []

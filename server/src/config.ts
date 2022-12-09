@@ -2,18 +2,23 @@ import { z } from 'zod'
 
 export const ConfigSchema = z
   .object({
+    // Maximum number of files to analyze in the background. Set to 0 to disable background analysis.
+    backgroundAnalysisMaxFiles: z.number().int().min(0).default(500),
+
     // Glob pattern for finding and parsing shell script files in the workspace. Used by the background analysis features across files.
     globPattern: z.string().trim().default('**/*@(.sh|.inc|.bash|.command)'),
-
-    // Controls if Treesitter parsing errors will be highlighted as problems.
-    highlightParsingErrors: z.boolean().default(false),
 
     // Configure explainshell server endpoint in order to get hover documentation on flags and options.
     // And empty string will disable the feature.
     explainshellEndpoint: z.string().trim().default(''),
 
-    // Controls the executable used for ShellCheck linting information. An empty string will disable linting.
-    shellcheckPath: z.string().trim().default('shellcheck'),
+    // Controls if Treesitter parsing errors will be highlighted as problems.
+    highlightParsingErrors: z.boolean().default(false),
+
+    // Controls how symbols (e.g. variables and functions) are included and used for completion and documentation.
+    // If false, then we only include symbols from sourced files (i.e. using non dynamic statements like 'source file.sh' or '. file.sh').
+    // If true, then all symbols from the workspace are included.
+    includeAllWorkspaceSymbols: z.boolean().default(false),
 
     // Additional ShellCheck arguments. Note that we already add the following arguments: --shell, --format, --external-sources."
     shellcheckArguments: z
@@ -31,8 +36,8 @@ export const ConfigSchema = z
       }, z.array(z.string()))
       .default([]),
 
-    // Maximum number of files to analyze in the background. Set to 0 to disable background analysis.
-    backgroundAnalysisMaxFiles: z.number().int().min(0).default(500),
+    // Controls the executable used for ShellCheck linting information. An empty string will disable linting.
+    shellcheckPath: z.string().trim().default('shellcheck'),
   })
   .strict()
 
@@ -42,18 +47,14 @@ export function getConfigFromEnvironmentVariables(): {
   config: z.infer<typeof ConfigSchema>
   environmentVariablesUsed: string[]
 } {
-  const { HIGHLIGHT_PARSING_ERRORS } = process.env
-
   const rawConfig = {
-    globPattern: process.env.GLOB_PATTERN,
-    highlightParsingErrors:
-      typeof HIGHLIGHT_PARSING_ERRORS !== 'undefined'
-        ? toBoolean(HIGHLIGHT_PARSING_ERRORS)
-        : undefined,
-    explainshellEndpoint: process.env.EXPLAINSHELL_ENDPOINT,
-    shellcheckPath: process.env.SHELLCHECK_PATH,
-    shellcheckArguments: process.env.SHELLCHECK_ARGUMENTS,
     backgroundAnalysisMaxFiles: process.env.BACKGROUND_ANALYSIS_MAX_FILES,
+    explainshellEndpoint: process.env.EXPLAINSHELL_ENDPOINT,
+    globPattern: process.env.GLOB_PATTERN,
+    highlightParsingErrors: toBoolean(process.env.HIGHLIGHT_PARSING_ERRORS),
+    includeAllWorkspaceSymbols: toBoolean(process.env.INCLUDE_ALL_WORKSPACE_SYMBOLS),
+    shellcheckArguments: process.env.SHELLCHECK_ARGUMENTS,
+    shellcheckPath: process.env.SHELLCHECK_PATH,
   }
 
   const environmentVariablesUsed = Object.entries(rawConfig)
@@ -69,4 +70,5 @@ export function getDefaultConfiguration(): z.infer<typeof ConfigSchema> {
   return ConfigSchema.parse({})
 }
 
-const toBoolean = (s: string): boolean => s === 'true' || s === '1'
+const toBoolean = (s?: string): boolean | undefined =>
+  typeof s !== 'undefined' ? s === 'true' || s === '1' : undefined
