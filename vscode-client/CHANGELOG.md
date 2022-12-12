@@ -2,7 +2,7 @@
 
 ## 1.21.0
 
-- Upgrade language server to 4.1.0 that makes symbols lookup based on on sourced files (using non dynamic statements like `source file.sh` or `. ~/file.inc`) instead of including symbols from all files in the workspace. We now also support jump-to-definition on the file path used in a source command. The new behavior can be disabled by turning on the `includeAllWorkspaceSymbols` configuration option.
+- Upgrade language server to 4.1.0 that makes symbols lookup based on sourced files (using non dynamic statements like `source file.sh` or `. ~/file.inc`) instead of including all symbols from the workspace. We now also support jump-to-definition on the file path used in a source command. The new behavior can be disabled by turning on the `includeAllWorkspaceSymbols` configuration option.
 
 ## 1.20.1
 
