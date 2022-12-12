@@ -34,7 +34,7 @@
     "vscode-languageserver-textdocument": "1.0.8"
   },
   "dependencies": {
-    "zod": "3.20.0"
+    "zod": "3.20.2"
   },
   "resolutions": {
     "sane": "^5.0.0"
