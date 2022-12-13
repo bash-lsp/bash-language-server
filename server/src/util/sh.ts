@@ -14,7 +14,7 @@ export function execShellScript(
   if (cmd === 'cmd.exe') {
     args.push('/c', body)
   } else {
-    args.push('-c', body)
+    args.push('--noprofile', '--norc', '-c', body)
   }
 
   const process = ChildProcess.spawn(cmd, args)

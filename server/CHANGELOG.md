@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 4.1.1
+
+- Background analysis: handle workspace root being a URL https://github.com/bash-lsp/bash-language-server/pull/625
+- Shell documentation: add `--noprofile --norc` to avoid config files breaking formatting https://github.com/bash-lsp/bash-language-server/pull/626
+
 ## 4.1.0
 
 - Symbols across files are now only included based on sourced files (using non dynamic statements like `source file.sh` or `. ~/file.inc`) instead of including symbols from all files in the workspace. We now also support jump-to-definition on the file path used in a source command. The new behavior can be disabled by turning on the `includeAllWorkspaceSymbols` configuration option. https://github.com/bash-lsp/bash-language-server/pull/244
