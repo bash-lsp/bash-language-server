@@ -1,3 +1,5 @@
+import { pathToFileURL } from 'node:url'
+
 import {
   FIXTURE_DOCUMENT,
   FIXTURE_FOLDER,
@@ -201,7 +203,7 @@ describe('findAllSourcedUris', () => {
     const newAnalyzer = new Analyzer({
       console: connection.console,
       parser,
-      workspaceFolder: REPO_ROOT_FOLDER,
+      workspaceFolder: pathToFileURL(REPO_ROOT_FOLDER).href,
     })
     await newAnalyzer.initiateBackgroundAnalysis({
       backgroundAnalysisMaxFiles: defaultConfig.backgroundAnalysisMaxFiles,
