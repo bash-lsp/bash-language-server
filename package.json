@@ -17,9 +17,9 @@
   },
   "devDependencies": {
     "@types/jest": "28.1.8",
-    "@types/node": "18.11.13",
-    "@typescript-eslint/eslint-plugin": "5.46.0",
-    "@typescript-eslint/parser": "5.46.0",
+    "@types/node": "18.11.14",
+    "@typescript-eslint/eslint-plugin": "5.46.1",
+    "@typescript-eslint/parser": "5.46.1",
     "eslint": "8.29.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-jest": "26.9.0",
@@ -34,7 +34,7 @@
     "vscode-languageserver-textdocument": "1.0.8"
   },
   "dependencies": {
-    "zod": "3.20.0"
+    "zod": "3.20.2"
   },
   "resolutions": {
     "sane": "^5.0.0"
