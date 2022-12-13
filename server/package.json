@@ -29,7 +29,7 @@
     "zod": "3.20.2"
   },
   "scripts": {
-    "prepublishOnly": "cd ../ && yarn run compile"
+    "prepublishOnly": "cd ../ && yarn run compile && cp README.md server/"
   },
   "devDependencies": {
     "@types/fuzzy-search": "2.1.2",
