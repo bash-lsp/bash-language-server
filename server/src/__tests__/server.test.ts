@@ -1,5 +1,7 @@
-import * as Process from 'child_process'
-import * as Path from 'path'
+import * as Process from 'node:child_process'
+import * as Path from 'node:path'
+import { pathToFileURL } from 'node:url'
+
 import * as LSP from 'vscode-languageserver/node'
 import { CodeAction } from 'vscode-languageserver/node'
 
@@ -14,7 +16,7 @@ import LspServer from '../server'
 import { CompletionItemDataType } from '../types'
 
 async function initializeServer(
-  { rootPath }: { rootPath?: string } = { rootPath: FIXTURE_FOLDER },
+  { rootPath }: { rootPath?: string } = { rootPath: pathToFileURL(FIXTURE_FOLDER).href },
 ) {
   const diagnostics: Array<LSP.PublishDiagnosticsParams | undefined> = []
 

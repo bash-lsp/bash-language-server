@@ -1,5 +1,7 @@
+import * as os from 'node:os'
+import { fileURLToPath } from 'node:url'
+
 import * as fastGlob from 'fast-glob'
-import * as os from 'os'
 
 // from https://github.com/sindresorhus/untildify/blob/f85a087418aeaa2beb56fe2684fe3b64fc8c588d/index.js#L11
 export function untildify(pathWithTilde: string): string {
@@ -18,6 +20,10 @@ export async function getFilePaths({
   rootPath: string
   maxItems: number
 }): Promise<string[]> {
+  if (rootPath.startsWith('file://')) {
+    rootPath = fileURLToPath(rootPath)
+  }
+
   const stream = fastGlob.stream([globPattern], {
     absolute: true,
     onlyFiles: true,

@@ -1,20 +1,26 @@
 # Bash Language Server
 
-Bash language server implementation based on [Tree Sitter][tree-sitter] and its [grammar for Bash][tree-sitter-bash] and supports [explainshell][explainshell] and [shellcheck][shellcheck].
+Bash language server that brings an IDE-like experience for bash scripts to most editors. This is based on the [Tree Sitter parser][tree-sitter-bash] and supports [explainshell][explainshell] and [shellcheck][shellcheck].
 
 We strongly recommend that you install [shellcheck][shellcheck] to enable linting: https://github.com/koalaman/shellcheck#installing
 
+Documentation around configuration can be found in the [config.ts](https://github.com/bash-lsp/bash-language-server/blob/main/server/src/config.ts) file.
+
 ## Features
 
-- [x] Jump to declaration
-- [x] Find references
-- [x] Code Outline & Show Symbols
-- [x] Highlight occurrences
-- [x] Code completion
-- [x] Simple diagnostics reporting
-- [x] Documentation for flags on hover
-- [x] Workspace symbols
-- [ ] Rename symbol
+- Jump to declaration
+- Find references
+- Code Outline & Show Symbols
+- Highlight occurrences
+- Code completion
+- Simple diagnostics reporting
+- Documentation for symbols on hover
+- Workspace symbols
+
+To be implemented:
+
+- Rename symbol
+- Better jump to declaration and find references based on scope
 
 ## Installation
 
@@ -28,7 +34,7 @@ On Fedora based distros:
 dnf install -y nodejs-bash-language-server
 ```
 
-If you encounter installation errors, ensure you have node version 12 or newer (`node --version`).
+If you encounter installation errors, ensure you have node version 14 or newer (`node --version`).
 
 ### Clients
 
