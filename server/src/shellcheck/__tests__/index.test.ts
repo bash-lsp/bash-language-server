@@ -8,7 +8,7 @@ import { Linter } from '../index'
 const mockConsole = getMockConnection().console
 
 function textToDoc(txt: string) {
-  return TextDocument.create('foo', 'bar', 0, txt)
+  return TextDocument.create(`file://${FIXTURE_FOLDER}/foo.sh`, 'bar', 0, txt)
 }
 
 describe('linter', () => {
@@ -220,14 +220,14 @@ describe('linter', () => {
     `)
   })
 
-  it('should follow sources with incorrect cwd if correct path is passed as a workspace path', async () => {
+  it('should follow sources with incorrect cwd and if correct path is passed as a source path', async () => {
     const linter = new Linter({
       console: mockConsole,
       cwd: path.resolve(path.join(FIXTURE_FOLDER, '../')),
       executablePath: 'shellcheck',
     })
     const result = await linter.lint(FIXTURE_DOCUMENT.SHELLCHECK_SOURCE, [
-      { uri: `file://${path.resolve(FIXTURE_FOLDER)}`, name: 'fixtures' },
+      path.resolve(FIXTURE_FOLDER),
     ])
     expect(result).toEqual({
       codeActions: [],

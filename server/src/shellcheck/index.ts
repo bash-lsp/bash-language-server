@@ -1,3 +1,6 @@
+import { dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import { spawn } from 'child_process'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
@@ -38,7 +41,7 @@ export class Linter {
 
   public async lint(
     document: TextDocument,
-    folders: LSP.WorkspaceFolder[],
+    sourcePaths: string[],
     additionalShellCheckArguments: string[] = [],
   ): Promise<{ diagnostics: LSP.Diagnostic[]; codeActions: LSP.CodeAction[] }> {
     if (!this._canLint) {
@@ -47,7 +50,7 @@ export class Linter {
 
     const result = await this.runShellCheck(
       document,
-      folders,
+      [...sourcePaths, dirname(fileURLToPath(document.uri))],
       additionalShellCheckArguments,
     )
     if (!this._canLint) {
@@ -59,7 +62,7 @@ export class Linter {
 
   private async runShellCheck(
     document: TextDocument,
-    folders: LSP.WorkspaceFolder[],
+    sourcePaths: string[],
     additionalArgs: string[] = [],
   ): Promise<ShellCheckResult> {
     const documentText = document.getText()
@@ -73,9 +76,8 @@ export class Linter {
         ? shellDialect
         : 'bash'
 
-    const workspaceFolderSourcePaths = folders
-      // NOTE: on some system folder.name is undefined
-      .map((folder) => folder?.name?.trim())
+    const sourcePathsArgs = sourcePaths
+      .map((folder) => folder.trim())
       .filter((folderName) => folderName)
       .map((folderName) => `--source-path=${folderName}`)
 
@@ -83,8 +85,7 @@ export class Linter {
       `--shell=${shellName}`,
       '--format=json1',
       '--external-sources',
-      `--source-path=${this.cwd}`,
-      ...workspaceFolderSourcePaths,
+      ...sourcePathsArgs,
       ...additionalArgs,
     ]
 
