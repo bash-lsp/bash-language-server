@@ -16,36 +16,31 @@ import * as TreeSitterUtil from './util/tree-sitter'
 
 const readFileAsync = promisify(fs.readFile)
 
-type Kinds = { [type: string]: LSP.SymbolKind }
+const TREE_SITTER_TYPE_TO_LSP_KIND: { [type: string]: LSP.SymbolKind | undefined } = {
+  // These keys are using underscores as that's the naming convention in tree-sitter.
+  environment_variable_assignment: LSP.SymbolKind.Variable,
+  function_definition: LSP.SymbolKind.Function,
+  variable_assignment: LSP.SymbolKind.Variable,
+}
 
 type Declarations = { [word: string]: LSP.SymbolInformation[] }
-type FileDeclarations = { [uri: string]: Declarations }
 
-type Trees = { [uri: string]: Parser.Tree }
-type Texts = { [uri: string]: string }
+type AnalyzedDocument = {
+  document: TextDocument
+  tree: Parser.Tree
+  declarations: Declarations
+  sourcedUris: Set<string>
+}
 
 /**
  * The Analyzer uses the Abstract Syntax Trees (ASTs) that are provided by
  * tree-sitter to find definitions, reference, etc.
  */
 export default class Analyzer {
-  private parser: Parser
   private console: LSP.RemoteConsole
-  private uriToTextDocument: { [uri: string]: TextDocument } = {}
-  private uriToTreeSitterTrees: Trees = {}
-
-  // We need this to find the word at a given point etc.
-  private uriToFileContent: Texts = {}
-  private uriToDeclarations: FileDeclarations = {}
-  private uriToSourcedUris: { [uri: string]: Set<string> } = {}
-  private treeSitterTypeToLSPKind: Kinds = {
-    // These keys are using underscores as that's the naming convention in tree-sitter.
-    environment_variable_assignment: LSP.SymbolKind.Variable,
-    function_definition: LSP.SymbolKind.Function,
-    variable_assignment: LSP.SymbolKind.Variable,
-  }
-
   private includeAllWorkspaceSymbols: boolean
+  private parser: Parser
+  private uriToAnalyzedDocument: Record<string, AnalyzedDocument | undefined> = {}
   private workspaceFolder: string | null
 
   public constructor({
@@ -69,8 +64,8 @@ export default class Analyzer {
    * Initiates a background analysis of the files in the workspaceFolder to
    * enable features across files.
    *
-   * NOTE: if the source aware feature works well, we can likely remove this and
-   * rely on parsing files as they are sourced.
+   * NOTE that when the source aware feature is enabled files are also parsed
+   * when they are found.
    */
   public async initiateBackgroundAnalysis({
     backgroundAnalysisMaxFiles,
@@ -162,9 +157,10 @@ export default class Analyzer {
     uri: string
     word: string
   }): LSP.Location[] {
-    const tree = this.uriToTreeSitterTrees[uri]
+    const tree = this.uriToAnalyzedDocument[uri]?.tree
+
     if (position && tree) {
-      // NOTE: when a word is a file path to a sourced file, we return a location it.
+      // NOTE: when a word is a file path to a sourced file, we return a location to it.
       const sourcedLocation = sourcing.getSourcedLocation({
         position,
         rootPath: this.workspaceFolder,
@@ -177,12 +173,13 @@ export default class Analyzer {
       }
     }
 
-    const fileDeclarations = this.getReachableUriToDeclarations({ uri })
-
-    return Object.keys(fileDeclarations)
+    return this.getReachableUris({ uri })
       .reduce((symbols, uri) => {
-        const declarationNames = fileDeclarations[uri][word] || []
-        declarationNames.forEach((d) => symbols.push(d))
+        const analyzedDocument = this.uriToAnalyzedDocument[uri]
+        if (analyzedDocument) {
+          const declarationNames = analyzedDocument.declarations[word] || []
+          declarationNames.forEach((d) => symbols.push(d))
+        }
         return symbols
       }, [] as LSP.SymbolInformation[])
       .map((symbol) => symbol.location)
@@ -205,12 +202,16 @@ export default class Analyzer {
     params: LSP.TextDocumentPositionParams
     endpoint: string
   }): Promise<{ helpHTML?: string }> {
-    const leafNode = this.uriToTreeSitterTrees[
-      params.textDocument.uri
-    ].rootNode.descendantForPosition({
+    const analyzedDocument = this.uriToAnalyzedDocument[params.textDocument.uri]
+
+    const leafNode = analyzedDocument?.tree.rootNode.descendantForPosition({
       row: params.position.line,
       column: params.position.character,
     })
+
+    if (!leafNode || !analyzedDocument) {
+      return {}
+    }
 
     // explainshell needs the whole command, not just the "word" (tree-sitter
     // parlance) that the user hovered over. A relatively successful heuristic
@@ -223,10 +224,9 @@ export default class Analyzer {
       return {}
     }
 
-    const cmd = this.uriToFileContent[params.textDocument.uri].slice(
-      interestingNode.startIndex,
-      interestingNode.endIndex,
-    )
+    const cmd = analyzedDocument.document
+      .getText()
+      .slice(interestingNode.startIndex, interestingNode.endIndex)
     type ExplainshellResponse = {
       matches?: Array<{ helpHTML: string; start: number; end: number }>
     }
@@ -242,8 +242,7 @@ export default class Analyzer {
       return {}
     } else {
       const offsetOfMousePointerInCommand =
-        this.uriToTextDocument[params.textDocument.uri].offsetAt(params.position) -
-        interestingNode.startIndex
+        analyzedDocument.document.offsetAt(params.position) - interestingNode.startIndex
 
       const match = explainshellResponse.matches.find(
         (helpItem) =>
@@ -259,7 +258,7 @@ export default class Analyzer {
    * Find all the locations where something named name has been defined.
    */
   public findReferences(name: string): LSP.Location[] {
-    const uris = Object.keys(this.uriToTreeSitterTrees)
+    const uris = Object.keys(this.uriToAnalyzedDocument)
     return flattenArray(uris.map((uri) => this.findOccurrences(uri, name)))
   }
 
@@ -268,8 +267,13 @@ export default class Analyzer {
    * It's currently not scope-aware.
    */
   public findOccurrences(uri: string, query: string): LSP.Location[] {
-    const tree = this.uriToTreeSitterTrees[uri]
-    const contents = this.uriToFileContent[uri]
+    const analyzedDocument = this.uriToAnalyzedDocument[uri]
+    if (!analyzedDocument) {
+      return []
+    }
+
+    const { tree } = analyzedDocument
+    const contents = analyzedDocument.document.getText()
 
     const locations: LSP.Location[] = []
 
@@ -301,7 +305,7 @@ export default class Analyzer {
    * Find all symbol definitions in the given file.
    */
   public findSymbolsForFile({ uri }: { uri: string }): LSP.SymbolInformation[] {
-    const declarationsInFile = this.uriToDeclarations[uri] || {}
+    const declarationsInFile = this.uriToAnalyzedDocument[uri]?.declarations || {}
     return flattenObjectValues(declarationsInFile)
   }
 
@@ -317,17 +321,18 @@ export default class Analyzer {
     uri: string
     word: string
   }): LSP.SymbolInformation[] {
-    const fileDeclarations = this.getReachableUriToDeclarations({ uri })
+    return this.getReachableUris({ uri }).reduce((symbols, uri) => {
+      const analyzedDocument = this.uriToAnalyzedDocument[uri]
 
-    return Object.keys(fileDeclarations).reduce((symbols, uri) => {
-      const declarationsInFile = fileDeclarations[uri]
-      Object.keys(declarationsInFile).map((name) => {
-        const match = exactMatch ? name === word : name.startsWith(word)
-        if (match) {
-          declarationsInFile[name].forEach((symbol) => symbols.push(symbol))
-        }
-      })
-
+      if (analyzedDocument) {
+        const { declarations } = analyzedDocument
+        Object.keys(declarations).map((name) => {
+          const match = exactMatch ? name === word : name.startsWith(word)
+          if (match) {
+            declarations[name].forEach((symbol) => symbols.push(symbol))
+          }
+        })
+      }
       return symbols
     }, [] as LSP.SymbolInformation[])
   }
@@ -350,20 +355,9 @@ export default class Analyzer {
 
     const tree = this.parser.parse(contents)
 
-    // TODO: would be nicer to save one map from uri to object containing all
-    // these fields.
-    this.uriToTextDocument[uri] = document
-    this.uriToTreeSitterTrees[uri] = tree
-    this.uriToDeclarations[uri] = {}
-    this.uriToFileContent[uri] = contents
-    this.uriToSourcedUris[uri] = sourcing.getSourcedUris({
-      fileContent: contents,
-      fileUri: uri,
-      rootPath: this.workspaceFolder,
-      tree,
-    })
-
     const problems: LSP.Diagnostic[] = []
+
+    const declarations: Declarations = {}
 
     // TODO: move this somewhere
     TreeSitterUtil.forEach(tree.rootNode, (n: Parser.SyntaxNode) => {
@@ -384,7 +378,7 @@ export default class Analyzer {
         }
 
         const word = contents.slice(named.startIndex, named.endIndex)
-        const namedDeclarations = this.uriToDeclarations[uri][word] || []
+        const namedDeclarations = declarations[word] || []
 
         const parent = TreeSitterUtil.findParent(
           n,
@@ -398,18 +392,38 @@ export default class Analyzer {
               )
             : '' // TODO: unsure what we should do here?
 
+        const kind = TREE_SITTER_TYPE_TO_LSP_KIND[n.type]
+
+        if (!kind) {
+          this.console.warn(
+            `Unmapped tree sitter type: ${n.type}, defaulting to variable`,
+          )
+        }
+
         namedDeclarations.push(
           LSP.SymbolInformation.create(
             word,
-            this.treeSitterTypeToLSPKind[n.type],
+            kind || LSP.SymbolKind.Variable,
             TreeSitterUtil.range(n),
             uri,
             parentName,
           ),
         )
-        this.uriToDeclarations[uri][word] = namedDeclarations
+        declarations[word] = namedDeclarations
       }
     })
+
+    this.uriToAnalyzedDocument[uri] = {
+      tree,
+      document,
+      declarations,
+      sourcedUris: sourcing.getSourcedUris({
+        fileContent: contents,
+        fileUri: uri,
+        rootPath: this.workspaceFolder,
+        tree,
+      }),
+    }
 
     function findMissingNodes(node: Parser.SyntaxNode) {
       if (node.isMissing()) {
@@ -434,7 +448,7 @@ export default class Analyzer {
     const allSourcedUris = new Set<string>([])
 
     const addSourcedFilesFromUri = (fromUri: string) => {
-      const sourcedUris = this.uriToSourcedUris[fromUri]
+      const sourcedUris = this.uriToAnalyzedDocument[fromUri]?.sourcedUris
 
       if (!sourcedUris) {
         return
@@ -461,14 +475,14 @@ export default class Analyzer {
     line: number,
     column: number,
   ): Parser.SyntaxNode | null {
-    const document = this.uriToTreeSitterTrees[uri]
+    const tree = this.uriToAnalyzedDocument[uri]?.tree
 
-    if (!document?.rootNode) {
+    if (!tree?.rootNode) {
       // Check for lacking rootNode (due to failed parse?)
       return null
     }
 
-    return document.rootNode.descendantForPosition({ row: line, column })
+    return tree.rootNode.descendantForPosition({ row: line, column })
   }
 
   /**
@@ -511,7 +525,10 @@ export default class Analyzer {
    * Find a block of comments above a line position
    */
   public commentsAbove(uri: string, line: number): string | null {
-    const doc = this.uriToTextDocument[uri]
+    const doc = this.uriToAnalyzedDocument[uri]?.document
+    if (!doc) {
+      return null
+    }
 
     const commentBlock = []
 
@@ -568,18 +585,15 @@ export default class Analyzer {
     this.includeAllWorkspaceSymbols = includeAllWorkspaceSymbols
   }
 
-  private getReachableUriToDeclarations({
-    uri: fromUri,
-  }: { uri?: string } = {}): FileDeclarations {
+  private getReachableUris({ uri: fromUri }: { uri?: string } = {}): string[] {
     if (!fromUri || this.includeAllWorkspaceSymbols) {
-      return this.uriToDeclarations
+      return Object.keys(this.uriToAnalyzedDocument)
     }
 
     const uris = [fromUri, ...Array.from(this.findAllSourcedUris({ uri: fromUri }))]
 
-    // for each uri (sourced and base file) we find the declarations
-    return uris.reduce((fileDeclarations, uri) => {
-      if (!this.uriToDeclarations[uri]) {
+    return uris.filter((uri) => {
+      if (!this.uriToAnalyzedDocument[uri]) {
         // Either the background analysis didn't run or the file is outside
         // the workspace. Let us try to analyze the file.
         try {
@@ -590,25 +604,29 @@ export default class Analyzer {
           })
         } catch (err) {
           this.console.log(`Error while analyzing sourced file ${uri}: ${err}`)
+          return false
         }
       }
 
-      fileDeclarations[uri] = this.uriToDeclarations[uri] || {}
-      return fileDeclarations
-    }, {} as FileDeclarations)
+      return true
+    })
   }
 
   private getAllSymbols({ uri }: { uri?: string } = {}): LSP.SymbolInformation[] {
-    const fileDeclarations = this.getReachableUriToDeclarations({ uri })
+    const reachableUris = this.getReachableUris({ uri })
 
-    return Object.keys(fileDeclarations).reduce((symbols, uri) => {
-      const declarationsInFile = fileDeclarations[uri]
-      Object.keys(declarationsInFile).forEach((name) => {
-        const declarationNames = this.uriToDeclarations[uri][name] || []
+    const symbols: LSP.SymbolInformation[] = []
+    reachableUris.forEach((uri) => {
+      const analyzedDocument = this.uriToAnalyzedDocument[uri]
+      if (!analyzedDocument) {
+        return
+      }
+
+      Object.values(analyzedDocument.declarations).forEach((declarationNames) => {
         declarationNames.forEach((d) => symbols.push(d))
       })
+    })
 
-      return symbols
-    }, [] as LSP.SymbolInformation[])
+    return symbols
   }
 }
