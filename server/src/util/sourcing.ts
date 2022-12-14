@@ -55,6 +55,10 @@ export function getSourcedUris({
 /**
  * Investigates if the given position is a path to a sourced file and maps it
  * to a location. Useful for jump to definition.
+ *
+ * TODO: we could likely store the position as part of the getSourcedUris and
+ * get rid of this function.
+ *
  * @returns an optional location
  */
 export function getSourcedLocation({
