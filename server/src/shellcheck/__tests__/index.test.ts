@@ -220,7 +220,7 @@ describe('linter', () => {
     `)
   })
 
-  it('should follow sources with incorrect cwd and if correct path is passed as a source path', async () => {
+  it('should follow sources with incorrect cwd if the execution path is passed', async () => {
     const linter = new Linter({
       console: mockConsole,
       cwd: path.resolve(path.join(FIXTURE_FOLDER, '../')),
