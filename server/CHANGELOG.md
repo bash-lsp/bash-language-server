@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.1.2
+
+- Correct ShellCheck `source-path` argument to support following sources based on the local folder of the file and the workspace root.
+
 ## 4.1.1
 
 - Background analysis: handle workspace root being a URL https://github.com/bash-lsp/bash-language-server/pull/625

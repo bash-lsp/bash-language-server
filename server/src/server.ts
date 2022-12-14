@@ -1,7 +1,8 @@
-import { spawnSync } from 'child_process'
-import * as path from 'path'
+import { spawnSync } from 'node:child_process'
+import * as path from 'node:path'
+import { isDeepStrictEqual } from 'node:util'
+
 import * as TurndownService from 'turndown'
-import { isDeepStrictEqual } from 'util'
 import * as LSP from 'vscode-languageserver/node'
 import { CodeAction } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
@@ -260,12 +261,10 @@ export default class BashServer {
     // Run ShellCheck diagnostics:
     if (this.linter) {
       try {
-        const folders = this.clientCapabilities.workspace?.workspaceFolders
-          ? await this.connection.workspace.getWorkspaceFolders()
-          : []
+        const sourceFolders = this.workspaceFolder ? [this.workspaceFolder] : []
         const { diagnostics: lintDiagnostics, codeActions } = await this.linter.lint(
           document,
-          folders || [],
+          sourceFolders,
           this.config.shellcheckArguments,
         )
         diagnostics = diagnostics.concat(lintDiagnostics)
