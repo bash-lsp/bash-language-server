@@ -7,8 +7,9 @@ import { Linter } from '../index'
 
 const mockConsole = getMockConnection().console
 
+const FIXTURE_DOCUMENT_URI = `file://${FIXTURE_FOLDER}/foo.sh`
 function textToDoc(txt: string) {
-  return TextDocument.create(`file://${FIXTURE_FOLDER}/foo.sh`, 'bar', 0, txt)
+  return TextDocument.create(FIXTURE_DOCUMENT_URI, 'bar', 0, txt)
 }
 
 describe('linter', () => {
@@ -71,7 +72,7 @@ describe('linter', () => {
             ],
             "edit": Object {
               "changes": Object {
-                "foo": Array [
+                "${FIXTURE_DOCUMENT_URI}": Array [
                   Object {
                     "newText": "\\"",
                     "range": Object {
