@@ -46,10 +46,7 @@ describe('ConfigSchema', () => {
   it('allows shellcheckArguments to be an array', () => {
     expect(
       ConfigSchema.parse({
-        shellcheckArguments: [
-          '--shell=sh',
-          '--exclude=SC2034,SC1090,SC1091,SC2164,SC2181,SC2154,SC2004,SC2016,SC2086,SC2048,SC2148',
-        ],
+        shellcheckArguments: [' -e ', 'SC2001', '-e', 'SC2002 '],
       }).shellcheckArguments,
     ).toEqual(['-e', 'SC2001', '-e', 'SC2002'])
   })
