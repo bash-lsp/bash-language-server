@@ -42,44 +42,73 @@ describe('ConfigSchema', () => {
       }
     `)
   })
-})
-describe('getShellcheckPath', () => {
-  it('defaults to "shellcheck"', () => {
-    process.env = {}
-    const result = getConfigFromEnvironmentVariables().config.shellcheckPath
-    expect(result).toEqual('shellcheck')
-  })
 
+  it('allows shellcheckArguments to be an array', () => {
+    expect(
+      ConfigSchema.parse({
+        shellcheckArguments: [' -e ', 'SC2001', '-e', 'SC2002 '],
+      }).shellcheckArguments,
+    ).toEqual(['-e', 'SC2001', '-e', 'SC2002'])
+  })
+})
+describe('getConfigFromEnvironmentVariables', () => {
+  it('returns a default', () => {
+    process.env = {}
+    const { config } = getConfigFromEnvironmentVariables()
+    expect(config).toMatchInlineSnapshot(`
+      Object {
+        "backgroundAnalysisMaxFiles": 500,
+        "explainshellEndpoint": "",
+        "globPattern": "**/*@(.sh|.inc|.bash|.command)",
+        "highlightParsingErrors": false,
+        "includeAllWorkspaceSymbols": false,
+        "shellcheckArguments": Array [],
+        "shellcheckPath": "shellcheck",
+      }
+    `)
+  })
   it('preserves an empty string', () => {
     process.env = {
       SHELLCHECK_PATH: '',
+      EXPLAINSHELL_ENDPOINT: '',
     }
-    const result = getConfigFromEnvironmentVariables().config.shellcheckPath
-    expect(result).toEqual('')
+    const { config } = getConfigFromEnvironmentVariables()
+    expect(config).toMatchInlineSnapshot(`
+      Object {
+        "backgroundAnalysisMaxFiles": 500,
+        "explainshellEndpoint": "",
+        "globPattern": "**/*@(.sh|.inc|.bash|.command)",
+        "highlightParsingErrors": false,
+        "includeAllWorkspaceSymbols": false,
+        "shellcheckArguments": Array [],
+        "shellcheckPath": "",
+      }
+    `)
   })
 
-  it('parses environment variable', () => {
+  it('parses environment variables', () => {
     process.env = {
       SHELLCHECK_PATH: '/path/to/shellcheck',
-    }
-    const result = getConfigFromEnvironmentVariables().config.shellcheckPath
-    expect(result).toEqual('/path/to/shellcheck')
-  })
-})
-
-describe('getShellCheckArguments', () => {
-  it('defaults to an empty array', () => {
-    process.env = {}
-    const result = getConfigFromEnvironmentVariables().config.shellcheckArguments
-    expect(result).toEqual([])
-  })
-
-  it('parses environment variable', () => {
-    process.env = {
       SHELLCHECK_ARGUMENTS: '-e SC2001',
+      EXPLAINSHELL_ENDPOINT: 'localhost:8080',
+      GLOB_PATTERN: '*.*',
+      BACKGROUND_ANALYSIS_MAX_FILES: '1',
     }
-    const result = getConfigFromEnvironmentVariables().config.shellcheckArguments
-    expect(result).toEqual(['-e', 'SC2001'])
+    const { config } = getConfigFromEnvironmentVariables()
+    expect(config).toMatchInlineSnapshot(`
+      Object {
+        "backgroundAnalysisMaxFiles": 1,
+        "explainshellEndpoint": "localhost:8080",
+        "globPattern": "*.*",
+        "highlightParsingErrors": false,
+        "includeAllWorkspaceSymbols": false,
+        "shellcheckArguments": Array [
+          "-e",
+          "SC2001",
+        ],
+        "shellcheckPath": "/path/to/shellcheck",
+      }
+    `)
   })
 
   it('parses environment variable with excessive white space', () => {
@@ -89,50 +118,7 @@ describe('getShellCheckArguments', () => {
     const result = getConfigFromEnvironmentVariables().config.shellcheckArguments
     expect(result).toEqual(['-e', 'SC2001', '-e', 'SC2002'])
   })
-})
-
-describe('getExplainshellEndpoint', () => {
-  it('default to an empty string', () => {
-    process.env = {}
-    const result = getConfigFromEnvironmentVariables().config.explainshellEndpoint
-    expect(result).toEqual('')
-  })
-
-  it('preserves the empty string', () => {
-    process.env = {
-      EXPLAINSHELL_ENDPOINT: '',
-    }
-    const result = getConfigFromEnvironmentVariables().config.explainshellEndpoint
-    expect(result).toEqual('')
-  })
-
-  it('parses environment variable', () => {
-    process.env = {
-      EXPLAINSHELL_ENDPOINT: 'localhost:8080',
-    }
-    const result = getConfigFromEnvironmentVariables().config.explainshellEndpoint
-    expect(result).toEqual('localhost:8080')
-  })
-})
-
-describe('getGlobPattern', () => {
-  it('parses environment variable', () => {
-    process.env = {
-      GLOB_PATTERN: '*.*',
-    }
-    const result = getConfigFromEnvironmentVariables().config.globPattern
-    expect(result).toEqual('*.*')
-  })
-})
-
-describe('highlightParsingError', () => {
-  it('default to false', () => {
-    process.env = {}
-    const result = getConfigFromEnvironmentVariables().config.highlightParsingErrors
-    expect(result).toEqual(false)
-  })
-
-  it('parses environment variable', () => {
+  it('parses boolean environment variables', () => {
     process.env = {
       HIGHLIGHT_PARSING_ERRORS: 'true',
     }
