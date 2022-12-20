@@ -1,9 +1,10 @@
-import * as fs from 'fs'
+import * as fs from 'node:fs'
+import * as url from 'node:url'
+import { promisify } from 'node:util'
+
 import * as FuzzySearch from 'fuzzy-search'
 import fetch from 'node-fetch'
 import * as URI from 'urijs'
-import * as url from 'url'
-import { promisify } from 'util'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as Parser from 'web-tree-sitter'
@@ -597,7 +598,9 @@ export default class Analyzer {
         // Either the background analysis didn't run or the file is outside
         // the workspace. Let us try to analyze the file.
         try {
-          const fileContent = fs.readFileSync(new URL(uri), 'utf8')
+          // Ensure that files with hashes are loaded correctly
+          const safeFilePath = new URL(uri).href.replace('file://', '')
+          const fileContent = fs.readFileSync(safeFilePath, 'utf8')
           this.analyze({
             document: TextDocument.create(uri, 'shell', 1, fileContent),
             uri,

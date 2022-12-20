@@ -93,6 +93,7 @@ export function getSourcedLocation({
     const rootPaths = [path.dirname(uri), rootPath].filter(Boolean) as string[]
 
     const sourcedUri = isSourced ? getSourcedUri({ word, rootPaths }) : null
+    console.log('>>>', word, rootPaths, sourcedUri)
 
     if (sourcedUri) {
       return LSP.Location.create(sourcedUri, LSP.Range.create(0, 0, 0, 0))
@@ -152,8 +153,7 @@ function getSourcedUri({
   // resolve  relative path
   for (const rootPath of rootPaths) {
     const potentialPath = path.join(rootPath.replace('file://', ''), unquotedPath)
-
-    // check if path is a file
+    // check if path exists
     if (fs.existsSync(potentialPath)) {
       return `file://${potentialPath}`
     }

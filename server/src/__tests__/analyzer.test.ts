@@ -18,7 +18,7 @@ const CURRENT_URI = 'dummy-uri.sh'
 const mockConsole = getMockConnection().console
 
 // if you add a .sh file to testing/fixtures, update this value
-const FIXTURE_FILES_MATCHING_GLOB = 13
+const FIXTURE_FILES_MATCHING_GLOB = 14
 
 const defaultConfig = getDefaultConfiguration()
 

@@ -464,6 +464,16 @@ export default class BashServer {
     if (!word) {
       return null
     }
+
+    console.log(
+      '>>>',
+      this.analyzer.findDefinition({
+        position: params.position,
+        uri: params.textDocument.uri,
+        word,
+      }),
+    )
+
     return this.analyzer.findDefinition({
       position: params.position,
       uri: params.textDocument.uri,
