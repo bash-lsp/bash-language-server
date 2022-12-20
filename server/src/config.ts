@@ -26,8 +26,6 @@ export const ConfigSchema = z
         let argsList: string[] = []
         if (typeof arg === 'string') {
           argsList = arg.split(' ')
-          //.map((s) => s.trim())
-          //.filter((s) => s.length > 0)
         } else if (Array.isArray(arg)) {
           argsList = arg as string[]
         }
@@ -48,7 +46,7 @@ export function getConfigFromEnvironmentVariables(): {
   environmentVariablesUsed: string[]
 } {
   const rawConfig = {
-    backgroundAnalysisMaxFiles: process.env.BACKGROUND_ANALYSIS_MAX_FILES,
+    backgroundAnalysisMaxFiles: toNumber(process.env.BACKGROUND_ANALYSIS_MAX_FILES),
     explainshellEndpoint: process.env.EXPLAINSHELL_ENDPOINT,
     globPattern: process.env.GLOB_PATTERN,
     highlightParsingErrors: toBoolean(process.env.HIGHLIGHT_PARSING_ERRORS),
@@ -72,3 +70,6 @@ export function getDefaultConfiguration(): z.infer<typeof ConfigSchema> {
 
 const toBoolean = (s?: string): boolean | undefined =>
   typeof s !== 'undefined' ? s === 'true' || s === '1' : undefined
+
+const toNumber = (s?: string): number | undefined =>
+  typeof s !== 'undefined' ? parseInt(s, 10) : undefined
