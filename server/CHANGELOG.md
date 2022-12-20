@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.1.3
+
+- Correctly parse environment variable `BACKGROUND_ANALYSIS_MAX_FILES`, although clients should migrate to the new configuration system (see info in the 4.0.1 release). https://github.com/bash-lsp/bash-language-server/pull/640
+
 ## 4.1.2
 
 - Correct ShellCheck `source-path` argument to support following sources based on the local folder of the file and the workspace root.
