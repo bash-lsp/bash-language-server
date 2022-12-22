@@ -430,6 +430,7 @@ export default class BashServer {
       exactMatch: true,
       uri: currentUri,
       word,
+      position: params.position,
     })
     if (
       ReservedWords.isReservedWord(word) ||

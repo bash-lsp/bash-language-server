@@ -314,22 +314,35 @@ export default class Analyzer {
    */
   public findSymbolsMatchingWord({
     exactMatch,
-    uri,
+    uri: fromUri,
     word,
+    position,
   }: {
     exactMatch: boolean
     uri: string
     word: string
+    position?: LSP.Position // FIXME: rename to location
   }): LSP.SymbolInformation[] {
-    return this.getReachableUris({ uri }).reduce((symbols, uri) => {
+    return this.getReachableUris({ uri: fromUri }).reduce((symbols, uri) => {
       const analyzedDocument = this.uriToAnalyzedDocument[uri]
 
       if (analyzedDocument) {
         const { declarations } = analyzedDocument
         Object.keys(declarations).map((name) => {
+          const namedDeclaration = declarations[name]
           const match = exactMatch ? name === word : name.startsWith(word)
           if (match) {
-            declarations[name].forEach((symbol) => symbols.push(symbol))
+            namedDeclaration.forEach((symbol) => {
+              // Skip if the symbol is defined in the current file after the requested position
+              // Ideally we want to be a lot smarter here...
+              if (uri === fromUri) {
+                if (position && symbol.location.range.start.line > position.line) {
+                  return
+                }
+              }
+
+              symbols.push(symbol)
+            })
           }
         })
       }
