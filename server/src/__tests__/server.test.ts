@@ -835,8 +835,17 @@ describe('server', () => {
     )
 
     expect(result).toBeDefined()
-    expect(result).toEqual({
-      contents: 'Function defined on line 4\n\noverride documentation for `ls` symbol',
-    })
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "contents": Object {
+          "kind": "markdown",
+          "value": "Function: **ls** - *defined on line 4*
+
+      \`\`\`txt
+      override documentation for \`ls\` symbol
+      \`\`\`",
+        },
+      }
+    `)
   })
 })
