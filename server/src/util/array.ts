@@ -25,7 +25,7 @@ export function uniqueBasedOnHash<A extends Record<string, any>>(
   const result: typeof list = []
   const hashSet = new Set<string>()
 
-  list.forEach(element => {
+  list.forEach((element) => {
     const hash = elementToHash(element)
     if (hashSet.has(hash)) {
       return

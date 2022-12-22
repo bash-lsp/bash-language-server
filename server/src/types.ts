@@ -1,4 +1,4 @@
-import * as LSP from 'vscode-languageserver'
+import * as LSP from 'vscode-languageserver/node'
 
 export enum CompletionItemDataType {
   Builtin,

@@ -1,12 +1,13 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'jest', 'simple-import-sort', 'prettier'],
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
+  plugins: [
+    '@typescript-eslint',
+    'jest',
+    'simple-import-sort',
+    'sort-class-members',
     'prettier',
-    'prettier/@typescript-eslint',
   ],
+  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
   parserOptions: {
     ecmaFeatures: {
       jsx: true,
@@ -16,15 +17,7 @@ module.exports = {
     project: './tsconfig.eslint.json',
   },
   rules: {
-    'prettier/prettier': [
-      'error',
-      {
-        trailingComma: 'all',
-        singleQuote: true,
-        printWidth: 90,
-        semi: false,
-      },
-    ],
+    'prettier/prettier': ['error'],
     '@typescript-eslint/no-unused-vars': [
       'error',
       {
@@ -49,8 +42,24 @@ module.exports = {
     ],
     'prefer-const': 'error',
     'prefer-template': 'error',
-    'simple-import-sort/sort': 'error',
+    'simple-import-sort/imports': 'error',
+    'simple-import-sort/exports': 'error',
     'object-shorthand': 'error',
+    'sort-class-members/sort-class-members': [
+      'error',
+      {
+        order: [
+          '[properties]',
+          '[conventional-private-properties]',
+          'constructor',
+          '[static-properties]',
+          '[static-methods]',
+          '[methods]',
+          '[conventional-private-methods]',
+        ],
+        accessorPairPositioning: 'getThenSet',
+      },
+    ],
 
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-member-accessibility': 'off',

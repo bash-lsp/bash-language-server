@@ -1,4 +1,5 @@
 'use strict'
+
 import * as path from 'path'
 import { ExtensionContext, workspace } from 'vscode'
 import {
@@ -6,24 +7,13 @@ import {
   LanguageClientOptions,
   ServerOptions,
   TransportKind,
-} from 'vscode-languageclient'
+} from 'vscode-languageclient/node'
+
+let client: LanguageClient
 
 export async function activate(context: ExtensionContext) {
-  const explainshellEndpoint = workspace
-    .getConfiguration('bashIde')
-    .get('explainshellEndpoint', '')
-
-  const globPattern = workspace.getConfiguration('bashIde').get('globPattern', '')
-
-  const highlightParsingErrors = workspace
-    .getConfiguration('bashIde')
-    .get('highlightParsingErrors', false)
-
   const env: any = {
     ...process.env,
-    EXPLAINSHELL_ENDPOINT: explainshellEndpoint,
-    GLOB_PATTERN: globPattern,
-    HIGHLIGHT_PARSING_ERRORS: highlightParsingErrors,
   }
 
   const serverExecutable = {
@@ -55,15 +45,21 @@ export async function activate(context: ExtensionContext) {
       },
     ],
     synchronize: {
-      configurationSection: 'Bash IDE',
+      configurationSection: 'bashIde',
       // Notify the server about file changes to '.clientrc files contain in the workspace
       fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
     },
   }
 
   const client = new LanguageClient('Bash IDE', 'Bash IDE', serverOptions, clientOptions)
+  client.registerProposedFeatures()
+  try {
+    await client.start()
+  } catch (error) {
+    client.error(`Start failed`, error, 'force')
+  }
+}
 
-  // Push the disposable to the context's subscriptions so that the
-  // client can be deactivated on extension deactivation
-  context.subscriptions.push(client.start())
+export function deactivate() {
+  return client.stop()
 }

@@ -38,24 +38,6 @@ Array [
 ]
 `;
 
-exports[`findDefinition returns a list of locations if parameter is found 1`] = `
-Array [
-  Object {
-    "range": Object {
-      "end": Object {
-        "character": 37,
-        "line": 148,
-      },
-      "start": Object {
-        "character": 0,
-        "line": 148,
-      },
-    },
-    "uri": "dummy-uri.sh",
-  },
-]
-`;
-
 exports[`findReferences returns a list of locations if parameter is found 1`] = `
 Array [
   Object {

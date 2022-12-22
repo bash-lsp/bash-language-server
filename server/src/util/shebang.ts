@@ -1,4 +1,8 @@
 const SHEBANG_REGEXP = /^#!(.*)/
+const SHELL_REGEXP = /bin[/](?:env )?(\w+)/
+
+const BASH_DIALECTS = ['sh', 'bash', 'dash', 'ksh'] as const
+type SupportedBashDialect = typeof BASH_DIALECTS[number]
 
 export function getShebang(fileContent: string): string | null {
   const match = SHEBANG_REGEXP.exec(fileContent)
@@ -6,14 +10,28 @@ export function getShebang(fileContent: string): string | null {
     return null
   }
 
-  return match[1].replace('-', '').trim()
+  return match[1].trim()
 }
 
-export function isBashShebang(shebang: string): boolean {
-  return shebang.endsWith('bash') || shebang.endsWith('sh')
+export function getShellDialect(shebang: string): SupportedBashDialect | null {
+  const match = SHELL_REGEXP.exec(shebang)
+  if (match && match[1]) {
+    const bashDialect = match[1].trim() as any
+    if (BASH_DIALECTS.includes(bashDialect)) {
+      return bashDialect
+    }
+  }
+
+  return null
 }
 
-export function hasBashShebang(fileContent: string): boolean {
+export function analyzeShebang(fileContent: string): {
+  shellDialect: SupportedBashDialect | null
+  shebang: string | null
+} {
   const shebang = getShebang(fileContent)
-  return shebang ? isBashShebang(shebang) : false
+  return {
+    shebang,
+    shellDialect: shebang ? getShellDialect(shebang) : null,
+  }
 }

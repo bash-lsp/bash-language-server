@@ -12,22 +12,22 @@ const readdirAsync = promisify(fs.readdir)
  * Provides information based on the programs on your PATH
  */
 export default class Executables {
+  private executables: Set<string>
+
+  private constructor(executables: string[]) {
+    this.executables = new Set(executables)
+  }
+
   /**
    * @param path is expected to to be a ':' separated list of paths.
    */
   public static fromPath(path: string): Promise<Executables> {
     const paths = path.split(':')
-    const promises = paths.map(x => findExecutablesInPath(x))
+    const promises = paths.map((x) => findExecutablesInPath(x))
     return Promise.all(promises)
       .then(ArrayUtil.flatten)
       .then(ArrayUtil.uniq)
-      .then(executables => new Executables(executables))
-  }
-
-  private executables: Set<string>
-
-  private constructor(executables: string[]) {
-    this.executables = new Set(executables)
+      .then((executables) => new Executables(executables))
   }
 
   /**

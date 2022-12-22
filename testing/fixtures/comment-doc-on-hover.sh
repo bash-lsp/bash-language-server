@@ -45,3 +45,12 @@ my_var="pizza"
 
 my_other_var="no comments above me :("
 
+
+# this is also included
+#
+# doc for func_four
+func_four() {
+    echo "func_four"
+}
+
+echo $unknown

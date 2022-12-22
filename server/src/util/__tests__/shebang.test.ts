@@ -1,31 +1,37 @@
-import { hasBashShebang } from '../shebang'
+import { analyzeShebang } from '../shebang'
 
-describe('hasBashShebang', () => {
-  it('returns false for empty file', () => {
-    expect(hasBashShebang('')).toBe(false)
+describe('analyzeShebang', () => {
+  it('returns null for an empty file', () => {
+    expect(analyzeShebang('')).toEqual({ shellDialect: null, shebang: null })
   })
 
-  it('returns false for python files', () => {
-    expect(hasBashShebang(`#!/usr/bin/env python2.7\n# set -x`)).toBe(false)
+  it('returns no shell dialect for python files', () => {
+    expect(analyzeShebang(`#!/usr/bin/env python2.7\n# set -x`)).toEqual({
+      shellDialect: null,
+      shebang: '/usr/bin/env python2.7',
+    })
   })
 
-  it('returns true for "#!/bin/sh -"', () => {
-    expect(hasBashShebang('#!/bin/sh -')).toBe(true)
-    expect(hasBashShebang('#!/bin/sh - ')).toBe(true)
+  it('returns no shell dialect for unsupported shell "#!/usr/bin/zsh"', () => {
+    expect(analyzeShebang('#!/usr/bin/zsh')).toEqual({
+      shellDialect: null,
+      shebang: '/usr/bin/zsh',
+    })
   })
 
-  it('returns true for "#!/usr/bin/env bash"', () => {
-    expect(hasBashShebang('#!/usr/bin/env bash')).toBe(true)
-    expect(hasBashShebang('#!/usr/bin/env bash ')).toBe(true)
-  })
-
-  it('returns true for "#!/bin/sh"', () => {
-    expect(hasBashShebang('#!/bin/sh')).toBe(true)
-    expect(hasBashShebang('#!/bin/sh ')).toBe(true)
-  })
-
-  it('returns true for "#!/bin/bash"', () => {
-    expect(hasBashShebang('#!/bin/bash')).toBe(true)
-    expect(hasBashShebang('#!/bin/bash ')).toBe(true)
+  test.each([
+    ['#!/bin/sh -', 'sh'],
+    ['#!/bin/sh', 'sh'],
+    ['#!/bin/env sh', 'sh'],
+    ['#!/usr/bin/env bash', 'bash'],
+    ['#!/bin/env bash', 'bash'],
+    ['#!/bin/bash', 'bash'],
+    ['#!/bin/bash -u', 'bash'],
+    ['#! /bin/bash', 'bash'],
+    ['#! /bin/dash', 'dash'],
+    ['#!/usr/bin/bash', 'bash'],
+  ])('returns a bash dialect for %p', (command, expectedDialect) => {
+    expect(analyzeShebang(command).shellDialect).toBe(expectedDialect)
+    expect(analyzeShebang(`${command} `).shellDialect).toBe(expectedDialect)
   })
 })

@@ -1,10 +1,22 @@
 import * as ChildProcess from 'child_process'
 
+import { isWindows } from './platform'
+
 /**
  * Execute the following sh program.
  */
-export function execShellScript(body: string, cmd = 'bash'): Promise<string> {
-  const args = ['-c', body]
+export function execShellScript(
+  body: string,
+  cmd = isWindows() ? 'cmd.exe' : 'bash',
+): Promise<string> {
+  const args = []
+
+  if (cmd === 'cmd.exe') {
+    args.push('/c', body)
+  } else {
+    args.push('--noprofile', '--norc', '-c', body)
+  }
+
   const process = ChildProcess.spawn(cmd, args)
 
   return new Promise((resolve, reject) => {
@@ -18,7 +30,7 @@ export function execShellScript(body: string, cmd = 'bash'): Promise<string> {
       }
     }
 
-    process.stdout.on('data', buffer => {
+    process.stdout.on('data', (buffer) => {
       output += buffer
     })
 
@@ -29,7 +41,7 @@ export function execShellScript(body: string, cmd = 'bash'): Promise<string> {
 
 // Currently only reserved words where documentation doesn't make sense.
 // At least on OS X these just return the builtin man. On ubuntu there
-// are no documentaiton for them.
+// are no documentation for them.
 const WORDS_WITHOUT_DOCUMENTATION = new Set([
   'else',
   'fi',
@@ -73,7 +85,9 @@ export async function getShellDocumentationWithoutCache({
           formattedDocumentation = formatManOutput(formattedDocumentation)
         }
 
-        return formattedDocumentation
+        if (formattedDocumentation) {
+          return formattedDocumentation
+        }
       }
     } catch (error) {
       // Ignoring if command fails and store failure in cache
@@ -107,10 +121,11 @@ export function formatManOutput(manOutput: string): string {
 /**
  * Only works for one-parameter (serializable) functions.
  */
+/* eslint-disable @typescript-eslint/ban-types */
 export function memorize<T extends Function>(func: T): T {
   const cache = new Map()
 
-  const returnFunc = async function(arg: any) {
+  const returnFunc = async function (arg: any) {
     const cacheKey = JSON.stringify(arg)
 
     if (cache.has(cacheKey)) {
