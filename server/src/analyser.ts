@@ -321,7 +321,7 @@ export default class Analyzer {
     exactMatch: boolean
     uri: string
     word: string
-    position?: LSP.Position // FIXME: rename to location
+    position: LSP.Position // FIXME: rename to location
   }): LSP.SymbolInformation[] {
     return this.getReachableUris({ uri: fromUri }).reduce((symbols, uri) => {
       const analyzedDocument = this.uriToAnalyzedDocument[uri]
@@ -336,7 +336,7 @@ export default class Analyzer {
               // Skip if the symbol is defined in the current file after the requested position
               // Ideally we want to be a lot smarter here...
               if (uri === fromUri) {
-                if (position && symbol.location.range.start.line > position.line) {
+                if (symbol.location.range.start.line > position.line) {
                   return
                 }
               }

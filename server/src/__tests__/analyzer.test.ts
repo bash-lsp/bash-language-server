@@ -318,6 +318,7 @@ describe('findSymbolsMatchingWord', () => {
         word: 'npm_config_logl',
         uri: FIXTURE_URI.INSTALL,
         exactMatch: false,
+        position: { line: 1000, character: 0 },
       }),
     ).toMatchInlineSnapshot(`
       Array [
@@ -363,6 +364,7 @@ describe('findSymbolsMatchingWord', () => {
         word: 'xxxxxxxx',
         uri: FIXTURE_URI.INSTALL,
         exactMatch: false,
+        position: { line: 1000, character: 0 },
       }),
     ).toMatchInlineSnapshot(`Array []`)
 
@@ -371,6 +373,7 @@ describe('findSymbolsMatchingWord', () => {
         word: 'BLU',
         uri: FIXTURE_URI.INSTALL,
         exactMatch: false,
+        position: { line: 6, character: 9 },
       }),
     ).toMatchInlineSnapshot(`
       Array [
@@ -399,6 +402,7 @@ describe('findSymbolsMatchingWord', () => {
         word: 'BLU',
         uri: FIXTURE_URI.SOURCING,
         exactMatch: false,
+        position: { line: 6, character: 9 },
       }),
     ).toMatchInlineSnapshot(`
       Array [
@@ -443,6 +447,7 @@ describe('findSymbolsMatchingWord', () => {
         word: 'BLU',
         uri: FIXTURE_URI.INSTALL,
         exactMatch: false,
+        position: { line: 1000, character: 0 },
       }),
     ).toMatchInlineSnapshot(`Array []`)
 
@@ -451,6 +456,7 @@ describe('findSymbolsMatchingWord', () => {
         word: 'BLU',
         uri: FIXTURE_URI.SOURCING,
         exactMatch: false,
+        position: { line: 6, character: 9 },
       }),
     ).toMatchInlineSnapshot(`
       Array [

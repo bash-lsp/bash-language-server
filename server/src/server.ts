@@ -564,6 +564,7 @@ export default class BashServer {
                   exactMatch: false,
                   uri: currentUri,
                   word,
+                  position: params.position,
                 }),
             currentUri,
           })
