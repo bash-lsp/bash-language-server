@@ -826,7 +826,7 @@ describe('server', () => {
           uri: FIXTURE_URI.OVERRIDE_SYMBOL,
         },
         position: {
-          line: 7,
+          line: 9,
           character: 1,
         },
       },
@@ -839,7 +839,7 @@ describe('server', () => {
       Object {
         "contents": Object {
           "kind": "markdown",
-          "value": "Function: **ls** - *defined on line 4*
+          "value": "Function: **ls** - *defined on line 6*
 
       \`\`\`txt
       override documentation for \`ls\` symbol
@@ -848,4 +848,31 @@ describe('server', () => {
       }
     `)
   })
+
+  it.failing(
+    'returns executable documentation if the function is not redefined',
+    async () => {
+      const { connection, server } = await initializeServer()
+      server.register(connection)
+
+      const onHover = connection.onHover.mock.calls[0][0]
+
+      const result = await onHover(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.OVERRIDE_SYMBOL,
+          },
+          position: {
+            line: 2,
+            character: 1,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      expect(result).toBeDefined()
+      expect((result as any)?.contents.value).toContain('ls – list directory contents')
+    },
+  )
 })
