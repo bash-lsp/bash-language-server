@@ -26,6 +26,7 @@ export const FIXTURE_URI = {
   COMMENT_DOC: `file://${path.join(FIXTURE_FOLDER, 'comment-doc-on-hover.sh')}`,
   OPTIONS: `file://${path.join(FIXTURE_FOLDER, 'options.sh')}`,
   SHELLCHECK_SOURCE: `file://${path.join(FIXTURE_FOLDER, 'shellcheck', 'source.sh')}`,
+  OVERRIDE_SYMBOL: `file://${path.join(FIXTURE_FOLDER, 'override-executable-symbol.sh')}`,
 }
 
 export const FIXTURE_DOCUMENT: Record<FIXTURE_KEY, TextDocument> = (
