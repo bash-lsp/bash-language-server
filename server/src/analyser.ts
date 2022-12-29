@@ -9,11 +9,11 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as Parser from 'web-tree-sitter'
 
 import {
-  Declarations,
   getGlobalDeclarations,
   getLocalDeclarations,
+  GlobalDeclarations,
 } from './util/declarations'
-import { flattenArray, flattenObjectValues } from './util/flatten'
+import { flattenArray } from './util/flatten'
 import { getFilePaths } from './util/fs'
 import { analyzeShebang } from './util/shebang'
 import * as sourcing from './util/sourcing'
@@ -23,9 +23,9 @@ const readFileAsync = promisify(fs.readFile)
 
 type AnalyzedDocument = {
   document: TextDocument
-  tree: Parser.Tree
-  declarations: Declarations // FIXME: rename to globalDeclarations + should be a record instead.
+  globalDeclarations: GlobalDeclarations
   sourcedUris: Set<string>
+  tree: Parser.Tree
 }
 
 /**
@@ -173,8 +173,10 @@ export default class Analyzer {
       .reduce((symbols, uri) => {
         const analyzedDocument = this.uriToAnalyzedDocument[uri]
         if (analyzedDocument) {
-          const declarationNames = analyzedDocument.declarations[word] || []
-          declarationNames.forEach((d) => symbols.push(d))
+          const globalDeclaration = analyzedDocument.globalDeclarations[word]
+          if (globalDeclaration) {
+            symbols.push(globalDeclaration)
+          }
         }
         return symbols
       }, [] as LSP.SymbolInformation[])
@@ -301,8 +303,8 @@ export default class Analyzer {
    * FIXME: should this return all symbols?
    */
   public findSymbolsForFile({ uri }: { uri: string }): LSP.SymbolInformation[] {
-    const declarationsInFile = this.uriToAnalyzedDocument[uri]?.declarations || {}
-    return flattenObjectValues(declarationsInFile)
+    const declarationsInFile = this.uriToAnalyzedDocument[uri]?.globalDeclarations || {}
+    return Object.values(declarationsInFile)
   }
 
   /**
@@ -325,8 +327,23 @@ export default class Analyzer {
       const analyzedDocument = this.uriToAnalyzedDocument[uri]
 
       if (analyzedDocument) {
-        // We use the global declarations from external files
-        let { declarations } = analyzedDocument
+        if (uri !== fromUri) {
+          // We use the global declarations from external files
+          const { globalDeclarations } = analyzedDocument
+
+          if (exactMatch) {
+            const symbol = globalDeclarations[word]
+            if (symbol) {
+              symbols.push(symbol)
+            }
+          } else {
+            Object.entries(globalDeclarations).forEach(([name, symbol]) => {
+              if (name.startsWith(word)) {
+                symbols.push(symbol)
+              }
+            })
+          }
+        }
 
         // For the current file we find declarations based on the current scope
         if (uri === fromUri) {
@@ -335,38 +352,39 @@ export default class Analyzer {
             column: position.character,
           })
 
-          declarations = getLocalDeclarations({
+          const localDeclarations = getLocalDeclarations({
             node,
             uri,
           })
-        }
 
-        Object.keys(declarations).map((name) => {
-          const symbolsMatchingWord = declarations[name]
-          const match = exactMatch ? name === word : name.startsWith(word)
+          Object.keys(localDeclarations).map((name) => {
+            const symbolsMatchingWord = localDeclarations[name]
+            const match = exactMatch ? name === word : name.startsWith(word)
 
-          if (match) {
-            // Find the latest definition
-            let closestSymbol: LSP.SymbolInformation | null = null
-            symbolsMatchingWord.forEach((symbol) => {
-              // Skip if the symbol is defined in the current file after the requested position
-              if (uri === fromUri && symbol.location.range.start.line > position.line) {
-                return
+            if (match) {
+              // Find the latest definition
+              let closestSymbol: LSP.SymbolInformation | null = null
+              symbolsMatchingWord.forEach((symbol) => {
+                // Skip if the symbol is defined in the current file after the requested position
+                if (uri === fromUri && symbol.location.range.start.line > position.line) {
+                  return
+                }
+
+                if (
+                  closestSymbol === null ||
+                  symbol.location.range.start.line >
+                    closestSymbol.location.range.start.line
+                ) {
+                  closestSymbol = symbol
+                }
+              })
+
+              if (closestSymbol) {
+                symbols.push(closestSymbol)
               }
-
-              if (
-                closestSymbol === null ||
-                symbol.location.range.start.line > closestSymbol.location.range.start.line
-              ) {
-                closestSymbol = symbol
-              }
-            })
-
-            if (closestSymbol) {
-              symbols.push(closestSymbol)
             }
-          }
-        })
+          })
+        }
       }
 
       return symbols
@@ -391,18 +409,18 @@ export default class Analyzer {
 
     const tree = this.parser.parse(fileContent)
 
-    const { declarations, diagnostics } = getGlobalDeclarations({ tree, uri })
+    const { diagnostics, globalDeclarations } = getGlobalDeclarations({ tree, uri })
 
     this.uriToAnalyzedDocument[uri] = {
-      tree,
       document,
-      declarations,
+      globalDeclarations,
       sourcedUris: sourcing.getSourcedUris({
         fileContent,
         fileUri: uri,
         rootPath: this.workspaceFolder,
         tree,
       }),
+      tree,
     }
 
     function findMissingNodes(node: Parser.SyntaxNode) {
@@ -603,8 +621,8 @@ export default class Analyzer {
         return
       }
 
-      Object.values(analyzedDocument.declarations).forEach((declarationNames) => {
-        declarationNames.forEach((d) => symbols.push(d))
+      Object.values(analyzedDocument.globalDeclarations).forEach((symbol) => {
+        symbols.push(symbol)
       })
     })
 

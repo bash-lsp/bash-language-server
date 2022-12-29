@@ -10,6 +10,7 @@ const TREE_SITTER_TYPE_TO_LSP_KIND: { [type: string]: LSP.SymbolKind | undefined
   variable_assignment: LSP.SymbolKind.Variable,
 }
 
+export type GlobalDeclarations = { [word: string]: LSP.SymbolInformation }
 export type Declarations = { [word: string]: LSP.SymbolInformation[] }
 
 /**
@@ -29,9 +30,12 @@ export function getGlobalDeclarations({
 }: {
   tree: Parser.Tree
   uri: string
-}): { diagnostics: LSP.Diagnostic[]; declarations: Declarations } {
+}): {
+  diagnostics: LSP.Diagnostic[]
+  globalDeclarations: GlobalDeclarations
+} {
   const diagnostics: LSP.Diagnostic[] = []
-  const declarations: Declarations = {}
+  const globalDeclarations: GlobalDeclarations = {}
 
   TreeSitterUtil.forEach(tree.rootNode, (node: Parser.SyntaxNode) => {
     if (node.parent?.type !== 'program') {
@@ -54,14 +58,14 @@ export function getGlobalDeclarations({
 
       if (symbol) {
         const word = symbol.name
-        declarations[word] = [symbol] // TODO: ensure this is the latest definition
+        globalDeclarations[word] = symbol
       }
     }
 
     return
   })
 
-  return { diagnostics, declarations }
+  return { diagnostics, globalDeclarations }
 }
 
 function nodeToSymbolInformation({
