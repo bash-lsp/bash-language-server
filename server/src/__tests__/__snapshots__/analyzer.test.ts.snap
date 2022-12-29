@@ -56,19 +56,6 @@ Array [
   Object {
     "range": Object {
       "end": Object {
-        "character": 12,
-        "line": 148,
-      },
-      "start": Object {
-        "character": 0,
-        "line": 148,
-      },
-    },
-    "uri": "dummy-uri.sh",
-  },
-  Object {
-    "range": Object {
-      "end": Object {
         "character": 45,
         "line": 152,
       },

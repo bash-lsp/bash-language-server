@@ -221,21 +221,8 @@ describe('server', () => {
       {} as any,
     )
 
-    // TODO: there is a superfluous range here on line 0:
     expect(result1).toMatchInlineSnapshot(`
       Array [
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 12,
-              "line": 0,
-            },
-            "start": Object {
-              "character": 9,
-              "line": 0,
-            },
-          },
-        },
         Object {
           "range": Object {
             "end": Object {
@@ -279,6 +266,134 @@ describe('server', () => {
     )
 
     expect(result2).toMatchInlineSnapshot(`Array []`)
+
+    const result3 = await onDocumentHighlight(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.SCOPE,
+        },
+        position: {
+          // X
+          line: 28,
+          character: 8,
+        },
+      },
+      {} as any,
+      {} as any,
+    )
+
+    expect(result3).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 1,
+              "line": 2,
+            },
+            "start": Object {
+              "character": 0,
+              "line": 2,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 1,
+              "line": 4,
+            },
+            "start": Object {
+              "character": 0,
+              "line": 4,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 9,
+              "line": 8,
+            },
+            "start": Object {
+              "character": 8,
+              "line": 8,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 11,
+              "line": 11,
+            },
+            "start": Object {
+              "character": 10,
+              "line": 11,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 13,
+              "line": 12,
+            },
+            "start": Object {
+              "character": 12,
+              "line": 12,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 13,
+              "line": 16,
+            },
+            "start": Object {
+              "character": 12,
+              "line": 16,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 15,
+              "line": 17,
+            },
+            "start": Object {
+              "character": 14,
+              "line": 17,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 11,
+              "line": 25,
+            },
+            "start": Object {
+              "character": 10,
+              "line": 25,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 9,
+              "line": 28,
+            },
+            "start": Object {
+              "character": 8,
+              "line": 28,
+            },
+          },
+        },
+      ]
+    `)
   })
 
   it('responds to onWorkspaceSymbol', async () => {

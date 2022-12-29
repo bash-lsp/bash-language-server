@@ -3,7 +3,7 @@ import * as FuzzySearch from 'fuzzy-search'
 import fetch from 'node-fetch'
 import * as URI from 'urijs'
 import * as url from 'url'
-import { promisify } from 'util'
+import { isDeepStrictEqual, promisify } from 'util'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as Parser from 'web-tree-sitter'
@@ -267,7 +267,8 @@ export default class Analyzer {
    * Find all occurrences of name in the given file.
    * It's currently not scope-aware.
    *
-   * FIXME: should this take the scope into account?
+   * FIXME: should this take the scope into account? I guess it should
+   * as this is used for highlighting.
    */
   public findOccurrences(uri: string, query: string): LSP.Location[] {
     const analyzedDocument = this.uriToAnalyzedDocument[uri]
@@ -290,7 +291,14 @@ export default class Analyzer {
 
       if (namedNode && namedNode.text === query) {
         const range = TreeSitterUtil.range(namedNode)
-        locations.push(LSP.Location.create(uri, range))
+
+        const alreadyInLocations = locations.some((loc) => {
+          return isDeepStrictEqual(loc.range, range)
+        })
+
+        if (!alreadyInLocations) {
+          locations.push(LSP.Location.create(uri, range))
+        }
       }
     })
 
