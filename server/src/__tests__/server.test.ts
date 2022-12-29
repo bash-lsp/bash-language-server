@@ -307,17 +307,6 @@ describe('server', () => {
           },
           name: 'npm_config_loglevel',
         },
-        {
-          kind: expect.any(Number),
-          location: {
-            range: {
-              end: { character: 31, line: 48 },
-              start: { character: 2, line: 48 },
-            },
-            uri: expect.stringContaining('/testing/fixtures/install.sh'),
-          },
-          name: 'npm_config_loglevel',
-        },
       ])
     }
 

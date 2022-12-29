@@ -256,6 +256,9 @@ export default class Analyzer {
 
   /**
    * Find all the locations where something named name has been defined.
+   *
+   * FIXME: take position into account
+   * FIXME: take file into account
    */
   public findReferences(name: string): LSP.Location[] {
     const uris = Object.keys(this.uriToAnalyzedDocument)
@@ -265,6 +268,8 @@ export default class Analyzer {
   /**
    * Find all occurrences of name in the given file.
    * It's currently not scope-aware.
+   *
+   * FIXME: should this take the scope into account?
    */
   public findOccurrences(uri: string, query: string): LSP.Location[] {
     const analyzedDocument = this.uriToAnalyzedDocument[uri]
@@ -273,27 +278,20 @@ export default class Analyzer {
     }
 
     const { tree } = analyzedDocument
-    const contents = analyzedDocument.document.getText()
 
     const locations: LSP.Location[] = []
 
     TreeSitterUtil.forEach(tree.rootNode, (n) => {
-      let name: null | string = null
-      let range: null | LSP.Range = null
+      let namedNode: Parser.SyntaxNode | null = null
 
       if (TreeSitterUtil.isReference(n)) {
-        const node = n.firstNamedChild || n
-        name = contents.slice(node.startIndex, node.endIndex)
-        range = TreeSitterUtil.range(node)
+        namedNode = n.firstNamedChild || n
       } else if (TreeSitterUtil.isDefinition(n)) {
-        const namedNode = n.firstNamedChild
-        if (namedNode) {
-          name = contents.slice(namedNode.startIndex, namedNode.endIndex)
-          range = TreeSitterUtil.range(namedNode)
-        }
+        namedNode = n.firstNamedChild
       }
 
-      if (name === query && range !== null) {
+      if (namedNode && namedNode.text === query) {
+        const range = TreeSitterUtil.range(namedNode)
         locations.push(LSP.Location.create(uri, range))
       }
     })
@@ -303,6 +301,8 @@ export default class Analyzer {
 
   /**
    * Find all symbol definitions in the given file.
+   *
+   * FIXME: should this return all symbols?
    */
   public findSymbolsForFile({ uri }: { uri: string }): LSP.SymbolInformation[] {
     const declarationsInFile = this.uriToAnalyzedDocument[uri]?.declarations || {}
@@ -311,41 +311,68 @@ export default class Analyzer {
 
   /**
    * Find symbol completions for the given word.
+   *
+   * FIXME: could this use findAllSymbols?
    */
   public findSymbolsMatchingWord({
     exactMatch,
+    position,
     uri: fromUri,
     word,
-    position,
   }: {
     exactMatch: boolean
+    position: LSP.Position
     uri: string
     word: string
-    position: LSP.Position // FIXME: rename to location
   }): LSP.SymbolInformation[] {
     return this.getReachableUris({ uri: fromUri }).reduce((symbols, uri) => {
       const analyzedDocument = this.uriToAnalyzedDocument[uri]
 
       if (analyzedDocument) {
-        const { declarations } = analyzedDocument
+        // We use the global declarations from external files
+        let { declarations } = analyzedDocument
+
+        // For the current file we find declarations based on the current scope
+        if (uri === fromUri) {
+          const node = analyzedDocument.tree.rootNode?.descendantForPosition({
+            row: position.line,
+            column: position.character,
+          })
+
+          declarations = getLocalDeclarations({
+            node,
+            uri,
+          })
+        }
+
         Object.keys(declarations).map((name) => {
-          const namedDeclaration = declarations[name]
+          const symbolsMatchingWord = declarations[name]
           const match = exactMatch ? name === word : name.startsWith(word)
+
           if (match) {
-            namedDeclaration.forEach((symbol) => {
+            // Find the latest definition
+            let closestSymbol: LSP.SymbolInformation | null = null
+            symbolsMatchingWord.forEach((symbol) => {
               // Skip if the symbol is defined in the current file after the requested position
-              // Ideally we want to be a lot smarter here...
-              if (uri === fromUri) {
-                if (symbol.location.range.start.line > position.line) {
-                  return
-                }
+              if (uri === fromUri && symbol.location.range.start.line > position.line) {
+                return
               }
 
-              symbols.push(symbol)
+              if (
+                closestSymbol === null ||
+                symbol.location.range.start.line > closestSymbol.location.range.start.line
+              ) {
+                closestSymbol = symbol
+              }
             })
+
+            if (closestSymbol) {
+              symbols.push(closestSymbol)
+            }
           }
         })
       }
+
       return symbols
     }, [] as LSP.SymbolInformation[])
   }
@@ -605,6 +632,7 @@ export default class Analyzer {
   }
 
   private getAllSymbols({ uri }: { uri?: string } = {}): LSP.SymbolInformation[] {
+    // FIXME: this should use getLocalDeclarations!
     const reachableUris = this.getReachableUris({ uri })
 
     const symbols: LSP.SymbolInformation[] = []
@@ -649,4 +677,55 @@ function nodeToSymbolInformation({
     uri,
     containerName,
   )
+}
+
+function getLocalDeclarations({
+  node,
+  uri,
+}: {
+  node: Parser.SyntaxNode | null
+  uri: string
+}): Declarations {
+  const declarations: Declarations = {}
+
+  // bottom up traversal of the tree to capture all local declarations
+
+  const walk = (node: Parser.SyntaxNode | null) => {
+    // NOTE: there is also node.walk
+    if (node) {
+      for (const childNode of node.children) {
+        let symbol: LSP.SymbolInformation | null = null
+
+        // local variables
+        if (childNode.type === 'declaration_command') {
+          const variableAssignmentNode = childNode.children.filter(
+            (child) => child.type === 'variable_assignment',
+          )[0]
+
+          if (variableAssignmentNode) {
+            symbol = nodeToSymbolInformation({
+              node: variableAssignmentNode,
+              uri,
+            })
+          }
+        } else if (TreeSitterUtil.isDefinition(childNode)) {
+          // FIXME: does this also capture local variables?
+          symbol = nodeToSymbolInformation({ node: childNode, uri })
+        }
+
+        if (symbol) {
+          if (!declarations[symbol.name]) {
+            declarations[symbol.name] = []
+          }
+          declarations[symbol.name].push(symbol)
+        }
+      }
+
+      walk(node.parent)
+    }
+  }
+
+  walk(node)
+
+  return declarations
 }

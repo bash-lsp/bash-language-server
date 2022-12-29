@@ -410,7 +410,7 @@ describe('findSymbolsMatchingWord', () => {
     `)
   })
 
-  it('return a list of symbols accessible to the uri when includeAllWorkspaceSymbols is false', async () => {
+  it('returns a list of symbols accessible to the uri when includeAllWorkspaceSymbols is false', async () => {
     const parser = await initializeParser()
     const connection = getMockConnection()
 
@@ -459,6 +459,146 @@ describe('findSymbolsMatchingWord', () => {
             "uri": "file://${FIXTURE_FOLDER}extension.inc",
           },
           "name": "BLUE",
+        },
+      ]
+    `)
+  })
+
+  it('returns symbols depending on the scope', async () => {
+    const parser = await initializeParser()
+    const connection = getMockConnection()
+
+    const analyzer = new Analyzer({
+      console: connection.console,
+      parser,
+      includeAllWorkspaceSymbols: false,
+      workspaceFolder: FIXTURE_FOLDER,
+    })
+
+    const findWordFromLine = (word: string, line: number) =>
+      analyzer.findSymbolsMatchingWord({
+        word,
+        uri: FIXTURE_URI.SCOPE,
+        exactMatch: true,
+        position: { line, character: 0 },
+      })
+
+    // Variable or function defined yet
+    expect(findWordFromLine('X', 0)).toEqual([])
+    expect(findWordFromLine('f', 0)).toEqual([])
+
+    // First definition
+    expect(findWordFromLine('X', 3)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "kind": 13,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 9,
+                "line": 2,
+              },
+              "start": Object {
+                "character": 0,
+                "line": 2,
+              },
+            },
+            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+          },
+          "name": "X",
+        },
+      ]
+    `)
+
+    // Local variable definition
+    expect(findWordFromLine('X', 13)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "containerName": "g",
+          "kind": 13,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 17,
+                "line": 11,
+              },
+              "start": Object {
+                "character": 10,
+                "line": 11,
+              },
+            },
+            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+          },
+          "name": "X",
+        },
+      ]
+    `)
+
+    // Local function definition
+    expect(findWordFromLine('f', 20)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "containerName": "g",
+          "kind": 12,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 5,
+                "line": 18,
+              },
+              "start": Object {
+                "character": 4,
+                "line": 15,
+              },
+            },
+            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+          },
+          "name": "f",
+        },
+      ]
+    `)
+
+    // Last definition
+    expect(findWordFromLine('X', 1000)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "kind": 13,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 9,
+                "line": 4,
+              },
+              "start": Object {
+                "character": 0,
+                "line": 4,
+              },
+            },
+            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+          },
+          "name": "X",
+        },
+      ]
+    `)
+
+    expect(findWordFromLine('f', 1000)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "kind": 12,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 1,
+                "line": 26,
+              },
+              "start": Object {
+                "character": 0,
+                "line": 7,
+              },
+            },
+            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+          },
+          "name": "f",
         },
       ]
     `)
