@@ -18,7 +18,7 @@ const CURRENT_URI = 'dummy-uri.sh'
 const mockConsole = getMockConnection().console
 
 // if you add a .sh file to testing/fixtures, update this value
-const FIXTURE_FILES_MATCHING_GLOB = 14
+const FIXTURE_FILES_MATCHING_GLOB = 15
 
 const defaultConfig = getDefaultConfiguration()
 
@@ -298,7 +298,7 @@ describe('commandNameAtPoint', () => {
 })
 
 describe('findSymbolsMatchingWord', () => {
-  it('return a list of symbols across the workspace when includeAllWorkspaceSymbols is true', async () => {
+  it('returns a list of symbols across the workspace when includeAllWorkspaceSymbols is true', async () => {
     const parser = await initializeParser()
     const connection = getMockConnection()
 
@@ -333,23 +333,6 @@ describe('findSymbolsMatchingWord', () => {
               "start": Object {
                 "character": 0,
                 "line": 40,
-              },
-            },
-            "uri": "file://${FIXTURE_FOLDER}install.sh",
-          },
-          "name": "npm_config_loglevel",
-        },
-        Object {
-          "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
-                "character": 31,
-                "line": 48,
-              },
-              "start": Object {
-                "character": 2,
-                "line": 48,
               },
             },
             "uri": "file://${FIXTURE_FOLDER}install.sh",
@@ -722,24 +705,6 @@ describe('getAllVariableSymbols', () => {
             "uri": "file://${FIXTURE_FOLDER}extension.inc",
           },
           "name": "RESET",
-        },
-        Object {
-          "containerName": "tagRelease",
-          "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
-                "character": 8,
-                "line": 5,
-              },
-              "start": Object {
-                "character": 2,
-                "line": 5,
-              },
-            },
-            "uri": "file://${REPO_ROOT_FOLDER}/scripts/tag-release.inc",
-          },
-          "name": "tag",
         },
       ]
     `)

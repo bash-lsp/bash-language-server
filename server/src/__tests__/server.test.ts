@@ -669,58 +669,6 @@ describe('server', () => {
           "kind": 6,
           "label": "RESET",
         },
-        Object {
-          "data": Object {
-            "name": "USER",
-            "type": 3,
-          },
-          "documentation": Object {
-            "kind": "markdown",
-            "value": "Variable: **USER** - *defined in issue101.sh*",
-          },
-          "kind": 6,
-          "label": "USER",
-        },
-        Object {
-          "data": Object {
-            "name": "PASSWORD",
-            "type": 3,
-          },
-          "documentation": Object {
-            "kind": "markdown",
-            "value": "Variable: **PASSWORD** - *defined in issue101.sh*",
-          },
-          "kind": 6,
-          "label": "PASSWORD",
-        },
-        Object {
-          "data": Object {
-            "name": "COMMENTS",
-            "type": 3,
-          },
-          "documentation": Object {
-            "kind": "markdown",
-            "value": "Variable: **COMMENTS** - *defined in issue101.sh*
-
-      \`\`\`txt
-      Having shifted twice, the rest is now comments ...
-      \`\`\`",
-          },
-          "kind": 6,
-          "label": "COMMENTS",
-        },
-        Object {
-          "data": Object {
-            "name": "tag",
-            "type": 3,
-          },
-          "documentation": Object {
-            "kind": "markdown",
-            "value": "Variable: **tag** - *defined in ../../scripts/tag-release.inc*",
-          },
-          "kind": 6,
-          "label": "tag",
-        },
       ]
     `)
   })

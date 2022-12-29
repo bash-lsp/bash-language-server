@@ -28,7 +28,7 @@ type Declarations = { [word: string]: LSP.SymbolInformation[] }
 type AnalyzedDocument = {
   document: TextDocument
   tree: Parser.Tree
-  declarations: Declarations
+  declarations: Declarations // FIXME: rename to globalDeclarations + should be a record instead.
   sourcedUris: Set<string>
 }
 
@@ -364,66 +364,45 @@ export default class Analyzer {
     document: TextDocument
     uri: string
   }): LSP.Diagnostic[] {
-    const contents = document.getText()
+    const fileContent = document.getText()
 
-    const tree = this.parser.parse(contents)
+    const tree = this.parser.parse(fileContent)
 
     const problems: LSP.Diagnostic[] = []
 
     const declarations: Declarations = {}
 
-    // TODO: move this somewhere
-    TreeSitterUtil.forEach(tree.rootNode, (n: Parser.SyntaxNode) => {
-      if (n.type === 'ERROR') {
+    // FIXME: move to a declaration utility file
+    TreeSitterUtil.forEach(tree.rootNode, (node: Parser.SyntaxNode) => {
+      if (node.type === 'ERROR') {
         problems.push(
           LSP.Diagnostic.create(
-            TreeSitterUtil.range(n),
-            'Failed to parse expression',
+            TreeSitterUtil.range(node),
+            'Failed to parse',
             LSP.DiagnosticSeverity.Error,
           ),
         )
         return
-      } else if (TreeSitterUtil.isDefinition(n)) {
-        const named = n.firstNamedChild
+      }
 
-        if (named === null) {
+      if (TreeSitterUtil.isDefinition(node)) {
+        if (node.parent?.type !== 'program') {
+          // FIXME: maybe we can avoid traversing the whole tree
           return
         }
 
-        const word = contents.slice(named.startIndex, named.endIndex)
-        const namedDeclarations = declarations[word] || []
+        const symbol = nodeToSymbolInformation({ node, uri })
 
-        const parent = TreeSitterUtil.findParent(
-          n,
-          (p) => p.type === 'function_definition',
-        )
-        const parentName =
-          parent && parent.firstNamedChild
-            ? contents.slice(
-                parent.firstNamedChild.startIndex,
-                parent.firstNamedChild.endIndex,
-              )
-            : '' // TODO: unsure what we should do here?
+        if (symbol) {
+          const word = symbol.name
 
-        const kind = TREE_SITTER_TYPE_TO_LSP_KIND[n.type]
-
-        if (!kind) {
-          this.console.warn(
-            `Unmapped tree sitter type: ${n.type}, defaulting to variable`,
-          )
+          const namedDeclarations = declarations[word] || []
+          namedDeclarations.push(symbol)
+          declarations[word] = namedDeclarations
         }
-
-        namedDeclarations.push(
-          LSP.SymbolInformation.create(
-            word,
-            kind || LSP.SymbolKind.Variable,
-            TreeSitterUtil.range(n),
-            uri,
-            parentName,
-          ),
-        )
-        declarations[word] = namedDeclarations
       }
+
+      return
     })
 
     this.uriToAnalyzedDocument[uri] = {
@@ -431,7 +410,7 @@ export default class Analyzer {
       document,
       declarations,
       sourcedUris: sourcing.getSourcedUris({
-        fileContent: contents,
+        fileContent,
         fileUri: uri,
         rootPath: this.workspaceFolder,
         tree,
@@ -642,4 +621,32 @@ export default class Analyzer {
 
     return symbols
   }
+}
+
+function nodeToSymbolInformation({
+  node,
+  uri,
+}: {
+  node: Parser.SyntaxNode
+  uri: string
+}): LSP.SymbolInformation | null {
+  const named = node.firstNamedChild
+
+  if (named === null) {
+    return null
+  }
+
+  const containerName =
+    TreeSitterUtil.findParent(node, (p) => p.type === 'function_definition')
+      ?.firstNamedChild?.text || ''
+
+  const kind = TREE_SITTER_TYPE_TO_LSP_KIND[node.type]
+
+  return LSP.SymbolInformation.create(
+    named.text,
+    kind || LSP.SymbolKind.Variable,
+    TreeSitterUtil.range(node),
+    uri,
+    containerName,
+  )
 }
