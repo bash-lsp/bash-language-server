@@ -8,6 +8,11 @@ import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as Parser from 'web-tree-sitter'
 
+import {
+  Declarations,
+  getGlobalDeclarations,
+  getLocalDeclarations,
+} from './util/declarations'
 import { flattenArray, flattenObjectValues } from './util/flatten'
 import { getFilePaths } from './util/fs'
 import { analyzeShebang } from './util/shebang'
@@ -15,15 +20,6 @@ import * as sourcing from './util/sourcing'
 import * as TreeSitterUtil from './util/tree-sitter'
 
 const readFileAsync = promisify(fs.readFile)
-
-const TREE_SITTER_TYPE_TO_LSP_KIND: { [type: string]: LSP.SymbolKind | undefined } = {
-  // These keys are using underscores as that's the naming convention in tree-sitter.
-  environment_variable_assignment: LSP.SymbolKind.Variable,
-  function_definition: LSP.SymbolKind.Function,
-  variable_assignment: LSP.SymbolKind.Variable,
-}
-
-type Declarations = { [word: string]: LSP.SymbolInformation[] }
 
 type AnalyzedDocument = {
   document: TextDocument
@@ -395,42 +391,7 @@ export default class Analyzer {
 
     const tree = this.parser.parse(fileContent)
 
-    const problems: LSP.Diagnostic[] = []
-
-    const declarations: Declarations = {}
-
-    // FIXME: move to a declaration utility file
-    TreeSitterUtil.forEach(tree.rootNode, (node: Parser.SyntaxNode) => {
-      if (node.type === 'ERROR') {
-        problems.push(
-          LSP.Diagnostic.create(
-            TreeSitterUtil.range(node),
-            'Failed to parse',
-            LSP.DiagnosticSeverity.Error,
-          ),
-        )
-        return
-      }
-
-      if (TreeSitterUtil.isDefinition(node)) {
-        if (node.parent?.type !== 'program') {
-          // FIXME: maybe we can avoid traversing the whole tree
-          return
-        }
-
-        const symbol = nodeToSymbolInformation({ node, uri })
-
-        if (symbol) {
-          const word = symbol.name
-
-          const namedDeclarations = declarations[word] || []
-          namedDeclarations.push(symbol)
-          declarations[word] = namedDeclarations
-        }
-      }
-
-      return
-    })
+    const { declarations, diagnostics } = getGlobalDeclarations({ tree, uri })
 
     this.uriToAnalyzedDocument[uri] = {
       tree,
@@ -446,7 +407,7 @@ export default class Analyzer {
 
     function findMissingNodes(node: Parser.SyntaxNode) {
       if (node.isMissing()) {
-        problems.push(
+        diagnostics.push(
           LSP.Diagnostic.create(
             TreeSitterUtil.range(node),
             `Syntax error: expected "${node.type}" somewhere in the file`,
@@ -460,7 +421,7 @@ export default class Analyzer {
 
     findMissingNodes(tree.rootNode)
 
-    return problems
+    return diagnostics
   }
 
   public findAllSourcedUris({ uri }: { uri: string }): Set<string> {
@@ -651,81 +612,12 @@ export default class Analyzer {
   }
 }
 
-function nodeToSymbolInformation({
-  node,
-  uri,
-}: {
-  node: Parser.SyntaxNode
-  uri: string
-}): LSP.SymbolInformation | null {
-  const named = node.firstNamedChild
-
-  if (named === null) {
-    return null
-  }
-
-  const containerName =
-    TreeSitterUtil.findParent(node, (p) => p.type === 'function_definition')
-      ?.firstNamedChild?.text || ''
-
-  const kind = TREE_SITTER_TYPE_TO_LSP_KIND[node.type]
-
-  return LSP.SymbolInformation.create(
-    named.text,
-    kind || LSP.SymbolKind.Variable,
-    TreeSitterUtil.range(node),
-    uri,
-    containerName,
-  )
-}
-
-function getLocalDeclarations({
-  node,
-  uri,
-}: {
-  node: Parser.SyntaxNode | null
-  uri: string
-}): Declarations {
-  const declarations: Declarations = {}
-
-  // bottom up traversal of the tree to capture all local declarations
-
-  const walk = (node: Parser.SyntaxNode | null) => {
-    // NOTE: there is also node.walk
-    if (node) {
-      for (const childNode of node.children) {
-        let symbol: LSP.SymbolInformation | null = null
-
-        // local variables
-        if (childNode.type === 'declaration_command') {
-          const variableAssignmentNode = childNode.children.filter(
-            (child) => child.type === 'variable_assignment',
-          )[0]
-
-          if (variableAssignmentNode) {
-            symbol = nodeToSymbolInformation({
-              node: variableAssignmentNode,
-              uri,
-            })
-          }
-        } else if (TreeSitterUtil.isDefinition(childNode)) {
-          // FIXME: does this also capture local variables?
-          symbol = nodeToSymbolInformation({ node: childNode, uri })
-        }
-
-        if (symbol) {
-          if (!declarations[symbol.name]) {
-            declarations[symbol.name] = []
-          }
-          declarations[symbol.name].push(symbol)
-        }
-      }
-
-      walk(node.parent)
-    }
-  }
-
-  walk(node)
-
-  return declarations
-}
+// Other languages where there are multiple re-declaration of variables
+// TS
+// - go to definition: takes you to the "let x = 1" line even though it is redefined
+// - clicking on first definition: shows references also in the other files
+// - docs: "function x(): void" or "let x: number"
+// Python
+// - go to definition: returns multiple definitions
+// - clicking on first definition: shows definitions
+// - docs: prefixed with "(function) x() -> None" or "(variable) xxx: Literal[1]"

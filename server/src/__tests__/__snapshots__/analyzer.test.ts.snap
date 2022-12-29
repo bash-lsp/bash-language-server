@@ -189,74 +189,6 @@ Array [
       "range": Object {
         "end": Object {
           "character": 6,
-          "line": 54,
-        },
-        "start": Object {
-          "character": 0,
-          "line": 54,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  Object {
-    "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
-          "character": 5,
-          "line": 83,
-        },
-        "start": Object {
-          "character": 0,
-          "line": 83,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  Object {
-    "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
-          "character": 6,
-          "line": 149,
-        },
-        "start": Object {
-          "character": 0,
-          "line": 149,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  Object {
-    "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
-          "character": 6,
-          "line": 181,
-        },
-        "start": Object {
-          "character": 0,
-          "line": 181,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  Object {
-    "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
-          "character": 6,
           "line": 265,
         },
         "start": Object {
@@ -267,23 +199,6 @@ Array [
       "uri": "dummy-uri.sh",
     },
     "name": "ret",
-  },
-  Object {
-    "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
-          "character": 15,
-          "line": 69,
-        },
-        "start": Object {
-          "character": 0,
-          "line": 69,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "TMP",
   },
   Object {
     "kind": 13,
