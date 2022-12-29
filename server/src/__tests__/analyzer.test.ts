@@ -60,12 +60,6 @@ describe('analyze', () => {
 })
 
 describe('findDefinition', () => {
-  it('returns an empty list if word is not found', () => {
-    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
-    const result = analyzer.findDefinition({ uri: CURRENT_URI, word: 'foobar' })
-    expect(result).toEqual([])
-  })
-
   it('returns a location to a file if word is the path in a sourcing statement', () => {
     const document = FIXTURE_DOCUMENT.SOURCING
     const { uri } = document
@@ -131,13 +125,13 @@ describe('findDefinition', () => {
     `)
   })
 
-  it('returns a list of locations if parameter is found', () => {
+  it('returns a local reference if definition is found', () => {
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
     const result = analyzer.findDefinition({
+      position: { character: 1, line: 148 },
       uri: CURRENT_URI,
       word: 'node_version',
     })
-    expect(result).not.toEqual([])
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -152,6 +146,32 @@ describe('findDefinition', () => {
             },
           },
           "uri": "dummy-uri.sh",
+        },
+      ]
+    `)
+  })
+
+  it('returns local declarations', () => {
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
+    const result = analyzer.findDefinition({
+      position: { character: 12, line: 12 },
+      uri: FIXTURE_URI.SCOPE,
+      word: 'X',
+    })
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 17,
+              "line": 11,
+            },
+            "start": Object {
+              "character": 10,
+              "line": 11,
+            },
+          },
+          "uri": "file://${FIXTURE_FOLDER}scope.sh",
         },
       ]
     `)

@@ -149,7 +149,7 @@ export default class Analyzer {
     uri,
     word,
   }: {
-    position?: { line: number; character: number }
+    position: LSP.Position
     uri: string
     word: string
   }): LSP.Location[] {
@@ -169,18 +169,12 @@ export default class Analyzer {
       }
     }
 
-    return this.getReachableUris({ uri })
-      .reduce((symbols, uri) => {
-        const analyzedDocument = this.uriToAnalyzedDocument[uri]
-        if (analyzedDocument) {
-          const globalDeclaration = analyzedDocument.globalDeclarations[word]
-          if (globalDeclaration) {
-            symbols.push(globalDeclaration)
-          }
-        }
-        return symbols
-      }, [] as LSP.SymbolInformation[])
-      .map((symbol) => symbol.location)
+    return this.findSymbolsMatchingWord({
+      exactMatch: true,
+      position,
+      uri,
+      word,
+    }).map((symbol) => symbol.location)
   }
 
   /**
@@ -253,7 +247,7 @@ export default class Analyzer {
   }
 
   /**
-   * Find all the locations where something named name has been defined.
+   * Find all the locations where something named name has been defined or referenced.
    *
    * FIXME: take position into account
    * FIXME: take file into account
@@ -316,9 +310,10 @@ export default class Analyzer {
   }
 
   /**
-   * Find symbol completions for the given word.
+   * Find declarations/definitions for the given word.
    *
    * FIXME: could this use findAllSymbols?
+   * FIXME: rename to findDeclarationsMatchingWord
    */
   public findSymbolsMatchingWord({
     exactMatch,
