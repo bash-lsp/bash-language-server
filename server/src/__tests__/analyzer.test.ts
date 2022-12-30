@@ -59,12 +59,12 @@ describe('analyze', () => {
   })
 })
 
-describe('findDefinition', () => {
+describe('findDeclarationLocations', () => {
   it('returns a location to a file if word is the path in a sourcing statement', () => {
     const document = FIXTURE_DOCUMENT.SOURCING
     const { uri } = document
     analyzer.analyze({ uri, document })
-    const result = analyzer.findDefinition({
+    const result = analyzer.findDeclarationLocations({
       uri,
       word: './extension.inc',
       position: { character: 10, line: 2 },
@@ -101,7 +101,7 @@ describe('findDefinition', () => {
     })
 
     newAnalyzer.analyze({ uri, document })
-    const result = newAnalyzer.findDefinition({
+    const result = newAnalyzer.findDeclarationLocations({
       uri,
       word: './scripts/tag-release.inc',
       position: { character: 10, line: 16 },
@@ -127,7 +127,7 @@ describe('findDefinition', () => {
 
   it('returns a local reference if definition is found', () => {
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
-    const result = analyzer.findDefinition({
+    const result = analyzer.findDeclarationLocations({
       position: { character: 1, line: 148 },
       uri: CURRENT_URI,
       word: 'node_version',
@@ -153,7 +153,7 @@ describe('findDefinition', () => {
 
   it('returns local declarations', () => {
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
-    const result = analyzer.findDefinition({
+    const result = analyzer.findDeclarationLocations({
       position: { character: 12, line: 12 },
       uri: FIXTURE_URI.SCOPE,
       word: 'X',
@@ -193,23 +193,23 @@ describe('findReferences', () => {
   })
 })
 
-describe('findSymbolsForFile', () => {
+describe('getDeclarationsForUri', () => {
   it('returns empty list if uri is not found', () => {
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
-    const result = analyzer.findSymbolsForFile({ uri: 'foobar.sh' })
+    const result = analyzer.getDeclarationsForUri({ uri: 'foobar.sh' })
     expect(result).toEqual([])
   })
 
   it('returns a list of SymbolInformation if uri is found', () => {
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
-    const result = analyzer.findSymbolsForFile({ uri: CURRENT_URI })
+    const result = analyzer.getDeclarationsForUri({ uri: CURRENT_URI })
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()
   })
 
   it('issue 101', () => {
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.ISSUE101 })
-    const result = analyzer.findSymbolsForFile({ uri: CURRENT_URI })
+    const result = analyzer.getDeclarationsForUri({ uri: CURRENT_URI })
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()
   })
@@ -317,7 +317,7 @@ describe('commandNameAtPoint', () => {
   })
 })
 
-describe('findSymbolsMatchingWord', () => {
+describe('findDeclarationsMatchingWord', () => {
   it('returns a list of symbols across the workspace when includeAllWorkspaceSymbols is true', async () => {
     const parser = await initializeParser()
     const connection = getMockConnection()
@@ -334,7 +334,7 @@ describe('findSymbolsMatchingWord', () => {
     })
 
     expect(
-      analyzer.findSymbolsMatchingWord({
+      analyzer.findDeclarationsMatchingWord({
         word: 'npm_config_logl',
         uri: FIXTURE_URI.INSTALL,
         exactMatch: false,
@@ -363,7 +363,7 @@ describe('findSymbolsMatchingWord', () => {
     `)
 
     expect(
-      analyzer.findSymbolsMatchingWord({
+      analyzer.findDeclarationsMatchingWord({
         word: 'xxxxxxxx',
         uri: FIXTURE_URI.INSTALL,
         exactMatch: false,
@@ -372,7 +372,7 @@ describe('findSymbolsMatchingWord', () => {
     ).toMatchInlineSnapshot(`Array []`)
 
     expect(
-      analyzer.findSymbolsMatchingWord({
+      analyzer.findDeclarationsMatchingWord({
         word: 'BLU',
         uri: FIXTURE_URI.INSTALL,
         exactMatch: false,
@@ -401,7 +401,7 @@ describe('findSymbolsMatchingWord', () => {
     `)
 
     expect(
-      analyzer.findSymbolsMatchingWord({
+      analyzer.findDeclarationsMatchingWord({
         word: 'BLU',
         uri: FIXTURE_URI.SOURCING,
         exactMatch: false,
@@ -446,7 +446,7 @@ describe('findSymbolsMatchingWord', () => {
     })
 
     expect(
-      analyzer.findSymbolsMatchingWord({
+      analyzer.findDeclarationsMatchingWord({
         word: 'BLU',
         uri: FIXTURE_URI.INSTALL,
         exactMatch: false,
@@ -455,7 +455,7 @@ describe('findSymbolsMatchingWord', () => {
     ).toMatchInlineSnapshot(`Array []`)
 
     expect(
-      analyzer.findSymbolsMatchingWord({
+      analyzer.findDeclarationsMatchingWord({
         word: 'BLU',
         uri: FIXTURE_URI.SOURCING,
         exactMatch: false,
@@ -496,7 +496,7 @@ describe('findSymbolsMatchingWord', () => {
     })
 
     const findWordFromLine = (word: string, line: number) =>
-      analyzer.findSymbolsMatchingWord({
+      analyzer.findDeclarationsMatchingWord({
         word,
         uri: FIXTURE_URI.SCOPE,
         exactMatch: true,
@@ -745,7 +745,7 @@ describe('initiateBackgroundAnalysis', () => {
   })
 })
 
-describe('getAllVariableSymbols', () => {
+describe('getAllVariables', () => {
   it('returns all variable symbols', async () => {
     const document = FIXTURE_DOCUMENT.SOURCING
     const { uri } = document
@@ -762,9 +762,8 @@ describe('getAllVariableSymbols', () => {
 
     newAnalyzer.analyze({ uri, document })
 
-    expect(
-      newAnalyzer.getAllVariableSymbols({ uri, position: { line: 20, character: 0 } }),
-    ).toMatchInlineSnapshot(`
+    expect(newAnalyzer.getAllVariables({ uri, position: { line: 20, character: 0 } }))
+      .toMatchInlineSnapshot(`
       Array [
         Object {
           "kind": 13,

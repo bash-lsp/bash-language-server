@@ -57,6 +57,57 @@ export default class Analyzer {
   }
 
   /**
+   * Analyze the given document, cache the tree-sitter AST, and iterate over the
+   * tree to find declarations.
+   *
+   * Returns all, if any, syntax errors that occurred while parsing the file.
+   *
+   */
+  public analyze({
+    document,
+    uri, // NOTE: we don't use document.uri to make testing easier
+  }: {
+    document: TextDocument
+    uri: string
+  }): LSP.Diagnostic[] {
+    const fileContent = document.getText()
+
+    const tree = this.parser.parse(fileContent)
+
+    const { diagnostics, globalDeclarations } = getGlobalDeclarations({ tree, uri })
+
+    this.uriToAnalyzedDocument[uri] = {
+      document,
+      globalDeclarations,
+      sourcedUris: sourcing.getSourcedUris({
+        fileContent,
+        fileUri: uri,
+        rootPath: this.workspaceFolder,
+        tree,
+      }),
+      tree,
+    }
+
+    function findMissingNodes(node: Parser.SyntaxNode) {
+      if (node.isMissing()) {
+        diagnostics.push(
+          LSP.Diagnostic.create(
+            TreeSitterUtil.range(node),
+            `Syntax error: expected "${node.type}" somewhere in the file`,
+            LSP.DiagnosticSeverity.Warning,
+          ),
+        )
+      } else if (node.hasError()) {
+        node.children.forEach(findMissingNodes)
+      }
+    }
+
+    findMissingNodes(tree.rootNode)
+
+    return diagnostics
+  }
+
+  /**
    * Initiates a background analysis of the files in the workspaceFolder to
    * enable features across files.
    *
@@ -142,10 +193,9 @@ export default class Analyzer {
   }
 
   /**
-   * Find all the locations where something has been defined.
-   * FIXME: rename to findDeclarationLocation or findDefinitionLocation
+   * Find all the locations where the word was declared.
    */
-  public findDefinition({
+  public findDeclarationLocations({
     position,
     uri,
     word,
@@ -170,7 +220,7 @@ export default class Analyzer {
       }
     }
 
-    return this.findSymbolsMatchingWord({
+    return this.findDeclarationsMatchingWord({
       exactMatch: true,
       position,
       uri,
@@ -179,16 +229,115 @@ export default class Analyzer {
   }
 
   /**
-   * Find all the symbols matching the query using fuzzy search.
-   * FIXME: rename to searchAllSymbols
+   * Find all the declaration symbols in the workspace matching the query using fuzzy search.
    */
-  public search(query: string): LSP.SymbolInformation[] {
-    const searcher = new FuzzySearch(this.getAllSymbols(), ['name'], {
+  public findDeclarationsWithFuzzySearch(query: string): LSP.SymbolInformation[] {
+    const searcher = new FuzzySearch(this.getAllDeclarations(), ['name'], {
       caseSensitive: true,
     })
     return searcher.search(query)
   }
 
+  /**
+   * Find declarations for the given word and position.
+   */
+  public findDeclarationsMatchingWord({
+    exactMatch,
+    position,
+    uri,
+    word,
+  }: {
+    exactMatch: boolean
+    position: LSP.Position
+    uri: string
+    word: string
+  }): LSP.SymbolInformation[] {
+    return this.getAllDeclarations({ uri, position }).filter((symbol) => {
+      if (exactMatch) {
+        return symbol.name === word
+      } else {
+        return symbol.name.startsWith(word)
+      }
+    })
+  }
+
+  /**
+   * Find all the locations where the given word was defined or referenced.
+   *
+   * FIXME: take position into account
+   * FIXME: take file into account
+   */
+  public findReferences(word: string): LSP.Location[] {
+    const uris = Object.keys(this.uriToAnalyzedDocument)
+    return flattenArray(uris.map((uri) => this.findOccurrences(uri, word)))
+  }
+
+  /**
+   * Find all occurrences (references or definitions) of a word in the given file.
+   * It's currently not scope-aware.
+   *
+   * FIXME: should this take the scope into account? I guess it should
+   * as this is used for highlighting.
+   */
+  public findOccurrences(uri: string, word: string): LSP.Location[] {
+    const analyzedDocument = this.uriToAnalyzedDocument[uri]
+    if (!analyzedDocument) {
+      return []
+    }
+
+    const { tree } = analyzedDocument
+
+    const locations: LSP.Location[] = []
+
+    TreeSitterUtil.forEach(tree.rootNode, (n) => {
+      let namedNode: Parser.SyntaxNode | null = null
+
+      if (TreeSitterUtil.isReference(n)) {
+        namedNode = n.firstNamedChild || n
+      } else if (TreeSitterUtil.isDefinition(n)) {
+        namedNode = n.firstNamedChild
+      }
+
+      if (namedNode && namedNode.text === word) {
+        const range = TreeSitterUtil.range(namedNode)
+
+        const alreadyInLocations = locations.some((loc) => {
+          return isDeepStrictEqual(loc.range, range)
+        })
+
+        if (!alreadyInLocations) {
+          locations.push(LSP.Location.create(uri, range))
+        }
+      }
+    })
+
+    return locations
+  }
+
+  public getAllVariables({
+    position,
+    uri,
+  }: {
+    position: LSP.Position
+    uri: string
+  }): LSP.SymbolInformation[] {
+    return this.getAllDeclarations({ uri, position }).filter(
+      (symbol) => symbol.kind === LSP.SymbolKind.Variable,
+    )
+  }
+
+  /**
+   * Get all symbol declarations in the given file.
+   *
+   * FIXME: this should return all symbols, not just global declarations.
+   * FIXME: convert to DocumentSymbol[] which is a hierarchy of symbols found in a given text document.
+   */
+  public getDeclarationsForUri({ uri }: { uri: string }): LSP.SymbolInformation[] {
+    const declarationsInFile = this.uriToAnalyzedDocument[uri]?.globalDeclarations || {}
+    return Object.values(declarationsInFile)
+  }
+
+  // TODO: move somewhere else than the analyzer...
   public async getExplainshellDocumentation({
     params,
     endpoint,
@@ -246,200 +395,6 @@ export default class Analyzer {
 
       return { helpHTML: match && match.helpHTML }
     }
-  }
-
-  /**
-   * Find all the locations where something named name has been defined or referenced.
-   *
-   * FIXME: take position into account
-   * FIXME: take file into account
-   */
-  public findReferences(name: string): LSP.Location[] {
-    const uris = Object.keys(this.uriToAnalyzedDocument)
-    return flattenArray(uris.map((uri) => this.findOccurrences(uri, name)))
-  }
-
-  /**
-   * Find all occurrences of name in the given file.
-   * It's currently not scope-aware.
-   *
-   * FIXME: should this take the scope into account? I guess it should
-   * as this is used for highlighting.
-   */
-  public findOccurrences(uri: string, query: string): LSP.Location[] {
-    const analyzedDocument = this.uriToAnalyzedDocument[uri]
-    if (!analyzedDocument) {
-      return []
-    }
-
-    const { tree } = analyzedDocument
-
-    const locations: LSP.Location[] = []
-
-    TreeSitterUtil.forEach(tree.rootNode, (n) => {
-      let namedNode: Parser.SyntaxNode | null = null
-
-      if (TreeSitterUtil.isReference(n)) {
-        namedNode = n.firstNamedChild || n
-      } else if (TreeSitterUtil.isDefinition(n)) {
-        namedNode = n.firstNamedChild
-      }
-
-      if (namedNode && namedNode.text === query) {
-        const range = TreeSitterUtil.range(namedNode)
-
-        const alreadyInLocations = locations.some((loc) => {
-          return isDeepStrictEqual(loc.range, range)
-        })
-
-        if (!alreadyInLocations) {
-          locations.push(LSP.Location.create(uri, range))
-        }
-      }
-    })
-
-    return locations
-  }
-
-  /**
-   * Find all symbol definitions in the given file.
-   *
-   * FIXME: this should return all symbols, not just global declarations.
-   * FIXME: convert to DocumentSymbol[] which is a hierarchy of symbols found in a given text document.
-   */
-  public findSymbolsForFile({ uri }: { uri: string }): LSP.SymbolInformation[] {
-    const declarationsInFile = this.uriToAnalyzedDocument[uri]?.globalDeclarations || {}
-    return Object.values(declarationsInFile)
-  }
-
-  /**
-   * Find declarations/definitions for the given word.
-   *
-   * FIXME: rename to findDeclarationsMatchingWord
-   */
-  public findSymbolsMatchingWord({
-    exactMatch,
-    position,
-    uri,
-    word,
-  }: {
-    exactMatch: boolean
-    position: LSP.Position
-    uri: string
-    word: string
-  }): LSP.SymbolInformation[] {
-    return this.getAllSymbols({ uri, position }).filter((symbol) => {
-      if (exactMatch) {
-        return symbol.name === word
-      } else {
-        return symbol.name.startsWith(word)
-      }
-    })
-  }
-
-  /**
-   * Analyze the given document, cache the tree-sitter AST, and iterate over the
-   * tree to find declarations.
-   *
-   * Returns all, if any, syntax errors that occurred while parsing the file.
-   *
-   */
-  public analyze({
-    document,
-    uri, // NOTE: we don't use document.uri to make testing easier
-  }: {
-    document: TextDocument
-    uri: string
-  }): LSP.Diagnostic[] {
-    const fileContent = document.getText()
-
-    const tree = this.parser.parse(fileContent)
-
-    const { diagnostics, globalDeclarations } = getGlobalDeclarations({ tree, uri })
-
-    this.uriToAnalyzedDocument[uri] = {
-      document,
-      globalDeclarations,
-      sourcedUris: sourcing.getSourcedUris({
-        fileContent,
-        fileUri: uri,
-        rootPath: this.workspaceFolder,
-        tree,
-      }),
-      tree,
-    }
-
-    function findMissingNodes(node: Parser.SyntaxNode) {
-      if (node.isMissing()) {
-        diagnostics.push(
-          LSP.Diagnostic.create(
-            TreeSitterUtil.range(node),
-            `Syntax error: expected "${node.type}" somewhere in the file`,
-            LSP.DiagnosticSeverity.Warning,
-          ),
-        )
-      } else if (node.hasError()) {
-        node.children.forEach(findMissingNodes)
-      }
-    }
-
-    findMissingNodes(tree.rootNode)
-
-    return diagnostics
-  }
-
-  public findAllSourcedUris({ uri }: { uri: string }): Set<string> {
-    const allSourcedUris = new Set<string>([])
-
-    const addSourcedFilesFromUri = (fromUri: string) => {
-      const sourcedUris = this.uriToAnalyzedDocument[fromUri]?.sourcedUris
-
-      if (!sourcedUris) {
-        return
-      }
-
-      sourcedUris.forEach((sourcedUri) => {
-        if (!allSourcedUris.has(sourcedUri)) {
-          allSourcedUris.add(sourcedUri)
-          addSourcedFilesFromUri(sourcedUri)
-        }
-      })
-    }
-
-    addSourcedFilesFromUri(uri)
-
-    return allSourcedUris
-  }
-
-  /**
-   * Find the node at the given point.
-   */
-  private nodeAtPoint(
-    uri: string,
-    line: number,
-    column: number,
-  ): Parser.SyntaxNode | null {
-    const tree = this.uriToAnalyzedDocument[uri]?.tree
-
-    if (!tree?.rootNode) {
-      // Check for lacking rootNode (due to failed parse?)
-      return null
-    }
-
-    return tree.rootNode.descendantForPosition({ row: line, column })
-  }
-
-  /**
-   * Find the full word at the given point.
-   */
-  public wordAtPoint(uri: string, line: number, column: number): string | null {
-    const node = this.nodeAtPoint(uri, line, column)
-
-    if (!node || node.childCount > 0 || node.text.trim() === '') {
-      return null
-    }
-
-    return node.text.trim()
   }
 
   /**
@@ -519,22 +474,24 @@ export default class Analyzer {
     return null
   }
 
-  public getAllVariableSymbols({
-    position,
-    uri,
-  }: {
-    position: LSP.Position
-    uri: string
-  }): LSP.SymbolInformation[] {
-    return this.getAllSymbols({ uri, position }).filter(
-      (symbol) => symbol.kind === LSP.SymbolKind.Variable,
-    )
+  /**
+   * Find the full word at the given point.
+   */
+  public wordAtPoint(uri: string, line: number, column: number): string | null {
+    const node = this.nodeAtPoint(uri, line, column)
+
+    if (!node || node.childCount > 0 || node.text.trim() === '') {
+      return null
+    }
+
+    return node.text.trim()
   }
 
   public setIncludeAllWorkspaceSymbols(includeAllWorkspaceSymbols: boolean): void {
     this.includeAllWorkspaceSymbols = includeAllWorkspaceSymbols
   }
 
+  // Private methods
   private getReachableUris({ uri: fromUri }: { uri?: string } = {}): string[] {
     if (!fromUri || this.includeAllWorkspaceSymbols) {
       return Object.keys(this.uriToAnalyzedDocument)
@@ -566,9 +523,9 @@ export default class Analyzer {
    * Get all declaration symbols (function or variables) from the given file/position
    * or from all files in the workspace.
    *
-   * FIXME: rename to getAllDeclarationSymbols
+   * Note that this can return duplicates across the workspace.
    */
-  private getAllSymbols({
+  private getAllDeclarations({
     uri: fromUri,
     position,
   }: { uri?: string; position?: LSP.Position } = {}): LSP.SymbolInformation[] {
@@ -601,7 +558,7 @@ export default class Analyzer {
             let closestSymbol: LSP.SymbolInformation | null = null
             symbolsMatchingWord.forEach((symbol) => {
               // Skip if the symbol is defined in the current file after the requested position
-              if (uri === fromUri && symbol.location.range.start.line > position.line) {
+              if (symbol.location.range.start.line > position.line) {
                 return
               }
 
@@ -622,5 +579,46 @@ export default class Analyzer {
 
       return symbols
     }, [] as LSP.SymbolInformation[])
+  }
+
+  public findAllSourcedUris({ uri }: { uri: string }): Set<string> {
+    const allSourcedUris = new Set<string>([])
+
+    const addSourcedFilesFromUri = (fromUri: string) => {
+      const sourcedUris = this.uriToAnalyzedDocument[fromUri]?.sourcedUris
+
+      if (!sourcedUris) {
+        return
+      }
+
+      sourcedUris.forEach((sourcedUri) => {
+        if (!allSourcedUris.has(sourcedUri)) {
+          allSourcedUris.add(sourcedUri)
+          addSourcedFilesFromUri(sourcedUri)
+        }
+      })
+    }
+
+    addSourcedFilesFromUri(uri)
+
+    return allSourcedUris
+  }
+
+  /**
+   * Find the node at the given point.
+   */
+  private nodeAtPoint(
+    uri: string,
+    line: number,
+    column: number,
+  ): Parser.SyntaxNode | null {
+    const tree = this.uriToAnalyzedDocument[uri]?.tree
+
+    if (!tree?.rootNode) {
+      // Check for lacking rootNode (due to failed parse?)
+      return null
+    }
+
+    return tree.rootNode.descendantForPosition({ row: line, column })
   }
 }

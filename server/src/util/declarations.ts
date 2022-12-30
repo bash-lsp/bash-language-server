@@ -132,7 +132,6 @@ export function getLocalDeclarations({
             })
           }
         } else if (TreeSitterUtil.isDefinition(childNode)) {
-          // FIXME: does this also capture local variables?
           symbol = nodeToSymbolInformation({ node: childNode, uri })
         }
 

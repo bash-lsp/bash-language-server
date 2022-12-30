@@ -95,7 +95,7 @@ Array [
 ]
 `;
 
-exports[`findSymbolsForFile issue 101 1`] = `
+exports[`getDeclarationsForUri issue 101 1`] = `
 Array [
   Object {
     "kind": 12,
@@ -117,7 +117,7 @@ Array [
 ]
 `;
 
-exports[`findSymbolsForFile returns a list of SymbolInformation if uri is found 1`] = `
+exports[`getDeclarationsForUri returns a list of SymbolInformation if uri is found 1`] = `
 Array [
   Object {
     "kind": 13,
