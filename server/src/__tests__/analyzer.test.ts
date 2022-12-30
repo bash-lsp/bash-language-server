@@ -762,7 +762,9 @@ describe('getAllVariableSymbols', () => {
 
     newAnalyzer.analyze({ uri, document })
 
-    expect(newAnalyzer.getAllVariableSymbols({ uri })).toMatchInlineSnapshot(`
+    expect(
+      newAnalyzer.getAllVariableSymbols({ uri, position: { line: 20, character: 0 } }),
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "kind": 13,

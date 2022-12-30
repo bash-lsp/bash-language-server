@@ -143,6 +143,7 @@ export default class Analyzer {
 
   /**
    * Find all the locations where something has been defined.
+   * FIXME: rename to findDeclarationLocation or findDefinitionLocation
    */
   public findDefinition({
     position,
@@ -179,6 +180,7 @@ export default class Analyzer {
 
   /**
    * Find all the symbols matching the query using fuzzy search.
+   * FIXME: rename to searchAllSymbols
    */
   public search(query: string): LSP.SymbolInformation[] {
     const searcher = new FuzzySearch(this.getAllSymbols(), ['name'], {
@@ -302,7 +304,8 @@ export default class Analyzer {
   /**
    * Find all symbol definitions in the given file.
    *
-   * FIXME: should this return all symbols?
+   * FIXME: this should return all symbols, not just global declarations.
+   * FIXME: convert to DocumentSymbol[] which is a hierarchy of symbols found in a given text document.
    */
   public findSymbolsForFile({ uri }: { uri: string }): LSP.SymbolInformation[] {
     const declarationsInFile = this.uriToAnalyzedDocument[uri]?.globalDeclarations || {}
@@ -312,13 +315,12 @@ export default class Analyzer {
   /**
    * Find declarations/definitions for the given word.
    *
-   * FIXME: could this use findAllSymbols?
    * FIXME: rename to findDeclarationsMatchingWord
    */
   public findSymbolsMatchingWord({
     exactMatch,
     position,
-    uri: fromUri,
+    uri,
     word,
   }: {
     exactMatch: boolean
@@ -326,72 +328,13 @@ export default class Analyzer {
     uri: string
     word: string
   }): LSP.SymbolInformation[] {
-    return this.getReachableUris({ uri: fromUri }).reduce((symbols, uri) => {
-      const analyzedDocument = this.uriToAnalyzedDocument[uri]
-
-      if (analyzedDocument) {
-        if (uri !== fromUri) {
-          // We use the global declarations from external files
-          const { globalDeclarations } = analyzedDocument
-
-          if (exactMatch) {
-            const symbol = globalDeclarations[word]
-            if (symbol) {
-              symbols.push(symbol)
-            }
-          } else {
-            Object.entries(globalDeclarations).forEach(([name, symbol]) => {
-              if (name.startsWith(word)) {
-                symbols.push(symbol)
-              }
-            })
-          }
-        }
-
-        // For the current file we find declarations based on the current scope
-        if (uri === fromUri) {
-          const node = analyzedDocument.tree.rootNode?.descendantForPosition({
-            row: position.line,
-            column: position.character,
-          })
-
-          const localDeclarations = getLocalDeclarations({
-            node,
-            uri,
-          })
-
-          Object.keys(localDeclarations).map((name) => {
-            const symbolsMatchingWord = localDeclarations[name]
-            const match = exactMatch ? name === word : name.startsWith(word)
-
-            if (match) {
-              // Find the latest definition
-              let closestSymbol: LSP.SymbolInformation | null = null
-              symbolsMatchingWord.forEach((symbol) => {
-                // Skip if the symbol is defined in the current file after the requested position
-                if (uri === fromUri && symbol.location.range.start.line > position.line) {
-                  return
-                }
-
-                if (
-                  closestSymbol === null ||
-                  symbol.location.range.start.line >
-                    closestSymbol.location.range.start.line
-                ) {
-                  closestSymbol = symbol
-                }
-              })
-
-              if (closestSymbol) {
-                symbols.push(closestSymbol)
-              }
-            }
-          })
-        }
+    return this.getAllSymbols({ uri, position }).filter((symbol) => {
+      if (exactMatch) {
+        return symbol.name === word
+      } else {
+        return symbol.name.startsWith(word)
       }
-
-      return symbols
-    }, [] as LSP.SymbolInformation[])
+    })
   }
 
   /**
@@ -576,8 +519,14 @@ export default class Analyzer {
     return null
   }
 
-  public getAllVariableSymbols({ uri }: { uri: string }): LSP.SymbolInformation[] {
-    return this.getAllSymbols({ uri }).filter(
+  public getAllVariableSymbols({
+    position,
+    uri,
+  }: {
+    position: LSP.Position
+    uri: string
+  }): LSP.SymbolInformation[] {
+    return this.getAllSymbols({ uri, position }).filter(
       (symbol) => symbol.kind === LSP.SymbolKind.Variable,
     )
   }
@@ -613,32 +562,65 @@ export default class Analyzer {
     })
   }
 
-  private getAllSymbols({ uri }: { uri?: string } = {}): LSP.SymbolInformation[] {
-    // FIXME: this should use getLocalDeclarations!
-    const reachableUris = this.getReachableUris({ uri })
-
-    const symbols: LSP.SymbolInformation[] = []
-    reachableUris.forEach((uri) => {
+  /**
+   * Get all declaration symbols (function or variables) from the given file/position
+   * or from all files in the workspace.
+   *
+   * FIXME: rename to getAllDeclarationSymbols
+   */
+  private getAllSymbols({
+    uri: fromUri,
+    position,
+  }: { uri?: string; position?: LSP.Position } = {}): LSP.SymbolInformation[] {
+    return this.getReachableUris({ uri: fromUri }).reduce((symbols, uri) => {
       const analyzedDocument = this.uriToAnalyzedDocument[uri]
-      if (!analyzedDocument) {
-        return
+
+      if (analyzedDocument) {
+        if (uri !== fromUri || !position) {
+          // We use the global declarations for external files or if we do not have a position
+          const { globalDeclarations } = analyzedDocument
+          Object.values(globalDeclarations).forEach((symbol) => symbols.push(symbol))
+        }
+
+        // For the current file we find declarations based on the current scope
+        if (uri === fromUri && position) {
+          const node = analyzedDocument.tree.rootNode?.descendantForPosition({
+            row: position.line,
+            column: position.character,
+          })
+
+          const localDeclarations = getLocalDeclarations({
+            node,
+            uri,
+          })
+
+          Object.keys(localDeclarations).map((name) => {
+            const symbolsMatchingWord = localDeclarations[name]
+
+            // Find the latest definition
+            let closestSymbol: LSP.SymbolInformation | null = null
+            symbolsMatchingWord.forEach((symbol) => {
+              // Skip if the symbol is defined in the current file after the requested position
+              if (uri === fromUri && symbol.location.range.start.line > position.line) {
+                return
+              }
+
+              if (
+                closestSymbol === null ||
+                symbol.location.range.start.line > closestSymbol.location.range.start.line
+              ) {
+                closestSymbol = symbol
+              }
+            })
+
+            if (closestSymbol) {
+              symbols.push(closestSymbol)
+            }
+          })
+        }
       }
 
-      Object.values(analyzedDocument.globalDeclarations).forEach((symbol) => {
-        symbols.push(symbol)
-      })
-    })
-
-    return symbols
+      return symbols
+    }, [] as LSP.SymbolInformation[])
   }
 }
-
-// Other languages where there are multiple re-declaration of variables
-// TS
-// - go to definition: takes you to the "let x = 1" line even though it is redefined
-// - clicking on first definition: shows references also in the other files
-// - docs: "function x(): void" or "let x: number"
-// Python
-// - go to definition: returns multiple definitions
-// - clicking on first definition: shows definitions
-// - docs: prefixed with "(function) x() -> None" or "(variable) xxx: Literal[1]"

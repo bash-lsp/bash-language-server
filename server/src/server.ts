@@ -474,6 +474,9 @@ export default class BashServer {
   }
 
   private onDocumentSymbol(params: LSP.DocumentSymbolParams): LSP.SymbolInformation[] {
+    // FIXME: ideally this should return LSP.DocumentSymbol[] instead of LSP.SymbolInformation[]
+    // which is a hirearchy of symbols.
+    // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_documentSymbol
     this.connection.console.log(`onDocumentSymbol`)
     return this.analyzer.findSymbolsForFile({ uri: params.textDocument.uri })
   }
@@ -559,7 +562,10 @@ export default class BashServer {
         ? []
         : this.getCompletionItemsForSymbols({
             symbols: shouldCompleteOnVariables
-              ? this.analyzer.getAllVariableSymbols({ uri: currentUri })
+              ? this.analyzer.getAllVariableSymbols({
+                  uri: currentUri,
+                  position: params.position,
+                })
               : this.analyzer.findSymbolsMatchingWord({
                   exactMatch: false,
                   uri: currentUri,
