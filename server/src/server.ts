@@ -204,7 +204,7 @@ export default class BashServer {
   }
 
   private updateConfiguration(configObject: any): boolean {
-    if (typeof configObject === 'object') {
+    if (typeof configObject === 'object' && configObject !== null) {
       try {
         const newConfig = config.ConfigSchema.parse(configObject)
 
