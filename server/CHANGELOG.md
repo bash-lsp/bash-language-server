@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.2.1
+
+- Add support for resolving loop variables https://github.com/bash-lsp/bash-language-server/pull/653
+
 ## 4.2.0
 
 - Improve heuristic for resolving variables by taking the scope into account, both locally and when sourcing files. https://github.com/bash-lsp/bash-language-server/pull/649
