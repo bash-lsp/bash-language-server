@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 4.2.0
+
+- Improve heuristic for resolving variables by taking the scope into account, both locally and when sourcing files. https://github.com/bash-lsp/bash-language-server/pull/649
+- Support client responding with `null` for `workspace/configuration`. https://github.com/bash-lsp/bash-language-server/pull/650
+
 ## 4.1.3
 
 - Correctly parse environment variable `BACKGROUND_ANALYSIS_MAX_FILES`, although clients should migrate to the new configuration system (see info in the 4.0.1 release). https://github.com/bash-lsp/bash-language-server/pull/640
