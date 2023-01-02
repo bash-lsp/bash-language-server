@@ -94,6 +94,9 @@ export function getAllDeclarationsInTree({
  * Done by traversing the tree upwards (which is a simplification for
  * actual bash behaviour but deemed good enough, compared to the complexity of flow tracing).
  * Filters out duplicate definitions. Used when getting declarations for the current scope.
+ *
+ * FIXME: unfortunately this doesn't capture all global variables defined inside functions.
+ * Wondering if getGlobalDeclarations should return this or we should make that a custom feature of this function.
  */
 export function getLocalDeclarations({
   node,

@@ -274,7 +274,7 @@ describe('server', () => {
         },
         position: {
           // X
-          line: 28,
+          line: 32,
           character: 8,
         },
       },
@@ -324,22 +324,10 @@ describe('server', () => {
           "range": Object {
             "end": Object {
               "character": 11,
-              "line": 11,
+              "line": 12,
             },
             "start": Object {
               "character": 10,
-              "line": 11,
-            },
-          },
-        },
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 13,
-              "line": 12,
-            },
-            "start": Object {
-              "character": 12,
               "line": 12,
             },
           },
@@ -348,11 +336,23 @@ describe('server', () => {
           "range": Object {
             "end": Object {
               "character": 13,
-              "line": 16,
+              "line": 15,
             },
             "start": Object {
               "character": 12,
-              "line": 16,
+              "line": 15,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 13,
+              "line": 19,
+            },
+            "start": Object {
+              "character": 12,
+              "line": 19,
             },
           },
         },
@@ -360,11 +360,11 @@ describe('server', () => {
           "range": Object {
             "end": Object {
               "character": 15,
-              "line": 17,
+              "line": 20,
             },
             "start": Object {
               "character": 14,
-              "line": 17,
+              "line": 20,
             },
           },
         },
@@ -372,11 +372,11 @@ describe('server', () => {
           "range": Object {
             "end": Object {
               "character": 11,
-              "line": 25,
+              "line": 29,
             },
             "start": Object {
               "character": 10,
-              "line": 25,
+              "line": 29,
             },
           },
         },
@@ -384,11 +384,11 @@ describe('server', () => {
           "range": Object {
             "end": Object {
               "character": 9,
-              "line": 28,
+              "line": 32,
             },
             "start": Object {
               "character": 8,
-              "line": 28,
+              "line": 32,
             },
           },
         },

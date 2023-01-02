@@ -164,11 +164,11 @@ describe('findDeclarationLocations', () => {
           "range": Object {
             "end": Object {
               "character": 17,
-              "line": 11,
+              "line": 12,
             },
             "start": Object {
               "character": 10,
-              "line": 11,
+              "line": 12,
             },
           },
           "uri": "file://${FIXTURE_FOLDER}scope.sh",
@@ -540,11 +540,11 @@ describe('findDeclarationsMatchingWord', () => {
             "range": Object {
               "end": Object {
                 "character": 17,
-                "line": 11,
+                "line": 12,
               },
               "start": Object {
                 "character": 10,
-                "line": 11,
+                "line": 12,
               },
             },
             "uri": "file://${FIXTURE_FOLDER}scope.sh",
@@ -555,7 +555,7 @@ describe('findDeclarationsMatchingWord', () => {
     `)
 
     // Local function definition
-    expect(findWordFromLine('f', 20)).toMatchInlineSnapshot(`
+    expect(findWordFromLine('f', 23)).toMatchInlineSnapshot(`
       Array [
         Object {
           "containerName": "g",
@@ -564,11 +564,11 @@ describe('findDeclarationsMatchingWord', () => {
             "range": Object {
               "end": Object {
                 "character": 5,
-                "line": 18,
+                "line": 21,
               },
               "start": Object {
                 "character": 4,
-                "line": 15,
+                "line": 18,
               },
             },
             "uri": "file://${FIXTURE_FOLDER}scope.sh",
@@ -609,7 +609,7 @@ describe('findDeclarationsMatchingWord', () => {
             "range": Object {
               "end": Object {
                 "character": 1,
-                "line": 26,
+                "line": 30,
               },
               "start": Object {
                 "character": 0,
@@ -622,6 +622,9 @@ describe('findDeclarationsMatchingWord', () => {
         },
       ]
     `)
+
+    // FIXME: this should return the a reference to the function
+    expect(findWordFromLine('GLOBAL_1', 1000)).toHaveLength(1)
   })
 })
 
