@@ -15,7 +15,9 @@ export type Declarations = { [word: string]: LSP.SymbolInformation[] }
 
 /**
  * Returns declarations (functions or variables) from a given root node
- * that would be available after sourcing the file.
+ * that would be available after sourcing the file. This currently does
+ * not include global variables defined inside function as we do not do
+ * any flow tracing.
  *
  * Will only return one declaration per symbol name – the latest definition.
  * This behavior is consistent with how Bash behaves, but differs between
@@ -64,6 +66,7 @@ export function getGlobalDeclarations({
 
 /**
  * Returns all declarations (functions or variables) from a given tree.
+ * This includes local variables.
  */
 export function getAllDeclarationsInTree({
   tree,
@@ -91,12 +94,10 @@ export function getAllDeclarationsInTree({
 
 /**
  * Returns declarations available for the given file and location.
- * Done by traversing the tree upwards (which is a simplification for
- * actual bash behaviour but deemed good enough, compared to the complexity of flow tracing).
- * Filters out duplicate definitions. Used when getting declarations for the current scope.
+ * The heuristics used is a simplification compared to bash behaviour,
+ * but deemed good enough, compared to the complexity of flow tracing.
  *
- * FIXME: unfortunately this doesn't capture all global variables defined inside functions.
- * Wondering if getGlobalDeclarations should return this or we should make that a custom feature of this function.
+ * Used when getting declarations for the current scope.
  */
 export function getLocalDeclarations({
   node,
@@ -107,8 +108,7 @@ export function getLocalDeclarations({
 }): Declarations {
   const declarations: Declarations = {}
 
-  // bottom up traversal of the tree to capture all local declarations
-
+  // Bottom up traversal to capture all local and scoped declarations
   const walk = (node: Parser.SyntaxNode | null) => {
     // NOTE: there is also node.walk
     if (node) {
@@ -144,6 +144,58 @@ export function getLocalDeclarations({
   }
 
   walk(node)
+
+  // Top down traversal to add missing global variables from within functions
+  if (node) {
+    const rootNode =
+      node.type === 'program'
+        ? node
+        : TreeSitterUtil.findParent(node, (p) => p.type === 'program')
+    if (!rootNode) {
+      throw new Error('did not find root node')
+    }
+
+    Object.entries(
+      getAllGlobalVariableDeclarations({
+        rootNode,
+        uri,
+      }),
+    ).map(([name, symbols]) => {
+      if (!declarations[name]) {
+        declarations[name] = symbols
+      }
+    })
+  }
+
+  return declarations
+}
+
+function getAllGlobalVariableDeclarations({
+  uri,
+  rootNode,
+}: {
+  uri: string
+  rootNode: Parser.SyntaxNode
+}) {
+  const declarations: Declarations = {}
+
+  TreeSitterUtil.forEach(rootNode, (node: Parser.SyntaxNode) => {
+    if (
+      node.type === 'variable_assignment' &&
+      // exclude local variables
+      node.parent?.type !== 'declaration_command'
+    ) {
+      const symbol = nodeToSymbolInformation({ node, uri })
+      if (symbol) {
+        if (!declarations[symbol.name]) {
+          declarations[symbol.name] = []
+        }
+        declarations[symbol.name].push(symbol)
+      }
+    }
+
+    return
+  })
 
   return declarations
 }

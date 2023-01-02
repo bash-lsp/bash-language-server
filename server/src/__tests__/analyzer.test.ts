@@ -623,8 +623,29 @@ describe('findDeclarationsMatchingWord', () => {
       ]
     `)
 
-    // FIXME: this should return the a reference to the function
-    expect(findWordFromLine('GLOBAL_1', 1000)).toHaveLength(1)
+    // Global variable defined inside a function
+    expect(findWordFromLine('GLOBAL_1', 1000)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "containerName": "g",
+          "kind": 13,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 23,
+                "line": 13,
+              },
+              "start": Object {
+                "character": 4,
+                "line": 13,
+              },
+            },
+            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+          },
+          "name": "GLOBAL_1",
+        },
+      ]
+    `)
   })
 })
 
