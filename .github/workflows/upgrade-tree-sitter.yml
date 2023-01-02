@@ -23,7 +23,7 @@ jobs:
         run: bash scripts/upgrade-tree-sitter.sh
 
       - name: Verify file changes
-        uses: tj-actions/verify-changed-files@v12
+        uses: tj-actions/verify-changed-files@v13
         id: verify-changed-files
         with:
           files: |
