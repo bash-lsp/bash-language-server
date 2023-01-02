@@ -152,7 +152,6 @@ describe('findDeclarationLocations', () => {
   })
 
   it('returns local declarations', () => {
-    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
     const result = analyzer.findDeclarationLocations({
       position: { character: 12, line: 12 },
       uri: FIXTURE_URI.SCOPE,
