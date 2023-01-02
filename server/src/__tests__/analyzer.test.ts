@@ -152,7 +152,6 @@ describe('findDeclarationLocations', () => {
   })
 
   it('returns local declarations', () => {
-    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
     const result = analyzer.findDeclarationLocations({
       position: { character: 12, line: 12 },
       uri: FIXTURE_URI.SCOPE,
@@ -169,6 +168,31 @@ describe('findDeclarationLocations', () => {
             "start": Object {
               "character": 10,
               "line": 12,
+            },
+          },
+          "uri": "file://${FIXTURE_FOLDER}scope.sh",
+        },
+      ]
+    `)
+  })
+
+  it('returns local declarations for loop variables', () => {
+    const result = analyzer.findDeclarationLocations({
+      position: { character: 18, line: 39 },
+      uri: FIXTURE_URI.SCOPE,
+      word: 'i',
+    })
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 5,
+              "line": 37,
+            },
+            "start": Object {
+              "character": 4,
+              "line": 37,
             },
           },
           "uri": "file://${FIXTURE_FOLDER}scope.sh",
