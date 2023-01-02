@@ -9,6 +9,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as Parser from 'web-tree-sitter'
 
 import {
+  getAllDeclarationsInTree,
   getGlobalDeclarations,
   getLocalDeclarations,
   GlobalDeclarations,
@@ -327,14 +328,18 @@ export default class Analyzer {
   }
 
   /**
-   * Get all symbol declarations in the given file.
+   * Get all symbol declarations in the given file. This is used for generating an outline.
    *
-   * FIXME: this should return all symbols, not just global declarations.
-   * FIXME: convert to DocumentSymbol[] which is a hierarchy of symbols found in a given text document.
+   * TODO: convert to DocumentSymbol[] which is a hierarchy of symbols found in a given text document.
    */
   public getDeclarationsForUri({ uri }: { uri: string }): LSP.SymbolInformation[] {
-    const declarationsInFile = this.uriToAnalyzedDocument[uri]?.globalDeclarations || {}
-    return Object.values(declarationsInFile)
+    const tree = this.uriToAnalyzedDocument[uri]?.tree
+
+    if (!tree?.rootNode) {
+      return []
+    }
+
+    return getAllDeclarationsInTree({ uri, tree })
   }
 
   // TODO: move somewhere else than the analyzer...
@@ -521,7 +526,8 @@ export default class Analyzer {
 
   /**
    * Get all declaration symbols (function or variables) from the given file/position
-   * or from all files in the workspace.
+   * or from all files in the workspace. It will take into account the given position
+   * to filter out irrelevant symbols.
    *
    * Note that this can return duplicates across the workspace.
    */

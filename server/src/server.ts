@@ -474,7 +474,7 @@ export default class BashServer {
   }
 
   private onDocumentSymbol(params: LSP.DocumentSymbolParams): LSP.SymbolInformation[] {
-    // FIXME: ideally this should return LSP.DocumentSymbol[] instead of LSP.SymbolInformation[]
+    // TODO: ideally this should return LSP.DocumentSymbol[] instead of LSP.SymbolInformation[]
     // which is a hierarchy of symbols.
     // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_documentSymbol
     this.connection.console.log(`onDocumentSymbol`)

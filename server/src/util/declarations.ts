@@ -68,36 +68,35 @@ export function getGlobalDeclarations({
   return { diagnostics, globalDeclarations }
 }
 
-function nodeToSymbolInformation({
-  node,
+/**
+ * Returns all declarations (functions or variables) from a given tree.
+ */
+export function getAllDeclarationsInTree({
+  tree,
   uri,
 }: {
-  node: Parser.SyntaxNode
+  tree: Parser.Tree
   uri: string
-}): LSP.SymbolInformation | null {
-  const named = node.firstNamedChild
+}): LSP.SymbolInformation[] {
+  const symbols: LSP.SymbolInformation[] = []
 
-  if (named === null) {
-    return null
-  }
+  TreeSitterUtil.forEach(tree.rootNode, (node: Parser.SyntaxNode) => {
+    if (TreeSitterUtil.isDefinition(node)) {
+      const symbol = nodeToSymbolInformation({ node, uri })
 
-  const containerName =
-    TreeSitterUtil.findParent(node, (p) => p.type === 'function_definition')
-      ?.firstNamedChild?.text || ''
+      if (symbol) {
+        symbols.push(symbol)
+      }
+    }
 
-  const kind = TREE_SITTER_TYPE_TO_LSP_KIND[node.type]
+    return
+  })
 
-  return LSP.SymbolInformation.create(
-    named.text,
-    kind || LSP.SymbolKind.Variable,
-    TreeSitterUtil.range(node),
-    uri,
-    containerName,
-  )
+  return symbols
 }
 
 /**
- * Returns declarations available for the given file and location
+ * Returns declarations available for the given file and location.
  * Done by traversing the tree upwards (which is a simplification for
  * actual bash behaviour but deemed good enough, compared to the complexity of flow tracing).
  * Filters out duplicate definitions. Used when getting declarations for the current scope.
@@ -150,4 +149,32 @@ export function getLocalDeclarations({
   walk(node)
 
   return declarations
+}
+
+function nodeToSymbolInformation({
+  node,
+  uri,
+}: {
+  node: Parser.SyntaxNode
+  uri: string
+}): LSP.SymbolInformation | null {
+  const named = node.firstNamedChild
+
+  if (named === null) {
+    return null
+  }
+
+  const containerName =
+    TreeSitterUtil.findParent(node, (p) => p.type === 'function_definition')
+      ?.firstNamedChild?.text || ''
+
+  const kind = TREE_SITTER_TYPE_TO_LSP_KIND[node.type]
+
+  return LSP.SymbolInformation.create(
+    named.text,
+    kind || LSP.SymbolKind.Variable,
+    TreeSitterUtil.range(node),
+    uri,
+    containerName,
+  )
 }
