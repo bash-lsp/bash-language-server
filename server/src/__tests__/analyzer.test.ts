@@ -176,6 +176,31 @@ describe('findDeclarationLocations', () => {
       ]
     `)
   })
+
+  it('returns local declarations for loop variables', () => {
+    const result = analyzer.findDeclarationLocations({
+      position: { character: 18, line: 39 },
+      uri: FIXTURE_URI.SCOPE,
+      word: 'i',
+    })
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 5,
+              "line": 37,
+            },
+            "start": Object {
+              "character": 4,
+              "line": 37,
+            },
+          },
+          "uri": "file://${FIXTURE_FOLDER}scope.sh",
+        },
+      ]
+    `)
+  })
 })
 
 describe('findReferences', () => {

@@ -34,3 +34,8 @@ echo "${X}"
 f
 
 echo "${GLOBAL_2}"
+
+for i in 1 2 3 4 5
+do
+ echo "$GLOBAL_1 $i"
+done

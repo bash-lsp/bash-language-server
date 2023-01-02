@@ -129,6 +129,16 @@ export function getLocalDeclarations({
           }
         } else if (TreeSitterUtil.isDefinition(childNode)) {
           symbol = nodeToSymbolInformation({ node: childNode, uri })
+        } else if (childNode.type === 'for_statement') {
+          const variableNode = childNode.child(1)
+          if (variableNode && variableNode.type === 'variable_name') {
+            symbol = LSP.SymbolInformation.create(
+              variableNode.text,
+              LSP.SymbolKind.Variable,
+              TreeSitterUtil.range(variableNode),
+              uri,
+            )
+          }
         }
 
         if (symbol) {
