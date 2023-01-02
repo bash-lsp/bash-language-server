@@ -922,6 +922,6 @@ describe('server', () => {
     )
 
     expect(result).toBeDefined()
-    expect((result as any)?.contents.value).toContain('ls – list directory contents')
+    expect((result as any)?.contents.value).toContain('list directory contents')
   })
 })
