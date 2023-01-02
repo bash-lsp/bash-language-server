@@ -37,11 +37,7 @@ export function getGlobalDeclarations({
   const diagnostics: LSP.Diagnostic[] = []
   const globalDeclarations: GlobalDeclarations = {}
 
-  TreeSitterUtil.forEach(tree.rootNode, (node: Parser.SyntaxNode) => {
-    if (node.parent?.type !== 'program') {
-      return
-    }
-
+  tree.rootNode.children.forEach((node) => {
     if (node.type === 'ERROR') {
       diagnostics.push(
         LSP.Diagnostic.create(
@@ -61,8 +57,6 @@ export function getGlobalDeclarations({
         globalDeclarations[word] = symbol
       }
     }
-
-    return
   })
 
   return { diagnostics, globalDeclarations }
