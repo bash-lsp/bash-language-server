@@ -221,21 +221,8 @@ describe('server', () => {
       {} as any,
     )
 
-    // TODO: there is a superfluous range here on line 0:
     expect(result1).toMatchInlineSnapshot(`
       Array [
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 12,
-              "line": 0,
-            },
-            "start": Object {
-              "character": 9,
-              "line": 0,
-            },
-          },
-        },
         Object {
           "range": Object {
             "end": Object {
@@ -279,6 +266,134 @@ describe('server', () => {
     )
 
     expect(result2).toMatchInlineSnapshot(`Array []`)
+
+    const result3 = await onDocumentHighlight(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.SCOPE,
+        },
+        position: {
+          // X
+          line: 32,
+          character: 8,
+        },
+      },
+      {} as any,
+      {} as any,
+    )
+
+    expect(result3).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 1,
+              "line": 2,
+            },
+            "start": Object {
+              "character": 0,
+              "line": 2,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 1,
+              "line": 4,
+            },
+            "start": Object {
+              "character": 0,
+              "line": 4,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 9,
+              "line": 8,
+            },
+            "start": Object {
+              "character": 8,
+              "line": 8,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 11,
+              "line": 12,
+            },
+            "start": Object {
+              "character": 10,
+              "line": 12,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 13,
+              "line": 15,
+            },
+            "start": Object {
+              "character": 12,
+              "line": 15,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 13,
+              "line": 19,
+            },
+            "start": Object {
+              "character": 12,
+              "line": 19,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 15,
+              "line": 20,
+            },
+            "start": Object {
+              "character": 14,
+              "line": 20,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 11,
+              "line": 29,
+            },
+            "start": Object {
+              "character": 10,
+              "line": 29,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 9,
+              "line": 32,
+            },
+            "start": Object {
+              "character": 8,
+              "line": 32,
+            },
+          },
+        },
+      ]
+    `)
   })
 
   it('responds to onWorkspaceSymbol', async () => {
@@ -302,17 +417,6 @@ describe('server', () => {
             range: {
               end: { character: 27, line: 40 },
               start: { character: 0, line: 40 },
-            },
-            uri: expect.stringContaining('/testing/fixtures/install.sh'),
-          },
-          name: 'npm_config_loglevel',
-        },
-        {
-          kind: expect.any(Number),
-          location: {
-            range: {
-              end: { character: 31, line: 48 },
-              start: { character: 2, line: 48 },
             },
             uri: expect.stringContaining('/testing/fixtures/install.sh'),
           },
@@ -669,58 +773,6 @@ describe('server', () => {
           "kind": 6,
           "label": "RESET",
         },
-        Object {
-          "data": Object {
-            "name": "USER",
-            "type": 3,
-          },
-          "documentation": Object {
-            "kind": "markdown",
-            "value": "Variable: **USER** - *defined in issue101.sh*",
-          },
-          "kind": 6,
-          "label": "USER",
-        },
-        Object {
-          "data": Object {
-            "name": "PASSWORD",
-            "type": 3,
-          },
-          "documentation": Object {
-            "kind": "markdown",
-            "value": "Variable: **PASSWORD** - *defined in issue101.sh*",
-          },
-          "kind": 6,
-          "label": "PASSWORD",
-        },
-        Object {
-          "data": Object {
-            "name": "COMMENTS",
-            "type": 3,
-          },
-          "documentation": Object {
-            "kind": "markdown",
-            "value": "Variable: **COMMENTS** - *defined in issue101.sh*
-
-      \`\`\`txt
-      Having shifted twice, the rest is now comments ...
-      \`\`\`",
-          },
-          "kind": 6,
-          "label": "COMMENTS",
-        },
-        Object {
-          "data": Object {
-            "name": "tag",
-            "type": 3,
-          },
-          "documentation": Object {
-            "kind": "markdown",
-            "value": "Variable: **tag** - *defined in ../../scripts/tag-release.inc*",
-          },
-          "kind": 6,
-          "label": "tag",
-        },
       ]
     `)
   })
@@ -849,30 +901,27 @@ describe('server', () => {
     `)
   })
 
-  it.failing(
-    'returns executable documentation if the function is not redefined',
-    async () => {
-      const { connection, server } = await initializeServer()
-      server.register(connection)
+  it('returns executable documentation if the function is not redefined', async () => {
+    const { connection, server } = await initializeServer()
+    server.register(connection)
 
-      const onHover = connection.onHover.mock.calls[0][0]
+    const onHover = connection.onHover.mock.calls[0][0]
 
-      const result = await onHover(
-        {
-          textDocument: {
-            uri: FIXTURE_URI.OVERRIDE_SYMBOL,
-          },
-          position: {
-            line: 2,
-            character: 1,
-          },
+    const result = await onHover(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.OVERRIDE_SYMBOL,
         },
-        {} as any,
-        {} as any,
-      )
+        position: {
+          line: 2,
+          character: 1,
+        },
+      },
+      {} as any,
+      {} as any,
+    )
 
-      expect(result).toBeDefined()
-      expect((result as any)?.contents.value).toContain('ls – list directory contents')
-    },
-  )
+    expect(result).toBeDefined()
+    expect((result as any)?.contents.value).toContain('list directory contents')
+  })
 })

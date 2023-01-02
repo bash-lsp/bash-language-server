@@ -18,7 +18,7 @@ const CURRENT_URI = 'dummy-uri.sh'
 const mockConsole = getMockConnection().console
 
 // if you add a .sh file to testing/fixtures, update this value
-const FIXTURE_FILES_MATCHING_GLOB = 14
+const FIXTURE_FILES_MATCHING_GLOB = 15
 
 const defaultConfig = getDefaultConfiguration()
 
@@ -59,18 +59,12 @@ describe('analyze', () => {
   })
 })
 
-describe('findDefinition', () => {
-  it('returns an empty list if word is not found', () => {
-    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
-    const result = analyzer.findDefinition({ uri: CURRENT_URI, word: 'foobar' })
-    expect(result).toEqual([])
-  })
-
+describe('findDeclarationLocations', () => {
   it('returns a location to a file if word is the path in a sourcing statement', () => {
     const document = FIXTURE_DOCUMENT.SOURCING
     const { uri } = document
     analyzer.analyze({ uri, document })
-    const result = analyzer.findDefinition({
+    const result = analyzer.findDeclarationLocations({
       uri,
       word: './extension.inc',
       position: { character: 10, line: 2 },
@@ -107,7 +101,7 @@ describe('findDefinition', () => {
     })
 
     newAnalyzer.analyze({ uri, document })
-    const result = newAnalyzer.findDefinition({
+    const result = newAnalyzer.findDeclarationLocations({
       uri,
       word: './scripts/tag-release.inc',
       position: { character: 10, line: 16 },
@@ -131,13 +125,13 @@ describe('findDefinition', () => {
     `)
   })
 
-  it('returns a list of locations if parameter is found', () => {
+  it('returns a local reference if definition is found', () => {
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
-    const result = analyzer.findDefinition({
+    const result = analyzer.findDeclarationLocations({
+      position: { character: 1, line: 148 },
       uri: CURRENT_URI,
       word: 'node_version',
     })
-    expect(result).not.toEqual([])
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -152,6 +146,32 @@ describe('findDefinition', () => {
             },
           },
           "uri": "dummy-uri.sh",
+        },
+      ]
+    `)
+  })
+
+  it('returns local declarations', () => {
+    analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
+    const result = analyzer.findDeclarationLocations({
+      position: { character: 12, line: 12 },
+      uri: FIXTURE_URI.SCOPE,
+      word: 'X',
+    })
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "range": Object {
+            "end": Object {
+              "character": 17,
+              "line": 12,
+            },
+            "start": Object {
+              "character": 10,
+              "line": 12,
+            },
+          },
+          "uri": "file://${FIXTURE_FOLDER}scope.sh",
         },
       ]
     `)
@@ -173,23 +193,23 @@ describe('findReferences', () => {
   })
 })
 
-describe('findSymbolsForFile', () => {
+describe('getDeclarationsForUri', () => {
   it('returns empty list if uri is not found', () => {
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
-    const result = analyzer.findSymbolsForFile({ uri: 'foobar.sh' })
+    const result = analyzer.getDeclarationsForUri({ uri: 'foobar.sh' })
     expect(result).toEqual([])
   })
 
   it('returns a list of SymbolInformation if uri is found', () => {
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
-    const result = analyzer.findSymbolsForFile({ uri: CURRENT_URI })
+    const result = analyzer.getDeclarationsForUri({ uri: CURRENT_URI })
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()
   })
 
   it('issue 101', () => {
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.ISSUE101 })
-    const result = analyzer.findSymbolsForFile({ uri: CURRENT_URI })
+    const result = analyzer.getDeclarationsForUri({ uri: CURRENT_URI })
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()
   })
@@ -297,8 +317,8 @@ describe('commandNameAtPoint', () => {
   })
 })
 
-describe('findSymbolsMatchingWord', () => {
-  it('return a list of symbols across the workspace when includeAllWorkspaceSymbols is true', async () => {
+describe('findDeclarationsMatchingWord', () => {
+  it('returns a list of symbols across the workspace when includeAllWorkspaceSymbols is true', async () => {
     const parser = await initializeParser()
     const connection = getMockConnection()
 
@@ -314,10 +334,11 @@ describe('findSymbolsMatchingWord', () => {
     })
 
     expect(
-      analyzer.findSymbolsMatchingWord({
+      analyzer.findDeclarationsMatchingWord({
         word: 'npm_config_logl',
         uri: FIXTURE_URI.INSTALL,
         exactMatch: false,
+        position: { line: 1000, character: 0 },
       }),
     ).toMatchInlineSnapshot(`
       Array [
@@ -338,39 +359,24 @@ describe('findSymbolsMatchingWord', () => {
           },
           "name": "npm_config_loglevel",
         },
-        Object {
-          "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
-                "character": 31,
-                "line": 48,
-              },
-              "start": Object {
-                "character": 2,
-                "line": 48,
-              },
-            },
-            "uri": "file://${FIXTURE_FOLDER}install.sh",
-          },
-          "name": "npm_config_loglevel",
-        },
       ]
     `)
 
     expect(
-      analyzer.findSymbolsMatchingWord({
+      analyzer.findDeclarationsMatchingWord({
         word: 'xxxxxxxx',
         uri: FIXTURE_URI.INSTALL,
         exactMatch: false,
+        position: { line: 1000, character: 0 },
       }),
     ).toMatchInlineSnapshot(`Array []`)
 
     expect(
-      analyzer.findSymbolsMatchingWord({
+      analyzer.findDeclarationsMatchingWord({
         word: 'BLU',
         uri: FIXTURE_URI.INSTALL,
         exactMatch: false,
+        position: { line: 6, character: 9 },
       }),
     ).toMatchInlineSnapshot(`
       Array [
@@ -395,10 +401,11 @@ describe('findSymbolsMatchingWord', () => {
     `)
 
     expect(
-      analyzer.findSymbolsMatchingWord({
+      analyzer.findDeclarationsMatchingWord({
         word: 'BLU',
         uri: FIXTURE_URI.SOURCING,
         exactMatch: false,
+        position: { line: 6, character: 9 },
       }),
     ).toMatchInlineSnapshot(`
       Array [
@@ -423,7 +430,7 @@ describe('findSymbolsMatchingWord', () => {
     `)
   })
 
-  it('return a list of symbols accessible to the uri when includeAllWorkspaceSymbols is false', async () => {
+  it('returns a list of symbols accessible to the uri when includeAllWorkspaceSymbols is false', async () => {
     const parser = await initializeParser()
     const connection = getMockConnection()
 
@@ -439,18 +446,20 @@ describe('findSymbolsMatchingWord', () => {
     })
 
     expect(
-      analyzer.findSymbolsMatchingWord({
+      analyzer.findDeclarationsMatchingWord({
         word: 'BLU',
         uri: FIXTURE_URI.INSTALL,
         exactMatch: false,
+        position: { line: 1000, character: 0 },
       }),
     ).toMatchInlineSnapshot(`Array []`)
 
     expect(
-      analyzer.findSymbolsMatchingWord({
+      analyzer.findDeclarationsMatchingWord({
         word: 'BLU',
         uri: FIXTURE_URI.SOURCING,
         exactMatch: false,
+        position: { line: 6, character: 9 },
       }),
     ).toMatchInlineSnapshot(`
       Array [
@@ -470,6 +479,170 @@ describe('findSymbolsMatchingWord', () => {
             "uri": "file://${FIXTURE_FOLDER}extension.inc",
           },
           "name": "BLUE",
+        },
+      ]
+    `)
+  })
+
+  it('returns symbols depending on the scope', async () => {
+    const parser = await initializeParser()
+    const connection = getMockConnection()
+
+    const analyzer = new Analyzer({
+      console: connection.console,
+      parser,
+      includeAllWorkspaceSymbols: false,
+      workspaceFolder: FIXTURE_FOLDER,
+    })
+
+    const findWordFromLine = (word: string, line: number) =>
+      analyzer.findDeclarationsMatchingWord({
+        word,
+        uri: FIXTURE_URI.SCOPE,
+        exactMatch: true,
+        position: { line, character: 0 },
+      })
+
+    // Variable or function defined yet
+    expect(findWordFromLine('X', 0)).toEqual([])
+    expect(findWordFromLine('f', 0)).toEqual([])
+
+    // First definition
+    expect(findWordFromLine('X', 3)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "kind": 13,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 9,
+                "line": 2,
+              },
+              "start": Object {
+                "character": 0,
+                "line": 2,
+              },
+            },
+            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+          },
+          "name": "X",
+        },
+      ]
+    `)
+
+    // Local variable definition
+    expect(findWordFromLine('X', 13)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "containerName": "g",
+          "kind": 13,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 17,
+                "line": 12,
+              },
+              "start": Object {
+                "character": 10,
+                "line": 12,
+              },
+            },
+            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+          },
+          "name": "X",
+        },
+      ]
+    `)
+
+    // Local function definition
+    expect(findWordFromLine('f', 23)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "containerName": "g",
+          "kind": 12,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 5,
+                "line": 21,
+              },
+              "start": Object {
+                "character": 4,
+                "line": 18,
+              },
+            },
+            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+          },
+          "name": "f",
+        },
+      ]
+    `)
+
+    // Last definition
+    expect(findWordFromLine('X', 1000)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "kind": 13,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 9,
+                "line": 4,
+              },
+              "start": Object {
+                "character": 0,
+                "line": 4,
+              },
+            },
+            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+          },
+          "name": "X",
+        },
+      ]
+    `)
+
+    expect(findWordFromLine('f', 1000)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "kind": 12,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 1,
+                "line": 30,
+              },
+              "start": Object {
+                "character": 0,
+                "line": 7,
+              },
+            },
+            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+          },
+          "name": "f",
+        },
+      ]
+    `)
+
+    // Global variable defined inside a function
+    expect(findWordFromLine('GLOBAL_1', 1000)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "containerName": "g",
+          "kind": 13,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 23,
+                "line": 13,
+              },
+              "start": Object {
+                "character": 4,
+                "line": 13,
+              },
+            },
+            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+          },
+          "name": "GLOBAL_1",
         },
       ]
     `)
@@ -596,7 +769,7 @@ describe('initiateBackgroundAnalysis', () => {
   })
 })
 
-describe('getAllVariableSymbols', () => {
+describe('getAllVariables', () => {
   it('returns all variable symbols', async () => {
     const document = FIXTURE_DOCUMENT.SOURCING
     const { uri } = document
@@ -613,7 +786,8 @@ describe('getAllVariableSymbols', () => {
 
     newAnalyzer.analyze({ uri, document })
 
-    expect(newAnalyzer.getAllVariableSymbols({ uri })).toMatchInlineSnapshot(`
+    expect(newAnalyzer.getAllVariables({ uri, position: { line: 20, character: 0 } }))
+      .toMatchInlineSnapshot(`
       Array [
         Object {
           "kind": 13,
@@ -716,24 +890,6 @@ describe('getAllVariableSymbols', () => {
             "uri": "file://${FIXTURE_FOLDER}extension.inc",
           },
           "name": "RESET",
-        },
-        Object {
-          "containerName": "tagRelease",
-          "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
-                "character": 8,
-                "line": 5,
-              },
-              "start": Object {
-                "character": 2,
-                "line": 5,
-              },
-            },
-            "uri": "file://${REPO_ROOT_FOLDER}/scripts/tag-release.inc",
-          },
-          "name": "tag",
         },
       ]
     `)

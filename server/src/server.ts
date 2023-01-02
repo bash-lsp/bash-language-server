@@ -426,10 +426,11 @@ export default class BashServer {
       }
     }
 
-    const symbolsMatchingWord = this.analyzer.findSymbolsMatchingWord({
+    const symbolsMatchingWord = this.analyzer.findDeclarationsMatchingWord({
       exactMatch: true,
       uri: currentUri,
       word,
+      position: params.position,
     })
     if (
       ReservedWords.isReservedWord(word) ||
@@ -465,7 +466,7 @@ export default class BashServer {
     if (!word) {
       return null
     }
-    return this.analyzer.findDefinition({
+    return this.analyzer.findDeclarationLocations({
       position: params.position,
       uri: params.textDocument.uri,
       word,
@@ -473,13 +474,16 @@ export default class BashServer {
   }
 
   private onDocumentSymbol(params: LSP.DocumentSymbolParams): LSP.SymbolInformation[] {
+    // TODO: ideally this should return LSP.DocumentSymbol[] instead of LSP.SymbolInformation[]
+    // which is a hierarchy of symbols.
+    // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_documentSymbol
     this.connection.console.log(`onDocumentSymbol`)
-    return this.analyzer.findSymbolsForFile({ uri: params.textDocument.uri })
+    return this.analyzer.getDeclarationsForUri({ uri: params.textDocument.uri })
   }
 
   private onWorkspaceSymbol(params: LSP.WorkspaceSymbolParams): LSP.SymbolInformation[] {
     this.connection.console.log('onWorkspaceSymbol')
-    return this.analyzer.search(params.query)
+    return this.analyzer.findDeclarationsWithFuzzySearch(params.query)
   }
 
   private onDocumentHighlight(
@@ -558,11 +562,15 @@ export default class BashServer {
         ? []
         : this.getCompletionItemsForSymbols({
             symbols: shouldCompleteOnVariables
-              ? this.analyzer.getAllVariableSymbols({ uri: currentUri })
-              : this.analyzer.findSymbolsMatchingWord({
+              ? this.analyzer.getAllVariables({
+                  uri: currentUri,
+                  position: params.position,
+                })
+              : this.analyzer.findDeclarationsMatchingWord({
                   exactMatch: false,
                   uri: currentUri,
                   word,
+                  position: params.position,
                 }),
             currentUri,
           })
@@ -732,6 +740,7 @@ function deduplicateSymbols({
         ),
     )
 
+  // NOTE: it might be that uniqueBasedOnHash is not needed anymore
   return uniqueBasedOnHash([...symbolsCurrentFile, ...symbolsOtherFiles], getSymbolId)
 }
 
