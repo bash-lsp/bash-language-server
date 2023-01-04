@@ -15,6 +15,12 @@ import { getMockConnection } from '../../../testing/mocks'
 import LspServer from '../server'
 import { CompletionItemDataType } from '../types'
 
+// Skip ShellCheck throttle delay in test cases
+jest.spyOn(global, 'setTimeout').mockImplementation((fn) => {
+  fn()
+  return 0 as any
+})
+
 async function initializeServer(
   { rootPath }: { rootPath?: string } = { rootPath: pathToFileURL(FIXTURE_FOLDER).href },
 ) {

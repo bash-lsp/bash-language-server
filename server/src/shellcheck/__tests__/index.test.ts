@@ -7,9 +7,35 @@ import { Linter } from '../index'
 
 const mockConsole = getMockConnection().console
 
+jest.useFakeTimers()
+
 const FIXTURE_DOCUMENT_URI = `file://${FIXTURE_FOLDER}/foo.sh`
 function textToDoc(txt: string) {
   return TextDocument.create(FIXTURE_DOCUMENT_URI, 'bar', 0, txt)
+}
+
+async function getLintingResult({
+  additionalShellCheckArguments = [],
+  cwd,
+  document,
+  executablePath = 'shellcheck',
+  sourcePaths = [],
+}: {
+  additionalShellCheckArguments?: string[]
+  cwd?: string
+  document: TextDocument
+  executablePath?: string
+  sourcePaths?: string[]
+}): Promise<[Awaited<ReturnType<Linter['lint']>>, Linter]> {
+  const linter = new Linter({
+    console: mockConsole,
+    cwd,
+    executablePath,
+  })
+  const promise = linter.lint(document, sourcePaths, additionalShellCheckArguments)
+  jest.runAllTimers()
+  const result = await promise
+  return [result, linter]
 }
 
 describe('linter', () => {
@@ -19,14 +45,17 @@ describe('linter', () => {
 
   it('should set canLint to false when linting fails', async () => {
     const executablePath = '77b4d3f6-c87a-11ec-9b62-a3c90f66d29f'
-    const linter = new Linter({
-      console: mockConsole,
+
+    const [result, linter] = await getLintingResult({
+      document: textToDoc(''),
       executablePath,
     })
-    expect(await linter.lint(textToDoc(''), [])).toEqual({
+
+    expect(result).toEqual({
       codeActions: [],
       diagnostics: [],
     })
+
     expect(linter.canLint).toBe(false)
     expect(mockConsole.warn).toBeCalledWith(
       expect.stringContaining(
@@ -35,15 +64,14 @@ describe('linter', () => {
     )
   })
 
-  it('should lint when shellcheck present', async () => {
+  it('should lint when shellcheck is present', async () => {
     // prettier-ignore
     const shell = [
       '#!/bin/bash',
       'echo $foo',
     ].join('\n')
 
-    const linter = new Linter({ console: mockConsole, executablePath: 'shellcheck' })
-    const result = await linter.lint(textToDoc(shell), [])
+    const [result] = await getLintingResult({ document: textToDoc(shell) })
     expect(result).toMatchInlineSnapshot(`
       Object {
         "codeActions": Array [
@@ -153,12 +181,11 @@ describe('linter', () => {
   })
 
   it('should correctly follow sources with correct cwd', async () => {
-    const linter = new Linter({
-      console: mockConsole,
+    const [result] = await getLintingResult({
       cwd: FIXTURE_FOLDER,
-      executablePath: 'shellcheck',
+      document: FIXTURE_DOCUMENT.SHELLCHECK_SOURCE,
     })
-    const result = await linter.lint(FIXTURE_DOCUMENT.SHELLCHECK_SOURCE, [])
+
     expect(result).toEqual({
       codeActions: [],
       diagnostics: [],
@@ -166,12 +193,11 @@ describe('linter', () => {
   })
 
   it('should fail to follow sources with incorrect cwd', async () => {
-    const linter = new Linter({
-      console: mockConsole,
+    const [result] = await getLintingResult({
       cwd: path.resolve(path.join(FIXTURE_FOLDER, '../')),
-      executablePath: 'shellcheck',
+      document: FIXTURE_DOCUMENT.SHELLCHECK_SOURCE,
     })
-    const result = await linter.lint(FIXTURE_DOCUMENT.SHELLCHECK_SOURCE, [])
+
     expect(result).toMatchInlineSnapshot(`
       Object {
         "codeActions": Array [],
@@ -222,14 +248,11 @@ describe('linter', () => {
   })
 
   it('should follow sources with incorrect cwd if the execution path is passed', async () => {
-    const linter = new Linter({
-      console: mockConsole,
+    const [result] = await getLintingResult({
       cwd: path.resolve(path.join(FIXTURE_FOLDER, '../')),
-      executablePath: 'shellcheck',
+      document: FIXTURE_DOCUMENT.SHELLCHECK_SOURCE,
+      sourcePaths: [path.resolve(FIXTURE_FOLDER)],
     })
-    const result = await linter.lint(FIXTURE_DOCUMENT.SHELLCHECK_SOURCE, [
-      path.resolve(FIXTURE_FOLDER),
-    ])
     expect(result).toEqual({
       codeActions: [],
       diagnostics: [],
