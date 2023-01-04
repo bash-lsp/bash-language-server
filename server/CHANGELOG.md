@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.2.2
+
+- Reduce CPU usage by introduce a short execution delay and throttling for ShellCheck tasks https://github.com/bash-lsp/bash-language-server/pull/655
+
 ## 4.2.1
 
 - Add support for resolving loop variables https://github.com/bash-lsp/bash-language-server/pull/653
