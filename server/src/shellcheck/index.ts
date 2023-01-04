@@ -5,6 +5,7 @@ import { spawn } from 'child_process'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
+import { ThrottledDelayer } from '../util/async'
 import { analyzeShebang } from '../util/shebang'
 import { CODE_TO_TAGS, LEVEL_TO_SEVERITY } from './config'
 import {
@@ -15,24 +16,33 @@ import {
 } from './types'
 
 const SUPPORTED_BASH_DIALECTS = ['sh', 'bash', 'dash', 'ksh']
-
+const DEBOUNCE_MS = 300
 type LinterOptions = {
   executablePath: string
   console: LSP.RemoteConsole
   cwd?: string
 }
 
+type LintingResult = {
+  diagnostics: LSP.Diagnostic[]
+  codeActions: LSP.CodeAction[]
+}
+
 export class Linter {
-  public executablePath: string
-  private cwd: string
   private console: LSP.RemoteConsole
+  private cwd: string
+  public executablePath: string
+  private uriToDelayer: {
+    [uri: string]: ThrottledDelayer<LintingResult>
+  }
   private _canLint: boolean
 
   constructor({ console, cwd, executablePath }: LinterOptions) {
-    this.executablePath = executablePath
-    this.cwd = cwd || process.cwd()
     this._canLint = true
     this.console = console
+    this.cwd = cwd || process.cwd()
+    this.executablePath = executablePath
+    this.uriToDelayer = Object.create(null)
   }
 
   public get canLint(): boolean {
@@ -43,11 +53,28 @@ export class Linter {
     document: TextDocument,
     sourcePaths: string[],
     additionalShellCheckArguments: string[] = [],
-  ): Promise<{ diagnostics: LSP.Diagnostic[]; codeActions: LSP.CodeAction[] }> {
+  ): Promise<LintingResult> {
     if (!this._canLint) {
       return { diagnostics: [], codeActions: [] }
     }
 
+    const { uri } = document
+    let delayer = this.uriToDelayer[uri]
+    if (!delayer) {
+      delayer = new ThrottledDelayer<LintingResult>(DEBOUNCE_MS)
+      this.uriToDelayer[uri] = delayer
+    }
+
+    return delayer.trigger(() =>
+      this.executeLint(document, sourcePaths, additionalShellCheckArguments),
+    )
+  }
+
+  private async executeLint(
+    document: TextDocument,
+    sourcePaths: string[],
+    additionalShellCheckArguments: string[] = [],
+  ): Promise<LintingResult> {
     const result = await this.runShellCheck(
       document,
       [...sourcePaths, dirname(fileURLToPath(document.uri))],
@@ -56,6 +83,9 @@ export class Linter {
     if (!this._canLint) {
       return { diagnostics: [], codeActions: [] }
     }
+
+    // Clean up the debounced function
+    delete this.uriToDelayer[document.uri]
 
     return mapShellCheckResult({ document, result })
   }
@@ -100,7 +130,7 @@ export class Linter {
       proc.stdout.on('data', (data) => (out += data))
       proc.stderr.on('data', (data) => (err += data))
       proc.stdin.on('error', () => {
-        // XXX: Ignore STDIN errors in case the process ends too quickly, before we try to
+        // NOTE: Ignore STDIN errors in case the process ends too quickly, before we try to
         // write. If we write after the process ends without this, we get an uncatchable EPIPE.
         // This is solved in Node >= 15.1 by the "on('spawn', ...)" event, but we need to
         // support earlier versions.
@@ -108,7 +138,7 @@ export class Linter {
       proc.stdin.end(documentText)
     })
 
-    // XXX: do we care about exit code? 0 means "ok", 1 possibly means "errors",
+    // NOTE: do we care about exit code? 0 means "ok", 1 possibly means "errors",
     // but the presence of parseable errors in the output is also sufficient to
     // distinguish.
     let exit
@@ -141,6 +171,7 @@ export class Linter {
     return ShellCheckResultSchema.parse(raw)
   }
 }
+
 function mapShellCheckResult({
   document,
   result,
