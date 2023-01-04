@@ -37,6 +37,13 @@ export async function activate(context: ExtensionContext) {
     debug: debugServerExecutable,
   }
 
+  // NOTE: To debug a server running in a process, use the following instead:
+  // This requires the server to be globally installed.
+  // const serverOptions = {
+  //   command: 'bash-language-server',
+  //   args: ['start'],
+  // }
+
   const clientOptions: LanguageClientOptions = {
     documentSelector: [
       {
