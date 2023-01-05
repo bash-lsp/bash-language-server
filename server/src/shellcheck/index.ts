@@ -5,7 +5,7 @@ import { spawn } from 'child_process'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
-import { ThrottledDelayer } from '../util/async'
+import { debounce } from '../util/async'
 import { analyzeShebang } from '../util/shebang'
 import { CODE_TO_TAGS, LEVEL_TO_SEVERITY } from './config'
 import {
@@ -32,8 +32,8 @@ export class Linter {
   private console: LSP.RemoteConsole
   private cwd: string
   public executablePath: string
-  private uriToDelayer: {
-    [uri: string]: ThrottledDelayer<LintingResult>
+  private uriToDebouncedExecuteLint: {
+    [uri: string]: InstanceType<typeof Linter>['executeLint']
   }
   private _canLint: boolean
 
@@ -42,7 +42,7 @@ export class Linter {
     this.console = console
     this.cwd = cwd || process.cwd()
     this.executablePath = executablePath
-    this.uriToDelayer = Object.create(null)
+    this.uriToDebouncedExecuteLint = Object.create(null)
   }
 
   public get canLint(): boolean {
@@ -59,15 +59,13 @@ export class Linter {
     }
 
     const { uri } = document
-    let delayer = this.uriToDelayer[uri]
-    if (!delayer) {
-      delayer = new ThrottledDelayer<LintingResult>(DEBOUNCE_MS)
-      this.uriToDelayer[uri] = delayer
+    let debouncedExecuteLint = this.uriToDebouncedExecuteLint[uri]
+    if (!debouncedExecuteLint) {
+      debouncedExecuteLint = debounce(this.executeLint.bind(this), DEBOUNCE_MS)
+      this.uriToDebouncedExecuteLint[uri] = debouncedExecuteLint
     }
 
-    return delayer.trigger(() =>
-      this.executeLint(document, sourcePaths, additionalShellCheckArguments),
-    )
+    return debouncedExecuteLint(document, sourcePaths, additionalShellCheckArguments)
   }
 
   private async executeLint(
@@ -85,7 +83,7 @@ export class Linter {
     }
 
     // Clean up the debounced function
-    delete this.uriToDelayer[document.uri]
+    delete this.uriToDebouncedExecuteLint[document.uri]
 
     return mapShellCheckResult({ document, result })
   }
