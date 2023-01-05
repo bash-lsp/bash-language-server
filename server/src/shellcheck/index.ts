@@ -16,7 +16,7 @@ import {
 } from './types'
 
 const SUPPORTED_BASH_DIALECTS = ['sh', 'bash', 'dash', 'ksh']
-const DEBOUNCE_MS = 300
+const DEBOUNCE_MS = 500
 type LinterOptions = {
   executablePath: string
   console: LSP.RemoteConsole
