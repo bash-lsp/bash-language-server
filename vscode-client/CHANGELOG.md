@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.25.0
+
+- Upgrade language server to 4.2.4 with a better ShellCheck performance and support for resolving loop variables.
+
 ## 1.24.0
 
 - Upgrade language server to 4.2.0.
