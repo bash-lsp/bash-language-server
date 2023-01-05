@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.2.3
+
+- Simpler debouncing for ShellCheck tasks where only the last request will return diagnostics https://github.com/bash-lsp/bash-language-server/pull/656
+
 ## 4.2.2
 
 - Reduce CPU usage by introduce a short execution delay and throttling for ShellCheck tasks https://github.com/bash-lsp/bash-language-server/pull/655
