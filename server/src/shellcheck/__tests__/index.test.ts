@@ -180,6 +180,27 @@ describe('linter', () => {
     `)
   })
 
+  it('should debounce the lint requests', async () => {
+    const linter = new Linter({
+      console: mockConsole,
+      cwd: FIXTURE_FOLDER,
+      executablePath: 'shellcheck',
+    })
+
+    const lintCalls = 100
+    const promises = [...Array(lintCalls)].map(() =>
+      linter.lint(FIXTURE_DOCUMENT.SHELLCHECK_SOURCE, []),
+    )
+
+    jest.runOnlyPendingTimers()
+
+    const result = await promises[promises.length - 1]
+    expect(result).toEqual({
+      codeActions: [],
+      diagnostics: [],
+    })
+  })
+
   it('should correctly follow sources with correct cwd', async () => {
     const [result] = await getLintingResult({
       cwd: FIXTURE_FOLDER,
