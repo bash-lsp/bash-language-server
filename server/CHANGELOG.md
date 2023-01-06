@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.2.5
+
+- Fix a critical bug causing memory leaks and high CPU usage for workspaces with many files https://github.com/bash-lsp/bash-language-server/pull/661
+
 ## 4.2.4
 
 - Increase ShellCheck execution delay to 500ms after typing ends.
