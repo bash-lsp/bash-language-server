@@ -39,6 +39,8 @@ export async function getFilePaths({
   let i = 0
   for await (const fileEntry of stream) {
     if (i >= maxItems) {
+      // NOTE: Close the stream to stop reading files paths.
+      stream.emit('close')
       break
     }
 
