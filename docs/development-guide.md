@@ -3,7 +3,7 @@
 There are two moving parts.
 
 - **Server**: A node server written in Typescript that implements the
-  [Language Server Protocol (LSP)][LSP].
+  [Language Server Protocol (LSP)][lsp].
 
 **Client**: A Visual Studio Code (vscode) extension which wraps the LSP server.
 
@@ -75,7 +75,6 @@ yarn link-server
 
 After that follow the steps above to work on the client.
 
-
 ## Working on the server (standalone)
 
 If you are working on the server outside of VS Code, then simply compile
@@ -86,7 +85,14 @@ reload your vscode window to re-launch the server.
 yarn run reinstall-server
 ```
 
-[LSP]: https://microsoft.github.io/language-server-protocol/
+## Performance
+
+To analyze the performance of the extension or server using the Chrome inspector:
+
+1. In Code start debugging "Run -> Start debugging"
+2. Open `chrome://inspect` in Chrome and ensure the port `localhost:6009` is added
+
+[lsp]: https://microsoft.github.io/language-server-protocol/
 [ide-bash]: https://github.com/bash-lsp/ide-bash
 [jest]: https://facebook.github.io/jest/
 [prettier]: https://prettier.io/
