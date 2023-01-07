@@ -1,0 +1,88 @@
+{
+    "shebang": {
+        "description": "[sh]hebang",
+        "prefix": "sh",
+        "body": [
+            "#!/usr/bin/env bash"
+        ]
+    },
+    "echo": {
+        "description": "[ec]ho",
+        "prefix": "ec",
+        "body": [
+            "echo \"${0:message}\""
+        ]
+    },
+    "printf": {
+        "description": "[pr]intf",
+        "prefix": "pr",
+        "body": [
+            "printf '%s' \"${0:message}\""
+        ]
+    },
+    "if": {
+        "description": "[if]",
+        "prefix": "if",
+        "body": [
+            "if ${0:command}; then",
+            "\t$0",
+            "fi"
+        ]
+    },
+    "ife": {
+        "description": "[if] [e]lse",
+        "prefix": "ife",
+        "body": [
+            "if ${0:command}; then",
+            "\techo",
+            "else",
+            "\t$0",
+            "fi"
+        ]
+    },
+    "wh": {
+        "description": "[wh]ile",
+        "prefix": "wh",
+        "body": [
+            "while ${0:command}; do",
+            "\t$0",
+            "done"
+        ]
+    },
+    "un": {
+        "description": "[un]til",
+        "prefix": "un",
+        "body": [
+            "until ${0:command}; do",
+            "\t$0",
+            "done"
+        ]
+    },
+    "fo": {
+        "description": "[fo]r",
+        "prefix": "fo",
+        "body": [
+            "for ${0:variable} in ${1:list}; do",
+            "\t$0",
+            "fi"
+        ]
+    },
+    "fu": {
+        "description": "[fu]nction",
+        "prefix": "fu",
+        "body": [
+            "${1:function_name}() {",
+            "\t$0",
+            "}"
+        ]        
+    },
+    "ma": {
+        "description": "[ma]in",
+        "prefix": "ma",
+        "body": [
+            "main() {",
+            "\t$0",
+            "}"
+        ]
+    }
+}
