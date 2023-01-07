@@ -71,6 +71,62 @@
             "}"
         ]
     },
+    ":-": {
+        "description": "[:-] expansion",
+        "prefix": ":-",
+        "body": [
+            "\"\\${${1:variable}:-${2:default}}\""
+        ]
+    },
+    ":=": {
+        "description": "[:=] expansion",
+        "prefix": ":=",
+        "body": [
+            "\"\\${${1:variable}:=${2:default}}\""
+        ]
+    },
+    ":?": {
+        "description": "[:?] expansion",
+        "prefix": ":?",
+        "body": [
+            "\"\\${${1:variable}:?${2:error_message}}\""
+        ]
+    },
+    ":+": {
+        "description": "[:+] expansion",
+        "prefix": ":+",
+        "body": [
+            "\"\\${${1:variable}:+${2:alternative}}\""
+        ]
+    },
+    "#": {
+        "description": "[#] expansion",
+        "prefix": "#",
+        "body": [
+            "\"\\${${1:variable}#${2:pattern}}\""
+        ]
+    },
+    "##": {
+        "description": "[##] expansion",
+        "prefix": "##",
+        "body": [
+            "\"\\${${1:variable}##${2:pattern}}\""
+        ]
+    },
+    "%": {
+        "description": "[%] expansion",
+        "prefix": "%",
+        "body": [
+            "\"\\${${1:variable}%${2:pattern}}\""
+        ]
+    },
+    "%%": {
+        "description": "[%%] expansion",
+        "prefix": "%%",
+        "body": [
+            "\"\\${${1:variable}%%${2:pattern}}\""
+        ]
+    },
     "echo": {
         "description": "[echo]",
         "prefix": "echo",
