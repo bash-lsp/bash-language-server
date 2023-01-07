@@ -25,7 +25,7 @@ export default class Executables {
     const paths = path.split(':')
     const promises = paths.map((x) => findExecutablesInPath(x))
     return Promise.all(promises)
-      .then(ArrayUtil.flatten)
+      .then(ArrayUtil.flattenArray)
       .then(ArrayUtil.uniq)
       .then((executables) => new Executables(executables))
   }

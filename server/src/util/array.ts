@@ -1,8 +1,8 @@
 /**
  * Flatten a 2-dimensional array into a 1-dimensional one.
  */
-export function flatten<A>(xs: A[][]): A[] {
-  return xs.reduce((a, b) => a.concat(b), [])
+export function flattenArray<T>(nestedArray: T[][]): T[] {
+  return nestedArray.reduce((acc, array) => [...acc, ...array], [])
 }
 
 /**
