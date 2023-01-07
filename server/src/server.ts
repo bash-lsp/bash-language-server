@@ -147,15 +147,15 @@ export default class BashServer {
     })
 
     // Register all the handlers for the LSP events.
-    connection.onHover(this.onHover.bind(this))
-    connection.onDefinition(this.onDefinition.bind(this))
-    connection.onDocumentSymbol(this.onDocumentSymbol.bind(this))
-    connection.onWorkspaceSymbol(this.onWorkspaceSymbol.bind(this))
-    connection.onDocumentHighlight(this.onDocumentHighlight.bind(this))
-    connection.onReferences(this.onReferences.bind(this))
+    connection.onCodeAction(this.onCodeAction.bind(this))
     connection.onCompletion(this.onCompletion.bind(this))
     connection.onCompletionResolve(this.onCompletionResolve.bind(this))
-    connection.onCodeAction(this.onCodeAction.bind(this))
+    connection.onDefinition(this.onDefinition.bind(this))
+    connection.onDocumentHighlight(this.onDocumentHighlight.bind(this))
+    connection.onDocumentSymbol(this.onDocumentSymbol.bind(this))
+    connection.onHover(this.onHover.bind(this))
+    connection.onReferences(this.onReferences.bind(this))
+    connection.onWorkspaceSymbol(this.onWorkspaceSymbol.bind(this))
 
     /**
      * The initialized notification is sent from the client to the server after
@@ -218,7 +218,9 @@ export default class BashServer {
     // FIXME: re-lint on workspace folder change
   }
 
+  // ==================
   // Internal functions
+  // ==================
 
   private async startBackgroundAnalysis(): Promise<{ filesParsed: number }> {
     const { workspaceFolder } = this
@@ -321,6 +323,31 @@ export default class BashServer {
     )
   }
 
+  private getCompletionItemsForSymbols({
+    symbols,
+    currentUri,
+  }: {
+    symbols: LSP.SymbolInformation[]
+    currentUri: string
+  }): BashCompletionItem[] {
+    return deduplicateSymbols({ symbols, currentUri }).map(
+      (symbol: LSP.SymbolInformation) => ({
+        label: symbol.name,
+        kind: symbolKindToCompletionKind(symbol.kind),
+        data: {
+          name: symbol.name,
+          type: CompletionItemDataType.Symbol,
+        },
+        documentation:
+          symbol.location.uri !== currentUri
+            ? this.getDocumentationForSymbol({
+                currentUri,
+                symbol,
+              })
+            : undefined,
+      }),
+    )
+  }
   private getDocumentationForSymbol({
     currentUri,
     symbol,
@@ -347,152 +374,46 @@ export default class BashServer {
     )
   }
 
-  private getCompletionItemsForSymbols({
-    symbols,
-    currentUri,
-  }: {
-    symbols: LSP.SymbolInformation[]
-    currentUri: string
-  }): BashCompletionItem[] {
-    return deduplicateSymbols({ symbols, currentUri }).map(
-      (symbol: LSP.SymbolInformation) => ({
-        label: symbol.name,
-        kind: symbolKindToCompletionKind(symbol.kind),
-        data: {
-          name: symbol.name,
-          type: CompletionItemDataType.Symbol,
-        },
-        documentation:
-          symbol.location.uri !== currentUri
-            ? this.getDocumentationForSymbol({
-                currentUri,
-                symbol,
-              })
-            : undefined,
-      }),
-    )
-  }
+  // ==============================
+  // Language server event handlers
+  // ==============================
 
-  // Language server event handlers:
+  private async onCodeAction(params: LSP.CodeActionParams): Promise<LSP.CodeAction[]> {
+    const codeActions = this.uriToCodeActions[params.textDocument.uri]
 
-  private async onHover(
-    params: LSP.TextDocumentPositionParams,
-  ): Promise<LSP.Hover | null> {
-    const word = this.analyzer.wordAtPointFromTextPosition(params)
-    const currentUri = params.textDocument.uri
-
-    this.logRequest({ request: 'onHover', params, word })
-
-    if (!word || word.startsWith('#')) {
-      return null
-    }
-
-    const { explainshellEndpoint } = this.config
-    if (explainshellEndpoint) {
-      try {
-        const { helpHTML } = await this.analyzer.getExplainshellDocumentation({
-          params,
-          endpoint: explainshellEndpoint,
-        })
-
-        if (helpHTML) {
-          return {
-            contents: {
-              kind: 'markdown',
-              value: new TurndownService().turndown(helpHTML),
-            },
-          }
-        }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : error
-        this.connection.console.warn(
-          `getExplainshellDocumentation exception: ${errorMessage}`,
-        )
-      }
-    }
-
-    const symbolsMatchingWord = this.analyzer.findDeclarationsMatchingWord({
-      exactMatch: true,
-      uri: currentUri,
-      word,
-      position: params.position,
-    })
-    if (
-      ReservedWords.isReservedWord(word) ||
-      Builtins.isBuiltin(word) ||
-      (this.executables.isExecutableOnPATH(word) && symbolsMatchingWord.length == 0)
-    ) {
-      const shellDocumentation = await getShellDocumentation({ word })
-      if (shellDocumentation) {
-        return { contents: getMarkdownContent(shellDocumentation, 'man') }
-      }
-    } else {
-      const symbolDocumentation = deduplicateSymbols({
-        symbols: symbolsMatchingWord,
-        currentUri,
-      })
-        // do not return hover referencing for the current line
-        .filter((symbol) => symbol.location.range.start.line !== params.position.line)
-        .map((symbol: LSP.SymbolInformation) =>
-          this.getDocumentationForSymbol({ currentUri, symbol }),
-        )
-
-      if (symbolDocumentation.length === 1) {
-        return { contents: symbolDocumentation[0] }
-      }
-    }
-
-    return null
-  }
-
-  private onDefinition(params: LSP.TextDocumentPositionParams): LSP.Definition | null {
-    const word = this.analyzer.wordAtPointFromTextPosition(params)
-    this.logRequest({ request: 'onDefinition', params, word })
-    if (!word) {
-      return null
-    }
-    return this.analyzer.findDeclarationLocations({
-      position: params.position,
-      uri: params.textDocument.uri,
-      word,
-    })
-  }
-
-  private onDocumentSymbol(params: LSP.DocumentSymbolParams): LSP.SymbolInformation[] {
-    // TODO: ideally this should return LSP.DocumentSymbol[] instead of LSP.SymbolInformation[]
-    // which is a hierarchy of symbols.
-    // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_documentSymbol
-    this.connection.console.log(`onDocumentSymbol`)
-    return this.analyzer.getDeclarationsForUri({ uri: params.textDocument.uri })
-  }
-
-  private onWorkspaceSymbol(params: LSP.WorkspaceSymbolParams): LSP.SymbolInformation[] {
-    this.connection.console.log('onWorkspaceSymbol')
-    return this.analyzer.findDeclarationsWithFuzzySearch(params.query)
-  }
-
-  private onDocumentHighlight(
-    params: LSP.TextDocumentPositionParams,
-  ): LSP.DocumentHighlight[] | null {
-    const word = this.analyzer.wordAtPointFromTextPosition(params)
-    this.logRequest({ request: 'onDocumentHighlight', params, word })
-
-    if (!word) {
+    if (!codeActions) {
       return []
     }
 
-    return this.analyzer
-      .findOccurrences(params.textDocument.uri, word)
-      .map((n) => ({ range: n.range }))
-  }
+    const getDiagnosticsFingerPrint = (diagnostics?: LSP.Diagnostic[]): string[] =>
+      diagnostics
+        ?.map(({ code, source, range }) =>
+          code !== undefined && source && range
+            ? JSON.stringify({
+                code,
+                source,
+                range,
+              })
+            : null,
+        )
+        .filter((fingerPrint): fingerPrint is string => fingerPrint != null) || []
 
-  private onReferences(params: LSP.ReferenceParams): LSP.Location[] | null {
-    const word = this.analyzer.wordAtPointFromTextPosition(params)
-    this.logRequest({ request: 'onReferences', params, word })
-    if (!word) {
-      return null
-    }
-    return this.analyzer.findReferences(word)
+    const paramsDiagnosticsKeys = getDiagnosticsFingerPrint(params.context.diagnostics)
+
+    // find actions that match the paramsDiagnosticsKeys
+    const actions = codeActions.filter((action) => {
+      const actionDiagnosticsKeys = getDiagnosticsFingerPrint(action.diagnostics)
+      // actions without diagnostics are always returned
+      if (actionDiagnosticsKeys.length === 0) {
+        return true
+      }
+
+      return actionDiagnosticsKeys.some((actionDiagnosticKey) =>
+        paramsDiagnosticsKeys.includes(actionDiagnosticKey),
+      )
+    })
+
+    return actions
   }
 
   private onCompletion(params: LSP.TextDocumentPositionParams): BashCompletionItem[] {
@@ -623,46 +544,6 @@ export default class BashServer {
     return allCompletions
   }
 
-  private async onCodeAction(params: LSP.CodeActionParams): Promise<LSP.CodeAction[]> {
-    const codeActions = this.uriToCodeActions[params.textDocument.uri]
-
-    if (!codeActions) {
-      return []
-    }
-
-    const getDiagnosticsFingerPrint = (diagnostics?: LSP.Diagnostic[]): string[] =>
-      (diagnostics &&
-        diagnostics
-          .map(({ code, source, range }) =>
-            code !== undefined && source && range
-              ? JSON.stringify({
-                  code,
-                  source,
-                  range,
-                })
-              : null,
-          )
-          .filter((fingerPrint): fingerPrint is string => fingerPrint != null)) ||
-      []
-
-    const paramsDiagnosticsKeys = getDiagnosticsFingerPrint(params.context.diagnostics)
-
-    // find actions that match the paramsDiagnosticsKeys
-    const actions = codeActions.filter((action) => {
-      const actionDiagnosticsKeys = getDiagnosticsFingerPrint(action.diagnostics)
-      // actions without diagnostics are always returned
-      if (actionDiagnosticsKeys.length === 0) {
-        return true
-      }
-
-      return actionDiagnosticsKeys.some((actionDiagnosticKey) =>
-        paramsDiagnosticsKeys.includes(actionDiagnosticKey),
-      )
-    })
-
-    return actions
-  }
-
   private async onCompletionResolve(
     item: LSP.CompletionItem,
   ): Promise<LSP.CompletionItem> {
@@ -692,6 +573,126 @@ export default class BashServer {
     } catch (error) {
       return item
     }
+  }
+
+  private onDefinition(params: LSP.TextDocumentPositionParams): LSP.Definition | null {
+    const word = this.analyzer.wordAtPointFromTextPosition(params)
+    this.logRequest({ request: 'onDefinition', params, word })
+    if (!word) {
+      return null
+    }
+    return this.analyzer.findDeclarationLocations({
+      position: params.position,
+      uri: params.textDocument.uri,
+      word,
+    })
+  }
+
+  private onDocumentHighlight(
+    params: LSP.TextDocumentPositionParams,
+  ): LSP.DocumentHighlight[] | null {
+    const word = this.analyzer.wordAtPointFromTextPosition(params)
+    this.logRequest({ request: 'onDocumentHighlight', params, word })
+
+    if (!word) {
+      return []
+    }
+
+    return this.analyzer
+      .findOccurrences(params.textDocument.uri, word)
+      .map((n) => ({ range: n.range }))
+  }
+
+  private onDocumentSymbol(params: LSP.DocumentSymbolParams): LSP.SymbolInformation[] {
+    // TODO: ideally this should return LSP.DocumentSymbol[] instead of LSP.SymbolInformation[]
+    // which is a hierarchy of symbols.
+    // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_documentSymbol
+    this.connection.console.log(`onDocumentSymbol`)
+    return this.analyzer.getDeclarationsForUri({ uri: params.textDocument.uri })
+  }
+
+  private async onHover(
+    params: LSP.TextDocumentPositionParams,
+  ): Promise<LSP.Hover | null> {
+    const word = this.analyzer.wordAtPointFromTextPosition(params)
+    const currentUri = params.textDocument.uri
+
+    this.logRequest({ request: 'onHover', params, word })
+
+    if (!word || word.startsWith('#')) {
+      return null
+    }
+
+    const { explainshellEndpoint } = this.config
+    if (explainshellEndpoint) {
+      try {
+        const { helpHTML } = await this.analyzer.getExplainshellDocumentation({
+          params,
+          endpoint: explainshellEndpoint,
+        })
+
+        if (helpHTML) {
+          return {
+            contents: {
+              kind: 'markdown',
+              value: new TurndownService().turndown(helpHTML),
+            },
+          }
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : error
+        this.connection.console.warn(
+          `getExplainshellDocumentation exception: ${errorMessage}`,
+        )
+      }
+    }
+
+    const symbolsMatchingWord = this.analyzer.findDeclarationsMatchingWord({
+      exactMatch: true,
+      uri: currentUri,
+      word,
+      position: params.position,
+    })
+    if (
+      ReservedWords.isReservedWord(word) ||
+      Builtins.isBuiltin(word) ||
+      (this.executables.isExecutableOnPATH(word) && symbolsMatchingWord.length == 0)
+    ) {
+      const shellDocumentation = await getShellDocumentation({ word })
+      if (shellDocumentation) {
+        return { contents: getMarkdownContent(shellDocumentation, 'man') }
+      }
+    } else {
+      const symbolDocumentation = deduplicateSymbols({
+        symbols: symbolsMatchingWord,
+        currentUri,
+      })
+        // do not return hover referencing for the current line
+        .filter((symbol) => symbol.location.range.start.line !== params.position.line)
+        .map((symbol: LSP.SymbolInformation) =>
+          this.getDocumentationForSymbol({ currentUri, symbol }),
+        )
+
+      if (symbolDocumentation.length === 1) {
+        return { contents: symbolDocumentation[0] }
+      }
+    }
+
+    return null
+  }
+
+  private onReferences(params: LSP.ReferenceParams): LSP.Location[] | null {
+    const word = this.analyzer.wordAtPointFromTextPosition(params)
+    this.logRequest({ request: 'onReferences', params, word })
+    if (!word) {
+      return null
+    }
+    return this.analyzer.findReferences(word)
+  }
+
+  private onWorkspaceSymbol(params: LSP.WorkspaceSymbolParams): LSP.SymbolInformation[] {
+    this.connection.console.log('onWorkspaceSymbol')
+    return this.analyzer.findDeclarationsWithFuzzySearch(params.query)
   }
 }
 
