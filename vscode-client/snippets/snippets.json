@@ -3,7 +3,7 @@
         "description": "[sh]hebang",
         "prefix": "sh",
         "body": [
-            "#!/usr/bin/env bash"
+            "#!/usr/bin/env ${1|bash,sh|}"
         ]
     },
     "if": {
