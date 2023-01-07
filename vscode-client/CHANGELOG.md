@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.26.0
+
+- Upgrade language server to 4.2.5 fixing a critical performance issue for workspaces with many files.
+
 ## 1.25.0
 
 - Upgrade language server to 4.2.4 with a better ShellCheck performance and support for resolving loop variables.

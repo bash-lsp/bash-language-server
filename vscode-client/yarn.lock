@@ -33,10 +33,10 @@ balanced-match@^1.0.0:
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
-bash-language-server@4.2.4:
-  version "4.2.4"
-  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-4.2.4.tgz#57f1bbed8ea10e81f857e33d4f05a9f2b3d7f39a"
-  integrity sha512-7CXhDaMPtsQvY+78KPQdRkciPLqmqv6KlD/XqDuB7rG1SsyqpKpphd1rkSGI0IPA3TzXqSRVYy+SXmM73mTAIA==
+bash-language-server@4.2.5:
+  version "4.2.5"
+  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-4.2.5.tgz#9aaa360409db7938020dc46d4ec3d1d7980cb5a6"
+  integrity sha512-JvxyqoMcRoiKm9FWojVx1tdWkUOkoARw4gc/lQIWmHtmzJngy1UrzfU6BNjRQA8NkZJkWHioqvLOVrEd+mVNKg==
   dependencies:
     fast-glob "3.2.12"
     fuzzy-search "3.2.1"
