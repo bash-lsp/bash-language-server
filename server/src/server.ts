@@ -12,7 +12,7 @@ import * as Builtins from './builtins'
 import * as config from './config'
 import Executables from './executables'
 import { initializeParser } from './parser'
-import * as ReservedWords from './reservedWords'
+import * as ReservedWords from './reserved-words'
 import { Linter } from './shellcheck'
 import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
@@ -60,6 +60,7 @@ export default class BashServer {
     this.config = {} as any // NOTE: configured in updateConfiguration
     this.updateConfiguration(config.getDefaultConfiguration())
   }
+
   /**
    * Initialize the server based on a connection to the client and the protocols
    * initialization parameters.
@@ -95,6 +96,32 @@ export default class BashServer {
   }
 
   /**
+   * The parts of the Language Server Protocol that we are currently supporting.
+   */
+  public capabilities(): LSP.ServerCapabilities {
+    return {
+      // For now we're using full-sync even though tree-sitter has great support
+      // for partial updates.
+      textDocumentSync: LSP.TextDocumentSyncKind.Full,
+      completionProvider: {
+        resolveProvider: true,
+        triggerCharacters: ['$', '{'],
+      },
+      hoverProvider: true,
+      documentHighlightProvider: true,
+      definitionProvider: true,
+      documentSymbolProvider: true,
+      workspaceSymbolProvider: true,
+      referencesProvider: true,
+      codeActionProvider: {
+        codeActionKinds: [LSP.CodeActionKind.QuickFix],
+        resolveProvider: false,
+        workDoneProgress: false,
+      },
+    }
+  }
+
+  /**
    * Register handlers for the events from the Language Server Protocol that we
    * care about.
    */
@@ -120,15 +147,15 @@ export default class BashServer {
     })
 
     // Register all the handlers for the LSP events.
-    connection.onHover(this.onHover.bind(this))
-    connection.onDefinition(this.onDefinition.bind(this))
-    connection.onDocumentSymbol(this.onDocumentSymbol.bind(this))
-    connection.onWorkspaceSymbol(this.onWorkspaceSymbol.bind(this))
-    connection.onDocumentHighlight(this.onDocumentHighlight.bind(this))
-    connection.onReferences(this.onReferences.bind(this))
+    connection.onCodeAction(this.onCodeAction.bind(this))
     connection.onCompletion(this.onCompletion.bind(this))
     connection.onCompletionResolve(this.onCompletionResolve.bind(this))
-    connection.onCodeAction(this.onCodeAction.bind(this))
+    connection.onDefinition(this.onDefinition.bind(this))
+    connection.onDocumentHighlight(this.onDocumentHighlight.bind(this))
+    connection.onDocumentSymbol(this.onDocumentSymbol.bind(this))
+    connection.onHover(this.onHover.bind(this))
+    connection.onReferences(this.onReferences.bind(this))
+    connection.onWorkspaceSymbol(this.onWorkspaceSymbol.bind(this))
 
     /**
      * The initialized notification is sent from the client to the server after
@@ -190,6 +217,10 @@ export default class BashServer {
 
     // FIXME: re-lint on workspace folder change
   }
+
+  // ==================
+  // Internal functions
+  // ==================
 
   private async startBackgroundAnalysis(): Promise<{ filesParsed: number }> {
     const { workspaceFolder } = this
@@ -277,52 +308,6 @@ export default class BashServer {
     this.connection.sendDiagnostics({ uri, version: document.version, diagnostics })
   }
 
-  /**
-   * The parts of the Language Server Protocol that we are currently supporting.
-   */
-  public capabilities(): LSP.ServerCapabilities {
-    return {
-      // For now we're using full-sync even though tree-sitter has great support
-      // for partial updates.
-      textDocumentSync: LSP.TextDocumentSyncKind.Full,
-      completionProvider: {
-        resolveProvider: true,
-        triggerCharacters: ['$', '{'],
-      },
-      hoverProvider: true,
-      documentHighlightProvider: true,
-      definitionProvider: true,
-      documentSymbolProvider: true,
-      workspaceSymbolProvider: true,
-      referencesProvider: true,
-      codeActionProvider: {
-        codeActionKinds: [LSP.CodeActionKind.QuickFix],
-        resolveProvider: false,
-        workDoneProgress: false,
-      },
-    }
-  }
-
-  private getWordAtPoint(
-    params: LSP.ReferenceParams | LSP.TextDocumentPositionParams,
-  ): string | null {
-    return this.analyzer.wordAtPoint(
-      params.textDocument.uri,
-      params.position.line,
-      params.position.character,
-    )
-  }
-
-  private getCommandNameAtPoint(
-    params: LSP.ReferenceParams | LSP.TextDocumentPositionParams,
-  ): string | null {
-    return this.analyzer.commandNameAtPoint(
-      params.textDocument.uri,
-      params.position.line,
-      params.position.character,
-    )
-  }
-
   private logRequest({
     request,
     params,
@@ -335,32 +320,6 @@ export default class BashServer {
     const wordLog = word ? `"${word}"` : 'null'
     this.connection.console.log(
       `${request} ${params.position.line}:${params.position.character} word=${wordLog}`,
-    )
-  }
-
-  private getDocumentationForSymbol({
-    currentUri,
-    symbol,
-  }: {
-    symbol: LSP.SymbolInformation
-    currentUri: string
-  }): LSP.MarkupContent {
-    const symbolUri = symbol.location.uri
-    const symbolStartLine = symbol.location.range.start.line
-
-    const commentAboveSymbol = this.analyzer.commentsAbove(symbolUri, symbolStartLine)
-    const symbolDocumentation = commentAboveSymbol ? `\n\n${commentAboveSymbol}` : ''
-    const hoverHeader = `${symbolKindToDescription(symbol.kind)}: **${symbol.name}**`
-    const symbolLocation =
-      symbolUri !== currentUri
-        ? `in ${path.relative(path.dirname(currentUri), symbolUri)}`
-        : `on line ${symbolStartLine + 1}`
-
-    // TODO: An improvement could be to add show the symbol definition in the hover instead
-    // of the defined location – similar to how VSCode works for languages like TypeScript.
-
-    return getMarkdownContent(
-      `${hoverHeader} - *defined ${symbolLocation}*${symbolDocumentation}`,
     )
   }
 
@@ -389,129 +348,76 @@ export default class BashServer {
       }),
     )
   }
+  private getDocumentationForSymbol({
+    currentUri,
+    symbol,
+  }: {
+    symbol: LSP.SymbolInformation
+    currentUri: string
+  }): LSP.MarkupContent {
+    const symbolUri = symbol.location.uri
+    const symbolStartLine = symbol.location.range.start.line
 
-  private async onHover(
-    params: LSP.TextDocumentPositionParams,
-  ): Promise<LSP.Hover | null> {
-    const word = this.getWordAtPoint(params)
-    const currentUri = params.textDocument.uri
+    const commentAboveSymbol = this.analyzer.commentsAbove(symbolUri, symbolStartLine)
+    const symbolDocumentation = commentAboveSymbol ? `\n\n${commentAboveSymbol}` : ''
+    const hoverHeader = `${symbolKindToDescription(symbol.kind)}: **${symbol.name}**`
+    const symbolLocation =
+      symbolUri !== currentUri
+        ? `in ${path.relative(path.dirname(currentUri), symbolUri)}`
+        : `on line ${symbolStartLine + 1}`
 
-    this.logRequest({ request: 'onHover', params, word })
+    // TODO: An improvement could be to add show the symbol definition in the hover instead
+    // of the defined location – similar to how VSCode works for languages like TypeScript.
 
-    if (!word || word.startsWith('#')) {
-      return null
-    }
-
-    const { explainshellEndpoint } = this.config
-    if (explainshellEndpoint) {
-      try {
-        const { helpHTML } = await this.analyzer.getExplainshellDocumentation({
-          params,
-          endpoint: explainshellEndpoint,
-        })
-
-        if (helpHTML) {
-          return {
-            contents: {
-              kind: 'markdown',
-              value: new TurndownService().turndown(helpHTML),
-            },
-          }
-        }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : error
-        this.connection.console.warn(
-          `getExplainshellDocumentation exception: ${errorMessage}`,
-        )
-      }
-    }
-
-    const symbolsMatchingWord = this.analyzer.findDeclarationsMatchingWord({
-      exactMatch: true,
-      uri: currentUri,
-      word,
-      position: params.position,
-    })
-    if (
-      ReservedWords.isReservedWord(word) ||
-      Builtins.isBuiltin(word) ||
-      (this.executables.isExecutableOnPATH(word) && symbolsMatchingWord.length == 0)
-    ) {
-      const shellDocumentation = await getShellDocumentation({ word })
-      if (shellDocumentation) {
-        return { contents: getMarkdownContent(shellDocumentation, 'man') }
-      }
-    } else {
-      const symbolDocumentation = deduplicateSymbols({
-        symbols: symbolsMatchingWord,
-        currentUri,
-      })
-        // do not return hover referencing for the current line
-        .filter((symbol) => symbol.location.range.start.line !== params.position.line)
-        .map((symbol: LSP.SymbolInformation) =>
-          this.getDocumentationForSymbol({ currentUri, symbol }),
-        )
-
-      if (symbolDocumentation.length === 1) {
-        return { contents: symbolDocumentation[0] }
-      }
-    }
-
-    return null
+    return getMarkdownContent(
+      `${hoverHeader} - *defined ${symbolLocation}*${symbolDocumentation}`,
+    )
   }
 
-  private onDefinition(params: LSP.TextDocumentPositionParams): LSP.Definition | null {
-    const word = this.getWordAtPoint(params)
-    this.logRequest({ request: 'onDefinition', params, word })
-    if (!word) {
-      return null
-    }
-    return this.analyzer.findDeclarationLocations({
-      position: params.position,
-      uri: params.textDocument.uri,
-      word,
-    })
-  }
+  // ==============================
+  // Language server event handlers
+  // ==============================
 
-  private onDocumentSymbol(params: LSP.DocumentSymbolParams): LSP.SymbolInformation[] {
-    // TODO: ideally this should return LSP.DocumentSymbol[] instead of LSP.SymbolInformation[]
-    // which is a hierarchy of symbols.
-    // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_documentSymbol
-    this.connection.console.log(`onDocumentSymbol`)
-    return this.analyzer.getDeclarationsForUri({ uri: params.textDocument.uri })
-  }
+  private async onCodeAction(params: LSP.CodeActionParams): Promise<LSP.CodeAction[]> {
+    const codeActions = this.uriToCodeActions[params.textDocument.uri]
 
-  private onWorkspaceSymbol(params: LSP.WorkspaceSymbolParams): LSP.SymbolInformation[] {
-    this.connection.console.log('onWorkspaceSymbol')
-    return this.analyzer.findDeclarationsWithFuzzySearch(params.query)
-  }
-
-  private onDocumentHighlight(
-    params: LSP.TextDocumentPositionParams,
-  ): LSP.DocumentHighlight[] | null {
-    const word = this.getWordAtPoint(params)
-    this.logRequest({ request: 'onDocumentHighlight', params, word })
-
-    if (!word) {
+    if (!codeActions) {
       return []
     }
 
-    return this.analyzer
-      .findOccurrences(params.textDocument.uri, word)
-      .map((n) => ({ range: n.range }))
-  }
+    const getDiagnosticsFingerPrint = (diagnostics?: LSP.Diagnostic[]): string[] =>
+      diagnostics
+        ?.map(({ code, source, range }) =>
+          code !== undefined && source && range
+            ? JSON.stringify({
+                code,
+                source,
+                range,
+              })
+            : null,
+        )
+        .filter((fingerPrint): fingerPrint is string => fingerPrint != null) || []
 
-  private onReferences(params: LSP.ReferenceParams): LSP.Location[] | null {
-    const word = this.getWordAtPoint(params)
-    this.logRequest({ request: 'onReferences', params, word })
-    if (!word) {
-      return null
-    }
-    return this.analyzer.findReferences(word)
+    const paramsDiagnosticsKeys = getDiagnosticsFingerPrint(params.context.diagnostics)
+
+    // find actions that match the paramsDiagnosticsKeys
+    const actions = codeActions.filter((action) => {
+      const actionDiagnosticsKeys = getDiagnosticsFingerPrint(action.diagnostics)
+      // actions without diagnostics are always returned
+      if (actionDiagnosticsKeys.length === 0) {
+        return true
+      }
+
+      return actionDiagnosticsKeys.some((actionDiagnosticKey) =>
+        paramsDiagnosticsKeys.includes(actionDiagnosticKey),
+      )
+    })
+
+    return actions
   }
 
   private onCompletion(params: LSP.TextDocumentPositionParams): BashCompletionItem[] {
-    const word = this.getWordAtPoint({
+    const word = this.analyzer.wordAtPointFromTextPosition({
       ...params,
       position: {
         line: params.position.line,
@@ -534,14 +440,12 @@ export default class BashServer {
 
     let options: string[] = []
     if (word && word.startsWith('-')) {
-      const commandName = this.getCommandNameAtPoint({
-        ...params,
-        position: {
-          line: params.position.line,
-          // Go one character back to get completion on the current word
-          character: Math.max(params.position.character - 1, 0),
-        },
-      })
+      const commandName = this.analyzer.commandNameAtPoint(
+        params.textDocument.uri,
+        params.position.line,
+        // Go one character back to get completion on the current word
+        Math.max(params.position.character - 1, 0),
+      )
 
       if (commandName) {
         options = getCommandOptions(commandName, word)
@@ -640,46 +544,6 @@ export default class BashServer {
     return allCompletions
   }
 
-  private async onCodeAction(params: LSP.CodeActionParams): Promise<LSP.CodeAction[]> {
-    const codeActions = this.uriToCodeActions[params.textDocument.uri]
-
-    if (!codeActions) {
-      return []
-    }
-
-    const getDiagnosticsFingerPrint = (diagnostics?: LSP.Diagnostic[]): string[] =>
-      (diagnostics &&
-        diagnostics
-          .map(({ code, source, range }) =>
-            code !== undefined && source && range
-              ? JSON.stringify({
-                  code,
-                  source,
-                  range,
-                })
-              : null,
-          )
-          .filter((fingerPrint): fingerPrint is string => fingerPrint != null)) ||
-      []
-
-    const paramsDiagnosticsKeys = getDiagnosticsFingerPrint(params.context.diagnostics)
-
-    // find actions that match the paramsDiagnosticsKeys
-    const actions = codeActions.filter((action) => {
-      const actionDiagnosticsKeys = getDiagnosticsFingerPrint(action.diagnostics)
-      // actions without diagnostics are always returned
-      if (actionDiagnosticsKeys.length === 0) {
-        return true
-      }
-
-      return actionDiagnosticsKeys.some((actionDiagnosticKey) =>
-        paramsDiagnosticsKeys.includes(actionDiagnosticKey),
-      )
-    })
-
-    return actions
-  }
-
   private async onCompletionResolve(
     item: LSP.CompletionItem,
   ): Promise<LSP.CompletionItem> {
@@ -709,6 +573,126 @@ export default class BashServer {
     } catch (error) {
       return item
     }
+  }
+
+  private onDefinition(params: LSP.TextDocumentPositionParams): LSP.Definition | null {
+    const word = this.analyzer.wordAtPointFromTextPosition(params)
+    this.logRequest({ request: 'onDefinition', params, word })
+    if (!word) {
+      return null
+    }
+    return this.analyzer.findDeclarationLocations({
+      position: params.position,
+      uri: params.textDocument.uri,
+      word,
+    })
+  }
+
+  private onDocumentHighlight(
+    params: LSP.TextDocumentPositionParams,
+  ): LSP.DocumentHighlight[] | null {
+    const word = this.analyzer.wordAtPointFromTextPosition(params)
+    this.logRequest({ request: 'onDocumentHighlight', params, word })
+
+    if (!word) {
+      return []
+    }
+
+    return this.analyzer
+      .findOccurrences(params.textDocument.uri, word)
+      .map((n) => ({ range: n.range }))
+  }
+
+  private onDocumentSymbol(params: LSP.DocumentSymbolParams): LSP.SymbolInformation[] {
+    // TODO: ideally this should return LSP.DocumentSymbol[] instead of LSP.SymbolInformation[]
+    // which is a hierarchy of symbols.
+    // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_documentSymbol
+    this.connection.console.log(`onDocumentSymbol`)
+    return this.analyzer.getDeclarationsForUri({ uri: params.textDocument.uri })
+  }
+
+  private async onHover(
+    params: LSP.TextDocumentPositionParams,
+  ): Promise<LSP.Hover | null> {
+    const word = this.analyzer.wordAtPointFromTextPosition(params)
+    const currentUri = params.textDocument.uri
+
+    this.logRequest({ request: 'onHover', params, word })
+
+    if (!word || word.startsWith('#')) {
+      return null
+    }
+
+    const { explainshellEndpoint } = this.config
+    if (explainshellEndpoint) {
+      try {
+        const { helpHTML } = await this.analyzer.getExplainshellDocumentation({
+          params,
+          endpoint: explainshellEndpoint,
+        })
+
+        if (helpHTML) {
+          return {
+            contents: {
+              kind: 'markdown',
+              value: new TurndownService().turndown(helpHTML),
+            },
+          }
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : error
+        this.connection.console.warn(
+          `getExplainshellDocumentation exception: ${errorMessage}`,
+        )
+      }
+    }
+
+    const symbolsMatchingWord = this.analyzer.findDeclarationsMatchingWord({
+      exactMatch: true,
+      uri: currentUri,
+      word,
+      position: params.position,
+    })
+    if (
+      ReservedWords.isReservedWord(word) ||
+      Builtins.isBuiltin(word) ||
+      (this.executables.isExecutableOnPATH(word) && symbolsMatchingWord.length == 0)
+    ) {
+      const shellDocumentation = await getShellDocumentation({ word })
+      if (shellDocumentation) {
+        return { contents: getMarkdownContent(shellDocumentation, 'man') }
+      }
+    } else {
+      const symbolDocumentation = deduplicateSymbols({
+        symbols: symbolsMatchingWord,
+        currentUri,
+      })
+        // do not return hover referencing for the current line
+        .filter((symbol) => symbol.location.range.start.line !== params.position.line)
+        .map((symbol: LSP.SymbolInformation) =>
+          this.getDocumentationForSymbol({ currentUri, symbol }),
+        )
+
+      if (symbolDocumentation.length === 1) {
+        return { contents: symbolDocumentation[0] }
+      }
+    }
+
+    return null
+  }
+
+  private onReferences(params: LSP.ReferenceParams): LSP.Location[] | null {
+    const word = this.analyzer.wordAtPointFromTextPosition(params)
+    this.logRequest({ request: 'onReferences', params, word })
+    if (!word) {
+      return null
+    }
+    return this.analyzer.findReferences(word)
+  }
+
+  private onWorkspaceSymbol(params: LSP.WorkspaceSymbolParams): LSP.SymbolInformation[] {
+    this.connection.console.log('onWorkspaceSymbol')
+    return this.analyzer.findDeclarationsWithFuzzySearch(params.query)
   }
 }
 
