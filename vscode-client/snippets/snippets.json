@@ -210,5 +210,12 @@
         "body": [
             "[[ ${1:argument1} ${2|-ef,-nt,-ot,==,=,!=,<,>,-eq,-ne,-lt,-le,-gt,-ge|} ${3:argument2} ]]"
         ]
+    },
+    "de": {
+        "description": "[de]vice name",
+        "prefix": "de",
+        "body": [
+            "/dev/${1|null,stdin,stdout,stderr|}"
+        ]
     }
 }
