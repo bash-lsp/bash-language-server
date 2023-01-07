@@ -6,20 +6,6 @@
             "#!/usr/bin/env bash"
         ]
     },
-    "echo": {
-        "description": "[ec]ho",
-        "prefix": "ec",
-        "body": [
-            "echo \"${0:message}\""
-        ]
-    },
-    "printf": {
-        "description": "[pr]intf",
-        "prefix": "pr",
-        "body": [
-            "printf '%s' \"${0:message}\""
-        ]
-    },
     "if": {
         "description": "[if]",
         "prefix": "if",
@@ -74,7 +60,7 @@
             "${1:function_name}() {",
             "\t$0",
             "}"
-        ]        
+        ]
     },
     "ma": {
         "description": "[ma]in",
@@ -83,6 +69,20 @@
             "main() {",
             "\t$0",
             "}"
+        ]
+    },
+    "echo": {
+        "description": "[echo]",
+        "prefix": "echo",
+        "body": [
+            "echo \"${0:message}\""
+        ]
+    },
+    "printf": {
+        "description": "[printf]",
+        "prefix": "printf",
+        "body": [
+            "printf '%s' \"${0:message}\""
         ]
     }
 }
