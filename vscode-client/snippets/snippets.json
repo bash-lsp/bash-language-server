@@ -75,14 +75,77 @@
         "description": "[echo]",
         "prefix": "echo",
         "body": [
-            "echo \"${0:message}\""
+            "echo \"${1:message}\""
         ]
     },
     "printf": {
         "description": "[printf]",
         "prefix": "printf",
         "body": [
-            "printf '%s' \"${0:message}\""
+            "printf '%s' \"${1:message}\""
+        ]
+    },
+    "source": {
+        "description": "[source]",
+        "prefix": "source",
+        "body": [
+            "source \"${1:path/to/file}\""
+        ]
+    },
+    "alias": {
+        "description": "[alias]",
+        "prefix": "alias",
+        "body": [
+            "alias ${1:name}=${2:value}"
+        ]
+    },
+    "builtin": {
+        "description": "[builtin]",
+        "prefix": "builtin",
+        "body": [
+            "builtin ${1|source,alias,bg,bind,break,builtin,caller,cd,command,compgen,complete,complete,compopt,continue,declare,typeset,dirs,disown,echo,enable,eval,exec,exit,export,fc,fg,getopts,hash,help,history,jobs,kill,let,local,logout,mapfile,readarray,popd,pushd,pwd,read,readonly,return,set,shift,shopt,suspend,test,type,ulimit,umask,unalias,unset|}"
+        ]
+    },
+    "cd": {
+        "description": "[cd]",
+        "prefix": "cd",
+        "body": [
+            "cd \"${1:path/to/directory}\" || echo \"${2:error_message}\" >&2"
+        ]
+    },
+    "getopts": {
+        "description": "[getopts]",
+        "prefix": "getopts",
+        "body": [
+            "getopts ${1:optstring} ${2:name}"
+        ]
+    },
+    "jobs": {
+        "description": "[jobs]",
+        "prefix": "jobs",
+        "body": [
+            "jobs -x ${1:command}"
+        ]
+    },
+    "kill": {
+        "description": "[kill]",
+        "prefix": "kill",
+        "body": [
+            "kill ${1|-l,-L|}"
+        ]
+    },
+    "let": {
+        "description": "[let]",
+        "prefix": "let",
+        "body": [
+            "let ${1:argument}"
+        ]
+    },
+    "test": {
+        "description": "[test]",
+        "prefix": "test",
+        "body": [
+            "[[ ${1:argument1} ${2|-ef,-nt,-ot,==,=,!=,<,>,-eq,-ne,-lt,-le,-gt,-ge|} ${3:argument2} ]]"
         ]
     }
 }
