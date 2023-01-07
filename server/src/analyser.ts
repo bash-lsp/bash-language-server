@@ -492,6 +492,16 @@ export default class Analyzer {
     return node.text.trim()
   }
 
+  public wordAtPointFromTextPosition(
+    params: LSP.TextDocumentPositionParams,
+  ): string | null {
+    return this.wordAtPoint(
+      params.textDocument.uri,
+      params.position.line,
+      params.position.character,
+    )
+  }
+
   public setIncludeAllWorkspaceSymbols(includeAllWorkspaceSymbols: boolean): void {
     this.includeAllWorkspaceSymbols = includeAllWorkspaceSymbols
   }

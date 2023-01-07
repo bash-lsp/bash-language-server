@@ -60,6 +60,7 @@ export default class BashServer {
     this.config = {} as any // NOTE: configured in updateConfiguration
     this.updateConfiguration(config.getDefaultConfiguration())
   }
+
   /**
    * Initialize the server based on a connection to the client and the protocols
    * initialization parameters.
@@ -92,6 +93,32 @@ export default class BashServer {
       executables,
       workspaceFolder,
     })
+  }
+
+  /**
+   * The parts of the Language Server Protocol that we are currently supporting.
+   */
+  public capabilities(): LSP.ServerCapabilities {
+    return {
+      // For now we're using full-sync even though tree-sitter has great support
+      // for partial updates.
+      textDocumentSync: LSP.TextDocumentSyncKind.Full,
+      completionProvider: {
+        resolveProvider: true,
+        triggerCharacters: ['$', '{'],
+      },
+      hoverProvider: true,
+      documentHighlightProvider: true,
+      definitionProvider: true,
+      documentSymbolProvider: true,
+      workspaceSymbolProvider: true,
+      referencesProvider: true,
+      codeActionProvider: {
+        codeActionKinds: [LSP.CodeActionKind.QuickFix],
+        resolveProvider: false,
+        workDoneProgress: false,
+      },
+    }
   }
 
   /**
@@ -191,6 +218,8 @@ export default class BashServer {
     // FIXME: re-lint on workspace folder change
   }
 
+  // Internal functions
+
   private async startBackgroundAnalysis(): Promise<{ filesParsed: number }> {
     const { workspaceFolder } = this
     if (workspaceFolder) {
@@ -277,52 +306,6 @@ export default class BashServer {
     this.connection.sendDiagnostics({ uri, version: document.version, diagnostics })
   }
 
-  /**
-   * The parts of the Language Server Protocol that we are currently supporting.
-   */
-  public capabilities(): LSP.ServerCapabilities {
-    return {
-      // For now we're using full-sync even though tree-sitter has great support
-      // for partial updates.
-      textDocumentSync: LSP.TextDocumentSyncKind.Full,
-      completionProvider: {
-        resolveProvider: true,
-        triggerCharacters: ['$', '{'],
-      },
-      hoverProvider: true,
-      documentHighlightProvider: true,
-      definitionProvider: true,
-      documentSymbolProvider: true,
-      workspaceSymbolProvider: true,
-      referencesProvider: true,
-      codeActionProvider: {
-        codeActionKinds: [LSP.CodeActionKind.QuickFix],
-        resolveProvider: false,
-        workDoneProgress: false,
-      },
-    }
-  }
-
-  private getWordAtPoint(
-    params: LSP.ReferenceParams | LSP.TextDocumentPositionParams,
-  ): string | null {
-    return this.analyzer.wordAtPoint(
-      params.textDocument.uri,
-      params.position.line,
-      params.position.character,
-    )
-  }
-
-  private getCommandNameAtPoint(
-    params: LSP.ReferenceParams | LSP.TextDocumentPositionParams,
-  ): string | null {
-    return this.analyzer.commandNameAtPoint(
-      params.textDocument.uri,
-      params.position.line,
-      params.position.character,
-    )
-  }
-
   private logRequest({
     request,
     params,
@@ -390,10 +373,12 @@ export default class BashServer {
     )
   }
 
+  // Language server event handlers:
+
   private async onHover(
     params: LSP.TextDocumentPositionParams,
   ): Promise<LSP.Hover | null> {
-    const word = this.getWordAtPoint(params)
+    const word = this.analyzer.wordAtPointFromTextPosition(params)
     const currentUri = params.textDocument.uri
 
     this.logRequest({ request: 'onHover', params, word })
@@ -461,7 +446,7 @@ export default class BashServer {
   }
 
   private onDefinition(params: LSP.TextDocumentPositionParams): LSP.Definition | null {
-    const word = this.getWordAtPoint(params)
+    const word = this.analyzer.wordAtPointFromTextPosition(params)
     this.logRequest({ request: 'onDefinition', params, word })
     if (!word) {
       return null
@@ -489,7 +474,7 @@ export default class BashServer {
   private onDocumentHighlight(
     params: LSP.TextDocumentPositionParams,
   ): LSP.DocumentHighlight[] | null {
-    const word = this.getWordAtPoint(params)
+    const word = this.analyzer.wordAtPointFromTextPosition(params)
     this.logRequest({ request: 'onDocumentHighlight', params, word })
 
     if (!word) {
@@ -502,7 +487,7 @@ export default class BashServer {
   }
 
   private onReferences(params: LSP.ReferenceParams): LSP.Location[] | null {
-    const word = this.getWordAtPoint(params)
+    const word = this.analyzer.wordAtPointFromTextPosition(params)
     this.logRequest({ request: 'onReferences', params, word })
     if (!word) {
       return null
@@ -511,7 +496,7 @@ export default class BashServer {
   }
 
   private onCompletion(params: LSP.TextDocumentPositionParams): BashCompletionItem[] {
-    const word = this.getWordAtPoint({
+    const word = this.analyzer.wordAtPointFromTextPosition({
       ...params,
       position: {
         line: params.position.line,
@@ -534,14 +519,12 @@ export default class BashServer {
 
     let options: string[] = []
     if (word && word.startsWith('-')) {
-      const commandName = this.getCommandNameAtPoint({
-        ...params,
-        position: {
-          line: params.position.line,
-          // Go one character back to get completion on the current word
-          character: Math.max(params.position.character - 1, 0),
-        },
-      })
+      const commandName = this.analyzer.commandNameAtPoint(
+        params.textDocument.uri,
+        params.position.line,
+        // Go one character back to get completion on the current word
+        Math.max(params.position.character - 1, 0),
+      )
 
       if (commandName) {
         options = getCommandOptions(commandName, word)
