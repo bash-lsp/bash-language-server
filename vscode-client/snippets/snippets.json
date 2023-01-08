@@ -10,7 +10,7 @@
         "description": "[if]",
         "prefix": "if",
         "body": [
-            "if ${0:command}; then",
+            "if ${1:command}; then",
             "\t$0",
             "fi"
         ]
@@ -19,7 +19,7 @@
         "description": "[if] [e]lse",
         "prefix": "ife",
         "body": [
-            "if ${0:command}; then",
+            "if ${1:command}; then",
             "\techo",
             "else",
             "\t$0",
@@ -30,7 +30,7 @@
         "description": "[wh]ile",
         "prefix": "wh",
         "body": [
-            "while ${0:command}; do",
+            "while ${1:command}; do",
             "\t$0",
             "done"
         ]
@@ -39,7 +39,7 @@
         "description": "[un]til",
         "prefix": "un",
         "body": [
-            "until ${0:command}; do",
+            "until ${1:command}; do",
             "\t$0",
             "done"
         ]
