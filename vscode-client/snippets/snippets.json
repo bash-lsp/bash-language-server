@@ -50,7 +50,7 @@
         "body": [
             "for ${1:variable} in ${2:list}; do",
             "\t$0",
-            "fi"
+            "done"
         ]
     },
     "fu": {
