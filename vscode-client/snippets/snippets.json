@@ -20,7 +20,7 @@
         "prefix": "ife",
         "body": [
             "if ${1:command}; then",
-            "\techo",
+            "\t${2:echo}",
             "else",
             "\t$0",
             "fi"
