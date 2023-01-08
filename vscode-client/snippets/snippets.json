@@ -162,13 +162,6 @@
             "alias ${1:name}=${2:value}"
         ]
     },
-    "builtin": {
-        "description": "[builtin]",
-        "prefix": "builtin",
-        "body": [
-            "builtin ${1|source,alias,bg,bind,break,builtin,caller,cd,command,compgen,complete,complete,compopt,continue,declare,typeset,dirs,disown,echo,enable,eval,exec,exit,export,fc,fg,getopts,hash,help,history,jobs,kill,let,local,logout,mapfile,readarray,popd,pushd,pwd,read,readonly,return,set,shift,shopt,suspend,test,type,ulimit,umask,unalias,unset|}"
-        ]
-    },
     "cd": {
         "description": "[cd]",
         "prefix": "cd",
