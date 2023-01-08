@@ -8,13 +8,13 @@ import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as Parser from 'web-tree-sitter'
 
+import { flattenArray } from './util/array'
 import {
   getAllDeclarationsInTree,
   getGlobalDeclarations,
   getLocalDeclarations,
   GlobalDeclarations,
 } from './util/declarations'
-import { flattenArray } from './util/flatten'
 import { getFilePaths } from './util/fs'
 import { analyzeShebang } from './util/shebang'
 import * as sourcing from './util/sourcing'
@@ -490,6 +490,16 @@ export default class Analyzer {
     }
 
     return node.text.trim()
+  }
+
+  public wordAtPointFromTextPosition(
+    params: LSP.TextDocumentPositionParams,
+  ): string | null {
+    return this.wordAtPoint(
+      params.textDocument.uri,
+      params.position.line,
+      params.position.character,
+    )
   }
 
   public setIncludeAllWorkspaceSymbols(includeAllWorkspaceSymbols: boolean): void {

@@ -1,4 +1,14 @@
-import { uniqueBasedOnHash } from '../array'
+import { flattenArray, uniqueBasedOnHash } from '../array'
+
+describe('flattenArray', () => {
+  it('works on array with one element', () => {
+    expect(flattenArray([[1, 2, 3]])).toEqual([1, 2, 3])
+  })
+
+  it('works on array with multiple elements', () => {
+    expect(flattenArray([[1], [2, 3], [4]])).toEqual([1, 2, 3, 4])
+  })
+})
 
 describe('uniqueBasedOnHash', () => {
   it('returns a list of unique elements', () => {
