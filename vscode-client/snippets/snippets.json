@@ -48,7 +48,7 @@
         "description": "[fo]r",
         "prefix": "fo",
         "body": [
-            "for ${0:variable} in ${1:list}; do",
+            "for ${1:variable} in ${2:list}; do",
             "\t$0",
             "fi"
         ]
