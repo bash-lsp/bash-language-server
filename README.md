@@ -78,7 +78,7 @@ endif
 For Vim 8 or Neovim using [YouCompleteMe](https://github.com/ycm-core/YouCompleteMe), add the following to `.vimrc`:
 
 ```vim
-let g:ycm_language_server = 
+let g:ycm_language_server =
             \ [
             \   {
             \       'name': 'bash',
@@ -160,7 +160,8 @@ Add the configuration to your `.emacs.d/init.el`
 
 ## Logging
 
-The minimum logging level for the server can be adjusted using the `BASH_IDE_LOG_LEVEL` environment variable. The options are `DEBUG|INFO|WARNING|ERROR`.
+The minimum logging level for the server can be adjusted using the `BASH_IDE_LOG_LEVEL` environment variable
+and through the general [workspace configuration](https://github.com/bash-lsp/bash-language-server/blob/main/server/src/config.ts).
 
 ## Development Guide
 

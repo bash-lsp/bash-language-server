@@ -9,6 +9,7 @@ describe('ConfigSchema', () => {
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
         "highlightParsingErrors": false,
         "includeAllWorkspaceSymbols": false,
+        "logLevel": "info",
         "shellcheckArguments": Array [],
         "shellcheckPath": "shellcheck",
       }
@@ -32,6 +33,7 @@ describe('ConfigSchema', () => {
         "globPattern": "**/*@(.sh)",
         "highlightParsingErrors": true,
         "includeAllWorkspaceSymbols": true,
+        "logLevel": "info",
         "shellcheckArguments": Array [
           "-e",
           "SC2001",
@@ -62,6 +64,7 @@ describe('getConfigFromEnvironmentVariables', () => {
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
         "highlightParsingErrors": false,
         "includeAllWorkspaceSymbols": false,
+        "logLevel": "info",
         "shellcheckArguments": Array [],
         "shellcheckPath": "shellcheck",
       }
@@ -80,6 +83,7 @@ describe('getConfigFromEnvironmentVariables', () => {
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
         "highlightParsingErrors": false,
         "includeAllWorkspaceSymbols": false,
+        "logLevel": "info",
         "shellcheckArguments": Array [],
         "shellcheckPath": "",
       }
@@ -102,6 +106,7 @@ describe('getConfigFromEnvironmentVariables', () => {
         "globPattern": "*.*",
         "highlightParsingErrors": false,
         "includeAllWorkspaceSymbols": false,
+        "logLevel": "info",
         "shellcheckArguments": Array [
           "-e",
           "SC2001",

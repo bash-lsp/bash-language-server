@@ -13,7 +13,7 @@ import {
 const mockConnection = getMockConnection()
 beforeAll(() => {
   setLogConnection(mockConnection)
-  setLogLevel(LSP.MessageType.Info)
+  setLogLevel('info')
   jest.useFakeTimers().setSystemTime(1522431328992)
 })
 
@@ -87,12 +87,12 @@ describe('getLogLevelFromEnvironment', () => {
 
     expect(console.warn).toHaveBeenCalledTimes(1)
     expect(console.warn).toHaveBeenCalledWith(
-      `Invalid BASH_IDE_LOG_LEVEL "invalid", expected one of: DEBUG, INFO, WARNING, ERROR`,
+      `Invalid BASH_IDE_LOG_LEVEL "invalid", expected one of: debug, info, warning, error`,
     )
   })
 
   it('returns log level from environment variable', () => {
-    process.env[LOG_LEVEL_ENV_VAR] = 'DEBUG'
+    process.env[LOG_LEVEL_ENV_VAR] = 'debug'
     expect(getLogLevelFromEnvironment()).toEqual(LSP.MessageType.Log)
   })
 })

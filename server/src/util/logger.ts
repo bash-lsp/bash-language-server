@@ -1,6 +1,19 @@
 import * as LSP from 'vscode-languageserver'
 
 export const LOG_LEVEL_ENV_VAR = 'BASH_IDE_LOG_LEVEL'
+export const LOG_LEVELS = ['debug', 'info', 'warning', 'error'] as const
+export const DEFAULT_LOG_LEVEL: LogLevel = 'info'
+
+type LogLevel = typeof LOG_LEVELS[number]
+
+const LOG_LEVELS_TO_MESSAGE_TYPES: {
+  [logLevel in LogLevel]: LSP.MessageType
+} = {
+  debug: LSP.MessageType.Log,
+  info: LSP.MessageType.Info,
+  warning: LSP.MessageType.Warning,
+  error: LSP.MessageType.Error,
+} as const
 
 // Singleton madness to allow for logging from anywhere in the codebase
 let _connection: LSP.Connection | null = null
@@ -16,8 +29,8 @@ export function setLogConnection(connection: LSP.Connection) {
 /**
  * Set the minimum log level.
  */
-export function setLogLevel(logLevel: LSP.MessageType) {
-  _logLevel = logLevel
+export function setLogLevel(logLevel: LogLevel) {
+  _logLevel = LOG_LEVELS_TO_MESSAGE_TYPES[logLevel]
 }
 
 export class Logger {
@@ -84,34 +97,29 @@ export class Logger {
   }
 }
 
+/**
+ * Default logger.
+ */
 export const logger = new Logger()
 
 /**
- * Get the log level from the environment.
- * Note that this is not part of the server/config.ts as this needs to be provided when
- * the server starts.
+ * Get the log level from the environment, before the server initializes.
+ * Should only be used internally.
  */
 export function getLogLevelFromEnvironment(): LSP.MessageType {
-  const ENV_LOG_LEVELS_TO_MESSAGE_TYPES: Record<string, LSP.MessageType | undefined> = {
-    DEBUG: LSP.MessageType.Log,
-    INFO: LSP.MessageType.Info,
-    WARNING: LSP.MessageType.Warning,
-    ERROR: LSP.MessageType.Error,
-  }
-
-  const logLevelFromEnvironment = process.env[LOG_LEVEL_ENV_VAR]
+  const logLevelFromEnvironment = process.env[LOG_LEVEL_ENV_VAR] as LogLevel | undefined
   if (logLevelFromEnvironment) {
-    const logLevel = ENV_LOG_LEVELS_TO_MESSAGE_TYPES[logLevelFromEnvironment]
+    const logLevel = LOG_LEVELS_TO_MESSAGE_TYPES[logLevelFromEnvironment]
     if (logLevel) {
       return logLevel
     }
     // eslint-disable-next-line no-console
     console.warn(
       `Invalid ${LOG_LEVEL_ENV_VAR} "${logLevelFromEnvironment}", expected one of: ${Object.keys(
-        ENV_LOG_LEVELS_TO_MESSAGE_TYPES,
+        LOG_LEVELS_TO_MESSAGE_TYPES,
       ).join(', ')}`,
     )
   }
 
-  return LSP.MessageType.Info
+  return LOG_LEVELS_TO_MESSAGE_TYPES[DEFAULT_LOG_LEVEL]
 }

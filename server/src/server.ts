@@ -16,7 +16,7 @@ import * as ReservedWords from './reserved-words'
 import { Linter } from './shellcheck'
 import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
-import { logger, setLogConnection } from './util/logger'
+import { logger, setLogConnection, setLogLevel } from './util/logger'
 import { getShellDocumentation } from './util/sh'
 
 const PARAMETER_EXPANSION_PREFIXES = new Set(['$', '${'])
@@ -59,7 +59,7 @@ export default class BashServer {
     this.linter = linter
     this.workspaceFolder = workspaceFolder
     this.config = {} as any // NOTE: configured in updateConfiguration
-    this.updateConfiguration(config.getDefaultConfiguration())
+    this.updateConfiguration(config.getDefaultConfiguration(), true)
   }
 
   /**
@@ -242,7 +242,7 @@ export default class BashServer {
     return Promise.resolve({ filesParsed: 0 })
   }
 
-  private updateConfiguration(configObject: any): boolean {
+  private updateConfiguration(configObject: any, isDefaultConfig = false): boolean {
     if (typeof configObject === 'object' && configObject !== null) {
       try {
         const newConfig = config.ConfigSchema.parse(configObject)
@@ -265,6 +265,12 @@ export default class BashServer {
           this.analyzer.setIncludeAllWorkspaceSymbols(
             this.config.includeAllWorkspaceSymbols,
           )
+
+          if (!isDefaultConfig) {
+            // We skip setting the log level as the default configuration should
+            // not override the environment defined log level.
+            setLogLevel(this.config.logLevel)
+          }
 
           return true
         }

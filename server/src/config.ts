@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { DEFAULT_LOG_LEVEL, LOG_LEVELS } from './util/logger'
+
 export const ConfigSchema = z
   .object({
     // Maximum number of files to analyze in the background. Set to 0 to disable background analysis.
@@ -11,6 +13,9 @@ export const ConfigSchema = z
     // Configure explainshell server endpoint in order to get hover documentation on flags and options.
     // And empty string will disable the feature.
     explainshellEndpoint: z.string().trim().default(''),
+
+    // Log level for the server. To set the right log level from the start please also use the environment variable 'BASH_IDE_LOG_LEVEL'.
+    logLevel: z.enum(LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
 
     // Controls if Treesitter parsing errors will be highlighted as problems.
     highlightParsingErrors: z.boolean().default(false),
@@ -42,7 +47,7 @@ export const ConfigSchema = z
 export type Config = z.infer<typeof ConfigSchema>
 
 export function getConfigFromEnvironmentVariables(): {
-  config: z.infer<typeof ConfigSchema>
+  config: Config
   environmentVariablesUsed: string[]
 } {
   const rawConfig = {
@@ -64,7 +69,7 @@ export function getConfigFromEnvironmentVariables(): {
   return { config, environmentVariablesUsed }
 }
 
-export function getDefaultConfiguration(): z.infer<typeof ConfigSchema> {
+export function getDefaultConfiguration(): Config {
   return ConfigSchema.parse({})
 }
 
