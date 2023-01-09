@@ -4,7 +4,7 @@ Bash language server that brings an IDE-like experience for bash scripts to most
 
 We strongly recommend that you install [shellcheck][shellcheck] to enable linting: https://github.com/koalaman/shellcheck#installing
 
-Documentation around configuration can be found in the [config.ts](https://github.com/bash-lsp/bash-language-server/blob/main/server/src/config.ts) file.
+Documentation around configuration variables can be found in the [config.ts](https://github.com/bash-lsp/bash-language-server/blob/main/server/src/config.ts) file.
 
 ## Features
 
@@ -24,6 +24,10 @@ To be implemented:
 
 ## Installation
 
+Usually you want to install a client for your editor (see the section below).
+
+But if you want to install the server binary:
+
 ```bash
 npm i -g bash-language-server
 ```
@@ -32,6 +36,12 @@ On Fedora based distros:
 
 ```bash
 dnf install -y nodejs-bash-language-server
+```
+
+To verify that everything is working:
+
+```bash
+bash-language-server --help
 ```
 
 If you encounter installation errors, ensure you have node version 14 or newer (`node --version`).
@@ -147,6 +157,10 @@ Add the configuration to your `.emacs.d/init.el`
   :hook
   (sh-mode . lsp))
 ```
+
+## Logging
+
+The minimum logging level for the server can be adjusted using the `BASH_IDE_LOG_LEVEL` environment variable. The options are `DEBUG|INFO|WARNING|ERROR`.
 
 ## Development Guide
 
