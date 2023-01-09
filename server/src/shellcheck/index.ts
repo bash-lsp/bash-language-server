@@ -6,6 +6,7 @@ import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { debounce } from '../util/async'
+import { logger } from '../util/logger'
 import { analyzeShebang } from '../util/shebang'
 import { CODE_TO_TAGS, LEVEL_TO_SEVERITY } from './config'
 import {
@@ -19,7 +20,6 @@ const SUPPORTED_BASH_DIALECTS = ['sh', 'bash', 'dash', 'ksh']
 const DEBOUNCE_MS = 500
 type LinterOptions = {
   executablePath: string
-  console: LSP.RemoteConsole
   cwd?: string
 }
 
@@ -29,7 +29,6 @@ type LintingResult = {
 }
 
 export class Linter {
-  private console: LSP.RemoteConsole
   private cwd: string
   public executablePath: string
   private uriToDebouncedExecuteLint: {
@@ -37,9 +36,8 @@ export class Linter {
   }
   private _canLint: boolean
 
-  constructor({ console, cwd, executablePath }: LinterOptions) {
+  constructor({ cwd, executablePath }: LinterOptions) {
     this._canLint = true
-    this.console = console
     this.cwd = cwd || process.cwd()
     this.executablePath = executablePath
     this.uriToDebouncedExecuteLint = Object.create(null)
@@ -117,7 +115,7 @@ export class Linter {
       ...additionalArgs,
     ]
 
-    this.console.log(`ShellCheck: running "${this.executablePath} ${args.join(' ')}"`)
+    logger.debug(`ShellCheck: running "${this.executablePath} ${args.join(' ')}"`)
 
     let out = ''
     let err = ''
@@ -146,7 +144,7 @@ export class Linter {
       // TODO: we could do this up front?
       if ((e as any).code === 'ENOENT') {
         // shellcheck path wasn't found, don't try to lint any more:
-        this.console.warn(
+        logger.warn(
           `ShellCheck: disabling linting as no executable was found at path '${this.executablePath}'`,
         )
         this._canLint = false

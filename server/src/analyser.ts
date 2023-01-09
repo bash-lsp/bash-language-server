@@ -16,6 +16,7 @@ import {
   GlobalDeclarations,
 } from './util/declarations'
 import { getFilePaths } from './util/fs'
+import { logger } from './util/logger'
 import { analyzeShebang } from './util/shebang'
 import * as sourcing from './util/sourcing'
 import * as TreeSitterUtil from './util/tree-sitter'
@@ -34,24 +35,20 @@ type AnalyzedDocument = {
  * tree-sitter to find definitions, reference, etc.
  */
 export default class Analyzer {
-  private console: LSP.RemoteConsole
   private includeAllWorkspaceSymbols: boolean
   private parser: Parser
   private uriToAnalyzedDocument: Record<string, AnalyzedDocument | undefined> = {}
   private workspaceFolder: string | null
 
   public constructor({
-    console,
     includeAllWorkspaceSymbols = false,
     parser,
     workspaceFolder,
   }: {
-    console: LSP.RemoteConsole
     includeAllWorkspaceSymbols?: boolean
     parser: Parser
     workspaceFolder: string | null
   }) {
-    this.console = console
     this.includeAllWorkspaceSymbols = includeAllWorkspaceSymbols
     this.parser = parser
     this.workspaceFolder = workspaceFolder
@@ -128,13 +125,11 @@ export default class Analyzer {
     }
 
     if (backgroundAnalysisMaxFiles <= 0) {
-      this.console.log(
-        `BackgroundAnalysis: skipping as backgroundAnalysisMaxFiles was 0...`,
-      )
+      logger.debug(`BackgroundAnalysis: skipping as backgroundAnalysisMaxFiles was 0...`)
       return { filesParsed: 0 }
     }
 
-    this.console.log(
+    logger.debug(
       `BackgroundAnalysis: resolving glob "${globPattern}" inside "${rootPath}"...`,
     )
 
@@ -150,13 +145,13 @@ export default class Analyzer {
       })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : error
-      this.console.warn(
+      logger.warn(
         `BackgroundAnalysis: failed resolved glob "${globPattern}". The experience across files will be degraded. Error: ${errorMessage}`,
       )
       return { filesParsed: 0 }
     }
 
-    this.console.log(
+    logger.debug(
       `BackgroundAnalysis: Glob resolved with ${
         filePaths.length
       } files after ${getTimePassed()}`,
@@ -169,7 +164,7 @@ export default class Analyzer {
         const fileContent = await readFileAsync(filePath, 'utf8')
         const { shebang, shellDialect } = analyzeShebang(fileContent)
         if (shebang && !shellDialect) {
-          this.console.log(
+          logger.debug(
             `BackgroundAnalysis: Skipping file ${uri} with shebang "${shebang}"`,
           )
           continue
@@ -181,13 +176,11 @@ export default class Analyzer {
         })
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : error
-        this.console.warn(
-          `BackgroundAnalysis: Failed analyzing ${uri}. Error: ${errorMessage}`,
-        )
+        logger.warn(`BackgroundAnalysis: Failed analyzing ${uri}. Error: ${errorMessage}`)
       }
     }
 
-    this.console.log(`BackgroundAnalysis: Completed after ${getTimePassed()}.`)
+    logger.debug(`BackgroundAnalysis: Completed after ${getTimePassed()}.`)
     return {
       filesParsed: filePaths.length,
     }
@@ -525,7 +518,7 @@ export default class Analyzer {
             uri,
           })
         } catch (err) {
-          this.console.log(`Error while analyzing sourced file ${uri}: ${err}`)
+          logger.debug(`Error while analyzing sourced file ${uri}: ${err}`)
           return false
         }
       }

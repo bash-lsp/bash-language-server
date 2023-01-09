@@ -16,6 +16,7 @@ import * as ReservedWords from './reserved-words'
 import { Linter } from './shellcheck'
 import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
+import { logger, setLogConnection } from './util/logger'
 import { getShellDocumentation } from './util/sh'
 
 const PARAMETER_EXPANSION_PREFIXES = new Set(['$', '${'])
@@ -70,6 +71,10 @@ export default class BashServer {
     { rootPath, rootUri, capabilities }: LSP.InitializeParams,
   ): // TODO: use workspaceFolders instead of rootPath
   Promise<BashServer> {
+    setLogConnection(connection)
+
+    logger.debug('Initializing...')
+
     const { PATH } = process.env
     const workspaceFolder = rootUri || rootPath || null
 
@@ -79,20 +84,23 @@ export default class BashServer {
 
     const parser = await initializeParser()
     const analyzer = new Analyzer({
-      console: connection.console,
       parser,
       workspaceFolder,
     })
 
     const executables = await Executables.fromPath(PATH)
 
-    return new BashServer({
+    const server = new BashServer({
       analyzer,
       capabilities,
       connection,
       executables,
       workspaceFolder,
     })
+
+    logger.debug('Initialized')
+
+    return server
   }
 
   /**
@@ -170,7 +178,7 @@ export default class BashServer {
 
       if (environmentVariablesUsed.length > 0) {
         this.updateConfiguration(environmentConfig)
-        connection.console.warn(
+        logger.warn(
           `Environment variable configuration is being deprecated, please use workspace configuration. The following environment variables were used: ${environmentVariablesUsed.join(
             ', ',
           )}`,
@@ -188,7 +196,7 @@ export default class BashServer {
           CONFIGURATION_SECTION,
         )
         this.updateConfiguration(configObject)
-        this.connection.console.log('Configuration loaded from client')
+        logger.debug('Configuration loaded from client')
       }
 
       initialized = true
@@ -206,7 +214,7 @@ export default class BashServer {
     connection.onDidChangeConfiguration(({ settings }) => {
       const configChanged = this.updateConfiguration(settings[CONFIGURATION_SECTION])
       if (configChanged && initialized) {
-        this.connection.console.log('Configuration changed')
+        logger.debug('Configuration changed')
         this.startBackgroundAnalysis()
         if (currentDocument) {
           this.uriToCodeActions[currentDocument.uri] = undefined
@@ -248,15 +256,10 @@ export default class BashServer {
 
           const { shellcheckPath } = this.config
           if (!shellcheckPath) {
-            this.connection.console.log(
-              'ShellCheck linting is disabled as "shellcheckPath" was not set',
-            )
+            logger.info('ShellCheck linting is disabled as "shellcheckPath" was not set')
             this.linter = undefined
           } else {
-            this.linter = new Linter({
-              console: this.connection.console,
-              executablePath: shellcheckPath,
-            })
+            this.linter = new Linter({ executablePath: shellcheckPath })
           }
 
           this.analyzer.setIncludeAllWorkspaceSymbols(
@@ -266,7 +269,7 @@ export default class BashServer {
           return true
         }
       } catch (err) {
-        this.connection.console.warn(`updateConfiguration: failed with ${err}`)
+        logger.warn(`updateConfiguration: failed with ${err}`)
       }
     }
 
@@ -301,7 +304,7 @@ export default class BashServer {
         diagnostics = diagnostics.concat(lintDiagnostics)
         this.uriToCodeActions[uri] = codeActions
       } catch (err) {
-        this.connection.console.error(`Error while linting: ${err}`)
+        logger.error(`Error while linting: ${err}`)
       }
     }
 
@@ -318,7 +321,7 @@ export default class BashServer {
     word?: string | null
   }) {
     const wordLog = word ? `"${word}"` : 'null'
-    this.connection.console.log(
+    logger.debug(
       `${request} ${params.position.line}:${params.position.character} word=${wordLog}`,
     )
   }
@@ -551,7 +554,7 @@ export default class BashServer {
       data: { name, type },
     } = item as BashCompletionItem
 
-    this.connection.console.log(`onCompletionResolve name=${name} type=${type}`)
+    logger.debug(`onCompletionResolve name=${name} type=${type}`)
 
     try {
       let documentation = null
@@ -607,7 +610,7 @@ export default class BashServer {
     // TODO: ideally this should return LSP.DocumentSymbol[] instead of LSP.SymbolInformation[]
     // which is a hierarchy of symbols.
     // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_documentSymbol
-    this.connection.console.log(`onDocumentSymbol`)
+    logger.debug(`onDocumentSymbol`)
     return this.analyzer.getDeclarationsForUri({ uri: params.textDocument.uri })
   }
 
@@ -641,9 +644,7 @@ export default class BashServer {
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : error
-        this.connection.console.warn(
-          `getExplainshellDocumentation exception: ${errorMessage}`,
-        )
+        logger.warn(`getExplainshellDocumentation exception: ${errorMessage}`)
       }
     }
 
@@ -691,7 +692,7 @@ export default class BashServer {
   }
 
   private onWorkspaceSymbol(params: LSP.WorkspaceSymbolParams): LSP.SymbolInformation[] {
-    this.connection.console.log('onWorkspaceSymbol')
+    logger.debug('onWorkspaceSymbol')
     return this.analyzer.findDeclarationsWithFuzzySearch(params.query)
   }
 }

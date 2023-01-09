@@ -6,26 +6,30 @@ import {
   FIXTURE_URI,
   REPO_ROOT_FOLDER,
 } from '../../../testing/fixtures'
-import { getMockConnection } from '../../../testing/mocks'
 import Analyzer from '../analyser'
 import { getDefaultConfiguration } from '../config'
 import { initializeParser } from '../parser'
 import * as fsUtil from '../util/fs'
+import { Logger } from '../util/logger'
 
 let analyzer: Analyzer
 
 const CURRENT_URI = 'dummy-uri.sh'
-const mockConsole = getMockConnection().console
 
 // if you add a .sh file to testing/fixtures, update this value
 const FIXTURE_FILES_MATCHING_GLOB = 15
 
 const defaultConfig = getDefaultConfiguration()
 
+jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {
+  // noop
+})
+const loggerDebug = jest.spyOn(Logger.prototype, 'debug')
+const loggerWarn = jest.spyOn(Logger.prototype, 'warn')
+
 beforeAll(async () => {
   const parser = await initializeParser()
   analyzer = new Analyzer({
-    console: mockConsole,
     parser,
     workspaceFolder: FIXTURE_FOLDER,
   })
@@ -93,9 +97,7 @@ describe('findDeclarationLocations', () => {
     const { uri } = document
 
     const parser = await initializeParser()
-    const connection = getMockConnection()
     const newAnalyzer = new Analyzer({
-      console: connection.console,
       parser,
       workspaceFolder: REPO_ROOT_FOLDER,
     })
@@ -242,10 +244,8 @@ describe('getDeclarationsForUri', () => {
 describe('findAllSourcedUris', () => {
   it('returns references to sourced files', async () => {
     const parser = await initializeParser()
-    const connection = getMockConnection()
 
     const newAnalyzer = new Analyzer({
-      console: connection.console,
       parser,
       workspaceFolder: pathToFileURL(REPO_ROOT_FOLDER).href,
     })
@@ -266,10 +266,8 @@ describe('findAllSourcedUris', () => {
 
   it('returns references to sourced files without file extension', async () => {
     const parser = await initializeParser()
-    const connection = getMockConnection()
 
     const newAnalyzer = new Analyzer({
-      console: connection.console,
       parser,
       workspaceFolder: FIXTURE_FOLDER,
     })
@@ -344,10 +342,8 @@ describe('commandNameAtPoint', () => {
 describe('findDeclarationsMatchingWord', () => {
   it('returns a list of symbols across the workspace when includeAllWorkspaceSymbols is true', async () => {
     const parser = await initializeParser()
-    const connection = getMockConnection()
 
     const analyzer = new Analyzer({
-      console: connection.console,
       parser,
       includeAllWorkspaceSymbols: true,
       workspaceFolder: FIXTURE_FOLDER,
@@ -456,10 +452,8 @@ describe('findDeclarationsMatchingWord', () => {
 
   it('returns a list of symbols accessible to the uri when includeAllWorkspaceSymbols is false', async () => {
     const parser = await initializeParser()
-    const connection = getMockConnection()
 
     const analyzer = new Analyzer({
-      console: connection.console,
       parser,
       includeAllWorkspaceSymbols: false,
       workspaceFolder: FIXTURE_FOLDER,
@@ -510,10 +504,8 @@ describe('findDeclarationsMatchingWord', () => {
 
   it('returns symbols depending on the scope', async () => {
     const parser = await initializeParser()
-    const connection = getMockConnection()
 
     const analyzer = new Analyzer({
-      console: connection.console,
       parser,
       includeAllWorkspaceSymbols: false,
       workspaceFolder: FIXTURE_FOLDER,
@@ -721,10 +713,7 @@ describe('initiateBackgroundAnalysis', () => {
 
     jest.spyOn(Date, 'now').mockImplementation(() => 0)
 
-    const connection = getMockConnection()
-
     const newAnalyzer = new Analyzer({
-      console: connection.console,
       parser,
       workspaceFolder: FIXTURE_FOLDER,
     })
@@ -733,13 +722,12 @@ describe('initiateBackgroundAnalysis', () => {
       globPattern: defaultConfig.globPattern,
     })
 
-    expect(connection.window.showWarningMessage).not.toHaveBeenCalled()
-    expect(connection.console.warn).not.toHaveBeenCalled()
+    expect(loggerWarn).not.toHaveBeenCalled()
 
     // Intro, stats on glob, one file skipped due to shebang, and outro
     expect(filesParsed).toEqual(FIXTURE_FILES_MATCHING_GLOB)
 
-    expect(connection.console.log).toHaveBeenNthCalledWith(
+    expect(loggerDebug).toHaveBeenNthCalledWith(
       1,
       expect.stringContaining('BackgroundAnalysis: resolving glob'),
     )
@@ -752,10 +740,7 @@ describe('initiateBackgroundAnalysis', () => {
 
     const parser = await initializeParser()
 
-    const connection = getMockConnection()
-
     const newAnalyzer = new Analyzer({
-      console: connection.console,
       parser,
       workspaceFolder: FIXTURE_FOLDER,
     })
@@ -764,8 +749,7 @@ describe('initiateBackgroundAnalysis', () => {
       globPattern: defaultConfig.globPattern,
     })
 
-    expect(connection.window.showWarningMessage).not.toHaveBeenCalled()
-    expect(connection.console.warn).toHaveBeenCalledWith(expect.stringContaining('BOOM'))
+    expect(loggerWarn).toHaveBeenCalledWith(expect.stringContaining('BOOM'))
     expect(filesParsed).toEqual(0)
   })
 
@@ -774,10 +758,7 @@ describe('initiateBackgroundAnalysis', () => {
 
     jest.spyOn(Date, 'now').mockImplementation(() => 0)
 
-    const connection = getMockConnection()
-
     const newAnalyzer = new Analyzer({
-      console: connection.console,
       parser,
       workspaceFolder: FIXTURE_FOLDER,
     })
@@ -786,8 +767,7 @@ describe('initiateBackgroundAnalysis', () => {
       globPattern: defaultConfig.globPattern,
     })
 
-    expect(connection.window.showWarningMessage).not.toHaveBeenCalled()
-    expect(connection.console.warn).not.toHaveBeenCalled()
+    expect(loggerWarn).not.toHaveBeenCalled()
 
     expect(filesParsed).toEqual(0)
   })
@@ -799,10 +779,8 @@ describe('getAllVariables', () => {
     const { uri } = document
 
     const parser = await initializeParser()
-    const connection = getMockConnection()
 
     const newAnalyzer = new Analyzer({
-      console: connection.console,
       parser,
       workspaceFolder: REPO_ROOT_FOLDER,
     })

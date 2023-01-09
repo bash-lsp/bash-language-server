@@ -1,5 +1,6 @@
 import * as ChildProcess from 'child_process'
 
+import { logger } from './logger'
 import { isWindows } from './platform'
 
 /**
@@ -91,7 +92,7 @@ export async function getShellDocumentationWithoutCache({
       }
     } catch (error) {
       // Ignoring if command fails and store failure in cache
-      console.error(`getShellDocumentation failed for "${word}"`, { error })
+      logger.error(`getShellDocumentation failed for "${word}"`, error)
     }
   }
 
@@ -109,9 +110,7 @@ export function formatManOutput(manOutput: string): string {
   const formattedManOutput = manOutput.slice(indexNameBlock, indexBeforeFooter)
 
   if (!formattedManOutput) {
-    console.error(`formatManOutput failed`, {
-      manOutput,
-    })
+    logger.error(`formatManOutput failed`, { manOutput })
     return manOutput
   }
 
