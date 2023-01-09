@@ -125,11 +125,11 @@ export default class Analyzer {
     }
 
     if (backgroundAnalysisMaxFiles <= 0) {
-      logger.debug(`BackgroundAnalysis: skipping as backgroundAnalysisMaxFiles was 0...`)
+      logger.info(`BackgroundAnalysis: skipping as backgroundAnalysisMaxFiles was 0...`)
       return { filesParsed: 0 }
     }
 
-    logger.debug(
+    logger.info(
       `BackgroundAnalysis: resolving glob "${globPattern}" inside "${rootPath}"...`,
     )
 
@@ -151,7 +151,7 @@ export default class Analyzer {
       return { filesParsed: 0 }
     }
 
-    logger.debug(
+    logger.info(
       `BackgroundAnalysis: Glob resolved with ${
         filePaths.length
       } files after ${getTimePassed()}`,
@@ -164,7 +164,7 @@ export default class Analyzer {
         const fileContent = await readFileAsync(filePath, 'utf8')
         const { shebang, shellDialect } = analyzeShebang(fileContent)
         if (shebang && !shellDialect) {
-          logger.debug(
+          logger.info(
             `BackgroundAnalysis: Skipping file ${uri} with shebang "${shebang}"`,
           )
           continue
@@ -180,7 +180,7 @@ export default class Analyzer {
       }
     }
 
-    logger.debug(`BackgroundAnalysis: Completed after ${getTimePassed()}.`)
+    logger.info(`BackgroundAnalysis: Completed after ${getTimePassed()}.`)
     return {
       filesParsed: filePaths.length,
     }
@@ -518,7 +518,7 @@ export default class Analyzer {
             uri,
           })
         } catch (err) {
-          logger.debug(`Error while analyzing sourced file ${uri}: ${err}`)
+          logger.warn(`Error while analyzing sourced file ${uri}: ${err}`)
           return false
         }
       }

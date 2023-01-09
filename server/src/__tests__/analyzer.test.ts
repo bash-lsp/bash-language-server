@@ -24,7 +24,7 @@ const defaultConfig = getDefaultConfiguration()
 jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {
   // noop
 })
-const loggerDebug = jest.spyOn(Logger.prototype, 'debug')
+const loggerInfo = jest.spyOn(Logger.prototype, 'info')
 const loggerWarn = jest.spyOn(Logger.prototype, 'warn')
 
 beforeAll(async () => {
@@ -727,7 +727,7 @@ describe('initiateBackgroundAnalysis', () => {
     // Intro, stats on glob, one file skipped due to shebang, and outro
     expect(filesParsed).toEqual(FIXTURE_FILES_MATCHING_GLOB)
 
-    expect(loggerDebug).toHaveBeenNthCalledWith(
+    expect(loggerInfo).toHaveBeenNthCalledWith(
       1,
       expect.stringContaining('BackgroundAnalysis: resolving glob'),
     )
