@@ -231,5 +231,19 @@
         "body": [
             "/dev/${1|null,stdin,stdout,stderr|}"
         ]
+    },
+    "sed:filter-lines": {
+        "description": "[sed:filter-lines]",
+        "prefix": "sed:filter-lines",
+        "body": [
+            "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '/${3:pattern}/' ${4:path/to/file}"
+        ]
+    },
+    "awk:filter-lines": {
+        "description": "[awk:filter-lines]",
+        "prefix": "awk:filter-lines",
+        "body": [
+            "awk '/${1:pattern}/' ${2:path/to/file}"
+        ]
     }
 }

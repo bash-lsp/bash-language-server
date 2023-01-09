@@ -8,5 +8,9 @@
     plus the first letter from the second one (if it's exist).
   - If a snippet is for a builtin then builtin name is used.
   - If a snippet is for expansion then expansion symbol is used.
+  - If a snippet is for a specific external program like **awk** then program name must be added to `prefix` like this:
+    `awk:{{snippet-prefix}}`.
   The second one is always a noun existing to make snippets more memorizable.
 - `body` is always array.
+- If both short and long options available placeholder must be used to let user to chose the option's style
+  but the first alternative should always be the long option.
