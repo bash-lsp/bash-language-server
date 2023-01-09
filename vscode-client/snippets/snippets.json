@@ -1,7 +1,10 @@
 {
     "shebang": {
         "description": "[sh]hebang",
-        "prefix": "sh",
+        "prefix": [
+            "sh",
+            "shebang"
+        ],
         "body": [
             "#!/usr/bin/env ${1|bash,sh|}"
         ]
@@ -15,9 +18,12 @@
             "fi"
         ]
     },
-    "ife": {
+    "if-else": {
         "description": "[if] [e]lse",
-        "prefix": "ife",
+        "prefix": [
+            "ife",
+            "if-else"
+        ],
         "body": [
             "if ${1:command}; then",
             "\t${2:echo}",
@@ -26,45 +32,60 @@
             "fi"
         ]
     },
-    "wh": {
+    "while": {
         "description": "[wh]ile",
-        "prefix": "wh",
+        "prefix": [
+            "wh",
+            "while"
+        ],
         "body": [
             "while ${1:command}; do",
             "\t$0",
             "done"
         ]
     },
-    "un": {
+    "until": {
         "description": "[un]til",
-        "prefix": "un",
+        "prefix": [
+            "un",
+            "until"
+        ],
         "body": [
             "until ${1:command}; do",
             "\t$0",
             "done"
         ]
     },
-    "fo": {
+    "for": {
         "description": "[fo]r",
-        "prefix": "fo",
+        "prefix": [
+            "fo",
+            "for"
+        ],
         "body": [
             "for ${1:variable} in ${2:list}; do",
             "\t$0",
             "done"
         ]
     },
-    "fu": {
+    "function": {
         "description": "[fu]nction",
-        "prefix": "fu",
+        "prefix": [
+            "fu",
+            "function"
+        ],
         "body": [
             "${1:function_name}() {",
             "\t$0",
             "}"
         ]
     },
-    "ma": {
+    "main": {
         "description": "[ma]in",
-        "prefix": "ma",
+        "prefix": [
+            "ma",
+            "main"
+        ],
         "body": [
             "main() {",
             "\t$0",
@@ -201,10 +222,10 @@
         "description": "[test]",
         "prefix": "test",
         "body": [
-            "[[ ${1:argument1} ${2|-ef,-nt,-ot,==,=,!=,<,>,-eq,-ne,-lt,-le,-gt,-ge|} ${3:argument2} ]]"
+            "[[ ${1:argument1} ${2|-ef,-nt,-ot,==,=,!=,=~,<,>,-eq,-ne,-lt,-le,-gt,-ge|} ${3:argument2} ]]"
         ]
     },
-    "de": {
+    "device": {
         "description": "[de]vice name",
         "prefix": "de",
         "body": [
