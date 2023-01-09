@@ -1,4 +1,5 @@
 import { ConfigSchema, getConfigFromEnvironmentVariables } from '../config'
+import { LOG_LEVEL_ENV_VAR } from '../util/logger'
 
 describe('ConfigSchema', () => {
   it('returns a default', () => {
@@ -97,6 +98,7 @@ describe('getConfigFromEnvironmentVariables', () => {
       EXPLAINSHELL_ENDPOINT: 'localhost:8080',
       GLOB_PATTERN: '*.*',
       BACKGROUND_ANALYSIS_MAX_FILES: '1',
+      [LOG_LEVEL_ENV_VAR]: 'error',
     }
     const { config } = getConfigFromEnvironmentVariables()
     expect(config).toMatchInlineSnapshot(`
@@ -106,7 +108,7 @@ describe('getConfigFromEnvironmentVariables', () => {
         "globPattern": "*.*",
         "highlightParsingErrors": false,
         "includeAllWorkspaceSymbols": false,
-        "logLevel": "info",
+        "logLevel": "error",
         "shellcheckArguments": Array [
           "-e",
           "SC2001",

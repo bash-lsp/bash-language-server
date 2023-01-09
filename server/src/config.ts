@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { DEFAULT_LOG_LEVEL, LOG_LEVELS } from './util/logger'
+import { DEFAULT_LOG_LEVEL, LOG_LEVEL_ENV_VAR, LOG_LEVELS } from './util/logger'
 
 export const ConfigSchema = z.object({
   // Maximum number of files to analyze in the background. Set to 0 to disable background analysis.
@@ -54,6 +54,7 @@ export function getConfigFromEnvironmentVariables(): {
     globPattern: process.env.GLOB_PATTERN,
     highlightParsingErrors: toBoolean(process.env.HIGHLIGHT_PARSING_ERRORS),
     includeAllWorkspaceSymbols: toBoolean(process.env.INCLUDE_ALL_WORKSPACE_SYMBOLS),
+    logLevel: process.env[LOG_LEVEL_ENV_VAR],
     shellcheckArguments: process.env.SHELLCHECK_ARGUMENTS,
     shellcheckPath: process.env.SHELLCHECK_PATH,
   }
