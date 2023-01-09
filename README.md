@@ -65,6 +65,19 @@ if executable('bash-language-server')
 endif
 ```
 
+For Vim 8 or Neovim using [YouCompleteMe](https://github.com/ycm-core/YouCompleteMe), add the following to `.vimrc`:
+
+```vim
+let g:ycm_language_server = 
+            \ [
+            \   {
+            \       'name': 'bash',
+            \       'cmdline': [ 'bash-language-server', 'start' ],
+            \       'filetypes': [ 'sh' ],
+            \   }
+            \ ]
+```
+
 For Vim 8 or Neovim using [neoclide/coc.nvim][coc.nvim], according to [it's Wiki article](https://github.com/neoclide/coc.nvim/wiki/Language-servers#bash), add the following to your `coc-settings.json`:
 
 ```jsonc
