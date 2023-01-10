@@ -187,7 +187,7 @@
         "description": "[cd]",
         "prefix": "cd",
         "body": [
-            "cd \"${1:path/to/directory}\" || echo \"${2:error_message}\" >&2"
+            "cd \"${1:path/to/directory}\""
         ]
     },
     "getopts": {
