@@ -227,7 +227,10 @@
     },
     "device": {
         "description": "[de]vice name",
-        "prefix": "de",
+        "prefix": [
+            "de",
+            "dev"
+        ],
         "body": [
             "/dev/${1|null,stdin,stdout,stderr|}"
         ]
