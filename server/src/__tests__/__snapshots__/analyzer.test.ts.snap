@@ -1,43 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`analyze returns a list of errors for a file with a missing node 1`] = `
-Array [
-  Object {
-    "message": "Syntax error: expected \\"fi\\" somewhere in the file",
-    "range": Object {
-      "end": Object {
-        "character": 0,
-        "line": 12,
-      },
-      "start": Object {
-        "character": 0,
-        "line": 12,
-      },
-    },
-    "severity": 2,
-  },
-]
-`;
-
-exports[`analyze returns a list of errors for a file with parsing errors 1`] = `
-Array [
-  Object {
-    "message": "Failed to parse",
-    "range": Object {
-      "end": Object {
-        "character": 1,
-        "line": 9,
-      },
-      "start": Object {
-        "character": 0,
-        "line": 2,
-      },
-    },
-    "severity": 1,
-  },
-]
-`;
-
 exports[`findReferences returns a list of locations if parameter is found 1`] = `
 Array [
   Object {

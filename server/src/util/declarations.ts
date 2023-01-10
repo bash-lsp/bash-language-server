@@ -46,6 +46,8 @@ export function getGlobalDeclarations({
           TreeSitterUtil.range(node),
           'Failed to parse',
           LSP.DiagnosticSeverity.Error,
+          undefined,
+          'bash-language-server',
         ),
       )
       return
@@ -77,7 +79,7 @@ export function getAllDeclarationsInTree({
 }): LSP.SymbolInformation[] {
   const symbols: LSP.SymbolInformation[] = []
 
-  TreeSitterUtil.forEach(tree.rootNode, (node: Parser.SyntaxNode) => {
+  TreeSitterUtil.forEach(tree.rootNode, (node) => {
     if (TreeSitterUtil.isDefinition(node)) {
       const symbol = nodeToSymbolInformation({ node, uri })
 
@@ -189,7 +191,7 @@ function getAllGlobalVariableDeclarations({
 }) {
   const declarations: Declarations = {}
 
-  TreeSitterUtil.forEach(rootNode, (node: Parser.SyntaxNode) => {
+  TreeSitterUtil.forEach(rootNode, (node) => {
     if (
       node.type === 'variable_assignment' &&
       // exclude local variables

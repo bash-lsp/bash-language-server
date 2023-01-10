@@ -17,3 +17,9 @@ echo "$"
 source ./scripts/tag-release.inc
 
 tagRelease '1.0.0'
+
+loadlib () {
+  source "$1.sh"
+}
+
+loadlib "issue206"

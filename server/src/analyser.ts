@@ -17,6 +17,7 @@ import {
 } from './util/declarations'
 import { getFilePaths } from './util/fs'
 import { logger } from './util/logger'
+import { isPositionIncludedInRange } from './util/lsp'
 import { analyzeShebang } from './util/shebang'
 import * as sourcing from './util/sourcing'
 import * as TreeSitterUtil from './util/tree-sitter'
@@ -27,6 +28,7 @@ type AnalyzedDocument = {
   document: TextDocument
   globalDeclarations: GlobalDeclarations
   sourcedUris: Set<string>
+  sourceCommands: sourcing.SourceCommand[]
   tree: Parser.Tree
 }
 
@@ -74,16 +76,45 @@ export default class Analyzer {
 
     const { diagnostics, globalDeclarations } = getGlobalDeclarations({ tree, uri })
 
+    const sourceCommands = sourcing.getSourceCommands({
+      fileUri: uri,
+      rootPath: this.workspaceFolder,
+      tree,
+    })
+
+    const sourcedUris = new Set(
+      sourceCommands
+        .map((sourceCommand) => sourceCommand.uri)
+        .filter((uri): uri is string => uri !== null),
+    )
+
     this.uriToAnalyzedDocument[uri] = {
       document,
       globalDeclarations,
-      sourcedUris: sourcing.getSourcedUris({
-        fileContent,
-        fileUri: uri,
-        rootPath: this.workspaceFolder,
-        tree,
-      }),
+      sourcedUris,
+      sourceCommands: sourceCommands.filter((sourceCommand) => !sourceCommand.error),
       tree,
+    }
+
+    if (!this.includeAllWorkspaceSymbols) {
+      sourceCommands
+        .filter((sourceCommand) => sourceCommand.error)
+        .forEach((sourceCommand) => {
+          diagnostics.push(
+            LSP.Diagnostic.create(
+              sourceCommand.range,
+              [
+                `Source command could not be analyzed: ${sourceCommand.error}.\n`,
+                'Note that enabling the configuration flag "includeAllWorkspaceSymbols"',
+                'would include all symbols in the workspace regardless of source commands.',
+                'But be aware that this will lead to false positive suggestions.',
+              ].join('\n'),
+              LSP.DiagnosticSeverity.Information,
+              undefined,
+              'bash-language-server',
+            ),
+          )
+        })
     }
 
     function findMissingNodes(node: Parser.SyntaxNode) {
@@ -93,6 +124,8 @@ export default class Analyzer {
             TreeSitterUtil.range(node),
             `Syntax error: expected "${node.type}" somewhere in the file`,
             LSP.DiagnosticSeverity.Warning,
+            undefined,
+            'bash-language-server',
           ),
         )
       } else if (node.hasError()) {
@@ -198,20 +231,13 @@ export default class Analyzer {
     uri: string
     word: string
   }): LSP.Location[] {
-    const tree = this.uriToAnalyzedDocument[uri]?.tree
+    // If the word is sourced, return the location of the source file
+    const sourcedUri = this.uriToAnalyzedDocument[uri]?.sourceCommands
+      .filter((sourceCommand) => isPositionIncludedInRange(position, sourceCommand.range))
+      .map((sourceCommand) => sourceCommand.uri)[0]
 
-    if (position && tree) {
-      // NOTE: when a word is a file path to a sourced file, we return a location to it.
-      const sourcedLocation = sourcing.getSourcedLocation({
-        position,
-        rootPath: this.workspaceFolder,
-        tree,
-        uri,
-        word,
-      })
-      if (sourcedLocation) {
-        return [sourcedLocation]
-      }
+    if (sourcedUri) {
+      return [LSP.Location.create(sourcedUri, LSP.Range.create(0, 0, 0, 0))]
     }
 
     return this.findDeclarationsMatchingWord({

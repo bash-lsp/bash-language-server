@@ -1,0 +1,146 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getSourcedUris returns a set of sourced files 2`] = `
+Array [
+  Object {
+    "error": null,
+    "range": Object {
+      "end": Object {
+        "character": 28,
+        "line": 1,
+      },
+      "start": Object {
+        "character": 6,
+        "line": 1,
+      },
+    },
+    "uri": "file:///Users/bash/file-in-path.sh",
+  },
+  Object {
+    "error": null,
+    "range": Object {
+      "end": Object {
+        "character": 31,
+        "line": 3,
+      },
+      "start": Object {
+        "character": 6,
+        "line": 3,
+      },
+    },
+    "uri": "file:///bin/extension.inc",
+  },
+  Object {
+    "error": null,
+    "range": Object {
+      "end": Object {
+        "character": 22,
+        "line": 5,
+      },
+      "start": Object {
+        "character": 6,
+        "line": 5,
+      },
+    },
+    "uri": "file:///Users/bash/x",
+  },
+  Object {
+    "error": null,
+    "range": Object {
+      "end": Object {
+        "character": 36,
+        "line": 7,
+      },
+      "start": Object {
+        "character": 6,
+        "line": 7,
+      },
+    },
+    "uri": "file:///Users/scripts/release-client.sh",
+  },
+  Object {
+    "error": null,
+    "range": Object {
+      "end": Object {
+        "character": 23,
+        "line": 9,
+      },
+      "start": Object {
+        "character": 6,
+        "line": 9,
+      },
+    },
+    "uri": "file:///Users/bash-user/myscript",
+  },
+  Object {
+    "error": "expansion not supported",
+    "range": Object {
+      "end": Object {
+        "character": 23,
+        "line": 13,
+      },
+      "start": Object {
+        "character": 6,
+        "line": 13,
+      },
+    },
+    "uri": null,
+  },
+  Object {
+    "error": "expansion not supported",
+    "range": Object {
+      "end": Object {
+        "character": 66,
+        "line": 16,
+      },
+      "start": Object {
+        "character": 49,
+        "line": 16,
+      },
+    },
+    "uri": null,
+  },
+  Object {
+    "error": "expansion not supported",
+    "range": Object {
+      "end": Object {
+        "character": 66,
+        "line": 18,
+      },
+      "start": Object {
+        "character": 6,
+        "line": 18,
+      },
+    },
+    "uri": null,
+  },
+  Object {
+    "error": null,
+    "range": Object {
+      "end": Object {
+        "character": 30,
+        "line": 25,
+      },
+      "start": Object {
+        "character": 8,
+        "line": 25,
+      },
+    },
+    "uri": "file:///Users/bash/issue206.sh",
+  },
+  Object {
+    "error": "expansion not supported",
+    "range": Object {
+      "end": Object {
+        "character": 22,
+        "line": 43,
+      },
+      "start": Object {
+        "character": 8,
+        "line": 43,
+      },
+    },
+    "uri": null,
+  },
+]
+`;
