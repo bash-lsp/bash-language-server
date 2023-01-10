@@ -16,4 +16,4 @@ echo "$"
 
 source ./scripts/tag-release.inc
 
-tagRelease '1.0.0' # FIXME: the "defined on" looks wierd
+tagRelease '1.0.0'
