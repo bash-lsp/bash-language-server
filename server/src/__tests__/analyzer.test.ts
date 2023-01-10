@@ -36,30 +36,110 @@ beforeAll(async () => {
 })
 
 describe('analyze', () => {
-  it('returns an empty list of errors for a file with no parsing errors', () => {
-    const result = analyzer.analyze({
+  it('returns an empty list of diagnostics for a file with no parsing errors', () => {
+    const diagnostics = analyzer.analyze({
       uri: CURRENT_URI,
       document: FIXTURE_DOCUMENT.INSTALL,
     })
-    expect(result).toEqual([])
+    expect(diagnostics).toEqual([])
   })
 
-  it('returns a list of errors for a file with a missing node', () => {
-    const result = analyzer.analyze({
+  it('returns a list of diagnostics for a file with a missing node', () => {
+    const diagnostics = analyzer.analyze({
       uri: CURRENT_URI,
       document: FIXTURE_DOCUMENT.MISSING_NODE,
     })
-    expect(result).not.toEqual([])
-    expect(result).toMatchSnapshot()
+    expect(diagnostics).not.toEqual([])
+    expect(diagnostics).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "message": "Syntax error: expected \\"fi\\" somewhere in the file",
+          "range": Object {
+            "end": Object {
+              "character": 0,
+              "line": 12,
+            },
+            "start": Object {
+              "character": 0,
+              "line": 12,
+            },
+          },
+          "severity": 2,
+          "source": "bash-language-server",
+        },
+      ]
+    `)
   })
 
-  it('returns a list of errors for a file with parsing errors', () => {
-    const result = analyzer.analyze({
+  it('returns a list of diagnostics for a file with parsing errors', () => {
+    const diagnostics = analyzer.analyze({
       uri: CURRENT_URI,
       document: FIXTURE_DOCUMENT.PARSE_PROBLEMS,
     })
-    expect(result).not.toEqual([])
-    expect(result).toMatchSnapshot()
+    expect(diagnostics).not.toEqual([])
+    expect(diagnostics).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "message": "Failed to parse",
+          "range": Object {
+            "end": Object {
+              "character": 1,
+              "line": 9,
+            },
+            "start": Object {
+              "character": 0,
+              "line": 2,
+            },
+          },
+          "severity": 1,
+          "source": "bash-language-server",
+        },
+      ]
+    `)
+  })
+
+  it('returns a list of diagnostics for a file with sourcing issues', async () => {
+    const parser = await initializeParser()
+    const newAnalyzer = new Analyzer({
+      parser,
+      workspaceFolder: FIXTURE_FOLDER,
+    })
+    const diagnostics = newAnalyzer.analyze({
+      uri: CURRENT_URI,
+      document: FIXTURE_DOCUMENT.SOURCING,
+    })
+    expect(diagnostics).not.toEqual([])
+    expect(diagnostics).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "message": "Source command could not be analyzed: expansion not supported.
+
+      Note that enabling the configuration flag \\"includeAllWorkspaceSymbols\\"
+      would include all symbols in the workspace regardless of source commands.
+      But be aware that this will lead to false positive suggestions.",
+          "range": Object {
+            "end": Object {
+              "character": 16,
+              "line": 21,
+            },
+            "start": Object {
+              "character": 2,
+              "line": 21,
+            },
+          },
+          "severity": 3,
+          "source": "bash-language-server",
+        },
+      ]
+    `)
+
+    // unless setIncludeAllWorkspaceSymbols set
+    newAnalyzer.setIncludeAllWorkspaceSymbols(true)
+    const diagnostics2 = newAnalyzer.analyze({
+      uri: CURRENT_URI,
+      document: FIXTURE_DOCUMENT.SOURCING,
+    })
+    expect(diagnostics2).toEqual([])
   })
 })
 

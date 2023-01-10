@@ -208,6 +208,23 @@ describe('server', () => {
           },
           "name": "BOLD",
         },
+        Object {
+          "kind": 12,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 1,
+                "line": 22,
+              },
+              "start": Object {
+                "character": 0,
+                "line": 20,
+              },
+            },
+            "uri": "file://${FIXTURE_FOLDER}sourcing.sh",
+          },
+          "name": "loadlib",
+        },
       ]
     `)
   })
