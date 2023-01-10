@@ -27,12 +27,7 @@ module.exports = {
         ignoreRestSiblings: true,
       },
     ],
-    'no-console': [
-      'error',
-      {
-        allow: ['warn', 'error'],
-      },
-    ],
+    'no-console': ['error'],
     'prefer-destructuring': [
       'error',
       {

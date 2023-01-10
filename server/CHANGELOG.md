@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.3.0
+
+- Add centralized and configurable logger that can be controlled using the `BASH_IDE_LOG_LEVEL` environment variable and workspace configuration. https://github.com/bash-lsp/bash-language-server/pull/669
+
 ## 4.2.5
 
 - Fix a critical bug causing memory leaks and high CPU usage for workspaces with many files https://github.com/bash-lsp/bash-language-server/pull/661

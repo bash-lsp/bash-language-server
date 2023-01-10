@@ -2,10 +2,13 @@ import * as path from 'path'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../../testing/fixtures'
-import { getMockConnection } from '../../../../testing/mocks'
+import { Logger } from '../../util/logger'
 import { Linter } from '../index'
 
-const mockConsole = getMockConnection().console
+jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {
+  // noop
+})
+const loggerWarn = jest.spyOn(Logger.prototype, 'warn')
 
 jest.useFakeTimers()
 
@@ -28,7 +31,6 @@ async function getLintingResult({
   sourcePaths?: string[]
 }): Promise<[Awaited<ReturnType<Linter['lint']>>, Linter]> {
   const linter = new Linter({
-    console: mockConsole,
     cwd,
     executablePath,
   })
@@ -40,7 +42,7 @@ async function getLintingResult({
 
 describe('linter', () => {
   it('default to canLint to true', () => {
-    expect(new Linter({ console: mockConsole, executablePath: 'foo' }).canLint).toBe(true)
+    expect(new Linter({ executablePath: 'foo' }).canLint).toBe(true)
   })
 
   it('should set canLint to false when linting fails', async () => {
@@ -57,7 +59,7 @@ describe('linter', () => {
     })
 
     expect(linter.canLint).toBe(false)
-    expect(mockConsole.warn).toBeCalledWith(
+    expect(loggerWarn).toBeCalledWith(
       expect.stringContaining(
         'ShellCheck: disabling linting as no executable was found at path',
       ),
@@ -182,7 +184,6 @@ describe('linter', () => {
 
   it('should debounce the lint requests', async () => {
     const linter = new Linter({
-      console: mockConsole,
       cwd: FIXTURE_FOLDER,
       executablePath: 'shellcheck',
     })

@@ -1,4 +1,5 @@
 import { ConfigSchema, getConfigFromEnvironmentVariables } from '../config'
+import { LOG_LEVEL_ENV_VAR } from '../util/logger'
 
 describe('ConfigSchema', () => {
   it('returns a default', () => {
@@ -9,6 +10,7 @@ describe('ConfigSchema', () => {
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
         "highlightParsingErrors": false,
         "includeAllWorkspaceSymbols": false,
+        "logLevel": "info",
         "shellcheckArguments": Array [],
         "shellcheckPath": "shellcheck",
       }
@@ -32,6 +34,7 @@ describe('ConfigSchema', () => {
         "globPattern": "**/*@(.sh)",
         "highlightParsingErrors": true,
         "includeAllWorkspaceSymbols": true,
+        "logLevel": "info",
         "shellcheckArguments": Array [
           "-e",
           "SC2001",
@@ -62,6 +65,7 @@ describe('getConfigFromEnvironmentVariables', () => {
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
         "highlightParsingErrors": false,
         "includeAllWorkspaceSymbols": false,
+        "logLevel": "info",
         "shellcheckArguments": Array [],
         "shellcheckPath": "shellcheck",
       }
@@ -80,6 +84,7 @@ describe('getConfigFromEnvironmentVariables', () => {
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
         "highlightParsingErrors": false,
         "includeAllWorkspaceSymbols": false,
+        "logLevel": "info",
         "shellcheckArguments": Array [],
         "shellcheckPath": "",
       }
@@ -93,6 +98,7 @@ describe('getConfigFromEnvironmentVariables', () => {
       EXPLAINSHELL_ENDPOINT: 'localhost:8080',
       GLOB_PATTERN: '*.*',
       BACKGROUND_ANALYSIS_MAX_FILES: '1',
+      [LOG_LEVEL_ENV_VAR]: 'error',
     }
     const { config } = getConfigFromEnvironmentVariables()
     expect(config).toMatchInlineSnapshot(`
@@ -102,6 +108,7 @@ describe('getConfigFromEnvironmentVariables', () => {
         "globPattern": "*.*",
         "highlightParsingErrors": false,
         "includeAllWorkspaceSymbols": false,
+        "logLevel": "error",
         "shellcheckArguments": Array [
           "-e",
           "SC2001",

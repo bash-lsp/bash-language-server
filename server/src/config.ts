@@ -1,48 +1,51 @@
 import { z } from 'zod'
 
-export const ConfigSchema = z
-  .object({
-    // Maximum number of files to analyze in the background. Set to 0 to disable background analysis.
-    backgroundAnalysisMaxFiles: z.number().int().min(0).default(500),
+import { DEFAULT_LOG_LEVEL, LOG_LEVEL_ENV_VAR, LOG_LEVELS } from './util/logger'
 
-    // Glob pattern for finding and parsing shell script files in the workspace. Used by the background analysis features across files.
-    globPattern: z.string().trim().default('**/*@(.sh|.inc|.bash|.command)'),
+export const ConfigSchema = z.object({
+  // Maximum number of files to analyze in the background. Set to 0 to disable background analysis.
+  backgroundAnalysisMaxFiles: z.number().int().min(0).default(500),
 
-    // Configure explainshell server endpoint in order to get hover documentation on flags and options.
-    // And empty string will disable the feature.
-    explainshellEndpoint: z.string().trim().default(''),
+  // Glob pattern for finding and parsing shell script files in the workspace. Used by the background analysis features across files.
+  globPattern: z.string().trim().default('**/*@(.sh|.inc|.bash|.command)'),
 
-    // Controls if Treesitter parsing errors will be highlighted as problems.
-    highlightParsingErrors: z.boolean().default(false),
+  // Configure explainshell server endpoint in order to get hover documentation on flags and options.
+  // And empty string will disable the feature.
+  explainshellEndpoint: z.string().trim().default(''),
 
-    // Controls how symbols (e.g. variables and functions) are included and used for completion and documentation.
-    // If false, then we only include symbols from sourced files (i.e. using non dynamic statements like 'source file.sh' or '. file.sh').
-    // If true, then all symbols from the workspace are included.
-    includeAllWorkspaceSymbols: z.boolean().default(false),
+  // Log level for the server. To set the right log level from the start please also use the environment variable 'BASH_IDE_LOG_LEVEL'.
+  logLevel: z.enum(LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
 
-    // Additional ShellCheck arguments. Note that we already add the following arguments: --shell, --format, --external-sources."
-    shellcheckArguments: z
-      .preprocess((arg) => {
-        let argsList: string[] = []
-        if (typeof arg === 'string') {
-          argsList = arg.split(' ')
-        } else if (Array.isArray(arg)) {
-          argsList = arg as string[]
-        }
+  // Controls if Treesitter parsing errors will be highlighted as problems.
+  highlightParsingErrors: z.boolean().default(false),
 
-        return argsList.map((s) => s.trim()).filter((s) => s.length > 0)
-      }, z.array(z.string()))
-      .default([]),
+  // Controls how symbols (e.g. variables and functions) are included and used for completion and documentation.
+  // If false, then we only include symbols from sourced files (i.e. using non dynamic statements like 'source file.sh' or '. file.sh').
+  // If true, then all symbols from the workspace are included.
+  includeAllWorkspaceSymbols: z.boolean().default(false),
 
-    // Controls the executable used for ShellCheck linting information. An empty string will disable linting.
-    shellcheckPath: z.string().trim().default('shellcheck'),
-  })
-  .strict()
+  // Additional ShellCheck arguments. Note that we already add the following arguments: --shell, --format, --external-sources."
+  shellcheckArguments: z
+    .preprocess((arg) => {
+      let argsList: string[] = []
+      if (typeof arg === 'string') {
+        argsList = arg.split(' ')
+      } else if (Array.isArray(arg)) {
+        argsList = arg as string[]
+      }
+
+      return argsList.map((s) => s.trim()).filter((s) => s.length > 0)
+    }, z.array(z.string()))
+    .default([]),
+
+  // Controls the executable used for ShellCheck linting information. An empty string will disable linting.
+  shellcheckPath: z.string().trim().default('shellcheck'),
+})
 
 export type Config = z.infer<typeof ConfigSchema>
 
 export function getConfigFromEnvironmentVariables(): {
-  config: z.infer<typeof ConfigSchema>
+  config: Config
   environmentVariablesUsed: string[]
 } {
   const rawConfig = {
@@ -51,6 +54,7 @@ export function getConfigFromEnvironmentVariables(): {
     globPattern: process.env.GLOB_PATTERN,
     highlightParsingErrors: toBoolean(process.env.HIGHLIGHT_PARSING_ERRORS),
     includeAllWorkspaceSymbols: toBoolean(process.env.INCLUDE_ALL_WORKSPACE_SYMBOLS),
+    logLevel: process.env[LOG_LEVEL_ENV_VAR],
     shellcheckArguments: process.env.SHELLCHECK_ARGUMENTS,
     shellcheckPath: process.env.SHELLCHECK_PATH,
   }
@@ -64,7 +68,7 @@ export function getConfigFromEnvironmentVariables(): {
   return { config, environmentVariablesUsed }
 }
 
-export function getDefaultConfiguration(): z.infer<typeof ConfigSchema> {
+export function getDefaultConfiguration(): Config {
   return ConfigSchema.parse({})
 }
 
