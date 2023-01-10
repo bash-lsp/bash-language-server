@@ -225,7 +225,7 @@
             "[[ ${1:argument1} ${2|-ef,-nt,-ot,==,=,!=,=~,<,>,-eq,-ne,-lt,-le,-gt,-ge|} ${3:argument2} ]]"
         ]
     },
-    "device": {
+    "stream": {
         "description": "[de]vice name",
         "prefix": [
             "de",
