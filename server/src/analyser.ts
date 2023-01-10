@@ -78,7 +78,6 @@ export default class Analyzer {
       document,
       globalDeclarations,
       sourcedUris: sourcing.getSourcedUris({
-        fileContent,
         fileUri: uri,
         rootPath: this.workspaceFolder,
         tree,

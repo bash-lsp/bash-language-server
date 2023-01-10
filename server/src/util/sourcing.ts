@@ -4,9 +4,9 @@ import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
 
 import { untildify } from './fs'
+import { logger } from './logger'
+import * as TreeSitterUtil from './tree-sitter'
 
-// Until the grammar supports sourcing, we use this little regular expression
-const SOURCING_STATEMENTS = /^(?:\t|[ ])*(?:source|[.])\s*(\S*)/
 const SOURCING_COMMANDS = ['source', '.']
 
 /**
@@ -14,12 +14,10 @@ const SOURCING_COMMANDS = ['source', '.']
  * sourced. Note that the URIs are resolved.
  */
 export function getSourcedUris({
-  fileContent,
   fileUri,
   rootPath,
   tree,
 }: {
-  fileContent: string
   fileUri: string
   rootPath: string | null
   tree: Parser.Tree
@@ -27,26 +25,44 @@ export function getSourcedUris({
   const uris: Set<string> = new Set([])
   const rootPaths = [path.dirname(fileUri), rootPath].filter(Boolean) as string[]
 
-  fileContent.split(/\r?\n/).forEach((line, lineIndex) => {
-    const match = line.match(SOURCING_STATEMENTS)
-    if (match) {
-      const [statement, word] = match
+  // find all source commands in the tree
+  TreeSitterUtil.forEach(tree.rootNode, (node) => {
+    if (node.type === 'command') {
+      const [commandNameNode, argumentNode] = node.namedChildren
+      if (
+        commandNameNode.type === 'command_name' &&
+        SOURCING_COMMANDS.includes(commandNameNode?.text)
+      ) {
+        let word = null
+        if (argumentNode.type === 'word') {
+          word = argumentNode.text
+        } else if (argumentNode.type === 'string') {
+          if (argumentNode.namedChildren.length === 0) {
+            word = argumentNode.text.slice(1, -1)
+          } else if (
+            argumentNode.namedChildren.every((n) => n.type === 'simple_expansion')
+          ) {
+            // not supported
+          } else {
+            logger.warn(
+              'Sourcing: unhandled argumentNode=string case',
+              argumentNode.namedChildren.map((c) => ({ type: c.type, text: c.text })),
+            )
+          }
+        } else {
+          logger.warn('Sourcing: unhandled argumentNode case', argumentNode.type)
+        }
 
-      if (tree.rootNode) {
-        const node = tree.rootNode.descendantForPosition({
-          row: lineIndex,
-          column: statement.length - 2,
-        })
-        if (['heredoc_body', 'raw_string'].includes(node?.type)) {
-          return
+        if (word) {
+          const sourcedUri = getSourcedUri({ rootPaths, word })
+          if (sourcedUri) {
+            uris.add(sourcedUri)
+          }
         }
       }
-
-      const sourcedUri = getSourcedUri({ rootPaths, word })
-      if (sourcedUri) {
-        uris.add(sourcedUri)
-      }
     }
+
+    return true
   })
 
   return uris
@@ -102,17 +118,6 @@ export function getSourcedLocation({
   return null
 }
 
-const stripQuotes = (path: string): string => {
-  const first = path[0]
-  const last = path[path.length - 1]
-
-  if (first === last && [`"`, `'`].includes(first)) {
-    return path.slice(1, -1)
-  }
-
-  return path
-}
-
 /**
  * Tries to parse the given path and returns a URI if possible.
  * - Filters out dynamic sources
@@ -131,27 +136,20 @@ function getSourcedUri({
   rootPaths: string[]
   word: string
 }): string | null {
-  let unquotedPath = stripQuotes(word)
-
-  if (unquotedPath.includes('$')) {
-    // NOTE: we don't support dynamic sourcing
-    return null
+  if (word.startsWith('~')) {
+    word = untildify(word)
   }
 
-  if (unquotedPath.startsWith('~')) {
-    unquotedPath = untildify(unquotedPath)
-  }
-
-  if (unquotedPath.startsWith('/')) {
-    if (fs.existsSync(unquotedPath)) {
-      return `file://${unquotedPath}`
+  if (word.startsWith('/')) {
+    if (fs.existsSync(word)) {
+      return `file://${word}`
     }
     return null
   }
 
   // resolve  relative path
   for (const rootPath of rootPaths) {
-    const potentialPath = path.join(rootPath.replace('file://', ''), unquotedPath)
+    const potentialPath = path.join(rootPath.replace('file://', ''), word)
 
     // check if path is a file
     if (fs.existsSync(potentialPath)) {
