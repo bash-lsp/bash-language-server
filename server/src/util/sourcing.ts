@@ -9,11 +9,16 @@ import * as TreeSitterUtil from './tree-sitter'
 
 const SOURCING_COMMANDS = ['source', '.']
 
+export type SourceCommand = {
+  range: LSP.Range
+  uri: string | null // resolved URIs
+  error: string | null
+}
+
 /**
- * Analysis the given file content and returns a set of URIs that are
- * sourced. Note that the URIs are resolved.
+ * Analysis the given tree for source commands.
  */
-export function getSourcedUris({
+export function getSourceCommands({
   fileUri,
   rootPath,
   tree,
@@ -21,97 +26,72 @@ export function getSourcedUris({
   fileUri: string
   rootPath: string | null
   tree: Parser.Tree
-}): Set<string> {
-  const uris: Set<string> = new Set([])
+}): SourceCommand[] {
+  const sourceCommands: SourceCommand[] = []
+
   const rootPaths = [path.dirname(fileUri), rootPath].filter(Boolean) as string[]
 
-  // find all source commands in the tree
   TreeSitterUtil.forEach(tree.rootNode, (node) => {
-    if (node.type === 'command') {
-      const [commandNameNode, argumentNode] = node.namedChildren
-      if (
-        commandNameNode.type === 'command_name' &&
-        SOURCING_COMMANDS.includes(commandNameNode?.text)
-      ) {
-        let word = null
-        if (argumentNode.type === 'word') {
-          word = argumentNode.text
-        } else if (argumentNode.type === 'string') {
-          if (argumentNode.namedChildren.length === 0) {
-            word = argumentNode.text.slice(1, -1)
-          } else if (
-            argumentNode.namedChildren.every((n) => n.type === 'simple_expansion')
-          ) {
-            // not supported
-          } else {
-            logger.warn(
-              'Sourcing: unhandled argumentNode=string case',
-              argumentNode.namedChildren.map((c) => ({ type: c.type, text: c.text })),
-            )
-          }
-        } else {
-          logger.warn('Sourcing: unhandled argumentNode case', argumentNode.type)
-        }
+    const sourcedPathInfo = getSourcedPathInfoFromNode({ node })
 
-        if (word) {
-          const sourcedUri = getSourcedUri({ rootPaths, word })
-          if (sourcedUri) {
-            uris.add(sourcedUri)
-          }
-        }
-      }
+    if (sourcedPathInfo) {
+      const { sourcedPath, parseError } = sourcedPathInfo
+      const uri = sourcedPath ? resolveSourcedUri({ rootPaths, sourcedPath }) : null
+
+      sourceCommands.push({
+        range: TreeSitterUtil.range(node),
+        uri,
+        error: uri ? null : parseError || 'failed to resolve path',
+      })
     }
 
     return true
   })
 
-  return uris
+  return sourceCommands
 }
 
-/**
- * Investigates if the given position is a path to a sourced file and maps it
- * to a location. Useful for jump to definition.
- *
- * TODO: we could likely store the position as part of the getSourcedUris and
- * get rid of this function.
- *
- * @returns an optional location
- */
-export function getSourcedLocation({
-  position,
-  rootPath,
-  tree,
-  uri,
-  word,
+function getSourcedPathInfoFromNode({
+  node,
 }: {
-  position: { line: number; character: number }
-  rootPath: string | null
-  tree: Parser.Tree
-  uri: string
-  word: string
-}): LSP.Location | null {
-  // NOTE: when a word is a file path to a sourced file, we return a location to
-  // that file.
-  if (tree.rootNode) {
-    const node = tree.rootNode.descendantForPosition({
-      row: position.line,
-      column: position.character,
-    })
+  node: Parser.SyntaxNode
+}): null | { sourcedPath?: string; parseError?: string } {
+  if (node.type === 'command') {
+    const [commandNameNode, argumentNode] = node.namedChildren
+    if (
+      commandNameNode.type === 'command_name' &&
+      SOURCING_COMMANDS.includes(commandNameNode.text)
+    ) {
+      if (argumentNode.type === 'word') {
+        return {
+          sourcedPath: argumentNode.text,
+        }
+      }
 
-    if (!node || node.text.trim() !== word) {
-      throw new Error('Implementation error: word was not found at the given position')
-    }
+      if (argumentNode.type === 'string') {
+        if (argumentNode.namedChildren.length === 0) {
+          return {
+            sourcedPath: argumentNode.text.slice(1, -1),
+          }
+        } else if (
+          argumentNode.namedChildren.every((n) => n.type === 'simple_expansion')
+        ) {
+          return {
+            parseError: 'expansion not supported',
+          }
+        } else {
+          logger.warn(
+            'Sourcing: unhandled argumentNode=string case',
+            argumentNode.namedChildren.map((c) => ({ type: c.type, text: c.text })),
+          )
+        }
+      } else {
+        logger.warn(`Sourcing: unhandled argumentNode=${argumentNode.type} case`)
+      }
 
-    const isSourced = node.previousNamedSibling
-      ? SOURCING_COMMANDS.includes(node.previousNamedSibling.text.trim())
-      : false
-
-    const rootPaths = [path.dirname(uri), rootPath].filter(Boolean) as string[]
-
-    const sourcedUri = isSourced ? getSourcedUri({ word, rootPaths }) : null
-
-    if (sourcedUri) {
-      return LSP.Location.create(sourcedUri, LSP.Range.create(0, 0, 0, 0))
+      return {
+        parseError: `unhandled case node type "${argumentNode.type}"`,
+      }
     }
   }
 
@@ -119,8 +99,7 @@ export function getSourcedLocation({
 }
 
 /**
- * Tries to parse the given path and returns a URI if possible.
- * - Filters out dynamic sources
+ * Tries to resolve the given sourced path and returns a URI if possible.
  * - Converts a relative paths to absolute paths
  * - Converts a tilde path to an absolute path
  * - Resolves the path
@@ -129,27 +108,27 @@ export function getSourcedLocation({
  * "If filename does not contain a slash, file names in PATH are used to find
  *  the directory containing filename." (see https://ss64.com/osx/source.html)
  */
-function getSourcedUri({
+function resolveSourcedUri({
   rootPaths,
-  word,
+  sourcedPath,
 }: {
   rootPaths: string[]
-  word: string
+  sourcedPath: string
 }): string | null {
-  if (word.startsWith('~')) {
-    word = untildify(word)
+  if (sourcedPath.startsWith('~')) {
+    sourcedPath = untildify(sourcedPath)
   }
 
-  if (word.startsWith('/')) {
-    if (fs.existsSync(word)) {
-      return `file://${word}`
+  if (sourcedPath.startsWith('/')) {
+    if (fs.existsSync(sourcedPath)) {
+      return `file://${sourcedPath}`
     }
     return null
   }
 
   // resolve  relative path
   for (const rootPath of rootPaths) {
-    const potentialPath = path.join(rootPath.replace('file://', ''), word)
+    const potentialPath = path.join(rootPath.replace('file://', ''), sourcedPath)
 
     // check if path is a file
     if (fs.existsSync(potentialPath)) {

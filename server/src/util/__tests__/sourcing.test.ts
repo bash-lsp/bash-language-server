@@ -3,7 +3,7 @@ import * as os from 'os'
 import * as Parser from 'web-tree-sitter'
 
 import { initializeParser } from '../../parser'
-import { getSourcedUris } from '../sourcing'
+import { getSourceCommands } from '../sourcing'
 
 const fileDirectory = '/Users/bash'
 const fileUri = `${fileDirectory}/file.sh`
@@ -21,12 +21,12 @@ jest.spyOn(os, 'homedir').mockImplementation(() => '/Users/bash-user')
 describe('getSourcedUris', () => {
   it('returns an empty set if no files were sourced', () => {
     const fileContent = ''
-    const result = getSourcedUris({
+    const sourceCommands = getSourceCommands({
       fileUri,
       rootPath: null,
       tree: parser.parse(fileContent),
     })
-    expect(result).toEqual(new Set([]))
+    expect(sourceCommands).toEqual([])
   })
 
   it('returns a set of sourced files', () => {
@@ -72,15 +72,26 @@ describe('getSourcedUris', () => {
         fi
       done
 
+      loadlib () {
+        source "$1.sh"
+      }
+
+      loadlib "issue101"
     `
 
-    const result = getSourcedUris({
+    const sourceCommands = getSourceCommands({
       fileUri,
       rootPath: null,
       tree: parser.parse(fileContent),
     })
 
-    expect(result).toMatchInlineSnapshot(`
+    const sourcedUris = new Set(
+      sourceCommands
+        .map((sourceCommand) => sourceCommand.uri)
+        .filter((uri) => uri !== null),
+    )
+
+    expect(sourcedUris).toMatchInlineSnapshot(`
       Set {
         "file:///Users/bash/file-in-path.sh",
         "file:///bin/extension.inc",
@@ -90,5 +101,7 @@ describe('getSourcedUris', () => {
         "file:///Users/bash/issue206.sh",
       }
     `)
+
+    expect(sourceCommands).toMatchSnapshot()
   })
 })
