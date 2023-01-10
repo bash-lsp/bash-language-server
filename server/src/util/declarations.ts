@@ -46,6 +46,8 @@ export function getGlobalDeclarations({
           TreeSitterUtil.range(node),
           'Failed to parse',
           LSP.DiagnosticSeverity.Error,
+          undefined,
+          'bash-language-server',
         ),
       )
       return

@@ -68,6 +68,12 @@ function getSourcedPathInfoFromNode({
         }
       }
 
+      if (argumentNode.type === 'simple_expansion') {
+        return {
+          parseError: 'expansion not supported',
+        }
+      }
+
       if (argumentNode.type === 'string') {
         if (argumentNode.namedChildren.length === 0) {
           return {

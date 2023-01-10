@@ -96,17 +96,26 @@ export default class Analyzer {
       tree,
     }
 
-    sourceCommands
-      .filter((sourceCommand) => sourceCommand.error)
-      .forEach((sourceCommand) => {
-        diagnostics.push(
-          LSP.Diagnostic.create(
-            sourceCommand.range,
-            `Source command could not be analyzed: ${sourceCommand.error}.`,
-            LSP.DiagnosticSeverity.Information,
-          ),
-        )
-      })
+    if (!this.includeAllWorkspaceSymbols) {
+      sourceCommands
+        .filter((sourceCommand) => sourceCommand.error)
+        .forEach((sourceCommand) => {
+          diagnostics.push(
+            LSP.Diagnostic.create(
+              sourceCommand.range,
+              [
+                `Source command could not be analyzed: ${sourceCommand.error}.\n`,
+                'Note that enabling the configuration flag "includeAllWorkspaceSymbols"',
+                'would include all symbols in the workspace regardless of source commands.',
+                'But be aware that this will lead to false positive suggestions.',
+              ].join('\n'),
+              LSP.DiagnosticSeverity.Information,
+              undefined,
+              'bash-language-server',
+            ),
+          )
+        })
+    }
 
     function findMissingNodes(node: Parser.SyntaxNode) {
       if (node.isMissing()) {
@@ -115,6 +124,8 @@ export default class Analyzer {
             TreeSitterUtil.range(node),
             `Syntax error: expected "${node.type}" somewhere in the file`,
             LSP.DiagnosticSeverity.Warning,
+            undefined,
+            'bash-language-server',
           ),
         )
       } else if (node.hasError()) {
