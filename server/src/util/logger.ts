@@ -4,7 +4,7 @@ export const LOG_LEVEL_ENV_VAR = 'BASH_IDE_LOG_LEVEL'
 export const LOG_LEVELS = ['debug', 'info', 'warning', 'error'] as const
 export const DEFAULT_LOG_LEVEL: LogLevel = 'info'
 
-type LogLevel = typeof LOG_LEVELS[number]
+type LogLevel = (typeof LOG_LEVELS)[number]
 
 const LOG_LEVELS_TO_MESSAGE_TYPES: {
   [logLevel in LogLevel]: LSP.MessageType
