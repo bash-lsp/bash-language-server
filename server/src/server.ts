@@ -364,6 +364,9 @@ export default class BashServer {
     symbol: LSP.SymbolInformation
     currentUri: string
   }): LSP.MarkupContent {
+    logger.debug(
+      `getDocumentationForSymbol: symbol=${symbol.name} uri=${symbol.location.uri}`,
+    )
     const symbolUri = symbol.location.uri
     const symbolStartLine = symbol.location.range.start.line
 
@@ -665,6 +668,9 @@ export default class BashServer {
       Builtins.isBuiltin(word) ||
       (this.executables.isExecutableOnPATH(word) && symbolsMatchingWord.length == 0)
     ) {
+      logger.debug(
+        `onHover: getting shell documentation for reserved word or builtin or executable`,
+      )
       const shellDocumentation = await getShellDocumentation({ word })
       if (shellDocumentation) {
         return { contents: getMarkdownContent(shellDocumentation, 'man') }
@@ -675,7 +681,11 @@ export default class BashServer {
         currentUri,
       })
         // do not return hover referencing for the current line
-        .filter((symbol) => symbol.location.range.start.line !== params.position.line)
+        .filter(
+          (symbol) =>
+            symbol.location.uri !== currentUri ||
+            symbol.location.range.start.line !== params.position.line,
+        )
         .map((symbol: LSP.SymbolInformation) =>
           this.getDocumentationForSymbol({ currentUri, symbol }),
         )
