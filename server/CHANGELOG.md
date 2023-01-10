@@ -1,5 +1,14 @@
 # Bash Language Server
 
+## 4.4.0
+
+- Improve source command parser and include diagnostics when parser fails https://github.com/bash-lsp/bash-language-server/pull/673
+- Fix `onHover` bug where sourced symbols on the same line as a reference would hide documentation https://github.com/bash-lsp/bash-language-server/pull/673
+
+## 4.3.2
+
+- Improved CLI output https://github.com/bash-lsp/bash-language-server/pull/672
+
 ## 4.3.0
 
 - Add centralized and configurable logger that can be controlled using the `BASH_IDE_LOG_LEVEL` environment variable and workspace configuration. https://github.com/bash-lsp/bash-language-server/pull/669
