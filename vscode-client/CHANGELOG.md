@@ -1,5 +1,10 @@
 # Bash IDE
 
+## 1.27.0
+
+- Snippets are now included! https://github.com/bash-lsp/bash-language-server/pull/664
+- Upgrade language server to 4.4.0 which improves source command parsing and includes diagnostics when we fail to analyze source commands. Logging is also improved and configurable.
+
 ## 1.26.0
 
 - Upgrade language server to 4.2.5 fixing a critical performance issue for workspaces with many files.
