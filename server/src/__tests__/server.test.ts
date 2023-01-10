@@ -14,11 +14,16 @@ import {
 import { getMockConnection } from '../../../testing/mocks'
 import LspServer from '../server'
 import { CompletionItemDataType } from '../types'
+import { Logger } from '../util/logger'
 
 // Skip ShellCheck throttle delay in test cases
 jest.spyOn(global, 'setTimeout').mockImplementation((fn) => {
   fn()
   return 0 as any
+})
+
+jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {
+  // noop
 })
 
 async function initializeServer(
@@ -480,6 +485,7 @@ describe('server', () => {
     )
 
     if (getOptionsResult.status !== 0) {
+      // eslint-disable-next-line no-console
       console.warn('Skipping onCompletion test as get-options.sh failed')
       return
     }

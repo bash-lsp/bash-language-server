@@ -11,9 +11,13 @@ import {
 
 let client: LanguageClient
 
+export const CONFIGURATION_SECTION = 'bashIde' // matching the package.json configuration section
+
 export async function activate(context: ExtensionContext) {
+  const config = workspace.getConfiguration(CONFIGURATION_SECTION)
   const env: any = {
     ...process.env,
+    BASH_IDE_LOG_LEVEL: config.get('logLevel', ''),
   }
 
   const serverExecutable = {
@@ -52,7 +56,7 @@ export async function activate(context: ExtensionContext) {
       },
     ],
     synchronize: {
-      configurationSection: 'bashIde',
+      configurationSection: CONFIGURATION_SECTION,
       // Notify the server about file changes to '.clientrc files contain in the workspace
       fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
     },

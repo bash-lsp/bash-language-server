@@ -1,10 +1,9 @@
+// TODO: combine this with server/bin as this is only used for that. Rename to bin.ts
 'use strict'
 
 import * as LSP from 'vscode-languageserver/node'
 
 import BashServer from './server'
-
-const pkg = require('../package')
 
 export function listen() {
   // Create a connection for the server.
@@ -16,12 +15,8 @@ export function listen() {
 
   connection.onInitialize(
     async (params: LSP.InitializeParams): Promise<LSP.InitializeResult> => {
-      connection.console.log(`Initialized server v. ${pkg.version} for ${params.rootUri}`)
-
       const server = await BashServer.initialize(connection, params)
-
       server.register(connection)
-
       return {
         capabilities: server.capabilities(),
       }
