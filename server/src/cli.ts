@@ -7,14 +7,25 @@ import { DEFAULT_LOG_LEVEL, LOG_LEVEL_ENV_VAR } from './util/logger'
 
 const packageJson = require('../package')
 
+const PADDING = 38
+
+const commandsAndFlags = {
+  start: 'Start listening on stdin/stdout',
+  '-h, --help': 'Display this help and exit',
+  '-v, --version': 'Print the version and exit',
+} as const
+
 function printHelp() {
   console.log(`Usage:
-  bash-language-server start           Start listening on stdin/stdout
-  bash-language-server -h, --help      Display this help and exit
-  bash-language-server -v, --version   Print the version and exit
+${Object.entries(commandsAndFlags)
+  .map(
+    ([k, description]) =>
+      `  ${`bash-language-server ${k}`.padEnd(PADDING)} ${description}`,
+  )
+  .join('\n')}
 
 Environment variables:
-  ${LOG_LEVEL_ENV_VAR.padEnd(36)} Set the log level (default: ${DEFAULT_LOG_LEVEL})
+  ${LOG_LEVEL_ENV_VAR.padEnd(PADDING)} Set the log level (default: ${DEFAULT_LOG_LEVEL})
 
 Further documentation: ${packageJson.repository.url}`)
 }
