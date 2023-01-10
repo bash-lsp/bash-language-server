@@ -3,11 +3,11 @@
   "description": "A language server for Bash",
   "author": "Mads Hartmann",
   "license": "MIT",
-  "version": "4.3.0",
+  "version": "4.3.2",
   "main": "./out/server.js",
   "typings": "./out/server.d.ts",
   "bin": {
-    "bash-language-server": "./bin/main.js"
+    "bash-language-server": "./out/cli.js"
   },
   "repository": {
     "type": "git",
