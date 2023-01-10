@@ -22,7 +22,6 @@ describe('getSourcedUris', () => {
   it('returns an empty set if no files were sourced', () => {
     const fileContent = ''
     const result = getSourcedUris({
-      fileContent,
       fileUri,
       rootPath: null,
       tree: parser.parse(fileContent),
@@ -44,17 +43,19 @@ describe('getSourcedUris', () => {
 
       # source ...
 
-      source "./issue206.sh" # quoted file in fixtures folder
-
       source "$LIBPATH" # dynamic imports not supported
 
       # conditional is currently not supported
       if [[ -z $__COMPLETION_LIB_LOADED ]]; then source "$LIBPATH" ; fi
 
+      . "$BASH_IT/themes/$BASH_IT_THEME/$BASH_IT_THEME.theme.bash"
+
       show ()
       {
         about 'Shows SVN proxy settings'
         group 'proxy'
+
+        source "./issue206.sh" # quoted file in fixtures folder
 
         echo "SVN Proxy Settings"
         echo "=================="
@@ -74,7 +75,6 @@ describe('getSourcedUris', () => {
     `
 
     const result = getSourcedUris({
-      fileContent,
       fileUri,
       rootPath: null,
       tree: parser.parse(fileContent),
