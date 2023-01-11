@@ -1,0 +1,42 @@
+name: 🐛 Bug report
+description: Create a report to help us improve
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue.
+
+        Please fill in as much of the following form as you're able.
+  - type: input
+    attributes:
+      label: Code editor
+      description: |
+        E.g. Eclipse, Emacs, Vim, Visual Studio Code, etc.
+  - type: input
+    attributes:
+      label: Platform
+      description: |
+        E.g. Unix, Windows, OS X, ?
+  - type: input
+    attributes:
+      label: Version
+      description: Output of `bash-language-server -v` or the version of the extension/client you are using.
+  - type: textarea
+    attributes:
+      label: What steps will reproduce the bug?
+      description: Enter details about your bug, preferably a simple code snippet.
+  - type: textarea
+    attributes:
+      label: How often does it reproduce? Is there a required condition?
+  - type: textarea
+    attributes:
+      label: What is the expected behavior?
+  - type: textarea
+    attributes:
+      label: What do you see instead?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: Tell us anything else you think we should know. An output from the language server logs would be great.
