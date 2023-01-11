@@ -1,6 +1,6 @@
 {
     "shebang": {
-        "description": "[sh]hebang",
+        "description": "[shhebang]",
         "prefix": "shebang",
         "body": [
             "#!/usr/bin/env ${1|bash,sh|}"
@@ -16,7 +16,7 @@
         ]
     },
     "if-else": {
-        "description": "[if] [e]lse",
+        "description": "[if] [else]",
         "prefix": "if-else",
         "body": [
             "if ${1:command}; then",
@@ -27,7 +27,7 @@
         ]
     },
     "while": {
-        "description": "[wh]ile",
+        "description": "[while]",
         "prefix": "while",
         "body": [
             "while ${1:command}; do",
@@ -36,7 +36,7 @@
         ]
     },
     "until": {
-        "description": "[un]til",
+        "description": "[until]",
         "prefix": "until",
         "body": [
             "until ${1:command}; do",
@@ -45,7 +45,7 @@
         ]
     },
     "for": {
-        "description": "[fo]r",
+        "description": "[for]",
         "prefix": "for",
         "body": [
             "for ${1:variable} in ${2:list}; do",
@@ -54,7 +54,7 @@
         ]
     },
     "function": {
-        "description": "[fu]nction",
+        "description": "[function]",
         "prefix": "function",
         "body": [
             "${1:function_name}() {",
@@ -63,7 +63,7 @@
         ]
     },
     "main": {
-        "description": "[ma]in",
+        "description": "[main]",
         "prefix": "main",
         "body": [
             "main() {",
@@ -205,7 +205,7 @@
         ]
     },
     "stream": {
-        "description": "[de]vice name",
+        "description": "[dev]ice name",
         "prefix": "dev",
         "body": [
             "/dev/${1|null,stdin,stdout,stderr|}"
