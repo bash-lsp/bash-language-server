@@ -1,6 +1,6 @@
 {
     "shebang": {
-        "description": "shhebang",
+        "description": "shebang",
         "prefix": "shebang",
         "body": [
             "#!/usr/bin/env ${1|bash,sh|}"
@@ -16,7 +16,7 @@
         ]
     },
     "if-else": {
-        "description": "[if] [else]",
+        "description": "if else",
         "prefix": "if-else",
         "body": [
             "if ${1:command}; then",
