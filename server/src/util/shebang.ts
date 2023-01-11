@@ -2,7 +2,7 @@ const SHEBANG_REGEXP = /^#!(.*)/
 const SHELL_REGEXP = /bin[/](?:env )?(\w+)/
 
 const BASH_DIALECTS = ['sh', 'bash', 'dash', 'ksh'] as const
-type SupportedBashDialect = typeof BASH_DIALECTS[number]
+type SupportedBashDialect = (typeof BASH_DIALECTS)[number]
 
 export function getShebang(fileContent: string): string | null {
   const match = SHEBANG_REGEXP.exec(fileContent)
