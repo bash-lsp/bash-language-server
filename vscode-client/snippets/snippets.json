@@ -1,13 +1,13 @@
 {
     "shebang": {
-        "description": "[sh]hebang",
+        "description": "shebang",
         "prefix": "shebang",
         "body": [
             "#!/usr/bin/env ${1|bash,sh|}"
         ]
     },
     "if": {
-        "description": "[if]",
+        "description": "if",
         "prefix": "if",
         "body": [
             "if ${1:command}; then",
@@ -16,7 +16,7 @@
         ]
     },
     "if-else": {
-        "description": "[if] [e]lse",
+        "description": "if else",
         "prefix": "if-else",
         "body": [
             "if ${1:command}; then",
@@ -27,7 +27,7 @@
         ]
     },
     "while": {
-        "description": "[wh]ile",
+        "description": "while",
         "prefix": "while",
         "body": [
             "while ${1:command}; do",
@@ -36,7 +36,7 @@
         ]
     },
     "until": {
-        "description": "[un]til",
+        "description": "until",
         "prefix": "until",
         "body": [
             "until ${1:command}; do",
@@ -45,7 +45,7 @@
         ]
     },
     "for": {
-        "description": "[fo]r",
+        "description": "for",
         "prefix": "for",
         "body": [
             "for ${1:variable} in ${2:list}; do",
@@ -54,7 +54,7 @@
         ]
     },
     "function": {
-        "description": "[fu]nction",
+        "description": "function",
         "prefix": "function",
         "body": [
             "${1:function_name}() {",
@@ -63,7 +63,7 @@
         ]
     },
     "main": {
-        "description": "[ma]in",
+        "description": "main",
         "prefix": "main",
         "body": [
             "main() {",
@@ -135,91 +135,91 @@
         ]
     },
     "echo": {
-        "description": "[echo]",
+        "description": "echo",
         "prefix": "echo",
         "body": [
             "echo \"${1:message}\""
         ]
     },
     "printf": {
-        "description": "[printf]",
+        "description": "printf",
         "prefix": "printf",
         "body": [
             "printf '%s' \"${1:message}\""
         ]
     },
     "source": {
-        "description": "[source]",
+        "description": "source",
         "prefix": "source",
         "body": [
             "source \"${1:path/to/file}\""
         ]
     },
     "alias": {
-        "description": "[alias]",
+        "description": "alias",
         "prefix": "alias",
         "body": [
             "alias ${1:name}=${2:value}"
         ]
     },
     "cd": {
-        "description": "[cd]",
+        "description": "cd",
         "prefix": "cd",
         "body": [
             "cd \"${1:path/to/directory}\""
         ]
     },
     "getopts": {
-        "description": "[getopts]",
+        "description": "getopts",
         "prefix": "getopts",
         "body": [
             "getopts ${1:optstring} ${2:name}"
         ]
     },
     "jobs": {
-        "description": "[jobs]",
+        "description": "jobs",
         "prefix": "jobs",
         "body": [
             "jobs -x ${1:command}"
         ]
     },
     "kill": {
-        "description": "[kill]",
+        "description": "kill",
         "prefix": "kill",
         "body": [
             "kill ${1|-l,-L|}"
         ]
     },
     "let": {
-        "description": "[let]",
+        "description": "let",
         "prefix": "let",
         "body": [
             "let ${1:argument}"
         ]
     },
     "test": {
-        "description": "[test]",
+        "description": "test",
         "prefix": "test",
         "body": [
             "[[ ${1:argument1} ${2|-ef,-nt,-ot,==,=,!=,=~,<,>,-eq,-ne,-lt,-le,-gt,-ge|} ${3:argument2} ]]"
         ]
     },
     "stream": {
-        "description": "[de]vice name",
+        "description": "[dev]ice name",
         "prefix": "dev",
         "body": [
             "/dev/${1|null,stdin,stdout,stderr|}"
         ]
     },
     "sed:filter-lines": {
-        "description": "[sed:filter-lines]",
+        "description": "sed:filter-lines",
         "prefix": "sed:filter-lines",
         "body": [
             "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '/${3:pattern}/' ${4:path/to/file}"
         ]
     },
     "awk:filter-lines": {
-        "description": "[awk:filter-lines]",
+        "description": "awk:filter-lines",
         "prefix": "awk:filter-lines",
         "body": [
             "awk '/${1:pattern}/' ${2:path/to/file}"
