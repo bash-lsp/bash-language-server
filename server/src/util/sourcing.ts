@@ -4,7 +4,6 @@ import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
 
 import { untildify } from './fs'
-import { logger } from './logger'
 import * as TreeSitterUtil from './tree-sitter'
 
 const SOURCING_COMMANDS = ['source', '.']
