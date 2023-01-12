@@ -20,7 +20,7 @@ Array [
     "error": null,
     "range": Object {
       "end": Object {
-        "character": 31,
+        "character": 33,
         "line": 3,
       },
       "start": Object {
@@ -73,7 +73,7 @@ Array [
     "uri": "file:///Users/bash-user/myscript",
   },
   Object {
-    "error": "expansion not supported",
+    "error": "non-constant source not supported",
     "range": Object {
       "end": Object {
         "character": 23,
@@ -87,7 +87,7 @@ Array [
     "uri": null,
   },
   Object {
-    "error": "expansion not supported",
+    "error": "non-constant source not supported",
     "range": Object {
       "end": Object {
         "character": 66,
@@ -101,7 +101,7 @@ Array [
     "uri": null,
   },
   Object {
-    "error": "expansion not supported",
+    "error": "non-constant source not supported",
     "range": Object {
       "end": Object {
         "character": 66,
@@ -129,15 +129,57 @@ Array [
     "uri": "file:///Users/bash/issue206.sh",
   },
   Object {
-    "error": "expansion not supported",
+    "error": "non-constant source not supported",
     "range": Object {
       "end": Object {
         "character": 22,
-        "line": 43,
+        "line": 47,
       },
       "start": Object {
         "character": 8,
-        "line": 43,
+        "line": 47,
+      },
+    },
+    "uri": null,
+  },
+  Object {
+    "error": "non-constant source not supported",
+    "range": Object {
+      "end": Object {
+        "character": 39,
+        "line": 59,
+      },
+      "start": Object {
+        "character": 8,
+        "line": 59,
+      },
+    },
+    "uri": null,
+  },
+  Object {
+    "error": "non-constant source not supported",
+    "range": Object {
+      "end": Object {
+        "character": 42,
+        "line": 62,
+      },
+      "start": Object {
+        "character": 8,
+        "line": 62,
+      },
+    },
+    "uri": null,
+  },
+  Object {
+    "error": "non-constant source not supported",
+    "range": Object {
+      "end": Object {
+        "character": 67,
+        "line": 89,
+      },
+      "start": Object {
+        "character": 10,
+        "line": 89,
       },
     },
     "uri": null,
