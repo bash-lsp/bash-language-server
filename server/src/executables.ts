@@ -1,12 +1,8 @@
 import * as fs from 'fs'
 import { basename, join } from 'path'
-import { promisify } from 'util'
 
 import * as ArrayUtil from './util/array'
 import * as FsUtil from './util/fs'
-
-const lstatAsync = promisify(fs.lstat)
-const readdirAsync = promisify(fs.readdir)
 
 /**
  * Provides information based on the programs on your PATH
@@ -52,16 +48,16 @@ async function findExecutablesInPath(path: string): Promise<string[]> {
   path = FsUtil.untildify(path)
 
   try {
-    const pathStats = await lstatAsync(path)
+    const pathStats = await fs.promises.lstat(path)
 
     if (pathStats.isDirectory()) {
-      const childrenPaths = await readdirAsync(path)
+      const childrenPaths = await fs.promises.readdir(path)
 
       const files = []
 
       for (const childrenPath of childrenPaths) {
         try {
-          const stats = await lstatAsync(join(path, childrenPath))
+          const stats = await fs.promises.lstat(join(path, childrenPath))
           if (isExecutableFile(stats)) {
             files.push(basename(childrenPath))
           }
