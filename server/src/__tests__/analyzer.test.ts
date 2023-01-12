@@ -112,7 +112,7 @@ describe('analyze', () => {
     expect(diagnostics).toMatchInlineSnapshot(`
       Array [
         Object {
-          "message": "Source command could not be analyzed: expansion not supported.
+          "message": "Source command could not be analyzed: non-constant source not supported.
 
       Note that enabling the configuration flag \\"includeAllWorkspaceSymbols\\"
       would include all symbols in the workspace regardless of source commands.

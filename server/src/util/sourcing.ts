@@ -4,7 +4,6 @@ import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
 
 import { untildify } from './fs'
-import { logger } from './logger'
 import * as TreeSitterUtil from './tree-sitter'
 
 const SOURCING_COMMANDS = ['source', '.']
@@ -68,35 +67,18 @@ function getSourcedPathInfoFromNode({
         }
       }
 
-      if (argumentNode.type === 'simple_expansion') {
-        return {
-          parseError: 'expansion not supported',
-        }
-      }
-
-      if (argumentNode.type === 'string') {
+      if (argumentNode.type === 'string' || argumentNode.type === 'raw_string') {
         if (argumentNode.namedChildren.length === 0) {
           return {
             sourcedPath: argumentNode.text.slice(1, -1),
           }
-        } else if (
-          argumentNode.namedChildren.every((n) => n.type === 'simple_expansion')
-        ) {
-          return {
-            parseError: 'expansion not supported',
-          }
-        } else {
-          logger.warn(
-            'Sourcing: unhandled argumentNode=string case',
-            argumentNode.namedChildren.map((c) => ({ type: c.type, text: c.text })),
-          )
         }
-      } else {
-        logger.warn(`Sourcing: unhandled argumentNode=${argumentNode.type} case`)
       }
 
+      // TODO: we could try to parse any ShellCheck "source "directive
+      // # shellcheck source=src/examples/config.sh
       return {
-        parseError: `unhandled case node type "${argumentNode.type}"`,
+        parseError: `non-constant source not supported`,
       }
     }
   }

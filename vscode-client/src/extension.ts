@@ -57,13 +57,12 @@ export async function activate(context: ExtensionContext) {
     ],
     synchronize: {
       configurationSection: CONFIGURATION_SECTION,
-      // Notify the server about file changes to '.clientrc files contain in the workspace
-      fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
     },
   }
 
   const client = new LanguageClient('Bash IDE', 'Bash IDE', serverOptions, clientOptions)
   client.registerProposedFeatures()
+
   try {
     await client.start()
   } catch (error) {

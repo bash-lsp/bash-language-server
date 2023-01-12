@@ -33,7 +33,7 @@ describe('getSourcedUris', () => {
     const fileContent = `
       source file-in-path.sh # does not contain a slash (i.e. is maybe somewhere on the path)
 
-      source /bin/extension.inc # absolute path
+      source '/bin/extension.inc' # absolute path
 
       source ./x a b c # some arguments
 
@@ -72,11 +72,56 @@ describe('getSourcedUris', () => {
         fi
       done
 
+      # ======================================
+      # example of sourcing through a function
+      # ======================================
+
       loadlib () {
         source "$1.sh"
       }
 
       loadlib "issue101"
+
+      # ======================================
+      # Example of dynamic sourcing
+      # ======================================
+
+      SCRIPT_DIR=$( cd "$( dirname "\${BASH_SOURCE[0]}" )" && pwd )
+      case "$ENV" in
+      staging)
+        source "$SCRIPT_DIR"/staging.sh
+        ;;
+      production)
+        source "$SCRIPT_DIR"/production.sh
+        ;;
+      *)
+        echo "Unknown environment please use 'staging' or 'production'"
+        exit 1
+        ;;
+      esac
+
+      # ======================================
+      # Example of sourcing through a loop
+      # ======================================
+
+      # Only set $BASH_IT if it's not already set
+      if [ -z "$BASH_IT" ];
+      then
+          # Setting $BASH to maintain backwards compatibility
+          # TODO: warn users that they should upgrade their .bash_profile
+          export BASH_IT=$BASH
+          export BASH="$(bash -c 'echo $BASH')"
+      fi
+
+      # Load custom aliases, completion, plugins
+      for file_type in "aliases" "completion" "plugins"
+      do
+        if [ -e "\${BASH_IT}/\${file_type}/custom.\${file_type}.bash" ]
+        then
+          # shellcheck disable=SC1090
+          source "\${BASH_IT}/\${file_type}/custom.\${file_type}.bash"
+        fi
+      done
     `
 
     const sourceCommands = getSourceCommands({

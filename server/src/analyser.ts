@@ -3,7 +3,7 @@ import * as FuzzySearch from 'fuzzy-search'
 import fetch from 'node-fetch'
 import * as URI from 'urijs'
 import * as url from 'url'
-import { isDeepStrictEqual, promisify } from 'util'
+import { isDeepStrictEqual } from 'util'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as Parser from 'web-tree-sitter'
@@ -21,8 +21,6 @@ import { isPositionIncludedInRange } from './util/lsp'
 import { analyzeShebang } from './util/shebang'
 import * as sourcing from './util/sourcing'
 import * as TreeSitterUtil from './util/tree-sitter'
-
-const readFileAsync = promisify(fs.readFile)
 
 type AnalyzedDocument = {
   document: TextDocument
@@ -194,7 +192,7 @@ export default class Analyzer {
       const uri = url.pathToFileURL(filePath).href
 
       try {
-        const fileContent = await readFileAsync(filePath, 'utf8')
+        const fileContent = await fs.promises.readFile(filePath, 'utf8')
         const { shebang, shellDialect } = analyzeShebang(fileContent)
         if (shebang && !shellDialect) {
           logger.info(
