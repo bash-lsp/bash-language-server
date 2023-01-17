@@ -396,9 +396,8 @@ export default class Analyzer {
       return {}
     }
 
-    const cmd = analyzedDocument.document
-      .getText()
-      .slice(interestingNode.startIndex, interestingNode.endIndex)
+    const cmd = interestingNode.text
+
     type ExplainshellResponse = {
       matches?: Array<{ helpHTML: string; start: number; end: number }>
     }
