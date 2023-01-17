@@ -14,6 +14,7 @@ import Executables from './executables'
 import { initializeParser } from './parser'
 import * as ReservedWords from './reserved-words'
 import { Linter } from './shellcheck'
+import { SNIPPETS } from './snippets'
 import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
 import { logger, setLogConnection, setLogLevel } from './util/logger'
@@ -541,6 +542,7 @@ export default class BashServer {
       ...programCompletions,
       ...builtinsCompletions,
       ...optionsCompletions,
+      ...SNIPPETS,
     ]
 
     if (word) {
