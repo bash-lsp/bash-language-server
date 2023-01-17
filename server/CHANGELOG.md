@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.5.0
+
+- Include 30 snippets for language constructs (e.g. `if`), builtins (e.g. `test`), expansions (e.g. `[##]`), and external programs (e.g. `sed`) https://github.com/bash-lsp/bash-language-server/pull/683
+
 ## 4.4.0
 
 - Improve source command parser and include diagnostics when parser fails https://github.com/bash-lsp/bash-language-server/pull/673
