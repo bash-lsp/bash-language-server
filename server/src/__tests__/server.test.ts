@@ -484,7 +484,6 @@ describe('server', () => {
       expect.arrayContaining([
         {
           data: {
-            name: 'rm',
             type: CompletionItemDataType.Executable,
           },
           kind: expect.any(Number),
@@ -634,7 +633,6 @@ describe('server', () => {
       Array [
         Object {
           "data": Object {
-            "name": "BLUE",
             "type": 3,
           },
           "documentation": Object {
@@ -666,7 +664,6 @@ describe('server', () => {
       Array [
         Object {
           "data": Object {
-            "name": "add_a_user",
             "type": 3,
           },
           "documentation": Object {
@@ -708,7 +705,6 @@ describe('server', () => {
       Array [
         Object {
           "data": Object {
-            "name": "BOLD",
             "type": 3,
           },
           "documentation": undefined,
@@ -747,7 +743,6 @@ describe('server', () => {
       Array [
         Object {
           "data": Object {
-            "name": "BOLD",
             "type": 3,
           },
           "documentation": undefined,
@@ -756,7 +751,6 @@ describe('server', () => {
         },
         Object {
           "data": Object {
-            "name": "RED",
             "type": 3,
           },
           "documentation": Object {
@@ -768,7 +762,6 @@ describe('server', () => {
         },
         Object {
           "data": Object {
-            "name": "GREEN",
             "type": 3,
           },
           "documentation": Object {
@@ -780,7 +773,6 @@ describe('server', () => {
         },
         Object {
           "data": Object {
-            "name": "BLUE",
             "type": 3,
           },
           "documentation": Object {
@@ -792,7 +784,6 @@ describe('server', () => {
         },
         Object {
           "data": Object {
-            "name": "RESET",
             "type": 3,
           },
           "documentation": Object {

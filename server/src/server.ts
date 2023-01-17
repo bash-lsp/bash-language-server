@@ -344,7 +344,6 @@ export default class BashServer {
         label: symbol.name,
         kind: symbolKindToCompletionKind(symbol.kind),
         data: {
-          name: symbol.name,
           type: CompletionItemDataType.Symbol,
         },
         documentation:
@@ -503,7 +502,6 @@ export default class BashServer {
       label: reservedWord,
       kind: LSP.CompletionItemKind.Keyword,
       data: {
-        name: reservedWord,
         type: CompletionItemDataType.ReservedWord,
       },
     }))
@@ -516,7 +514,6 @@ export default class BashServer {
           label: executable,
           kind: LSP.CompletionItemKind.Function,
           data: {
-            name: executable,
             type: CompletionItemDataType.Executable,
           },
         }
@@ -526,7 +523,6 @@ export default class BashServer {
       label: builtin,
       kind: LSP.CompletionItemKind.Function,
       data: {
-        name: builtin,
         type: CompletionItemDataType.Builtin,
       },
     }))
@@ -535,7 +531,6 @@ export default class BashServer {
       label: option,
       kind: LSP.CompletionItemKind.Constant,
       data: {
-        name: option,
         type: CompletionItemDataType.Symbol,
       },
     }))
@@ -560,10 +555,11 @@ export default class BashServer {
     item: LSP.CompletionItem,
   ): Promise<LSP.CompletionItem> {
     const {
-      data: { name, type },
+      label,
+      data: { type },
     } = item as BashCompletionItem
 
-    logger.debug(`onCompletionResolve name=${name} type=${type}`)
+    logger.debug(`onCompletionResolve label=${label} type=${type}`)
 
     try {
       let documentation = null
@@ -573,7 +569,7 @@ export default class BashServer {
         type === CompletionItemDataType.Builtin ||
         type === CompletionItemDataType.ReservedWord
       ) {
-        documentation = await getShellDocumentation({ word: name })
+        documentation = await getShellDocumentation({ word: label })
       }
 
       return documentation
