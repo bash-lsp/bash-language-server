@@ -1,9 +1,16 @@
 # Bash IDE
 
+## 1.28.0
+
+- Upgrade language server to 4.5.0.
+- Include 30 snippets for language constructs (e.g. `if`), builtins (e.g. `test`), expansions (e.g. `[##]`), and external programs (e.g. `sed`).
+- Improved source command parsing.
+- Includes diagnostics when we fail to analyze source commands.
+- Logging is improved and configurable.
+
 ## 1.27.0
 
-- Snippets are now included! https://github.com/bash-lsp/bash-language-server/pull/664
-- Upgrade language server to 4.4.0 which improves source command parsing and includes diagnostics when we fail to analyze source commands. Logging is also improved and configurable.
+- FAULTY RELEASE. The server was stuck on version 4.2.5, but new logging configuration was shipped which made the server fail loading the configuration.
 
 ## 1.26.0
 

@@ -33,14 +33,14 @@ balanced-match@^1.0.0:
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
-bash-language-server@4.2.5:
-  version "4.2.5"
-  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-4.2.5.tgz#9aaa360409db7938020dc46d4ec3d1d7980cb5a6"
-  integrity sha512-JvxyqoMcRoiKm9FWojVx1tdWkUOkoARw4gc/lQIWmHtmzJngy1UrzfU6BNjRQA8NkZJkWHioqvLOVrEd+mVNKg==
+bash-language-server@4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-4.5.0.tgz#bee083a8e5ea7bfaba5fd703ca3647f3f13b5688"
+  integrity sha512-Vnq+3KScmrj6MYujzUhiZ4DJDMI/Pyc5EC2gxi1bIW8Qg+ASlOeUnm485/3Q6Ro3jNf+T6E9opQFbh6O606xfg==
   dependencies:
     fast-glob "3.2.12"
     fuzzy-search "3.2.1"
-    node-fetch "2.6.7"
+    node-fetch "2.6.8"
     turndown "7.1.1"
     urijs "1.19.11"
     vscode-languageserver "8.0.2"
@@ -154,10 +154,10 @@ minimatch@^3.0.4:
   dependencies:
     brace-expansion "^1.1.7"
 
-node-fetch@2.6.7:
-  version "2.6.7"
-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.7.tgz#24de9fba827e3b4ae44dc8b20256a379160052ad"
-  integrity sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ==
+node-fetch@2.6.8:
+  version "2.6.8"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.8.tgz#a68d30b162bc1d8fd71a367e81b997e1f4d4937e"
+  integrity sha512-RZ6dBYuj8dRSfxpUSu+NsdF1dpPpluJxwOp+6IoDp/sH2QNDSvurYsAa+F1WxY2RjA1iP93xhcsUoYbF2XBqVg==
   dependencies:
     whatwg-url "^5.0.0"
 
