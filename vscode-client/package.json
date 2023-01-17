@@ -27,12 +27,6 @@
   ],
   "main": "./out/extension",
   "contributes": {
-    "snippets": [
-      {
-        "language": "shellscript",
-        "path": "./snippets/snippets.json"
-      }
-    ],
     "configuration": {
       "type": "object",
       "title": "Bash IDE configuration",
