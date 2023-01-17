@@ -563,6 +563,29 @@ describe('server', () => {
     expect(result && 'length' in result && result.length).toBeGreaterThanOrEqual(50)
   })
 
+  it('responds to onCompletion with empty list when the following characters is not an empty string or whitespace', async () => {
+    const { connection } = await initializeServer()
+
+    const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+    const result = await onCompletion(
+      {
+        textDocument: {
+          uri: FIXTURE_URI.INSTALL,
+        },
+        position: {
+          // {
+          line: 271,
+          character: 21,
+        },
+      },
+      {} as any,
+      {} as any,
+    )
+
+    expect(result).toEqual([])
+  })
+
   it('responds to onCompletion with empty list when word is a comment', async () => {
     const { connection } = await initializeServer()
 
