@@ -5,6 +5,7 @@ import {
   FIXTURE_FOLDER,
   FIXTURE_URI,
   REPO_ROOT_FOLDER,
+  updateSnapshotUris,
 } from '../../../testing/fixtures'
 import Analyzer from '../analyser'
 import { getDefaultConfiguration } from '../config'
@@ -122,7 +123,7 @@ describe('findDeclarationLocations', () => {
       word: './extension.inc',
       position: { character: 10, line: 2 },
     })
-    expect(result).toMatchInlineSnapshot(`
+    expect(updateSnapshotUris(result)).toMatchInlineSnapshot(`
       Array [
         Object {
           "range": Object {
@@ -135,7 +136,7 @@ describe('findDeclarationLocations', () => {
               "line": 0,
             },
           },
-          "uri": "file://${FIXTURE_FOLDER}extension.inc",
+          "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc",
         },
       ]
     `)
@@ -157,7 +158,7 @@ describe('findDeclarationLocations', () => {
       word: './scripts/tag-release.inc',
       position: { character: 10, line: 16 },
     })
-    expect(result).toMatchInlineSnapshot(`
+    expect(updateSnapshotUris(result)).toMatchInlineSnapshot(`
       Array [
         Object {
           "range": Object {
@@ -170,7 +171,7 @@ describe('findDeclarationLocations', () => {
               "line": 0,
             },
           },
-          "uri": "file://${REPO_ROOT_FOLDER}/scripts/tag-release.inc",
+          "uri": "file://__REPO_ROOT_FOLDER__/scripts/tag-release.inc",
         },
       ]
     `)
@@ -183,7 +184,7 @@ describe('findDeclarationLocations', () => {
       uri: CURRENT_URI,
       word: 'node_version',
     })
-    expect(result).toMatchInlineSnapshot(`
+    expect(updateSnapshotUris(result)).toMatchInlineSnapshot(`
       Array [
         Object {
           "range": Object {
@@ -208,7 +209,7 @@ describe('findDeclarationLocations', () => {
       uri: FIXTURE_URI.SCOPE,
       word: 'X',
     })
-    expect(result).toMatchInlineSnapshot(`
+    expect(updateSnapshotUris(result)).toMatchInlineSnapshot(`
       Array [
         Object {
           "range": Object {
@@ -221,7 +222,7 @@ describe('findDeclarationLocations', () => {
               "line": 12,
             },
           },
-          "uri": "file://${FIXTURE_FOLDER}scope.sh",
+          "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/scope.sh",
         },
       ]
     `)
@@ -233,7 +234,7 @@ describe('findDeclarationLocations', () => {
       uri: FIXTURE_URI.SCOPE,
       word: 'i',
     })
-    expect(result).toMatchInlineSnapshot(`
+    expect(updateSnapshotUris(result)).toMatchInlineSnapshot(`
       Array [
         Object {
           "range": Object {
@@ -246,7 +247,7 @@ describe('findDeclarationLocations', () => {
               "line": 37,
             },
           },
-          "uri": "file://${FIXTURE_FOLDER}scope.sh",
+          "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/scope.sh",
         },
       ]
     `)
@@ -403,12 +404,14 @@ describe('findDeclarationsMatchingWord', () => {
     })
 
     expect(
-      analyzer.findDeclarationsMatchingWord({
-        word: 'npm_config_logl',
-        uri: FIXTURE_URI.INSTALL,
-        exactMatch: false,
-        position: { line: 1000, character: 0 },
-      }),
+      updateSnapshotUris(
+        analyzer.findDeclarationsMatchingWord({
+          word: 'npm_config_logl',
+          uri: FIXTURE_URI.INSTALL,
+          exactMatch: false,
+          position: { line: 1000, character: 0 },
+        }),
+      ),
     ).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -424,7 +427,7 @@ describe('findDeclarationsMatchingWord', () => {
                 "line": 40,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}install.sh",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh",
           },
           "name": "npm_config_loglevel",
         },
@@ -441,12 +444,14 @@ describe('findDeclarationsMatchingWord', () => {
     ).toMatchInlineSnapshot(`Array []`)
 
     expect(
-      analyzer.findDeclarationsMatchingWord({
-        word: 'BLU',
-        uri: FIXTURE_URI.INSTALL,
-        exactMatch: false,
-        position: { line: 6, character: 9 },
-      }),
+      updateSnapshotUris(
+        analyzer.findDeclarationsMatchingWord({
+          word: 'BLU',
+          uri: FIXTURE_URI.INSTALL,
+          exactMatch: false,
+          position: { line: 6, character: 9 },
+        }),
+      ),
     ).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -454,15 +459,15 @@ describe('findDeclarationsMatchingWord', () => {
           "location": Object {
             "range": Object {
               "end": Object {
-                "character": 19,
+                "character": 25,
                 "line": 6,
               },
               "start": Object {
-                "character": 0,
+                "character": 6,
                 "line": 6,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}extension.inc",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc",
           },
           "name": "BLUE",
         },
@@ -470,12 +475,14 @@ describe('findDeclarationsMatchingWord', () => {
     `)
 
     expect(
-      analyzer.findDeclarationsMatchingWord({
-        word: 'BLU',
-        uri: FIXTURE_URI.SOURCING,
-        exactMatch: false,
-        position: { line: 6, character: 9 },
-      }),
+      updateSnapshotUris(
+        analyzer.findDeclarationsMatchingWord({
+          word: 'BLU',
+          uri: FIXTURE_URI.SOURCING,
+          exactMatch: false,
+          position: { line: 6, character: 9 },
+        }),
+      ),
     ).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -483,15 +490,15 @@ describe('findDeclarationsMatchingWord', () => {
           "location": Object {
             "range": Object {
               "end": Object {
-                "character": 19,
+                "character": 25,
                 "line": 6,
               },
               "start": Object {
-                "character": 0,
+                "character": 6,
                 "line": 6,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}extension.inc",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc",
           },
           "name": "BLUE",
         },
@@ -522,12 +529,14 @@ describe('findDeclarationsMatchingWord', () => {
     ).toMatchInlineSnapshot(`Array []`)
 
     expect(
-      analyzer.findDeclarationsMatchingWord({
-        word: 'BLU',
-        uri: FIXTURE_URI.SOURCING,
-        exactMatch: false,
-        position: { line: 6, character: 9 },
-      }),
+      updateSnapshotUris(
+        analyzer.findDeclarationsMatchingWord({
+          word: 'BLU',
+          uri: FIXTURE_URI.SOURCING,
+          exactMatch: false,
+          position: { line: 6, character: 9 },
+        }),
+      ),
     ).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -535,15 +544,15 @@ describe('findDeclarationsMatchingWord', () => {
           "location": Object {
             "range": Object {
               "end": Object {
-                "character": 19,
+                "character": 25,
                 "line": 6,
               },
               "start": Object {
-                "character": 0,
+                "character": 6,
                 "line": 6,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}extension.inc",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc",
           },
           "name": "BLUE",
         },
@@ -573,7 +582,7 @@ describe('findDeclarationsMatchingWord', () => {
     expect(findWordFromLine('f', 0)).toEqual([])
 
     // First definition
-    expect(findWordFromLine('X', 3)).toMatchInlineSnapshot(`
+    expect(updateSnapshotUris(findWordFromLine('X', 3))).toMatchInlineSnapshot(`
       Array [
         Object {
           "kind": 13,
@@ -588,7 +597,7 @@ describe('findDeclarationsMatchingWord', () => {
                 "line": 2,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/scope.sh",
           },
           "name": "X",
         },
@@ -596,7 +605,7 @@ describe('findDeclarationsMatchingWord', () => {
     `)
 
     // Local variable definition
-    expect(findWordFromLine('X', 13)).toMatchInlineSnapshot(`
+    expect(updateSnapshotUris(findWordFromLine('X', 13))).toMatchInlineSnapshot(`
       Array [
         Object {
           "containerName": "g",
@@ -612,7 +621,7 @@ describe('findDeclarationsMatchingWord', () => {
                 "line": 12,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/scope.sh",
           },
           "name": "X",
         },
@@ -620,7 +629,7 @@ describe('findDeclarationsMatchingWord', () => {
     `)
 
     // Local function definition
-    expect(findWordFromLine('f', 23)).toMatchInlineSnapshot(`
+    expect(updateSnapshotUris(findWordFromLine('f', 23))).toMatchInlineSnapshot(`
       Array [
         Object {
           "containerName": "g",
@@ -636,7 +645,7 @@ describe('findDeclarationsMatchingWord', () => {
                 "line": 18,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/scope.sh",
           },
           "name": "f",
         },
@@ -644,7 +653,7 @@ describe('findDeclarationsMatchingWord', () => {
     `)
 
     // Last definition
-    expect(findWordFromLine('X', 1000)).toMatchInlineSnapshot(`
+    expect(updateSnapshotUris(findWordFromLine('X', 1000))).toMatchInlineSnapshot(`
       Array [
         Object {
           "kind": 13,
@@ -659,14 +668,14 @@ describe('findDeclarationsMatchingWord', () => {
                 "line": 4,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/scope.sh",
           },
           "name": "X",
         },
       ]
     `)
 
-    expect(findWordFromLine('f', 1000)).toMatchInlineSnapshot(`
+    expect(updateSnapshotUris(findWordFromLine('f', 1000))).toMatchInlineSnapshot(`
       Array [
         Object {
           "kind": 12,
@@ -681,7 +690,7 @@ describe('findDeclarationsMatchingWord', () => {
                 "line": 7,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/scope.sh",
           },
           "name": "f",
         },
@@ -689,7 +698,7 @@ describe('findDeclarationsMatchingWord', () => {
     `)
 
     // Global variable defined inside a function
-    expect(findWordFromLine('GLOBAL_1', 1000)).toMatchInlineSnapshot(`
+    expect(updateSnapshotUris(findWordFromLine('GLOBAL_1', 1000))).toMatchInlineSnapshot(`
       Array [
         Object {
           "containerName": "g",
@@ -705,7 +714,7 @@ describe('findDeclarationsMatchingWord', () => {
                 "line": 13,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}scope.sh",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/scope.sh",
           },
           "name": "GLOBAL_1",
         },
@@ -842,8 +851,14 @@ describe('getAllVariables', () => {
 
     newAnalyzer.analyze({ uri, document })
 
-    expect(newAnalyzer.getAllVariables({ uri, position: { line: 20, character: 0 } }))
-      .toMatchInlineSnapshot(`
+    expect(
+      updateSnapshotUris(
+        newAnalyzer.getAllVariables({
+          uri,
+          position: { line: 20, character: 0 },
+        }),
+      ),
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "kind": 13,
@@ -858,7 +873,7 @@ describe('getAllVariables', () => {
                 "line": 10,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}sourcing.sh",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/sourcing.sh",
           },
           "name": "BOLD",
         },
@@ -875,7 +890,7 @@ describe('getAllVariables', () => {
                 "line": 4,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}extension.inc",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc",
           },
           "name": "RED",
         },
@@ -892,7 +907,7 @@ describe('getAllVariables', () => {
                 "line": 5,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}extension.inc",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc",
           },
           "name": "GREEN",
         },
@@ -901,15 +916,15 @@ describe('getAllVariables', () => {
           "location": Object {
             "range": Object {
               "end": Object {
-                "character": 19,
+                "character": 25,
                 "line": 6,
               },
               "start": Object {
-                "character": 0,
+                "character": 6,
                 "line": 6,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}extension.inc",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc",
           },
           "name": "BLUE",
         },
@@ -918,15 +933,15 @@ describe('getAllVariables', () => {
           "location": Object {
             "range": Object {
               "end": Object {
-                "character": 16,
+                "character": 23,
                 "line": 7,
               },
               "start": Object {
-                "character": 0,
+                "character": 7,
                 "line": 7,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}extension.inc",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc",
           },
           "name": "BOLD",
         },
@@ -935,15 +950,15 @@ describe('getAllVariables', () => {
           "location": Object {
             "range": Object {
               "end": Object {
-                "character": 17,
-                "line": 8,
+                "character": 19,
+                "line": 10,
               },
               "start": Object {
-                "character": 0,
-                "line": 8,
+                "character": 2,
+                "line": 10,
               },
             },
-            "uri": "file://${FIXTURE_FOLDER}extension.inc",
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc",
           },
           "name": "RESET",
         },

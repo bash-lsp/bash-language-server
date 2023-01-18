@@ -1,10 +1,16 @@
 import { Range } from 'vscode-languageserver/node'
 import { SyntaxNode } from 'web-tree-sitter'
 
-export function forEach(node: SyntaxNode, cb: (n: SyntaxNode) => void) {
-  cb(node)
-  if (node.children.length) {
-    node.children.forEach((n) => forEach(n, cb))
+/**
+ * Recursively iterate over all nodes in a tree.
+ *
+ * @param node The node to start iterating from
+ * @param callback The callback to call for each node. Return false to stop following children.
+ */
+export function forEach(node: SyntaxNode, callback: (n: SyntaxNode) => void | boolean) {
+  const followChildren = callback(node) !== false
+  if (followChildren && node.children.length) {
+    node.children.forEach((n) => forEach(n, callback))
   }
 }
 
@@ -19,8 +25,6 @@ export function range(n: SyntaxNode): Range {
 
 export function isDefinition(n: SyntaxNode): boolean {
   switch (n.type) {
-    // For now. Later we'll have a command_declaration take precedence over
-    // variable_assignment
     case 'variable_assignment':
     case 'function_definition':
       return true

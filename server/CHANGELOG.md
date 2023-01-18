@@ -1,5 +1,11 @@
 # Bash Language Server
 
+## 4.5.1
+
+- Include grouped variables and functions when finding global declarations https://github.com/bash-lsp/bash-language-server/pull/685
+- Skip completions in the middle of a non word when the following characters is not an empty list or whitespace. https://github.com/bash-lsp/bash-language-server/pull/684
+- Remove infrequent and rather useless "Failed to parse" diagnostics (and thereby the `HIGHLIGHT_PARSING_ERRORS` and `highlightParsingErrors` configuration option) – the tree sitter parser is actually rather good at error recovery. Note that these messages will now be shown in the log. https://github.com/bash-lsp/bash-language-server/pull/686
+
 ## 4.5.0
 
 - Include 30 snippets for language constructs (e.g. `if`), builtins (e.g. `test`), expansions (e.g. `[##]`), and external programs (e.g. `sed`) https://github.com/bash-lsp/bash-language-server/pull/683

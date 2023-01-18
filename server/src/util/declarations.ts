@@ -13,11 +13,16 @@ const TREE_SITTER_TYPE_TO_LSP_KIND: { [type: string]: LSP.SymbolKind | undefined
 export type GlobalDeclarations = { [word: string]: LSP.SymbolInformation }
 export type Declarations = { [word: string]: LSP.SymbolInformation[] }
 
+const GLOBAL_DECLARATION_LEAF_NODE_TYPES = new Set([
+  'if_statement',
+  'function_definition',
+])
+
 /**
  * Returns declarations (functions or variables) from a given root node
  * that would be available after sourcing the file. This currently does
- * not include global variables defined inside function as we do not do
- * any flow tracing.
+ * not include global variables defined inside if statements or functions
+ * as we do not do any flow tracing.
  *
  * Will only return one declaration per symbol name – the latest definition.
  * This behavior is consistent with how Bash behaves, but differs between
@@ -35,7 +40,9 @@ export function getGlobalDeclarations({
 }): GlobalDeclarations {
   const globalDeclarations: GlobalDeclarations = {}
 
-  tree.rootNode.children.forEach((node) => {
+  TreeSitterUtil.forEach(tree.rootNode, (node) => {
+    const followChildren = !GLOBAL_DECLARATION_LEAF_NODE_TYPES.has(node.type)
+
     if (TreeSitterUtil.isDefinition(node)) {
       const symbol = nodeToSymbolInformation({ node, uri })
       if (symbol) {
@@ -43,6 +50,8 @@ export function getGlobalDeclarations({
         globalDeclarations[word] = symbol
       }
     }
+
+    return followChildren
   })
 
   return globalDeclarations
