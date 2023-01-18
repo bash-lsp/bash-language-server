@@ -359,6 +359,13 @@ export default class Analyzer {
     return getAllDeclarationsInTree({ uri, tree })
   }
 
+  /**
+   * Get the document for the given URI.
+   */
+  public getDocument(uri: string): TextDocument | undefined {
+    return this.uriToAnalyzedDocument[uri]?.document
+  }
+
   // TODO: move somewhere else than the analyzer...
   public async getExplainshellDocumentation({
     params,
@@ -389,9 +396,8 @@ export default class Analyzer {
       return {}
     }
 
-    const cmd = analyzedDocument.document
-      .getText()
-      .slice(interestingNode.startIndex, interestingNode.endIndex)
+    const cmd = interestingNode.text
+
     type ExplainshellResponse = {
       matches?: Array<{ helpHTML: string; start: number; end: number }>
     }

@@ -268,3 +268,5 @@ if [ $ret -ne 0 ]; then
   echo "It failed" >&2
 fi
 exit $ret
+
+iverilog -i wave.vpp *{}.v

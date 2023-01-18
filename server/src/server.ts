@@ -437,21 +437,34 @@ export default class BashServer {
         character: Math.max(params.position.character - 1, 0),
       },
     })
+
     this.logRequest({ request: 'onCompletion', params, word })
 
-    if (word && word.startsWith('#')) {
+    if (word?.startsWith('#')) {
       // Inside a comment block
       return []
     }
-    if (word && word === '{') {
+
+    if (word === '{') {
       // We should not complete when it is not prefixed by a $.
-      // This case needs to be here
-      // because { is a completionProvider triggerCharacter.
+      // This case needs to be here as "{" is a completionProvider triggerCharacter.
       return []
     }
 
+    if (!word) {
+      const nextCharacter = this.analyzer.getDocument(params.textDocument.uri)?.getText({
+        start: params.position,
+        end: { ...params.position, character: params.position.character + 1 },
+      })
+      const isNextCharacterSpaceOrEmpty = nextCharacter === '' || nextCharacter === ' '
+      if (!isNextCharacterSpaceOrEmpty) {
+        // We are in the middle of something, so don't complete
+        return []
+      }
+    }
+
     let options: string[] = []
-    if (word && word.startsWith('-')) {
+    if (word?.startsWith('-')) {
       const commandName = this.analyzer.commandNameAtPoint(
         params.textDocument.uri,
         params.position.line,
