@@ -16,9 +16,6 @@ export const ConfigSchema = z.object({
   // Log level for the server. To set the right log level from the start please also use the environment variable 'BASH_IDE_LOG_LEVEL'.
   logLevel: z.enum(LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
 
-  // Controls if Treesitter parsing errors will be highlighted as problems.
-  highlightParsingErrors: z.boolean().default(false),
-
   // Controls how symbols (e.g. variables and functions) are included and used for completion and documentation.
   // If false, then we only include symbols from sourced files (i.e. using non dynamic statements like 'source file.sh' or '. file.sh').
   // If true, then all symbols from the workspace are included.
@@ -52,7 +49,6 @@ export function getConfigFromEnvironmentVariables(): {
     backgroundAnalysisMaxFiles: toNumber(process.env.BACKGROUND_ANALYSIS_MAX_FILES),
     explainshellEndpoint: process.env.EXPLAINSHELL_ENDPOINT,
     globPattern: process.env.GLOB_PATTERN,
-    highlightParsingErrors: toBoolean(process.env.HIGHLIGHT_PARSING_ERRORS),
     includeAllWorkspaceSymbols: toBoolean(process.env.INCLUDE_ALL_WORKSPACE_SYMBOLS),
     logLevel: process.env[LOG_LEVEL_ENV_VAR],
     shellcheckArguments: process.env.SHELLCHECK_ARGUMENTS,

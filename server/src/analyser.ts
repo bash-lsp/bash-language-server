@@ -57,9 +57,6 @@ export default class Analyzer {
   /**
    * Analyze the given document, cache the tree-sitter AST, and iterate over the
    * tree to find declarations.
-   *
-   * Returns all, if any, syntax errors that occurred while parsing the file.
-   *
    */
   public analyze({
     document,
@@ -68,11 +65,12 @@ export default class Analyzer {
     document: TextDocument
     uri: string
   }): LSP.Diagnostic[] {
+    const diagnostics: LSP.Diagnostic[] = []
     const fileContent = document.getText()
 
     const tree = this.parser.parse(fileContent)
 
-    const { diagnostics, globalDeclarations } = getGlobalDeclarations({ tree, uri })
+    const globalDeclarations = getGlobalDeclarations({ tree, uri })
 
     const sourceCommands = sourcing.getSourceCommands({
       fileUri: uri,
@@ -115,23 +113,9 @@ export default class Analyzer {
         })
     }
 
-    function findMissingNodes(node: Parser.SyntaxNode) {
-      if (node.isMissing()) {
-        diagnostics.push(
-          LSP.Diagnostic.create(
-            TreeSitterUtil.range(node),
-            `Syntax error: expected "${node.type}" somewhere in the file`,
-            LSP.DiagnosticSeverity.Warning,
-            undefined,
-            'bash-language-server',
-          ),
-        )
-      } else if (node.hasError()) {
-        node.children.forEach(findMissingNodes)
-      }
+    if (tree.rootNode.hasError()) {
+      logger.warn(`Error while parsing ${uri}: syntax error`)
     }
-
-    findMissingNodes(tree.rootNode)
 
     return diagnostics
   }

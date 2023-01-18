@@ -47,11 +47,6 @@
           "default": "**/*@(.sh|.inc|.bash|.command)",
           "description": "Glob pattern for finding and parsing shell script files in the workspace. Used by the background analysis features across files."
         },
-        "bashIde.highlightParsingErrors": {
-          "type": "boolean",
-          "default": false,
-          "description": "Controls if Treesitter parsing errors will be highlighted as problems."
-        },
         "bashIde.includeAllWorkspaceSymbols": {
           "type": "boolean",
           "default": false,
