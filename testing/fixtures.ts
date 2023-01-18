@@ -39,3 +39,18 @@ export const FIXTURE_DOCUMENT: Record<FIXTURE_KEY, TextDocument> = (
 }, {} as any)
 
 export const REPO_ROOT_FOLDER = path.resolve(path.join(FIXTURE_FOLDER, '../..'))
+
+export function updateSnapshotUris(obj: any) {
+  if (obj.uri) {
+    obj.uri = obj.uri.replace(REPO_ROOT_FOLDER, '__REPO_ROOT_FOLDER__')
+  }
+  Object.values(obj).forEach((child) => {
+    if (Array.isArray(child)) {
+      child.forEach((el) => updateSnapshotUris(el))
+    } else if (typeof child === 'object' && child != null) {
+      updateSnapshotUris(child)
+    }
+  })
+
+  return obj
+}
