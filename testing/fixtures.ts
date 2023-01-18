@@ -21,6 +21,7 @@ export const FIXTURE_URI = {
   ISSUE101: `file://${path.join(FIXTURE_FOLDER, 'issue101.sh')}`,
   ISSUE206: `file://${path.join(FIXTURE_FOLDER, 'issue206.sh')}`,
   MISSING_EXTENSION: `file://${path.join(FIXTURE_FOLDER, 'extension')}`,
+  EXTENSION_INC: `file://${path.join(FIXTURE_FOLDER, 'extension.inc')}`,
   MISSING_NODE: `file://${path.join(FIXTURE_FOLDER, 'missing-node.sh')}`,
   OPTIONS: `file://${path.join(FIXTURE_FOLDER, 'options.sh')}`,
   OVERRIDE_SYMBOL: `file://${path.join(FIXTURE_FOLDER, 'override-executable-symbol.sh')}`,

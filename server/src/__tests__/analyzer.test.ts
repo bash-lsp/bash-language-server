@@ -454,11 +454,11 @@ describe('findDeclarationsMatchingWord', () => {
           "location": Object {
             "range": Object {
               "end": Object {
-                "character": 19,
+                "character": 25,
                 "line": 6,
               },
               "start": Object {
-                "character": 0,
+                "character": 6,
                 "line": 6,
               },
             },
@@ -483,11 +483,11 @@ describe('findDeclarationsMatchingWord', () => {
           "location": Object {
             "range": Object {
               "end": Object {
-                "character": 19,
+                "character": 25,
                 "line": 6,
               },
               "start": Object {
-                "character": 0,
+                "character": 6,
                 "line": 6,
               },
             },
@@ -535,11 +535,11 @@ describe('findDeclarationsMatchingWord', () => {
           "location": Object {
             "range": Object {
               "end": Object {
-                "character": 19,
+                "character": 25,
                 "line": 6,
               },
               "start": Object {
-                "character": 0,
+                "character": 6,
                 "line": 6,
               },
             },
@@ -901,11 +901,11 @@ describe('getAllVariables', () => {
           "location": Object {
             "range": Object {
               "end": Object {
-                "character": 19,
+                "character": 25,
                 "line": 6,
               },
               "start": Object {
-                "character": 0,
+                "character": 6,
                 "line": 6,
               },
             },
@@ -918,11 +918,11 @@ describe('getAllVariables', () => {
           "location": Object {
             "range": Object {
               "end": Object {
-                "character": 16,
+                "character": 23,
                 "line": 7,
               },
               "start": Object {
-                "character": 0,
+                "character": 7,
                 "line": 7,
               },
             },
@@ -935,12 +935,12 @@ describe('getAllVariables', () => {
           "location": Object {
             "range": Object {
               "end": Object {
-                "character": 17,
-                "line": 8,
+                "character": 19,
+                "line": 10,
               },
               "start": Object {
-                "character": 0,
-                "line": 8,
+                "character": 2,
+                "line": 10,
               },
             },
             "uri": "file://${FIXTURE_FOLDER}extension.inc",
