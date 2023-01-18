@@ -1,5 +1,12 @@
 # Bash IDE
 
+## 1.29.0
+
+- Upgrade language server to 4.5.1.
+- Improved parsing of global declarations.
+- Skip completions in the middle of a non word when the following characters is not an empty list or whitespace.
+- Remove infrequent and rather useless "Failed to parse" diagnostics and the `highlightParsingErrors` configuration option – the tree sitter parser is actually rather good at error recovery. Note that these messages will now be shown in the log.
+
 ## 1.28.0
 
 - Upgrade language server to 4.5.0.
