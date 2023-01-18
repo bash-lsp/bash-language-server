@@ -25,8 +25,6 @@ export function range(n: SyntaxNode): Range {
 
 export function isDefinition(n: SyntaxNode): boolean {
   switch (n.type) {
-    // For now. Later we'll have a command_declaration take precedence over
-    // variable_assignment
     case 'variable_assignment':
     case 'function_definition':
       return true
