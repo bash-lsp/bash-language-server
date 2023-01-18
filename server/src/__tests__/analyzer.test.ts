@@ -42,60 +42,29 @@ describe('analyze', () => {
       document: FIXTURE_DOCUMENT.INSTALL,
     })
     expect(diagnostics).toEqual([])
+    expect(loggerWarn).not.toHaveBeenCalled()
   })
 
-  it('returns a list of diagnostics for a file with a missing node', () => {
+  it('parses files with a missing node', () => {
     const diagnostics = analyzer.analyze({
       uri: CURRENT_URI,
       document: FIXTURE_DOCUMENT.MISSING_NODE,
     })
-    expect(diagnostics).not.toEqual([])
-    expect(diagnostics).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "message": "Syntax error: expected \\"fi\\" somewhere in the file",
-          "range": Object {
-            "end": Object {
-              "character": 0,
-              "line": 12,
-            },
-            "start": Object {
-              "character": 0,
-              "line": 12,
-            },
-          },
-          "severity": 2,
-          "source": "bash-language-server",
-        },
-      ]
-    `)
+    expect(diagnostics).toEqual([])
+    expect(loggerWarn).toHaveBeenCalledWith(
+      'Error while parsing dummy-uri.sh: syntax error',
+    )
   })
 
-  it('returns a list of diagnostics for a file with parsing errors', () => {
+  it('parses a file with parsing errors', () => {
     const diagnostics = analyzer.analyze({
       uri: CURRENT_URI,
       document: FIXTURE_DOCUMENT.PARSE_PROBLEMS,
     })
-    expect(diagnostics).not.toEqual([])
-    expect(diagnostics).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "message": "Failed to parse",
-          "range": Object {
-            "end": Object {
-              "character": 1,
-              "line": 9,
-            },
-            "start": Object {
-              "character": 0,
-              "line": 2,
-            },
-          },
-          "severity": 1,
-          "source": "bash-language-server",
-        },
-      ]
-    `)
+    expect(diagnostics).toEqual([])
+    expect(loggerWarn).toHaveBeenCalledWith(
+      'Error while parsing dummy-uri.sh: syntax error',
+    )
   })
 
   it('returns a list of diagnostics for a file with sourcing issues', async () => {
@@ -802,7 +771,12 @@ describe('initiateBackgroundAnalysis', () => {
       globPattern: defaultConfig.globPattern,
     })
 
-    expect(loggerWarn).not.toHaveBeenCalled()
+    expect(loggerWarn).toHaveBeenCalled()
+    expect(loggerWarn.mock.calls).toEqual([
+      [expect.stringContaining('missing-node.sh: syntax error')],
+      [expect.stringContaining('not-a-shell-script.sh: syntax error')],
+      [expect.stringContaining('parse-problems.sh: syntax error')],
+    ])
 
     // Intro, stats on glob, one file skipped due to shebang, and outro
     expect(filesParsed).toEqual(FIXTURE_FILES_MATCHING_GLOB)

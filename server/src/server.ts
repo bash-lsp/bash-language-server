@@ -289,15 +289,8 @@ export default class BashServer {
   public async analyzeAndLintDocument(document: TextDocument) {
     const { uri } = document
 
-    let diagnostics: LSP.Diagnostic[] = []
-
     // Load the tree for the modified contents into the analyzer:
-    const analyzeDiagnostics = this.analyzer.analyze({ uri, document })
-    // Treesitter's diagnostics can be a bit inaccurate, so we only merge the
-    // analyzer's diagnostics if the setting is enabled:
-    if (this.config.highlightParsingErrors) {
-      diagnostics = diagnostics.concat(analyzeDiagnostics)
-    }
+    let diagnostics = this.analyzer.analyze({ uri, document })
 
     // Run ShellCheck diagnostics:
     if (this.linter) {

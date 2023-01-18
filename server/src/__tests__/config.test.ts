@@ -8,7 +8,6 @@ describe('ConfigSchema', () => {
         "backgroundAnalysisMaxFiles": 500,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
-        "highlightParsingErrors": false,
         "includeAllWorkspaceSymbols": false,
         "logLevel": "info",
         "shellcheckArguments": Array [],
@@ -22,7 +21,6 @@ describe('ConfigSchema', () => {
         backgroundAnalysisMaxFiles: 1,
         explainshellEndpoint: 'localhost:8080',
         globPattern: '**/*@(.sh)',
-        highlightParsingErrors: true,
         includeAllWorkspaceSymbols: true,
         shellcheckArguments: ' -e SC2001  -e SC2002 ',
         shellcheckPath: '',
@@ -32,7 +30,6 @@ describe('ConfigSchema', () => {
         "backgroundAnalysisMaxFiles": 1,
         "explainshellEndpoint": "localhost:8080",
         "globPattern": "**/*@(.sh)",
-        "highlightParsingErrors": true,
         "includeAllWorkspaceSymbols": true,
         "logLevel": "info",
         "shellcheckArguments": Array [
@@ -63,7 +60,6 @@ describe('getConfigFromEnvironmentVariables', () => {
         "backgroundAnalysisMaxFiles": 500,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
-        "highlightParsingErrors": false,
         "includeAllWorkspaceSymbols": false,
         "logLevel": "info",
         "shellcheckArguments": Array [],
@@ -82,7 +78,6 @@ describe('getConfigFromEnvironmentVariables', () => {
         "backgroundAnalysisMaxFiles": 500,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
-        "highlightParsingErrors": false,
         "includeAllWorkspaceSymbols": false,
         "logLevel": "info",
         "shellcheckArguments": Array [],
@@ -106,7 +101,6 @@ describe('getConfigFromEnvironmentVariables', () => {
         "backgroundAnalysisMaxFiles": 1,
         "explainshellEndpoint": "localhost:8080",
         "globPattern": "*.*",
-        "highlightParsingErrors": false,
         "includeAllWorkspaceSymbols": false,
         "logLevel": "error",
         "shellcheckArguments": Array [
@@ -127,27 +121,27 @@ describe('getConfigFromEnvironmentVariables', () => {
   })
   it('parses boolean environment variables', () => {
     process.env = {
-      HIGHLIGHT_PARSING_ERRORS: 'true',
+      INCLUDE_ALL_WORKSPACE_SYMBOLS: 'true',
     }
-    let result = getConfigFromEnvironmentVariables().config.highlightParsingErrors
+    let result = getConfigFromEnvironmentVariables().config.includeAllWorkspaceSymbols
     expect(result).toEqual(true)
 
     process.env = {
-      HIGHLIGHT_PARSING_ERRORS: '1',
+      INCLUDE_ALL_WORKSPACE_SYMBOLS: '1',
     }
-    result = getConfigFromEnvironmentVariables().config.highlightParsingErrors
+    result = getConfigFromEnvironmentVariables().config.includeAllWorkspaceSymbols
     expect(result).toEqual(true)
 
     process.env = {
-      HIGHLIGHT_PARSING_ERRORS: '0',
+      INCLUDE_ALL_WORKSPACE_SYMBOLS: '0',
     }
-    result = getConfigFromEnvironmentVariables().config.highlightParsingErrors
+    result = getConfigFromEnvironmentVariables().config.includeAllWorkspaceSymbols
     expect(result).toEqual(false)
 
     process.env = {
-      HIGHLIGHT_PARSING_ERRORS: 'false',
+      INCLUDE_ALL_WORKSPACE_SYMBOLS: 'false',
     }
-    result = getConfigFromEnvironmentVariables().config.highlightParsingErrors
+    result = getConfigFromEnvironmentVariables().config.includeAllWorkspaceSymbols
     expect(result).toEqual(false)
   })
 })

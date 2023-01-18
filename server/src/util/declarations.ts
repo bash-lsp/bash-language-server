@@ -32,30 +32,12 @@ export function getGlobalDeclarations({
 }: {
   tree: Parser.Tree
   uri: string
-}): {
-  diagnostics: LSP.Diagnostic[]
-  globalDeclarations: GlobalDeclarations
-} {
-  const diagnostics: LSP.Diagnostic[] = []
+}): GlobalDeclarations {
   const globalDeclarations: GlobalDeclarations = {}
 
   tree.rootNode.children.forEach((node) => {
-    if (node.type === 'ERROR') {
-      diagnostics.push(
-        LSP.Diagnostic.create(
-          TreeSitterUtil.range(node),
-          'Failed to parse',
-          LSP.DiagnosticSeverity.Error,
-          undefined,
-          'bash-language-server',
-        ),
-      )
-      return
-    }
-
     if (TreeSitterUtil.isDefinition(node)) {
       const symbol = nodeToSymbolInformation({ node, uri })
-
       if (symbol) {
         const word = symbol.name
         globalDeclarations[word] = symbol
@@ -63,7 +45,7 @@ export function getGlobalDeclarations({
     }
   })
 
-  return { diagnostics, globalDeclarations }
+  return globalDeclarations
 }
 
 /**
