@@ -965,8 +965,7 @@ describe('server', () => {
     })
 
     it('displays correct documentation for symbols in file that override path executables', async () => {
-      const { connection, server } = await initializeServer()
-      server.register(connection)
+      const { connection } = await initializeServer()
 
       const onHover = connection.onHover.mock.calls[0][0]
 
@@ -1000,31 +999,70 @@ describe('server', () => {
     })
 
     it('returns executable documentation if the function is not redefined', async () => {
-      const { connection, server } = await initializeServer()
-      server.register(connection)
+      const { connection } = await initializeServer()
 
       const onHover = connection.onHover.mock.calls[0][0]
 
-      const result = await onHover(
-        {
-          textDocument: {
-            uri: FIXTURE_URI.OVERRIDE_SYMBOL,
+      const getHoverResult = (position: LSP.Position) =>
+        onHover(
+          {
+            textDocument: {
+              uri: FIXTURE_URI.OVERRIDE_SYMBOL,
+            },
+            position,
           },
-          position: {
-            line: 2,
-            character: 1,
-          },
-        },
-        {} as any,
-        {} as any,
-      )
+          {} as any,
+          {} as any,
+        )
 
-      expect(result).toBeDefined()
-      expect((result as any)?.contents.value).toContain('list directory contents')
+      const result1 = await getHoverResult({ line: 2, character: 1 })
+      expect(result1).toBeDefined()
+      expect((result1 as any)?.contents.value).toContain('list directory contents')
+
+      // return null same result if the cursor is on the arguments
+      const result2 = await getHoverResult({ line: 2, character: 3 })
+      expect(result2).toBeDefined()
+      expect((result2 as any)?.contents.value).toBeUndefined()
     })
 
-    it.skip('returns documentation from explainshell', () => {
-      // FIXME
+    it.skip('returns documentation from explainshell', async () => {
+      // Skipped as this requires a running explainshell server
+      // docker container run --name explainshell --restart always -p 127.0.0.1:6000:5000 -d spaceinvaderone/explainshell
+
+      const { connection } = await initializeServer({
+        capabilities: {
+          workspace: {
+            configuration: true,
+          },
+        },
+        configurationObject: {
+          explainshellEndpoint: 'http://localhost:6000',
+        },
+      })
+      const onHover = connection.onHover.mock.calls[0][0]
+
+      const getHoverResult = (position: LSP.Position) =>
+        onHover(
+          {
+            textDocument: {
+              uri: FIXTURE_URI.OVERRIDE_SYMBOL,
+            },
+            position,
+          },
+          {} as any,
+          {} as any,
+        )
+
+      const result1 = await getHoverResult({ line: 2, character: 1 })
+      expect(result1).toBeDefined()
+      expect((result1 as any)?.contents.value).toEqual('list directory contents')
+
+      // return explain shell result for the arguments
+      const result2 = await getHoverResult({ line: 2, character: 3 })
+      expect(result2).toBeDefined()
+      expect((result2 as any)?.contents.value).toEqual(
+        '**\\-l** use a long listing format',
+      )
     })
   })
 

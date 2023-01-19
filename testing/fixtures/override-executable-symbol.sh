@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ls
+ls -la
 
 # override documentation for `ls` symbol
 ls() {

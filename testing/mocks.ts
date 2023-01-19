@@ -9,7 +9,12 @@ export function getMockConnection(): jest.Mocked<LSP.Connection> {
   }
 
   return {
-    client: {} as any,
+    client: {
+      connection: {} as any,
+      register: jest.fn(),
+      initialize: jest.fn(),
+      fillServerCapabilities: jest.fn(),
+    },
     console,
     dispose: jest.fn(),
     languages: {} as any,
@@ -76,6 +81,20 @@ export function getMockConnection(): jest.Mocked<LSP.Connection> {
       showInformationMessage: jest.fn(),
       showWarningMessage: jest.fn(),
     },
-    workspace: {} as any,
+    workspace: {
+      applyEdit: jest.fn(),
+      connection: {} as any,
+      fillServerCapabilities: jest.fn(),
+      getConfiguration: jest.fn(),
+      getWorkspaceFolders: jest.fn(),
+      initialize: jest.fn(),
+      onDidChangeWorkspaceFolders: jest.fn(),
+      onDidCreateFiles: jest.fn(),
+      onDidDeleteFiles: jest.fn(),
+      onDidRenameFiles: jest.fn(),
+      onWillCreateFiles: jest.fn(),
+      onWillDeleteFiles: jest.fn(),
+      onWillRenameFiles: jest.fn(),
+    },
   }
 }
