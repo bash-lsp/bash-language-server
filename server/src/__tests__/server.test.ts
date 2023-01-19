@@ -10,6 +10,7 @@ import {
   FIXTURE_FOLDER,
   FIXTURE_URI,
   REPO_ROOT_FOLDER,
+  updateSnapshotUris,
 } from '../../../testing/fixtures'
 import { getMockConnection } from '../../../testing/mocks'
 import LspServer from '../server'
@@ -57,914 +58,966 @@ async function initializeServer(
 describe('server', () => {
   it('initializes and responds to capabilities', async () => {
     const { server } = await initializeServer()
-    expect(server.capabilities()).toMatchSnapshot()
+    expect(server.capabilities()).toMatchInlineSnapshot(`
+      Object {
+        "codeActionProvider": Object {
+          "codeActionKinds": Array [
+            "quickfix",
+          ],
+          "resolveProvider": false,
+          "workDoneProgress": false,
+        },
+        "completionProvider": Object {
+          "resolveProvider": true,
+          "triggerCharacters": Array [
+            "$",
+            "{",
+          ],
+        },
+        "definitionProvider": true,
+        "documentHighlightProvider": true,
+        "documentSymbolProvider": true,
+        "hoverProvider": true,
+        "referencesProvider": true,
+        "textDocumentSync": 1,
+        "workspaceSymbolProvider": true,
+      }
+    `)
   })
 
   it('register LSP connection', async () => {
     const { connection } = await initializeServer()
 
-    expect(connection.onHover).toHaveBeenCalledTimes(1)
-    expect(connection.onDefinition).toHaveBeenCalledTimes(1)
-    expect(connection.onDocumentSymbol).toHaveBeenCalledTimes(1)
-    expect(connection.onWorkspaceSymbol).toHaveBeenCalledTimes(1)
-    expect(connection.onDocumentHighlight).toHaveBeenCalledTimes(1)
-    expect(connection.onReferences).toHaveBeenCalledTimes(1)
+    expect(connection.onCodeAction).toHaveBeenCalledTimes(1)
     expect(connection.onCompletion).toHaveBeenCalledTimes(1)
     expect(connection.onCompletionResolve).toHaveBeenCalledTimes(1)
-    expect(connection.onCodeAction).toHaveBeenCalledTimes(1)
+    expect(connection.onDefinition).toHaveBeenCalledTimes(1)
+    expect(connection.onDocumentHighlight).toHaveBeenCalledTimes(1)
+    expect(connection.onDocumentSymbol).toHaveBeenCalledTimes(1)
+    expect(connection.onHover).toHaveBeenCalledTimes(1)
+    expect(connection.onReferences).toHaveBeenCalledTimes(1)
+    expect(connection.onWorkspaceSymbol).toHaveBeenCalledTimes(1)
   })
 
-  it('responds to onHover', async () => {
-    const { connection } = await initializeServer()
+  describe('onCodeAction', () => {
+    it('responds to onCodeAction', async () => {
+      const { connection, server } = await initializeServer()
+      const document = FIXTURE_DOCUMENT.COMMENT_DOC
 
-    const onHover = connection.onHover.mock.calls[0][0]
+      await server.analyzeAndLintDocument(document)
 
-    const result = await onHover(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.INSTALL,
-        },
-        position: {
-          line: 25,
-          character: 5,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
+      expect(connection.sendDiagnostics).toHaveBeenCalledTimes(1)
+      const { diagnostics } = connection.sendDiagnostics.mock.calls[0][0]
+      const fixableDiagnostic = diagnostics.filter(({ code }) => code === 'SC2086')[0]
 
-    expect(result).toBeDefined()
-    expect(result).toEqual({
-      contents: {
-        kind: 'markdown',
-        value: expect.stringContaining('remove directories'),
-      },
-    })
-  })
+      expect(fixableDiagnostic).toMatchInlineSnapshot(`
+              Object {
+                "code": "SC2086",
+                "codeDescription": Object {
+                  "href": "https://www.shellcheck.net/wiki/SC2086",
+                },
+                "message": "Double quote to prevent globbing and word splitting.",
+                "range": Object {
+                  "end": Object {
+                    "character": 13,
+                    "line": 55,
+                  },
+                  "start": Object {
+                    "character": 5,
+                    "line": 55,
+                  },
+                },
+                "severity": 3,
+                "source": "shellcheck",
+                "tags": undefined,
+              }
+          `)
 
-  it('responds to onHover with function documentation extracted from comments', async () => {
-    const { connection } = await initializeServer()
+      // TODO: we could find the diagnostics and then use the range to test the code action
 
-    const onHover = connection.onHover.mock.calls[0][0]
+      const onCodeAction = connection.onCodeAction.mock.calls[0][0]
 
-    const result = await onHover(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.COMMENT_DOC,
-        },
-        position: {
-          line: 17,
-          character: 0,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    expect(result).toBeDefined()
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "contents": Object {
-          "kind": "markdown",
-          "value": "Function: **hello_world** - *defined on line 8*
-
-      \`\`\`txt
-      this is a comment
-      describing the function
-      hello_world
-      this function takes two arguments
-      \`\`\`",
-        },
-      }
-    `)
-  })
-
-  it('responds to onDefinition', async () => {
-    const { connection } = await initializeServer()
-
-    const onDefinition = connection.onDefinition.mock.calls[0][0]
-
-    const result = await onDefinition(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.SOURCING,
-        },
-        position: { character: 10, line: 2 },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 0,
-              "line": 0,
-            },
-            "start": Object {
-              "character": 0,
-              "line": 0,
-            },
-          },
-          "uri": "file://${FIXTURE_FOLDER}extension.inc",
-        },
-      ]
-    `)
-  })
-
-  it('responds to onDocumentSymbol', async () => {
-    const { connection } = await initializeServer()
-
-    const onDocumentSymbol = connection.onDocumentSymbol.mock.calls[0][0]
-
-    const result = await onDocumentSymbol(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.SOURCING,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
-                "character": 16,
-                "line": 10,
-              },
-              "start": Object {
-                "character": 0,
-                "line": 10,
-              },
-            },
-            "uri": "file://${FIXTURE_FOLDER}sourcing.sh",
-          },
-          "name": "BOLD",
-        },
-        Object {
-          "kind": 12,
-          "location": Object {
-            "range": Object {
-              "end": Object {
-                "character": 1,
-                "line": 22,
-              },
-              "start": Object {
-                "character": 0,
-                "line": 20,
-              },
-            },
-            "uri": "file://${FIXTURE_FOLDER}sourcing.sh",
-          },
-          "name": "loadlib",
-        },
-      ]
-    `)
-  })
-
-  it('responds to onDocumentHighlight', async () => {
-    const { connection } = await initializeServer()
-
-    const onDocumentHighlight = connection.onDocumentHighlight.mock.calls[0][0]
-
-    const result1 = await onDocumentHighlight(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.ISSUE206,
-        },
-        position: {
-          // FOO
-          line: 0,
-          character: 10,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    expect(result1).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 12,
-              "line": 0,
-            },
-            "start": Object {
-              "character": 9,
-              "line": 0,
-            },
-          },
-        },
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 28,
-              "line": 1,
-            },
-            "start": Object {
-              "character": 25,
-              "line": 1,
-            },
-          },
-        },
-      ]
-    `)
-
-    const result2 = await onDocumentHighlight(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.ISSUE206,
-        },
-        position: {
-          // readonly cannot be parsed as a word
-          line: 0,
-          character: 0,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    expect(result2).toMatchInlineSnapshot(`Array []`)
-
-    const result3 = await onDocumentHighlight(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.SCOPE,
-        },
-        position: {
-          // X
-          line: 32,
-          character: 8,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    expect(result3).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 1,
-              "line": 2,
-            },
-            "start": Object {
-              "character": 0,
-              "line": 2,
-            },
-          },
-        },
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 1,
-              "line": 4,
-            },
-            "start": Object {
-              "character": 0,
-              "line": 4,
-            },
-          },
-        },
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 9,
-              "line": 8,
-            },
-            "start": Object {
-              "character": 8,
-              "line": 8,
-            },
-          },
-        },
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 11,
-              "line": 12,
-            },
-            "start": Object {
-              "character": 10,
-              "line": 12,
-            },
-          },
-        },
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 13,
-              "line": 15,
-            },
-            "start": Object {
-              "character": 12,
-              "line": 15,
-            },
-          },
-        },
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 13,
-              "line": 19,
-            },
-            "start": Object {
-              "character": 12,
-              "line": 19,
-            },
-          },
-        },
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 15,
-              "line": 20,
-            },
-            "start": Object {
-              "character": 14,
-              "line": 20,
-            },
-          },
-        },
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 11,
-              "line": 29,
-            },
-            "start": Object {
-              "character": 10,
-              "line": 29,
-            },
-          },
-        },
-        Object {
-          "range": Object {
-            "end": Object {
-              "character": 9,
-              "line": 32,
-            },
-            "start": Object {
-              "character": 8,
-              "line": 32,
-            },
-          },
-        },
-      ]
-    `)
-  })
-
-  it('responds to onWorkspaceSymbol', async () => {
-    const { connection } = await initializeServer()
-
-    const onWorkspaceSymbol = connection.onWorkspaceSymbol.mock.calls[0][0]
-
-    async function lookupAndExpectNpmConfigLoglevelResult(query: string) {
-      const result = await onWorkspaceSymbol(
+      const result = await onCodeAction(
         {
-          query,
+          textDocument: {
+            uri: FIXTURE_URI.COMMENT_DOC,
+          },
+          range: fixableDiagnostic.range,
+          context: {
+            diagnostics: [fixableDiagnostic],
+          },
         },
         {} as any,
         {} as any,
       )
 
-      expect(result).toEqual([
+      expect(result).toHaveLength(1)
+      const codeAction = (result as CodeAction[])[0]
+      expect(codeAction.diagnostics).toEqual([fixableDiagnostic])
+      expect(codeAction.diagnostics).toEqual([fixableDiagnostic])
+
+      expect(
+        codeAction.edit?.changes && codeAction.edit?.changes[FIXTURE_URI.COMMENT_DOC],
+      ).toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "newText": "\\"",
+                  "range": Object {
+                    "end": Object {
+                      "character": 13,
+                      "line": 55,
+                    },
+                    "start": Object {
+                      "character": 13,
+                      "line": 55,
+                    },
+                  },
+                },
+                Object {
+                  "newText": "\\"",
+                  "range": Object {
+                    "end": Object {
+                      "character": 5,
+                      "line": 55,
+                    },
+                    "start": Object {
+                      "character": 5,
+                      "line": 55,
+                    },
+                  },
+                },
+              ]
+          `)
+    })
+  })
+
+  describe('onCompletion', () => {
+    it('responds to onCompletion with filtered list when word is found', async () => {
+      const { connection } = await initializeServer()
+
+      const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+      const result = await onCompletion(
         {
-          kind: expect.any(Number),
-          location: {
-            range: {
-              end: { character: 27, line: 40 },
-              start: { character: 0, line: 40 },
-            },
-            uri: expect.stringContaining('/testing/fixtures/install.sh'),
+          textDocument: {
+            uri: FIXTURE_URI.INSTALL,
           },
-          name: 'npm_config_loglevel',
+          position: {
+            // rm
+            line: 25,
+            character: 5,
+          },
         },
+        {} as any,
+        {} as any,
+      )
+
+      // Limited set (not using snapshot due to different executables on CI and locally)
+      expect(result && 'length' in result && result.length < 8).toBe(true)
+      expect(result).toEqual(
+        expect.arrayContaining([
+          {
+            data: {
+              type: CompletionItemDataType.Executable,
+            },
+            kind: expect.any(Number),
+            label: 'rm',
+          },
+        ]),
+      )
+    })
+
+    it('responds to onCompletion with options list when command name is found', async () => {
+      // This doesn't work on all hosts:
+      const getOptionsResult = Process.spawnSync(
+        Path.join(__dirname, '../src/get-options.sh'),
+        ['find', '-'],
+      )
+
+      if (getOptionsResult.status !== 0) {
+        // eslint-disable-next-line no-console
+        console.warn('Skipping onCompletion test as get-options.sh failed')
+        return
+      }
+
+      const { connection } = await initializeServer()
+
+      const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+      const result = await onCompletion(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.OPTIONS,
+          },
+          position: {
+            // grep --line-
+            line: 2,
+            character: 12,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      expect(result).toEqual(
+        expect.arrayContaining([
+          {
+            data: {
+              name: expect.stringMatching(RegExp('--line-.*')),
+              type: CompletionItemDataType.Symbol,
+            },
+            kind: expect.any(Number),
+            label: expect.stringMatching(RegExp('--line-.*')),
+          },
+        ]),
+      )
+    })
+
+    it('responds to onCompletion with entire list when no word is found', async () => {
+      const { connection } = await initializeServer()
+
+      const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+      const result = await onCompletion(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.INSTALL,
+          },
+          position: {
+            // empty space
+            line: 26,
+            character: 0,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      // Entire list
+      expect(result && 'length' in result && result.length).toBeGreaterThanOrEqual(50)
+    })
+
+    it('responds to onCompletion with empty list when the following characters is not an empty string or whitespace', async () => {
+      const { connection } = await initializeServer()
+
+      const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+      const result = await onCompletion(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.INSTALL,
+          },
+          position: {
+            // {
+            line: 271,
+            character: 21,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      expect(result).toEqual([])
+    })
+
+    it('responds to onCompletion with empty list when word is a comment', async () => {
+      const { connection } = await initializeServer()
+
+      const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+      const result = await onCompletion(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.INSTALL,
+          },
+          position: {
+            // inside comment
+            line: 2,
+            character: 1,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      expect(result).toEqual([])
+    })
+
+    it('responds to onCompletion with empty list when word is {', async () => {
+      const { connection } = await initializeServer()
+
+      const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+      const result = await onCompletion(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.ISSUE101,
+          },
+          position: {
+            // the opening brace '{' to 'add_a_user'
+            line: 4,
+            character: 0,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      expect(result).toEqual([])
+    })
+
+    it('responds to onCompletion when word is found in another file', async () => {
+      const { connection } = await initializeServer()
+
+      const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+      const resultVariable = await onCompletion(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.SOURCING,
+          },
+          position: {
+            // $BLU (variable)
+            line: 6,
+            character: 7,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      expect(resultVariable).toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "data": Object {
+                    "type": 3,
+                  },
+                  "documentation": Object {
+                    "kind": "markdown",
+                    "value": "Variable: **BLUE** - *defined in extension.inc*",
+                  },
+                  "kind": 6,
+                  "label": "BLUE",
+                },
+              ]
+          `)
+
+      const resultFunction = await onCompletion(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.SOURCING,
+          },
+          position: {
+            // add_a_us (function)
+            line: 8,
+            character: 7,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      expect(resultFunction).toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "data": Object {
+                    "type": 3,
+                  },
+                  "documentation": Object {
+                    "kind": "markdown",
+                    "value": "Function: **add_a_user** - *defined in issue101.sh*
+
+              \`\`\`txt
+              Helper function to add a user
+              \`\`\`",
+                  },
+                  "kind": 3,
+                  "label": "add_a_user",
+                },
+              ]
+          `)
+    })
+
+    it('responds to onCompletion with local symbol when word is found in multiple files', async () => {
+      const { connection } = await initializeServer()
+
+      const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+      const result = await onCompletion(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.SOURCING,
+          },
+          position: {
+            // BOL (BOLD is defined in multiple places)
+            line: 12,
+            character: 7,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      expect(result).toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "data": Object {
+                    "type": 3,
+                  },
+                  "documentation": undefined,
+                  "kind": 6,
+                  "label": "BOLD",
+                },
+              ]
+          `)
+    })
+
+    it('responds to onCompletion with all variables when starting to expand parameters', async () => {
+      const { connection } = await initializeServer({ rootPath: REPO_ROOT_FOLDER })
+
+      const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+      const result: any = await onCompletion(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.SOURCING,
+          },
+          position: {
+            // $
+            line: 14,
+            character: 7,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      // they are all variables
+      expect(Array.from(new Set(result.map((item: any) => item.kind)))).toEqual([
+        LSP.CompletionItemKind.Variable,
       ])
-    }
-
-    await lookupAndExpectNpmConfigLoglevelResult('npm_config_loglevel') // exact
-    await lookupAndExpectNpmConfigLoglevelResult('config_log') // in the middle
-    await lookupAndExpectNpmConfigLoglevelResult('npmloglevel') // fuzzy
+      expect(result).toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "data": Object {
+                    "type": 3,
+                  },
+                  "documentation": undefined,
+                  "kind": 6,
+                  "label": "BOLD",
+                },
+                Object {
+                  "data": Object {
+                    "type": 3,
+                  },
+                  "documentation": Object {
+                    "kind": "markdown",
+                    "value": "Variable: **RED** - *defined in extension.inc*",
+                  },
+                  "kind": 6,
+                  "label": "RED",
+                },
+                Object {
+                  "data": Object {
+                    "type": 3,
+                  },
+                  "documentation": Object {
+                    "kind": "markdown",
+                    "value": "Variable: **GREEN** - *defined in extension.inc*",
+                  },
+                  "kind": 6,
+                  "label": "GREEN",
+                },
+                Object {
+                  "data": Object {
+                    "type": 3,
+                  },
+                  "documentation": Object {
+                    "kind": "markdown",
+                    "value": "Variable: **BLUE** - *defined in extension.inc*",
+                  },
+                  "kind": 6,
+                  "label": "BLUE",
+                },
+                Object {
+                  "data": Object {
+                    "type": 3,
+                  },
+                  "documentation": Object {
+                    "kind": "markdown",
+                    "value": "Variable: **RESET** - *defined in extension.inc*",
+                  },
+                  "kind": 6,
+                  "label": "RESET",
+                },
+              ]
+          `)
+    })
   })
 
-  it('responds to onCompletion with filtered list when word is found', async () => {
-    const { connection } = await initializeServer()
+  describe('onCompletionResolve', () => {
+    // FIXME
+  })
 
-    const onCompletion = connection.onCompletion.mock.calls[0][0]
+  describe('onDefinition', () => {
+    it('responds to onDefinition', async () => {
+      const { connection } = await initializeServer()
 
-    const result = await onCompletion(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.INSTALL,
-        },
-        position: {
-          // rm
-          line: 25,
-          character: 5,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
+      const onDefinition = connection.onDefinition.mock.calls[0][0]
 
-    // Limited set (not using snapshot due to different executables on CI and locally)
-    expect(result && 'length' in result && result.length < 8).toBe(true)
-    expect(result).toEqual(
-      expect.arrayContaining([
+      const result = await onDefinition(
         {
-          data: {
-            type: CompletionItemDataType.Executable,
+          textDocument: {
+            uri: FIXTURE_URI.SOURCING,
           },
-          kind: expect.any(Number),
-          label: 'rm',
+          position: { character: 10, line: 2 },
         },
-      ]),
-    )
+        {} as any,
+        {} as any,
+      )
+
+      expect(updateSnapshotUris(result)).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "range": Object {
+              "end": Object {
+                "character": 0,
+                "line": 0,
+              },
+              "start": Object {
+                "character": 0,
+                "line": 0,
+              },
+            },
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc",
+          },
+        ]
+      `)
+    })
   })
 
-  it('responds to onCompletion with options list when command name is found', async () => {
-    // This doesn't work on all hosts:
-    const getOptionsResult = Process.spawnSync(
-      Path.join(__dirname, '../src/get-options.sh'),
-      ['find', '-'],
-    )
+  describe('onDocumentHighlight', () => {
+    it('responds to onDocumentHighlight', async () => {
+      const { connection } = await initializeServer()
 
-    if (getOptionsResult.status !== 0) {
-      // eslint-disable-next-line no-console
-      console.warn('Skipping onCompletion test as get-options.sh failed')
-      return
-    }
+      const onDocumentHighlight = connection.onDocumentHighlight.mock.calls[0][0]
 
-    const { connection } = await initializeServer()
-
-    const onCompletion = connection.onCompletion.mock.calls[0][0]
-
-    const result = await onCompletion(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.OPTIONS,
-        },
-        position: {
-          // grep --line-
-          line: 2,
-          character: 12,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    expect(result).toEqual(
-      expect.arrayContaining([
+      const result1 = await onDocumentHighlight(
         {
-          data: {
-            name: expect.stringMatching(RegExp('--line-.*')),
-            type: CompletionItemDataType.Symbol,
+          textDocument: {
+            uri: FIXTURE_URI.ISSUE206,
           },
-          kind: expect.any(Number),
-          label: expect.stringMatching(RegExp('--line-.*')),
+          position: {
+            // FOO
+            line: 0,
+            character: 10,
+          },
         },
-      ]),
-    )
+        {} as any,
+        {} as any,
+      )
+
+      expect(result1).toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "range": Object {
+                    "end": Object {
+                      "character": 12,
+                      "line": 0,
+                    },
+                    "start": Object {
+                      "character": 9,
+                      "line": 0,
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "end": Object {
+                      "character": 28,
+                      "line": 1,
+                    },
+                    "start": Object {
+                      "character": 25,
+                      "line": 1,
+                    },
+                  },
+                },
+              ]
+          `)
+
+      const result2 = await onDocumentHighlight(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.ISSUE206,
+          },
+          position: {
+            // readonly cannot be parsed as a word
+            line: 0,
+            character: 0,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      expect(result2).toMatchInlineSnapshot(`Array []`)
+
+      const result3 = await onDocumentHighlight(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.SCOPE,
+          },
+          position: {
+            // X
+            line: 32,
+            character: 8,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      expect(result3).toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "range": Object {
+                    "end": Object {
+                      "character": 1,
+                      "line": 2,
+                    },
+                    "start": Object {
+                      "character": 0,
+                      "line": 2,
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "end": Object {
+                      "character": 1,
+                      "line": 4,
+                    },
+                    "start": Object {
+                      "character": 0,
+                      "line": 4,
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "end": Object {
+                      "character": 9,
+                      "line": 8,
+                    },
+                    "start": Object {
+                      "character": 8,
+                      "line": 8,
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "end": Object {
+                      "character": 11,
+                      "line": 12,
+                    },
+                    "start": Object {
+                      "character": 10,
+                      "line": 12,
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "end": Object {
+                      "character": 13,
+                      "line": 15,
+                    },
+                    "start": Object {
+                      "character": 12,
+                      "line": 15,
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "end": Object {
+                      "character": 13,
+                      "line": 19,
+                    },
+                    "start": Object {
+                      "character": 12,
+                      "line": 19,
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "end": Object {
+                      "character": 15,
+                      "line": 20,
+                    },
+                    "start": Object {
+                      "character": 14,
+                      "line": 20,
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "end": Object {
+                      "character": 11,
+                      "line": 29,
+                    },
+                    "start": Object {
+                      "character": 10,
+                      "line": 29,
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "end": Object {
+                      "character": 9,
+                      "line": 32,
+                    },
+                    "start": Object {
+                      "character": 8,
+                      "line": 32,
+                    },
+                  },
+                },
+              ]
+          `)
+    })
   })
 
-  it('responds to onCompletion with entire list when no word is found', async () => {
-    const { connection } = await initializeServer()
+  describe('onDocumentSymbol', () => {
+    it('responds to onDocumentSymbol', async () => {
+      const { connection } = await initializeServer()
 
-    const onCompletion = connection.onCompletion.mock.calls[0][0]
+      const onDocumentSymbol = connection.onDocumentSymbol.mock.calls[0][0]
 
-    const result = await onCompletion(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.INSTALL,
+      const result = await onDocumentSymbol(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.SOURCING,
+          },
         },
-        position: {
-          // empty space
-          line: 26,
-          character: 0,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
+        {} as any,
+        {} as any,
+      )
 
-    // Entire list
-    expect(result && 'length' in result && result.length).toBeGreaterThanOrEqual(50)
+      expect(updateSnapshotUris(result)).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "kind": 13,
+            "location": Object {
+              "range": Object {
+                "end": Object {
+                  "character": 16,
+                  "line": 10,
+                },
+                "start": Object {
+                  "character": 0,
+                  "line": 10,
+                },
+              },
+              "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/sourcing.sh",
+            },
+            "name": "BOLD",
+          },
+          Object {
+            "kind": 12,
+            "location": Object {
+              "range": Object {
+                "end": Object {
+                  "character": 1,
+                  "line": 22,
+                },
+                "start": Object {
+                  "character": 0,
+                  "line": 20,
+                },
+              },
+              "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/sourcing.sh",
+            },
+            "name": "loadlib",
+          },
+        ]
+      `)
+    })
   })
 
-  it('responds to onCompletion with empty list when the following characters is not an empty string or whitespace', async () => {
-    const { connection } = await initializeServer()
+  describe('onHover', () => {
+    it('responds with documentation for command', async () => {
+      const { connection } = await initializeServer()
 
-    const onCompletion = connection.onCompletion.mock.calls[0][0]
+      const onHover = connection.onHover.mock.calls[0][0]
 
-    const result = await onCompletion(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.INSTALL,
+      const result = await onHover(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.INSTALL,
+          },
+          position: {
+            // rm
+            line: 25,
+            character: 5,
+          },
         },
-        position: {
-          // {
-          line: 271,
-          character: 21,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
+        {} as any,
+        {} as any,
+      )
 
-    expect(result).toEqual([])
+      expect(result).toBeDefined()
+      expect(result).toEqual({
+        contents: {
+          kind: 'markdown',
+          value: expect.stringContaining('remove directories'),
+        },
+      })
+    })
+
+    it('responds with function documentation extracted from comments', async () => {
+      const { connection } = await initializeServer()
+
+      const onHover = connection.onHover.mock.calls[0][0]
+
+      const result = await onHover(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.COMMENT_DOC,
+          },
+          position: {
+            line: 17,
+            character: 0,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      expect(result).toBeDefined()
+      expect(result).toMatchInlineSnapshot(`
+              Object {
+                "contents": Object {
+                  "kind": "markdown",
+                  "value": "Function: **hello_world** - *defined on line 8*
+
+              \`\`\`txt
+              this is a comment
+              describing the function
+              hello_world
+              this function takes two arguments
+              \`\`\`",
+                },
+              }
+          `)
+    })
+
+    it('displays correct documentation for symbols in file that override path executables', async () => {
+      const { connection, server } = await initializeServer()
+      server.register(connection)
+
+      const onHover = connection.onHover.mock.calls[0][0]
+
+      const result = await onHover(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.OVERRIDE_SYMBOL,
+          },
+          position: {
+            line: 9,
+            character: 1,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      expect(result).toBeDefined()
+      expect(result).toMatchInlineSnapshot(`
+              Object {
+                "contents": Object {
+                  "kind": "markdown",
+                  "value": "Function: **ls** - *defined on line 6*
+
+              \`\`\`txt
+              override documentation for \`ls\` symbol
+              \`\`\`",
+                },
+              }
+          `)
+    })
+
+    it('returns executable documentation if the function is not redefined', async () => {
+      const { connection, server } = await initializeServer()
+      server.register(connection)
+
+      const onHover = connection.onHover.mock.calls[0][0]
+
+      const result = await onHover(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.OVERRIDE_SYMBOL,
+          },
+          position: {
+            line: 2,
+            character: 1,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      expect(result).toBeDefined()
+      expect((result as any)?.contents.value).toContain('list directory contents')
+    })
+
+    it.skip('returns documentation from explainshell', () => {
+      // FIXME
+    })
   })
 
-  it('responds to onCompletion with empty list when word is a comment', async () => {
-    const { connection } = await initializeServer()
-
-    const onCompletion = connection.onCompletion.mock.calls[0][0]
-
-    const result = await onCompletion(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.INSTALL,
-        },
-        position: {
-          // inside comment
-          line: 2,
-          character: 1,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    expect(result).toEqual([])
+  describe('onReferences', () => {
+    // FIXME
   })
 
-  it('responds to onCompletion with empty list when word is {', async () => {
-    const { connection } = await initializeServer()
+  describe('onWorkspaceSymbol', () => {
+    it('responds to onWorkspaceSymbol', async () => {
+      const { connection } = await initializeServer()
 
-    const onCompletion = connection.onCompletion.mock.calls[0][0]
+      const onWorkspaceSymbol = connection.onWorkspaceSymbol.mock.calls[0][0]
 
-    const result = await onCompletion(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.ISSUE101,
-        },
-        position: {
-          // the opening brace '{' to 'add_a_user'
-          line: 4,
-          character: 0,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    expect(result).toEqual([])
-  })
-
-  it('responds to onCompletion when word is found in another file', async () => {
-    const { connection } = await initializeServer()
-
-    const onCompletion = connection.onCompletion.mock.calls[0][0]
-
-    const resultVariable = await onCompletion(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.SOURCING,
-        },
-        position: {
-          // $BLU (variable)
-          line: 6,
-          character: 7,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    expect(resultVariable).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "data": Object {
-            "type": 3,
+      async function lookupAndExpectNpmConfigLoglevelResult(query: string) {
+        const result = await onWorkspaceSymbol(
+          {
+            query,
           },
-          "documentation": Object {
-            "kind": "markdown",
-            "value": "Variable: **BLUE** - *defined in extension.inc*",
-          },
-          "kind": 6,
-          "label": "BLUE",
-        },
-      ]
-    `)
+          {} as any,
+          {} as any,
+        )
 
-    const resultFunction = await onCompletion(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.SOURCING,
-        },
-        position: {
-          // add_a_us (function)
-          line: 8,
-          character: 7,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    expect(resultFunction).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "data": Object {
-            "type": 3,
+        expect(result).toEqual([
+          {
+            kind: expect.any(Number),
+            location: {
+              range: {
+                end: { character: 27, line: 40 },
+                start: { character: 0, line: 40 },
+              },
+              uri: expect.stringContaining('/testing/fixtures/install.sh'),
+            },
+            name: 'npm_config_loglevel',
           },
-          "documentation": Object {
-            "kind": "markdown",
-            "value": "Function: **add_a_user** - *defined in issue101.sh*
-
-      \`\`\`txt
-      Helper function to add a user
-      \`\`\`",
-          },
-          "kind": 3,
-          "label": "add_a_user",
-        },
-      ]
-    `)
-  })
-
-  it('responds to onCompletion with local symbol when word is found in multiple files', async () => {
-    const { connection } = await initializeServer()
-
-    const onCompletion = connection.onCompletion.mock.calls[0][0]
-
-    const result = await onCompletion(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.SOURCING,
-        },
-        position: {
-          // BOL (BOLD is defined in multiple places)
-          line: 12,
-          character: 7,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "data": Object {
-            "type": 3,
-          },
-          "documentation": undefined,
-          "kind": 6,
-          "label": "BOLD",
-        },
-      ]
-    `)
-  })
-
-  it('responds to onCompletion with all variables when starting to expand parameters', async () => {
-    const { connection } = await initializeServer({ rootPath: REPO_ROOT_FOLDER })
-
-    const onCompletion = connection.onCompletion.mock.calls[0][0]
-
-    const result: any = await onCompletion(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.SOURCING,
-        },
-        position: {
-          // $
-          line: 14,
-          character: 7,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    // they are all variables
-    expect(Array.from(new Set(result.map((item: any) => item.kind)))).toEqual([
-      LSP.CompletionItemKind.Variable,
-    ])
-    expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "data": Object {
-            "type": 3,
-          },
-          "documentation": undefined,
-          "kind": 6,
-          "label": "BOLD",
-        },
-        Object {
-          "data": Object {
-            "type": 3,
-          },
-          "documentation": Object {
-            "kind": "markdown",
-            "value": "Variable: **RED** - *defined in extension.inc*",
-          },
-          "kind": 6,
-          "label": "RED",
-        },
-        Object {
-          "data": Object {
-            "type": 3,
-          },
-          "documentation": Object {
-            "kind": "markdown",
-            "value": "Variable: **GREEN** - *defined in extension.inc*",
-          },
-          "kind": 6,
-          "label": "GREEN",
-        },
-        Object {
-          "data": Object {
-            "type": 3,
-          },
-          "documentation": Object {
-            "kind": "markdown",
-            "value": "Variable: **BLUE** - *defined in extension.inc*",
-          },
-          "kind": 6,
-          "label": "BLUE",
-        },
-        Object {
-          "data": Object {
-            "type": 3,
-          },
-          "documentation": Object {
-            "kind": "markdown",
-            "value": "Variable: **RESET** - *defined in extension.inc*",
-          },
-          "kind": 6,
-          "label": "RESET",
-        },
-      ]
-    `)
-  })
-
-  it('responds to onCodeAction', async () => {
-    const { connection, server } = await initializeServer()
-    const document = FIXTURE_DOCUMENT.COMMENT_DOC
-
-    await server.analyzeAndLintDocument(document)
-
-    expect(connection.sendDiagnostics).toHaveBeenCalledTimes(1)
-    const { diagnostics } = connection.sendDiagnostics.mock.calls[0][0]
-    const fixableDiagnostic = diagnostics.filter(({ code }) => code === 'SC2086')[0]
-
-    expect(fixableDiagnostic).toMatchInlineSnapshot(`
-      Object {
-        "code": "SC2086",
-        "codeDescription": Object {
-          "href": "https://www.shellcheck.net/wiki/SC2086",
-        },
-        "message": "Double quote to prevent globbing and word splitting.",
-        "range": Object {
-          "end": Object {
-            "character": 13,
-            "line": 55,
-          },
-          "start": Object {
-            "character": 5,
-            "line": 55,
-          },
-        },
-        "severity": 3,
-        "source": "shellcheck",
-        "tags": undefined,
+        ])
       }
-    `)
 
-    // TODO: we could find the diagnostics and then use the range to test the code action
-
-    const onCodeAction = connection.onCodeAction.mock.calls[0][0]
-
-    const result = await onCodeAction(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.COMMENT_DOC,
-        },
-        range: fixableDiagnostic.range,
-        context: {
-          diagnostics: [fixableDiagnostic],
-        },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    expect(result).toHaveLength(1)
-    const codeAction = (result as CodeAction[])[0]
-    expect(codeAction.diagnostics).toEqual([fixableDiagnostic])
-    expect(codeAction.diagnostics).toEqual([fixableDiagnostic])
-
-    expect(codeAction.edit?.changes && codeAction.edit?.changes[FIXTURE_URI.COMMENT_DOC])
-      .toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "newText": "\\"",
-          "range": Object {
-            "end": Object {
-              "character": 13,
-              "line": 55,
-            },
-            "start": Object {
-              "character": 13,
-              "line": 55,
-            },
-          },
-        },
-        Object {
-          "newText": "\\"",
-          "range": Object {
-            "end": Object {
-              "character": 5,
-              "line": 55,
-            },
-            "start": Object {
-              "character": 5,
-              "line": 55,
-            },
-          },
-        },
-      ]
-    `)
-  })
-
-  it('displays correct documentation for symbols in file that override path executables', async () => {
-    const { connection, server } = await initializeServer()
-    server.register(connection)
-
-    const onHover = connection.onHover.mock.calls[0][0]
-
-    const result = await onHover(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.OVERRIDE_SYMBOL,
-        },
-        position: {
-          line: 9,
-          character: 1,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    expect(result).toBeDefined()
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "contents": Object {
-          "kind": "markdown",
-          "value": "Function: **ls** - *defined on line 6*
-
-      \`\`\`txt
-      override documentation for \`ls\` symbol
-      \`\`\`",
-        },
-      }
-    `)
-  })
-
-  it('returns executable documentation if the function is not redefined', async () => {
-    const { connection, server } = await initializeServer()
-    server.register(connection)
-
-    const onHover = connection.onHover.mock.calls[0][0]
-
-    const result = await onHover(
-      {
-        textDocument: {
-          uri: FIXTURE_URI.OVERRIDE_SYMBOL,
-        },
-        position: {
-          line: 2,
-          character: 1,
-        },
-      },
-      {} as any,
-      {} as any,
-    )
-
-    expect(result).toBeDefined()
-    expect((result as any)?.contents.value).toContain('list directory contents')
+      await lookupAndExpectNpmConfigLoglevelResult('npm_config_loglevel') // exact
+      await lookupAndExpectNpmConfigLoglevelResult('config_log') // in the middle
+      await lookupAndExpectNpmConfigLoglevelResult('npmloglevel') // fuzzy
+    })
   })
 })
