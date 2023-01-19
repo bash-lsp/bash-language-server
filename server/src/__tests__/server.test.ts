@@ -27,20 +27,31 @@ jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {
   // noop
 })
 
-async function initializeServer(
-  { rootPath }: { rootPath?: string } = { rootPath: pathToFileURL(FIXTURE_FOLDER).href },
-) {
+async function initializeServer({
+  capabilities,
+  configurationObject,
+  rootPath,
+}: {
+  capabilities?: LSP.ClientCapabilities
+  configurationObject?: unknown
+  rootPath?: string
+} = {}) {
   const diagnostics: Array<LSP.PublishDiagnosticsParams | undefined> = []
 
   const connection = getMockConnection()
 
   const server = await LspServer.initialize(connection, {
-    rootPath,
+    rootPath: rootPath || pathToFileURL(FIXTURE_FOLDER).href,
     rootUri: null,
     processId: 42,
-    capabilities: {} as any,
+    capabilities: capabilities || {},
     workspaceFolders: null,
   })
+
+  if (configurationObject) {
+    const getConfiguration = connection.workspace.getConfiguration as any
+    getConfiguration.mockResolvedValue(configurationObject)
+  }
 
   server.register(connection)
   const onInitialized = connection.onInitialized.mock.calls[0][0]
@@ -97,6 +108,42 @@ describe('server', () => {
     expect(connection.onHover).toHaveBeenCalledTimes(1)
     expect(connection.onReferences).toHaveBeenCalledTimes(1)
     expect(connection.onWorkspaceSymbol).toHaveBeenCalledTimes(1)
+  })
+
+  it('allows for defining workspace configuration', async () => {
+    const { connection } = await initializeServer({
+      capabilities: {
+        workspace: {
+          configuration: true,
+        },
+      },
+      configurationObject: {
+        explainshellEndpoint: 'foo',
+      },
+    })
+
+    expect(connection.workspace.getConfiguration).toHaveBeenCalled()
+    expect(Logger.prototype.log).not.toHaveBeenCalledWith(expect.any(Number), [
+      expect.stringContaining('updateConfiguration: failed'),
+    ])
+  })
+
+  it('ignores invalid workspace configuration', async () => {
+    const { connection } = await initializeServer({
+      capabilities: {
+        workspace: {
+          configuration: true,
+        },
+      },
+      configurationObject: {
+        explainshellEndpoint: 42,
+      },
+    })
+
+    expect(connection.workspace.getConfiguration).toHaveBeenCalled()
+    expect(Logger.prototype.log).toHaveBeenCalledWith(expect.any(Number), [
+      expect.stringContaining('updateConfiguration: failed'),
+    ])
   })
 
   describe('onCodeAction', () => {
