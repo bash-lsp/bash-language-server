@@ -1,7 +1,6 @@
 import * as fs from 'fs'
 import * as FuzzySearch from 'fuzzy-search'
 import fetch from 'node-fetch'
-import * as URI from 'urijs'
 import * as url from 'url'
 import { isDeepStrictEqual } from 'util'
 import * as LSP from 'vscode-languageserver/node'
@@ -380,13 +379,13 @@ export default class Analyzer {
       return {}
     }
 
-    const cmd = interestingNode.text
-
     type ExplainshellResponse = {
       matches?: Array<{ helpHTML: string; start: number; end: number }>
     }
 
-    const url = URI(endpoint).path('/api/explain').addQuery('cmd', cmd).toString()
+    const searchParams = new URLSearchParams({ cmd: interestingNode.text }).toString()
+    const url = `${endpoint}/api/explain?${searchParams}`
+
     const explainshellRawResponse = await fetch(url)
     const explainshellResponse =
       (await explainshellRawResponse.json()) as ExplainshellResponse
