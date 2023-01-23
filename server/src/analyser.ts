@@ -1,7 +1,6 @@
 import * as fs from 'fs'
 import * as FuzzySearch from 'fuzzy-search'
 import fetch from 'node-fetch'
-import * as URI from 'urijs'
 import * as url from 'url'
 import { isDeepStrictEqual } from 'util'
 import * as LSP from 'vscode-languageserver/node'
@@ -265,9 +264,9 @@ export default class Analyzer {
 
   /**
    * Find all the locations where the given word was defined or referenced.
+   * This will include commands, functions, variables, etc.
    *
-   * FIXME: take position into account
-   * FIXME: take file into account
+   * It's currently not scope-aware, see findOccurrences.
    */
   public findReferences(word: string): LSP.Location[] {
     const uris = Object.keys(this.uriToAnalyzedDocument)
@@ -275,11 +274,14 @@ export default class Analyzer {
   }
 
   /**
-   * Find all occurrences (references or definitions) of a word in the given file.
+   * Find all occurrences of a word in the given file.
    * It's currently not scope-aware.
    *
-   * FIXME: should this take the scope into account? I guess it should
-   * as this is used for highlighting.
+   * This will include commands, functions, variables, etc.
+   *
+   * It's currently not scope-aware, meaning references does include
+   * references to functions and variables that has the same name but
+   * are defined in different files.
    */
   public findOccurrences(uri: string, word: string): LSP.Location[] {
     const analyzedDocument = this.uriToAnalyzedDocument[uri]
@@ -295,6 +297,7 @@ export default class Analyzer {
       let namedNode: Parser.SyntaxNode | null = null
 
       if (TreeSitterUtil.isReference(n)) {
+        // NOTE: a reference can be a command, variable, function, etc.
         namedNode = n.firstNamedChild || n
       } else if (TreeSitterUtil.isDefinition(n)) {
         namedNode = n.firstNamedChild
@@ -380,13 +383,13 @@ export default class Analyzer {
       return {}
     }
 
-    const cmd = interestingNode.text
-
     type ExplainshellResponse = {
       matches?: Array<{ helpHTML: string; start: number; end: number }>
     }
 
-    const url = URI(endpoint).path('/api/explain').addQuery('cmd', cmd).toString()
+    const searchParams = new URLSearchParams({ cmd: interestingNode.text }).toString()
+    const url = `${endpoint}/api/explain?${searchParams}`
+
     const explainshellRawResponse = await fetch(url)
     const explainshellResponse =
       (await explainshellRawResponse.json()) as ExplainshellResponse

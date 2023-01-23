@@ -18,6 +18,7 @@ import { SNIPPETS } from './snippets'
 import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
 import { logger, setLogConnection, setLogLevel } from './util/logger'
+import { isPositionIncludedInRange } from './util/lsp'
 import { getShellDocumentation } from './util/sh'
 
 const PARAMETER_EXPANSION_PREFIXES = new Set(['$', '${'])
@@ -708,7 +709,14 @@ export default class BashServer {
     if (!word) {
       return null
     }
-    return this.analyzer.findReferences(word)
+
+    const isCurrentDeclaration = (l: LSP.Location) =>
+      l.uri === params.textDocument.uri &&
+      isPositionIncludedInRange(params.position, l.range)
+
+    return this.analyzer
+      .findReferences(word)
+      .filter((l) => params.context.includeDeclaration || !isCurrentDeclaration(l))
   }
 
   private onWorkspaceSymbol(params: LSP.WorkspaceSymbolParams): LSP.SymbolInformation[] {

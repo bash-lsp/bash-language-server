@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 4.5.2
+
+- fixed `onReferences` to respect the `context.includeDeclaration` flag
+- removed unnecessary dependency `urijs`
+
 ## 4.5.1
 
 - Include grouped variables and functions when finding global declarations https://github.com/bash-lsp/bash-language-server/pull/685
