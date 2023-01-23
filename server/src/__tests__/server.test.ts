@@ -524,7 +524,7 @@ describe('server', () => {
 
       const onCompletion = connection.onCompletion.mock.calls[0][0]
 
-      const result: any = await onCompletion(
+      const result = await onCompletion(
         {
           textDocument: {
             uri: FIXTURE_URI.SOURCING,
@@ -540,9 +540,6 @@ describe('server', () => {
       )
 
       // they are all variables
-      expect(Array.from(new Set(result.map((item: any) => item.kind)))).toEqual([
-        LSP.CompletionItemKind.Variable,
-      ])
       expect(result).toMatchInlineSnapshot(`
               Array [
                 Object {
@@ -603,7 +600,48 @@ describe('server', () => {
   })
 
   describe('onCompletionResolve', () => {
-    // FIXME
+    it('resolves documentation for buitins', async () => {
+      const { connection } = await initializeServer({ rootPath: REPO_ROOT_FOLDER })
+
+      const onCompletionResolve = connection.onCompletionResolve.mock.calls[0][0]
+
+      const item = {
+        data: {
+          type: CompletionItemDataType.Builtin,
+        },
+        kind: LSP.CompletionItemKind.Function,
+        label: 'echo',
+      }
+      const result = await onCompletionResolve(item, {} as any)
+
+      expect(result).toEqual({
+        ...item,
+        documentation: {
+          kind: 'markdown',
+          value: expect.stringContaining('Write arguments to the standard output'),
+        },
+      })
+    })
+
+    it('ignores unknown items', async () => {
+      const { connection } = await initializeServer({ rootPath: REPO_ROOT_FOLDER })
+
+      const onCompletionResolve = connection.onCompletionResolve.mock.calls[0][0]
+
+      const item = {
+        data: {
+          type: CompletionItemDataType.Symbol,
+        },
+        kind: LSP.CompletionItemKind.Function,
+        label: 'foobar',
+      }
+      const result = await onCompletionResolve(item, {} as any)
+
+      expect(result).toEqual({
+        ...item,
+        documentation: undefined,
+      })
+    })
   })
 
   describe('onDefinition', () => {
