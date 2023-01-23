@@ -146,6 +146,25 @@ describe('server', () => {
     ])
   })
 
+  it('responds to onDidChangeConfiguration', async () => {
+    const { connection } = await initializeServer({
+      capabilities: {
+        workspace: {
+          configuration: true,
+        },
+      },
+    })
+
+    const onDidChangeConfiguration = connection.onDidChangeConfiguration.mock.calls[0][0]
+
+    onDidChangeConfiguration({ settings: { bashIde: { explainshellEndpoint: 42 } } })
+
+    expect(connection.workspace.getConfiguration).toHaveBeenCalled()
+    expect(Logger.prototype.log).toHaveBeenCalledWith(expect.any(Number), [
+      expect.stringContaining('updateConfiguration: failed'),
+    ])
+  })
+
   describe('onCodeAction', () => {
     it('responds to onCodeAction', async () => {
       const { connection, server } = await initializeServer()
