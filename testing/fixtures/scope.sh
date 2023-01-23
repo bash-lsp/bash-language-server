@@ -39,3 +39,5 @@ for i in 1 2 3 4 5
 do
  echo "$GLOBAL_1 $i"
 done
+
+echo "$npm_config_loglevel" # this is an undefined variable, but defined in install.sh

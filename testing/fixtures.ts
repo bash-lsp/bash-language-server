@@ -40,17 +40,28 @@ export const FIXTURE_DOCUMENT: Record<FIXTURE_KEY, TextDocument> = (
 
 export const REPO_ROOT_FOLDER = path.resolve(path.join(FIXTURE_FOLDER, '../..'))
 
-export function updateSnapshotUris(obj: any) {
-  if (obj.uri) {
-    obj.uri = obj.uri.replace(REPO_ROOT_FOLDER, '__REPO_ROOT_FOLDER__')
-  }
-  Object.values(obj).forEach((child) => {
-    if (Array.isArray(child)) {
-      child.forEach((el) => updateSnapshotUris(el))
-    } else if (typeof child === 'object' && child != null) {
-      updateSnapshotUris(child)
+export function updateSnapshotUris<
+  T extends Record<string, any> | Array<any> | null | undefined,
+>(data: T): T {
+  if (data != null) {
+    if (Array.isArray(data)) {
+      data.forEach((el) => updateSnapshotUris(el))
+      return data
     }
-  })
 
-  return obj
+    if (typeof data === 'object') {
+      if (data.uri) {
+        data.uri = data.uri.replace(REPO_ROOT_FOLDER, '__REPO_ROOT_FOLDER__')
+      }
+      Object.values(data).forEach((child) => {
+        if (Array.isArray(child)) {
+          child.forEach((el) => updateSnapshotUris(el))
+        } else if (typeof child === 'object' && child != null) {
+          updateSnapshotUris(child)
+        }
+      })
+    }
+  }
+
+  return data
 }

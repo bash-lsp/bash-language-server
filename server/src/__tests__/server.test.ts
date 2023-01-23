@@ -699,7 +699,7 @@ describe('server', () => {
             uri: FIXTURE_URI.ISSUE206,
           },
           position: {
-            // readonly cannot be parsed as a word
+            // readonly is a declaration command so not parsed correctly by findOccurrences
             line: 0,
             character: 0,
           },
@@ -1026,7 +1026,7 @@ describe('server', () => {
     })
 
     it.skip('returns documentation from explainshell', async () => {
-      // Skipped as this requires a running explainshell server
+      // Skipped as this requires a running explainshell server (and the code is hard to mock)
       // docker container run --name explainshell --restart always -p 127.0.0.1:6000:5000 -d spaceinvaderone/explainshell
 
       const { connection } = await initializeServer({
@@ -1067,7 +1067,180 @@ describe('server', () => {
   })
 
   describe('onReferences', () => {
-    // FIXME
+    async function getOnReferencesTestCase() {
+      const { connection } = await initializeServer()
+      const onReferences = connection.onReferences.mock.calls[0][0]
+
+      const callOnReferences = ({
+        includeDeclarationOfCurrentSymbol,
+        uri,
+        position,
+      }: {
+        includeDeclarationOfCurrentSymbol: boolean
+        uri: string
+        position: LSP.Position
+      }) =>
+        updateSnapshotUris(
+          onReferences(
+            {
+              textDocument: {
+                uri,
+              },
+              position,
+              context: {
+                includeDeclaration: includeDeclarationOfCurrentSymbol,
+              },
+            },
+            {} as any,
+            {} as any,
+          ),
+        )
+
+      return {
+        callOnReferences,
+      }
+    }
+
+    it('returns null if the word is not found', async () => {
+      const { callOnReferences } = await getOnReferencesTestCase()
+      const result = await callOnReferences({
+        position: { line: 34, character: 1 }, // empty line
+        uri: FIXTURE_URI.INSTALL,
+        includeDeclarationOfCurrentSymbol: true,
+      })
+      expect(result).toBeNull()
+    })
+
+    it('returns references to builtins and executables across the workspace', async () => {
+      const { callOnReferences } = await getOnReferencesTestCase()
+      const result = await callOnReferences({
+        position: { line: 263, character: 5 }, // echo
+        uri: FIXTURE_URI.INSTALL,
+        includeDeclarationOfCurrentSymbol: true,
+      })
+      expect(Array.isArray(result)).toBe(true)
+      if (Array.isArray(result)) {
+        expect(result.length).toBeGreaterThan(50)
+        expect(new Set(result.map((v) => v.uri)).size).toBeGreaterThan(5)
+      }
+    })
+
+    it('returns references depending on the context flag', async () => {
+      const { callOnReferences } = await getOnReferencesTestCase()
+
+      const resultIncludingCurrentSymbol = await callOnReferences({
+        position: { line: 50, character: 10 }, // npm_config_loglevel
+        uri: FIXTURE_URI.INSTALL,
+        includeDeclarationOfCurrentSymbol: true,
+      })
+
+      const resultExcludingCurrentSymbol = await callOnReferences({
+        position: { line: 50, character: 10 }, // npm_config_loglevel
+        uri: FIXTURE_URI.INSTALL,
+        includeDeclarationOfCurrentSymbol: false,
+      })
+
+      expect(resultIncludingCurrentSymbol).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "range": Object {
+              "end": Object {
+                "character": 19,
+                "line": 40,
+              },
+              "start": Object {
+                "character": 0,
+                "line": 40,
+              },
+            },
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh",
+          },
+          Object {
+            "range": Object {
+              "end": Object {
+                "character": 21,
+                "line": 48,
+              },
+              "start": Object {
+                "character": 2,
+                "line": 48,
+              },
+            },
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh",
+          },
+          Object {
+            "range": Object {
+              "end": Object {
+                "character": 26,
+                "line": 50,
+              },
+              "start": Object {
+                "character": 7,
+                "line": 50,
+              },
+            },
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh",
+          },
+          Object {
+            "range": Object {
+              "end": Object {
+                "character": 26,
+                "line": 42,
+              },
+              "start": Object {
+                "character": 7,
+                "line": 42,
+              },
+            },
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/scope.sh",
+          },
+        ]
+      `)
+
+      expect(resultExcludingCurrentSymbol).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "range": Object {
+              "end": Object {
+                "character": 19,
+                "line": 40,
+              },
+              "start": Object {
+                "character": 0,
+                "line": 40,
+              },
+            },
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh",
+          },
+          Object {
+            "range": Object {
+              "end": Object {
+                "character": 21,
+                "line": 48,
+              },
+              "start": Object {
+                "character": 2,
+                "line": 48,
+              },
+            },
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh",
+          },
+          Object {
+            "range": Object {
+              "end": Object {
+                "character": 26,
+                "line": 42,
+              },
+              "start": Object {
+                "character": 7,
+                "line": 42,
+              },
+            },
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/scope.sh",
+          },
+        ]
+      `)
+    })
   })
 
   describe('onWorkspaceSymbol', () => {
