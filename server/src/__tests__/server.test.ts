@@ -1046,8 +1046,22 @@ describe('server', () => {
         line: 2,
         character: 3,
       })
-      expect(result2).toBeDefined()
-      expect((result2 as any)?.contents.value).toBeUndefined()
+      expect(result2).toEqual(null)
+    })
+
+    it('responds with documentation even if parsing fails', async () => {
+      const result = await getHoverResult(FIXTURE_URI.MISSING_NODE2, {
+        // sleep
+        line: 12,
+        character: 4,
+      })
+
+      expect(result).toEqual({
+        contents: {
+          kind: 'markdown',
+          value: expect.stringContaining('suspends execution'),
+        },
+      })
     })
 
     it.skip('returns documentation from explainshell', async () => {

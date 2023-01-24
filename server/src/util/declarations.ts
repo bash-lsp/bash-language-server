@@ -154,20 +154,20 @@ export function getLocalDeclarations({
       node.type === 'program'
         ? node
         : TreeSitterUtil.findParent(node, (p) => p.type === 'program')
-    if (!rootNode) {
-      throw new Error('did not find root node')
-    }
 
-    Object.entries(
-      getAllGlobalVariableDeclarations({
-        rootNode,
-        uri,
-      }),
-    ).map(([name, symbols]) => {
-      if (!declarations[name]) {
-        declarations[name] = symbols
-      }
-    })
+    if (rootNode) {
+      // In case of parsing errors, the root node might not be found
+      Object.entries(
+        getAllGlobalVariableDeclarations({
+          rootNode,
+          uri,
+        }),
+      ).map(([name, symbols]) => {
+        if (!declarations[name]) {
+          declarations[name] = symbols
+        }
+      })
+    }
   }
 
   return declarations
