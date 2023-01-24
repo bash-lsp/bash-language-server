@@ -20,6 +20,7 @@ import { uniqueBasedOnHash } from './util/array'
 import { logger, setLogConnection, setLogLevel } from './util/logger'
 import { isPositionIncludedInRange } from './util/lsp'
 import { getShellDocumentation } from './util/sh'
+import { SOURCING_COMMANDS } from './util/sourcing'
 
 const PARAMETER_EXPANSION_PREFIXES = new Set(['$', '${'])
 const CONFIGURATION_SECTION = 'bashIde'
@@ -115,7 +116,8 @@ export default class BashServer {
       textDocumentSync: LSP.TextDocumentSyncKind.Full,
       completionProvider: {
         resolveProvider: true,
-        triggerCharacters: ['$', '{'],
+        // ' ' is needed for completion after a command (currently only for source)
+        triggerCharacters: ['$', '{', ' ', '.'],
       },
       hoverProvider: true,
       documentHighlightProvider: true,
@@ -423,12 +425,15 @@ export default class BashServer {
   }
 
   private onCompletion(params: LSP.TextDocumentPositionParams): BashCompletionItem[] {
+    const currentUri = params.textDocument.uri
+    const previousCharacterPosition = Math.max(params.position.character - 1, 0)
+
     const word = this.analyzer.wordAtPointFromTextPosition({
       ...params,
       position: {
         line: params.position.line,
         // Go one character back to get completion on the current word
-        character: Math.max(params.position.character - 1, 0),
+        character: previousCharacterPosition,
       },
     })
 
@@ -439,9 +444,53 @@ export default class BashServer {
       return []
     }
 
-    if (word === '{') {
-      // We should not complete when it is not prefixed by a $.
-      // This case needs to be here as "{" is a completionProvider triggerCharacter.
+    if (word && ['{', '.'].includes(word)) {
+      // When the current word is a "{"" or a "." we should not complete.
+      // A valid completion word would be "${" or a "." command followed by an empty word.
+      return []
+    }
+
+    const commandNameBefore = this.analyzer.commandNameAtPoint(
+      params.textDocument.uri,
+      params.position.line,
+      // there might be a better way using the AST:
+      Math.max(params.position.character - 2, 0),
+    )
+    console.log(
+      '>>> commandNameBefore',
+      commandNameBefore,
+      Math.max(params.position.character - 2, 0),
+    )
+    const { workspaceFolder } = this
+    if (
+      workspaceFolder &&
+      commandNameBefore &&
+      SOURCING_COMMANDS.includes(commandNameBefore)
+    ) {
+      const uris = this.analyzer
+        .getAllUris()
+        .filter((uri) => currentUri !== uri)
+        .map((uri) => uri.replace(workspaceFolder, '.').replace('file://', ''))
+
+      if (uris) {
+        // TODO: remove qoutes if the user already typed them
+        // TODO: figure out the base path based on other source commands
+        return uris.map((uri) => {
+          return {
+            label: uri,
+            kind: LSP.CompletionItemKind.File,
+            data: {
+              type: CompletionItemDataType.Symbol,
+            },
+          }
+        })
+      }
+    }
+
+    // TODO: maybe abort if commandNameBefore is a known command
+    if (word === ' ') {
+      // TODO: test this
+      // No command was found, so don't complete on space
       return []
     }
 
@@ -463,15 +512,13 @@ export default class BashServer {
         params.textDocument.uri,
         params.position.line,
         // Go one character back to get completion on the current word
-        Math.max(params.position.character - 1, 0),
+        previousCharacterPosition,
       )
 
       if (commandName) {
         options = getCommandOptions(commandName, word)
       }
     }
-
-    const currentUri = params.textDocument.uri
 
     // TODO: an improvement here would be to detect if the current word is
     // not only a parameter expansion prefix, but also if the word is actually

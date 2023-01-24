@@ -1,7 +1,7 @@
 const SHEBANG_REGEXP = /^#!(.*)/
 const SHELL_REGEXP = /bin[/](?:env )?(\w+)/
 
-const BASH_DIALECTS = ['sh', 'bash', 'dash', 'ksh'] as const
+const BASH_DIALECTS = ['sh', 'bash', 'dash', 'ksh'] as const // why not try to parse zsh? And let treesitter determine if it is supported
 type SupportedBashDialect = (typeof BASH_DIALECTS)[number]
 
 export function getShebang(fileContent: string): string | null {

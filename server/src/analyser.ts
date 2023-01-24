@@ -273,7 +273,7 @@ export default class Analyzer {
    * It's currently not scope-aware, see findOccurrences.
    */
   public findReferences(word: string): LSP.Location[] {
-    const uris = Object.keys(this.uriToAnalyzedDocument)
+    const uris = this.getAllUris()
     return flattenArray(uris.map((uri) => this.findOccurrences(uri, word)))
   }
 
@@ -321,6 +321,10 @@ export default class Analyzer {
     })
 
     return locations
+  }
+
+  public getAllUris(): string[] {
+    return Object.keys(this.uriToAnalyzedDocument)
   }
 
   public getAllVariables({
@@ -414,6 +418,10 @@ export default class Analyzer {
 
       return { helpHTML: match && match.helpHTML }
     }
+  }
+
+  public getSourcedUris(uri: string): Set<string> {
+    return this.uriToAnalyzedDocument[uri]?.sourcedUris || new Set([])
   }
 
   /**
@@ -523,7 +531,7 @@ export default class Analyzer {
   // Private methods
   private getReachableUris({ uri: fromUri }: { uri?: string } = {}): string[] {
     if (!fromUri || this.includeAllWorkspaceSymbols) {
-      return Object.keys(this.uriToAnalyzedDocument)
+      return this.getAllUris()
     }
 
     const uris = [fromUri, ...Array.from(this.findAllSourcedUris({ uri: fromUri }))]
