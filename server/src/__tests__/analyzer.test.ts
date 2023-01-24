@@ -18,7 +18,7 @@ let analyzer: Analyzer
 const CURRENT_URI = 'dummy-uri.sh'
 
 // if you add a .sh file to testing/fixtures, update this value
-const FIXTURE_FILES_MATCHING_GLOB = 15
+const FIXTURE_FILES_MATCHING_GLOB = 16
 
 const defaultConfig = getDefaultConfiguration()
 
@@ -46,12 +46,30 @@ describe('analyze', () => {
     expect(loggerWarn).not.toHaveBeenCalled()
   })
 
-  it('parses files with a missing node', () => {
+  it('parses files with a missing nodes and return relevant diagnostics', () => {
     const diagnostics = analyzer.analyze({
       uri: CURRENT_URI,
       document: FIXTURE_DOCUMENT.MISSING_NODE,
     })
-    expect(diagnostics).toEqual([])
+    expect(diagnostics).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "message": "Syntax error: \\"fi\\" missing",
+          "range": Object {
+            "end": Object {
+              "character": 0,
+              "line": 12,
+            },
+            "start": Object {
+              "character": 0,
+              "line": 12,
+            },
+          },
+          "severity": 2,
+          "source": "bash-language-server",
+        },
+      ]
+    `)
     expect(loggerWarn).toHaveBeenCalledWith(
       'Error while parsing dummy-uri.sh: syntax error',
     )
@@ -783,6 +801,7 @@ describe('initiateBackgroundAnalysis', () => {
     expect(loggerWarn).toHaveBeenCalled()
     expect(loggerWarn.mock.calls).toEqual([
       [expect.stringContaining('missing-node.sh: syntax error')],
+      [expect.stringContaining('missing-node2.sh: syntax error')],
       [expect.stringContaining('not-a-shell-script.sh: syntax error')],
       [expect.stringContaining('parse-problems.sh: syntax error')],
     ])
