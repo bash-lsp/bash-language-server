@@ -33,16 +33,15 @@ balanced-match@^1.0.0:
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
-bash-language-server@4.5.1:
-  version "4.5.1"
-  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-4.5.1.tgz#e1b8ae962b4ea2f33c1b28ccbc81246e79cfdf99"
-  integrity sha512-5vCFA1xwsuRcAt0qaFLhRgUoBskUTGwRpaiXKBrDw1WXWS+d3kkdBjTbrGouxuFcb2OrOPYSXf41xsEbEG8u/Q==
+bash-language-server@4.5.3:
+  version "4.5.3"
+  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-4.5.3.tgz#6820bd50580f806ca73baf4d5ff836737cdd820f"
+  integrity sha512-34H512+qYa9vqkoorA5wkULaJCb6STVtgAOKcpCCovM4EPgJOxt7IPIkghNFTmuwFRaUDZm2r/dZ4C0GROpfig==
   dependencies:
     fast-glob "3.2.12"
     fuzzy-search "3.2.1"
     node-fetch "2.6.8"
     turndown "7.1.1"
-    urijs "1.19.11"
     vscode-languageserver "8.0.2"
     vscode-languageserver-textdocument "1.0.8"
     web-tree-sitter "0.20.7"
@@ -208,11 +207,6 @@ turndown@7.1.1:
   integrity sha512-BEkXaWH7Wh7e9bd2QumhfAXk5g34+6QUmmWx+0q6ThaVOLuLUqsnkq35HQ5SBHSaxjSfSM7US5o4lhJNH7B9MA==
   dependencies:
     domino "^2.1.6"
-
-urijs@1.19.11:
-  version "1.19.11"
-  resolved "https://registry.yarnpkg.com/urijs/-/urijs-1.19.11.tgz#204b0d6b605ae80bea54bea39280cdb7c9f923cc"
-  integrity sha512-HXgFDgDommxn5/bIv0cnQZsPhHDA90NPHD6+c/v21U5+Sx5hoP8+dP9IZXBU1gIfvdRfhG8cel9QNPeionfcCQ==
 
 vscode-jsonrpc@8.0.2:
   version "8.0.2"

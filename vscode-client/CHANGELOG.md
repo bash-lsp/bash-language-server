@@ -1,5 +1,12 @@
 # Bash IDE
 
+## 1.30.0
+
+- Upgrade language server to 4.5.3.
+- Fix issue where some features would work as expected in case of a syntax issue
+- Fixed `onReferences` to respect the `context.includeDeclaration` flag
+- Removed unnecessary dependency `urijs`
+
 ## 1.29.0
 
 - Upgrade language server to 4.5.1.
