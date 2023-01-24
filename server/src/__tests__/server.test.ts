@@ -616,6 +616,29 @@ describe('server', () => {
               ]
           `)
     })
+
+    it('responds to onCompletion with source suggestions', async () => {
+      const { connection } = await initializeServer({ rootPath: REPO_ROOT_FOLDER })
+
+      const onCompletion = connection.onCompletion.mock.calls[0][0]
+
+      const result = await onCompletion(
+        {
+          textDocument: {
+            uri: FIXTURE_URI.SOURCING,
+          },
+          position: {
+            // after source
+            line: 2,
+            character: 8,
+          },
+        },
+        {} as any,
+        {} as any,
+      )
+
+      expect(result).toMatchInlineSnapshot(`Array []`)
+    })
   })
 
   describe('onCompletionResolve', () => {

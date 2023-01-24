@@ -6,7 +6,7 @@ import * as Parser from 'web-tree-sitter'
 import { untildify } from './fs'
 import * as TreeSitterUtil from './tree-sitter'
 
-const SOURCING_COMMANDS = ['source', '.']
+export const SOURCING_COMMANDS = ['source', '.']
 
 export type SourceCommand = {
   range: LSP.Range
@@ -55,11 +55,12 @@ function getSourcedPathInfoFromNode({
 }: {
   node: Parser.SyntaxNode
 }): null | { sourcedPath?: string; parseError?: string } {
-  if (node.type === 'command') {
+  if (node && node.type === 'command') {
     const [commandNameNode, argumentNode] = node.namedChildren
     if (
       commandNameNode.type === 'command_name' &&
-      SOURCING_COMMANDS.includes(commandNameNode.text)
+      SOURCING_COMMANDS.includes(commandNameNode.text) &&
+      argumentNode
     ) {
       if (argumentNode.type === 'word') {
         return {
