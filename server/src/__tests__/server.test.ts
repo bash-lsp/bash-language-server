@@ -955,27 +955,29 @@ describe('server', () => {
   })
 
   describe('onHover', () => {
-    it('responds with documentation for command', async () => {
+    async function getHoverResult(uri: string, position: LSP.Position) {
       const { connection } = await initializeServer()
 
       const onHover = connection.onHover.mock.calls[0][0]
 
-      const result = await onHover(
+      return onHover(
         {
           textDocument: {
-            uri: FIXTURE_URI.INSTALL,
+            uri,
           },
-          position: {
-            // rm
-            line: 25,
-            character: 5,
-          },
+          position,
         },
         {} as any,
         {} as any,
       )
+    }
+    it('responds with documentation for command', async () => {
+      const result = await getHoverResult(FIXTURE_URI.INSTALL, {
+        // rm
+        line: 25,
+        character: 5,
+      })
 
-      expect(result).toBeDefined()
       expect(result).toEqual({
         contents: {
           kind: 'markdown',
@@ -985,25 +987,11 @@ describe('server', () => {
     })
 
     it('responds with function documentation extracted from comments', async () => {
-      const { connection } = await initializeServer()
+      const result = await getHoverResult(FIXTURE_URI.COMMENT_DOC, {
+        line: 17,
+        character: 0,
+      })
 
-      const onHover = connection.onHover.mock.calls[0][0]
-
-      const result = await onHover(
-        {
-          textDocument: {
-            uri: FIXTURE_URI.COMMENT_DOC,
-          },
-          position: {
-            line: 17,
-            character: 0,
-          },
-        },
-        {} as any,
-        {} as any,
-      )
-
-      expect(result).toBeDefined()
       expect(result).toMatchInlineSnapshot(`
               Object {
                 "contents": Object {
@@ -1022,25 +1010,11 @@ describe('server', () => {
     })
 
     it('displays correct documentation for symbols in file that override path executables', async () => {
-      const { connection } = await initializeServer()
+      const result = await getHoverResult(FIXTURE_URI.OVERRIDE_SYMBOL, {
+        line: 9,
+        character: 1,
+      })
 
-      const onHover = connection.onHover.mock.calls[0][0]
-
-      const result = await onHover(
-        {
-          textDocument: {
-            uri: FIXTURE_URI.OVERRIDE_SYMBOL,
-          },
-          position: {
-            line: 9,
-            character: 1,
-          },
-        },
-        {} as any,
-        {} as any,
-      )
-
-      expect(result).toBeDefined()
       expect(result).toMatchInlineSnapshot(`
               Object {
                 "contents": Object {
@@ -1056,28 +1030,22 @@ describe('server', () => {
     })
 
     it('returns executable documentation if the function is not redefined', async () => {
-      const { connection } = await initializeServer()
-
-      const onHover = connection.onHover.mock.calls[0][0]
-
-      const getHoverResult = (position: LSP.Position) =>
-        onHover(
-          {
-            textDocument: {
-              uri: FIXTURE_URI.OVERRIDE_SYMBOL,
-            },
-            position,
-          },
-          {} as any,
-          {} as any,
-        )
-
-      const result1 = await getHoverResult({ line: 2, character: 1 })
-      expect(result1).toBeDefined()
-      expect((result1 as any)?.contents.value).toContain('list directory contents')
+      const result1 = await getHoverResult(FIXTURE_URI.OVERRIDE_SYMBOL, {
+        line: 2,
+        character: 1,
+      })
+      expect(result1).toEqual({
+        contents: {
+          kind: 'markdown',
+          value: expect.stringContaining('list directory contents'),
+        },
+      })
 
       // return null same result if the cursor is on the arguments
-      const result2 = await getHoverResult({ line: 2, character: 3 })
+      const result2 = await getHoverResult(FIXTURE_URI.OVERRIDE_SYMBOL, {
+        line: 2,
+        character: 3,
+      })
       expect(result2).toBeDefined()
       expect((result2 as any)?.contents.value).toBeUndefined()
     })
