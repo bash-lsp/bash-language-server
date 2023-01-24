@@ -1059,7 +1059,7 @@ describe('server', () => {
       expect(result).toEqual({
         contents: {
           kind: 'markdown',
-          value: expect.stringContaining('suspends execution'),
+          value: expect.stringContaining('sleep'),
         },
       })
     })

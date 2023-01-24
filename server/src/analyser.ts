@@ -116,7 +116,11 @@ export default class Analyzer {
       logger.warn(`Error while parsing ${uri}: syntax error`)
     }
 
-    return diagnostics
+    const missingNodesDiagnostics = TreeSitterUtil.getDiagnosticsForMissingNodes(
+      tree.rootNode,
+    )
+
+    return diagnostics.concat(missingNodesDiagnostics)
   }
 
   /**
