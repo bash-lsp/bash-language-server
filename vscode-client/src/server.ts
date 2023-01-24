@@ -20,7 +20,8 @@ connection.listen()
 
 // Don't die on unhandled Promise rejections
 process.on('unhandledRejection', (reason, p) => {
-  connection.console.error(`Unhandled Rejection at promise: ${p}, reason: ${reason}`)
+  const stack = reason instanceof Error ? reason.stack : reason
+  connection.console.error(`Unhandled Rejection at promise: ${p}, reason: ${stack}`)
 })
 
 process.on('SIGPIPE', () => {
