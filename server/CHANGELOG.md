@@ -1,9 +1,13 @@
 # Bash Language Server
 
+## 4.5.3
+
+- Fix issue where some features would work as expected in case of a syntax issue https://github.com/bash-lsp/bash-language-server/pull/691
+
 ## 4.5.2
 
-- fixed `onReferences` to respect the `context.includeDeclaration` flag
-- removed unnecessary dependency `urijs`
+- Fixed `onReferences` to respect the `context.includeDeclaration` flag https://github.com/bash-lsp/bash-language-server/pull/688
+- Removed unnecessary dependency `urijs` https://github.com/bash-lsp/bash-language-server/pull/688
 
 ## 4.5.1
 
