@@ -94,9 +94,11 @@ export function getAllDeclarationsInTree({
  */
 export function getLocalDeclarations({
   node,
+  rootNode,
   uri,
 }: {
   node: Parser.SyntaxNode | null
+  rootNode: Parser.SyntaxNode
   uri: string
 }): Declarations {
   const declarations: Declarations = {}
@@ -149,26 +151,16 @@ export function getLocalDeclarations({
   walk(node)
 
   // Top down traversal to add missing global variables from within functions
-  if (node) {
-    const rootNode =
-      node.type === 'program'
-        ? node
-        : TreeSitterUtil.findParent(node, (p) => p.type === 'program')
-
-    if (rootNode) {
-      // In case of parsing errors, the root node might not be found
-      Object.entries(
-        getAllGlobalVariableDeclarations({
-          rootNode,
-          uri,
-        }),
-      ).map(([name, symbols]) => {
-        if (!declarations[name]) {
-          declarations[name] = symbols
-        }
-      })
+  Object.entries(
+    getAllGlobalVariableDeclarations({
+      rootNode,
+      uri,
+    }),
+  ).map(([name, symbols]) => {
+    if (!declarations[name]) {
+      declarations[name] = symbols
     }
-  }
+  })
 
   return declarations
 }

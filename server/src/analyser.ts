@@ -578,6 +578,7 @@ export default class Analyzer {
 
           const localDeclarations = getLocalDeclarations({
             node,
+            rootNode: analyzedDocument.tree.rootNode,
             uri,
           })
 
