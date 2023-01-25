@@ -1,5 +1,10 @@
 # Bash IDE
 
+## 1.31.0
+
+- Upgrade language server to 4.5.4.
+- Skip running ShellCheck for unsupported zsh files. We will still run it for bash like files without a shebang or without a known file extension.
+
 ## 1.30.0
 
 - Upgrade language server to 4.5.3.
