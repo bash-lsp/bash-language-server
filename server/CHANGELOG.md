@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.5.4
+
+- Skip running ShellCheck for unsupported zsh files. We will still try for files without a shebang and without a known file extension. https://github.com/bash-lsp/bash-language-server/pull/694
+
 ## 4.5.3
 
 - Fix issue where some features would work as expected in case of a syntax issue https://github.com/bash-lsp/bash-language-server/pull/691

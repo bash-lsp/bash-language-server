@@ -71,11 +71,33 @@ export class Linter {
     sourcePaths: string[],
     additionalShellCheckArguments: string[] = [],
   ): Promise<LintingResult> {
+    const documentText = document.getText()
+
+    const shellDialect = guessShellDialect({
+      documentText,
+      uri: document.uri,
+    })
+
+    if (shellDialect && !SUPPORTED_BASH_DIALECTS.includes(shellDialect)) {
+      // We found a dialect that isn't supported by ShellCheck.
+      return { diagnostics: [], codeActions: [] }
+    }
+
+    // NOTE: that ShellCheck actually does shebang parsing, but we manually
+    // do it here in order to fallback to bash for files without a shebang.
+    // This enables parsing files with a bash syntax, but could yield false positives.
+    const shellName =
+      shellDialect && SUPPORTED_BASH_DIALECTS.includes(shellDialect)
+        ? shellDialect
+        : 'bash'
+
     const result = await this.runShellCheck(
-      document,
+      documentText,
+      shellName,
       [...sourcePaths, dirname(fileURLToPath(document.uri))],
       additionalShellCheckArguments,
     )
+
     if (!this._canLint) {
       return { diagnostics: [], codeActions: [] }
     }
@@ -83,25 +105,15 @@ export class Linter {
     // Clean up the debounced function
     delete this.uriToDebouncedExecuteLint[document.uri]
 
-    return mapShellCheckResult({ document, result })
+    return mapShellCheckResult({ uri: document.uri, result })
   }
 
   private async runShellCheck(
-    document: TextDocument,
+    documentText: string,
+    shellName: string,
     sourcePaths: string[],
     additionalArgs: string[] = [],
   ): Promise<ShellCheckResult> {
-    const documentText = document.getText()
-
-    const { shellDialect } = analyzeShebang(documentText)
-    // NOTE: that ShellCheck actually does shebang parsing, but we manually
-    // do it here in order to fallback to bash. This enables parsing files
-    // with a bash syntax.
-    const shellName =
-      shellDialect && SUPPORTED_BASH_DIALECTS.includes(shellDialect)
-        ? shellDialect
-        : 'bash'
-
     const sourcePathsArgs = sourcePaths
       .map((folder) => folder.trim())
       .filter((folderName) => folderName)
@@ -169,10 +181,10 @@ export class Linter {
 }
 
 function mapShellCheckResult({
-  document,
+  uri,
   result,
 }: {
-  document: TextDocument
+  uri: string
   result: ShellCheckResult
 }): {
   diagnostics: LSP.Diagnostic[]
@@ -208,8 +220,8 @@ function mapShellCheckResult({
 
     const codeAction = CodeActionProvider.getCodeAction({
       comment,
-      document,
       diagnostics: [diagnostic],
+      uri,
     })
 
     if (codeAction) {
@@ -230,12 +242,12 @@ function mapShellCheckResult({
 class CodeActionProvider {
   public static getCodeAction({
     comment,
-    document,
     diagnostics,
+    uri,
   }: {
     comment: ShellCheckComment
-    document: TextDocument
     diagnostics: LSP.Diagnostic[]
+    uri: string
   }): LSP.CodeAction | null {
     const { code, fix } = comment
     if (!fix || fix.replacements.length === 0) {
@@ -257,7 +269,7 @@ class CodeActionProvider {
       diagnostics,
       edit: {
         changes: {
-          [document.uri]: edits,
+          [uri]: edits,
         },
       },
       kind: LSP.CodeActionKind.QuickFix,
@@ -282,4 +294,8 @@ class CodeActionProvider {
       newText: replacement.replacement,
     }
   }
+}
+
+function guessShellDialect({ documentText, uri }: { documentText: string; uri: string }) {
+  return uri.endsWith('.zsh') ? 'zsh' : analyzeShebang(documentText).shellDialect
 }
