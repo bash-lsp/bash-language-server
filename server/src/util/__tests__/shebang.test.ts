@@ -12,10 +12,10 @@ describe('analyzeShebang', () => {
     })
   })
 
-  it('returns no shell dialect for unsupported shell "#!/usr/bin/zsh"', () => {
-    expect(analyzeShebang('#!/usr/bin/zsh')).toEqual({
+  it('returns no shell dialect for unsupported shell "#!/usr/bin/fish"', () => {
+    expect(analyzeShebang('#!/usr/bin/fish')).toEqual({
       shellDialect: null,
-      shebang: '/usr/bin/zsh',
+      shebang: '/usr/bin/fish',
     })
   })
 
@@ -30,6 +30,7 @@ describe('analyzeShebang', () => {
     ['#! /bin/bash', 'bash'],
     ['#! /bin/dash', 'dash'],
     ['#!/usr/bin/bash', 'bash'],
+    ['#!/usr/bin/zsh', 'zsh'],
   ])('returns a bash dialect for %p', (command, expectedDialect) => {
     expect(analyzeShebang(command).shellDialect).toBe(expectedDialect)
     expect(analyzeShebang(`${command} `).shellDialect).toBe(expectedDialect)
