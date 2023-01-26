@@ -18,7 +18,7 @@ let analyzer: Analyzer
 const CURRENT_URI = 'dummy-uri.sh'
 
 // if you add a .sh file to testing/fixtures, update this value
-const FIXTURE_FILES_MATCHING_GLOB = 16
+const FIXTURE_FILES_MATCHING_GLOB = 17
 
 const defaultConfig = getDefaultConfiguration()
 
@@ -28,12 +28,33 @@ jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {
 const loggerInfo = jest.spyOn(Logger.prototype, 'info')
 const loggerWarn = jest.spyOn(Logger.prototype, 'warn')
 
-beforeAll(async () => {
+async function getAnalyzer({
+  includeAllWorkspaceSymbols = false,
+  workspaceFolder = FIXTURE_FOLDER,
+  runBackgroundAnalysis = false,
+}: {
+  includeAllWorkspaceSymbols?: boolean
+  workspaceFolder?: string
+  runBackgroundAnalysis?: boolean
+}) {
   const parser = await initializeParser()
-  analyzer = new Analyzer({
+
+  const analyzer = new Analyzer({
     parser,
-    workspaceFolder: FIXTURE_FOLDER,
+    includeAllWorkspaceSymbols,
+    workspaceFolder,
   })
+  if (runBackgroundAnalysis) {
+    await analyzer.initiateBackgroundAnalysis({
+      backgroundAnalysisMaxFiles: defaultConfig.backgroundAnalysisMaxFiles,
+      globPattern: defaultConfig.globPattern,
+    })
+  }
+  return analyzer
+}
+
+beforeAll(async () => {
+  analyzer = await getAnalyzer({})
 })
 
 describe('analyze', () => {
@@ -355,7 +376,6 @@ describe('findAllSourcedUris', () => {
       new Set([
         `file://${FIXTURE_FOLDER}extension.inc`,
         `file://${FIXTURE_FOLDER}issue101.sh`,
-        `file://${FIXTURE_FOLDER}sourcing.sh`,
       ]),
     )
   })
@@ -576,6 +596,27 @@ describe('findDeclarationsMatchingWord', () => {
         },
       ]
     `)
+  })
+
+  it('resolves sourced file not covered by the background analysis glob', async () => {
+    async function expectThatSourcingWorksWhenIncludeAllWorkspaceSymbolsIs(v: boolean) {
+      const analyzer = await getAnalyzer({
+        runBackgroundAnalysis: true,
+        includeAllWorkspaceSymbols: v,
+      })
+
+      expect(
+        analyzer.findDeclarationsMatchingWord({
+          word: 'XXX',
+          uri: FIXTURE_URI.SOURCING2,
+          exactMatch: true,
+          position: { line: 2, character: 21 }, // XXX
+        }),
+      ).toHaveLength(1)
+    }
+
+    await expectThatSourcingWorksWhenIncludeAllWorkspaceSymbolsIs(false)
+    await expectThatSourcingWorksWhenIncludeAllWorkspaceSymbolsIs(true)
   })
 
   it('returns symbols depending on the scope', async () => {

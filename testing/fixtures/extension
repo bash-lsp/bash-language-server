@@ -1,5 +1,8 @@
 #!/bin/sh
 
-. sourcing.sh
+. ./extension.inc
 
 echo "It works, but is not parsed initially"
+
+# A little variable
+export XXX=1
