@@ -934,5 +934,22 @@ Array [
     },
     "name": "ret",
   },
+  Object {
+    "kind": 13,
+    "location": Object {
+      "range": Object {
+        "end": Object {
+          "character": 24,
+          "line": 273,
+        },
+        "start": Object {
+          "character": 5,
+          "line": 273,
+        },
+      },
+      "uri": "dummy-uri.sh",
+    },
+    "name": "FILE_PATH_EXPANSION",
+  },
 ]
 `;

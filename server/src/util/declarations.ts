@@ -43,12 +43,10 @@ export function getGlobalDeclarations({
   TreeSitterUtil.forEach(tree.rootNode, (node) => {
     const followChildren = !GLOBAL_DECLARATION_LEAF_NODE_TYPES.has(node.type)
 
-    if (TreeSitterUtil.isDefinition(node)) {
-      const symbol = nodeToSymbolInformation({ node, uri })
-      if (symbol) {
-        const word = symbol.name
-        globalDeclarations[word] = symbol
-      }
+    const symbol = getDeclarationSymbolFromNode({ node, uri })
+    if (symbol) {
+      const word = symbol.name
+      globalDeclarations[word] = symbol
     }
 
     return followChildren
@@ -71,15 +69,10 @@ export function getAllDeclarationsInTree({
   const symbols: LSP.SymbolInformation[] = []
 
   TreeSitterUtil.forEach(tree.rootNode, (node) => {
-    if (TreeSitterUtil.isDefinition(node)) {
-      const symbol = nodeToSymbolInformation({ node, uri })
-
-      if (symbol) {
-        symbols.push(symbol)
-      }
+    const symbol = getDeclarationSymbolFromNode({ node, uri })
+    if (symbol) {
+      symbols.push(symbol)
     }
-
-    return
   })
 
   return symbols
@@ -122,8 +115,6 @@ export function getLocalDeclarations({
               uri,
             })
           }
-        } else if (TreeSitterUtil.isDefinition(childNode)) {
-          symbol = nodeToSymbolInformation({ node: childNode, uri })
         } else if (childNode.type === 'for_statement') {
           const variableNode = childNode.child(1)
           if (variableNode && variableNode.type === 'variable_name') {
@@ -134,6 +125,8 @@ export function getLocalDeclarations({
               uri,
             )
           }
+        } else {
+          symbol = getDeclarationSymbolFromNode({ node: childNode, uri })
         }
 
         if (symbol) {
@@ -221,4 +214,34 @@ function nodeToSymbolInformation({
     uri,
     containerName,
   )
+}
+
+function getDeclarationSymbolFromNode({
+  node,
+  uri,
+}: {
+  node: Parser.SyntaxNode
+  uri: string
+}): LSP.SymbolInformation | null {
+  if (TreeSitterUtil.isDefinition(node)) {
+    return nodeToSymbolInformation({ node, uri })
+  } else if (node.type === 'command' && node.text.startsWith(': ')) {
+    // : does argument expansion and retains the side effects.
+    // A common usage is to define default values of environment variables, e.g. : "${VARIABLE:="default"}".
+    const variableNode = node.namedChildren
+      .find((c) => c.type === 'string')
+      ?.namedChildren.find((c) => c.type === 'expansion')
+      ?.namedChildren.find((c) => c.type === 'variable_name')
+
+    if (variableNode) {
+      return LSP.SymbolInformation.create(
+        variableNode.text,
+        LSP.SymbolKind.Variable,
+        TreeSitterUtil.range(variableNode),
+        uri,
+      )
+    }
+  }
+
+  return null
 }

@@ -979,6 +979,23 @@ describe('getAllVariables', () => {
           },
           "name": "RESET",
         },
+        Object {
+          "kind": 13,
+          "location": Object {
+            "range": Object {
+              "end": Object {
+                "character": 14,
+                "line": 25,
+              },
+              "start": Object {
+                "character": 5,
+                "line": 25,
+              },
+            },
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc",
+          },
+          "name": "FILE_PATH",
+        },
       ]
     `)
   })
