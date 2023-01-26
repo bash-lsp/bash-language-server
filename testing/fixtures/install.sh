@@ -270,3 +270,7 @@ fi
 exit $ret
 
 iverilog -i wave.vpp *{}.v
+
+: "${FILE_PATH_EXPANSION:="/default/file"}"
+
+printf 'Printing %s\n' "$FILE_PATH_EXPANSION"
