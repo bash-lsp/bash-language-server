@@ -30,6 +30,7 @@ export const FIXTURE_URI = {
   SCOPE: `file://${path.join(FIXTURE_FOLDER, 'scope.sh')}`,
   SHELLCHECK_SOURCE: `file://${path.join(FIXTURE_FOLDER, 'shellcheck', 'source.sh')}`,
   SOURCING: `file://${path.join(FIXTURE_FOLDER, 'sourcing.sh')}`,
+  SOURCING2: `file://${path.join(FIXTURE_FOLDER, 'sourcing2.sh')}`,
 }
 
 export const FIXTURE_DOCUMENT: Record<FIXTURE_KEY, TextDocument> = (

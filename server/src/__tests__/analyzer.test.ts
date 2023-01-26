@@ -13,12 +13,10 @@ import { initializeParser } from '../parser'
 import * as fsUtil from '../util/fs'
 import { Logger } from '../util/logger'
 
-let analyzer: Analyzer
-
 const CURRENT_URI = 'dummy-uri.sh'
 
 // if you add a .sh file to testing/fixtures, update this value
-const FIXTURE_FILES_MATCHING_GLOB = 16
+const FIXTURE_FILES_MATCHING_GLOB = 17
 
 const defaultConfig = getDefaultConfiguration()
 
@@ -28,16 +26,34 @@ jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {
 const loggerInfo = jest.spyOn(Logger.prototype, 'info')
 const loggerWarn = jest.spyOn(Logger.prototype, 'warn')
 
-beforeAll(async () => {
+async function getAnalyzer({
+  includeAllWorkspaceSymbols = false,
+  workspaceFolder = FIXTURE_FOLDER,
+  runBackgroundAnalysis = false,
+}: {
+  includeAllWorkspaceSymbols?: boolean
+  workspaceFolder?: string
+  runBackgroundAnalysis?: boolean
+}) {
   const parser = await initializeParser()
-  analyzer = new Analyzer({
+
+  const analyzer = new Analyzer({
     parser,
-    workspaceFolder: FIXTURE_FOLDER,
+    includeAllWorkspaceSymbols,
+    workspaceFolder,
   })
-})
+  if (runBackgroundAnalysis) {
+    await analyzer.initiateBackgroundAnalysis({
+      backgroundAnalysisMaxFiles: defaultConfig.backgroundAnalysisMaxFiles,
+      globPattern: defaultConfig.globPattern,
+    })
+  }
+  return analyzer
+}
 
 describe('analyze', () => {
-  it('returns an empty list of diagnostics for a file with no parsing errors', () => {
+  it('returns an empty list of diagnostics for a file with no parsing errors', async () => {
+    const analyzer = await getAnalyzer({})
     const diagnostics = analyzer.analyze({
       uri: CURRENT_URI,
       document: FIXTURE_DOCUMENT.INSTALL,
@@ -46,7 +62,8 @@ describe('analyze', () => {
     expect(loggerWarn).not.toHaveBeenCalled()
   })
 
-  it('parses files with a missing nodes and return relevant diagnostics', () => {
+  it('parses files with a missing nodes and return relevant diagnostics', async () => {
+    const analyzer = await getAnalyzer({})
     const diagnostics = analyzer.analyze({
       uri: CURRENT_URI,
       document: FIXTURE_DOCUMENT.MISSING_NODE,
@@ -75,7 +92,8 @@ describe('analyze', () => {
     )
   })
 
-  it('parses a file with parsing errors', () => {
+  it('parses a file with parsing errors', async () => {
+    const analyzer = await getAnalyzer({})
     const diagnostics = analyzer.analyze({
       uri: CURRENT_URI,
       document: FIXTURE_DOCUMENT.PARSE_PROBLEMS,
@@ -87,12 +105,8 @@ describe('analyze', () => {
   })
 
   it('returns a list of diagnostics for a file with sourcing issues', async () => {
-    const parser = await initializeParser()
-    const newAnalyzer = new Analyzer({
-      parser,
-      workspaceFolder: FIXTURE_FOLDER,
-    })
-    const diagnostics = newAnalyzer.analyze({
+    const analyzer = await getAnalyzer({})
+    const diagnostics = analyzer.analyze({
       uri: CURRENT_URI,
       document: FIXTURE_DOCUMENT.SOURCING,
     })
@@ -122,8 +136,8 @@ describe('analyze', () => {
     `)
 
     // unless setIncludeAllWorkspaceSymbols set
-    newAnalyzer.setIncludeAllWorkspaceSymbols(true)
-    const diagnostics2 = newAnalyzer.analyze({
+    analyzer.setIncludeAllWorkspaceSymbols(true)
+    const diagnostics2 = analyzer.analyze({
       uri: CURRENT_URI,
       document: FIXTURE_DOCUMENT.SOURCING,
     })
@@ -132,7 +146,8 @@ describe('analyze', () => {
 })
 
 describe('findDeclarationLocations', () => {
-  it('returns a location to a file if word is the path in a sourcing statement', () => {
+  it('returns a location to a file if word is the path in a sourcing statement', async () => {
+    const analyzer = await getAnalyzer({})
     const document = FIXTURE_DOCUMENT.SOURCING
     const { uri } = document
     analyzer.analyze({ uri, document })
@@ -164,14 +179,10 @@ describe('findDeclarationLocations', () => {
     const document = FIXTURE_DOCUMENT.SOURCING
     const { uri } = document
 
-    const parser = await initializeParser()
-    const newAnalyzer = new Analyzer({
-      parser,
-      workspaceFolder: REPO_ROOT_FOLDER,
-    })
+    const analyzer = await getAnalyzer({ workspaceFolder: REPO_ROOT_FOLDER })
 
-    newAnalyzer.analyze({ uri, document })
-    const result = newAnalyzer.findDeclarationLocations({
+    analyzer.analyze({ uri, document })
+    const result = analyzer.findDeclarationLocations({
       uri,
       word: './scripts/tag-release.inc',
       position: { character: 10, line: 16 },
@@ -195,7 +206,8 @@ describe('findDeclarationLocations', () => {
     `)
   })
 
-  it('returns a local reference if definition is found', () => {
+  it('returns a local reference if definition is found', async () => {
+    const analyzer = await getAnalyzer({})
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
     const result = analyzer.findDeclarationLocations({
       position: { character: 1, line: 148 },
@@ -221,7 +233,8 @@ describe('findDeclarationLocations', () => {
     `)
   })
 
-  it('returns local declarations', () => {
+  it('returns local declarations', async () => {
+    const analyzer = await getAnalyzer({})
     const result = analyzer.findDeclarationLocations({
       position: { character: 12, line: 12 },
       uri: FIXTURE_URI.SCOPE,
@@ -246,7 +259,8 @@ describe('findDeclarationLocations', () => {
     `)
   })
 
-  it('returns local declarations for loop variables', () => {
+  it('returns local declarations for loop variables', async () => {
+    const analyzer = await getAnalyzer({})
     const result = analyzer.findDeclarationLocations({
       position: { character: 18, line: 39 },
       uri: FIXTURE_URI.SCOPE,
@@ -273,13 +287,15 @@ describe('findDeclarationLocations', () => {
 })
 
 describe('findReferences', () => {
-  it('returns empty list if parameter is not found', () => {
+  it('returns empty list if parameter is not found', async () => {
+    const analyzer = await getAnalyzer({})
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
     const result = analyzer.findReferences('foobar')
     expect(result).toEqual([])
   })
 
-  it('returns a list of locations if parameter is found', () => {
+  it('returns a list of locations if parameter is found', async () => {
+    const analyzer = await getAnalyzer({})
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
     const result = analyzer.findReferences('node_version')
     expect(result).not.toEqual([])
@@ -288,20 +304,23 @@ describe('findReferences', () => {
 })
 
 describe('getDeclarationsForUri', () => {
-  it('returns empty list if uri is not found', () => {
+  it('returns empty list if uri is not found', async () => {
+    const analyzer = await getAnalyzer({})
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
     const result = analyzer.getDeclarationsForUri({ uri: 'foobar.sh' })
     expect(result).toEqual([])
   })
 
-  it('returns a list of SymbolInformation if uri is found', () => {
+  it('returns a list of SymbolInformation if uri is found', async () => {
+    const analyzer = await getAnalyzer({})
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
     const result = analyzer.getDeclarationsForUri({ uri: CURRENT_URI })
     expect(result).not.toEqual([])
     expect(result).toMatchSnapshot()
   })
 
-  it('issue 101', () => {
+  it('issue 101', async () => {
+    const analyzer = await getAnalyzer({})
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.ISSUE101 })
     const result = analyzer.getDeclarationsForUri({ uri: CURRENT_URI })
     expect(result).not.toEqual([])
@@ -311,18 +330,12 @@ describe('getDeclarationsForUri', () => {
 
 describe('findAllSourcedUris', () => {
   it('returns references to sourced files', async () => {
-    const parser = await initializeParser()
-
-    const newAnalyzer = new Analyzer({
-      parser,
+    const analyzer = await getAnalyzer({
+      runBackgroundAnalysis: true,
       workspaceFolder: pathToFileURL(REPO_ROOT_FOLDER).href,
     })
-    await newAnalyzer.initiateBackgroundAnalysis({
-      backgroundAnalysisMaxFiles: defaultConfig.backgroundAnalysisMaxFiles,
-      globPattern: defaultConfig.globPattern,
-    })
 
-    const result = newAnalyzer.findAllSourcedUris({ uri: FIXTURE_URI.SOURCING })
+    const result = analyzer.findAllSourcedUris({ uri: FIXTURE_URI.SOURCING })
     expect(result).toEqual(
       new Set([
         `file://${REPO_ROOT_FOLDER}/scripts/tag-release.inc`, // resolved based on repoRootFolder
@@ -333,36 +346,27 @@ describe('findAllSourcedUris', () => {
   })
 
   it('returns references to sourced files without file extension', async () => {
-    const parser = await initializeParser()
-
-    const newAnalyzer = new Analyzer({
-      parser,
-      workspaceFolder: FIXTURE_FOLDER,
-    })
-    await newAnalyzer.initiateBackgroundAnalysis({
-      backgroundAnalysisMaxFiles: defaultConfig.backgroundAnalysisMaxFiles,
-      globPattern: defaultConfig.globPattern,
-    })
+    const analyzer = await getAnalyzer({ runBackgroundAnalysis: true })
 
     // Parse the file without extension
-    newAnalyzer.analyze({
+    analyzer.analyze({
       uri: FIXTURE_URI.MISSING_EXTENSION,
       document: FIXTURE_DOCUMENT.MISSING_EXTENSION,
     })
 
-    const result = newAnalyzer.findAllSourcedUris({ uri: FIXTURE_URI.MISSING_EXTENSION })
+    const result = analyzer.findAllSourcedUris({ uri: FIXTURE_URI.MISSING_EXTENSION })
     expect(result).toEqual(
       new Set([
         `file://${FIXTURE_FOLDER}extension.inc`,
         `file://${FIXTURE_FOLDER}issue101.sh`,
-        `file://${FIXTURE_FOLDER}sourcing.sh`,
       ]),
     )
   })
 })
 
 describe('wordAtPoint', () => {
-  it('returns current word at a given point', () => {
+  it('returns current word at a given point', async () => {
+    const analyzer = await getAnalyzer({})
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
     expect(analyzer.wordAtPoint(CURRENT_URI, 25, 0)).toEqual(null)
     expect(analyzer.wordAtPoint(CURRENT_URI, 25, 1)).toEqual(null)
@@ -390,7 +394,8 @@ describe('wordAtPoint', () => {
 })
 
 describe('commandNameAtPoint', () => {
-  it('returns current command name at a given point', () => {
+  it('returns current command name at a given point', async () => {
+    const analyzer = await getAnalyzer({})
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.INSTALL })
     expect(analyzer.commandNameAtPoint(CURRENT_URI, 15, 0)).toEqual(null)
 
@@ -409,16 +414,9 @@ describe('commandNameAtPoint', () => {
 
 describe('findDeclarationsMatchingWord', () => {
   it('returns a list of symbols across the workspace when includeAllWorkspaceSymbols is true', async () => {
-    const parser = await initializeParser()
-
-    const analyzer = new Analyzer({
-      parser,
+    const analyzer = await getAnalyzer({
       includeAllWorkspaceSymbols: true,
-      workspaceFolder: FIXTURE_FOLDER,
-    })
-    await analyzer.initiateBackgroundAnalysis({
-      backgroundAnalysisMaxFiles: defaultConfig.backgroundAnalysisMaxFiles,
-      globPattern: defaultConfig.globPattern,
+      runBackgroundAnalysis: true,
     })
 
     expect(
@@ -525,16 +523,9 @@ describe('findDeclarationsMatchingWord', () => {
   })
 
   it('returns a list of symbols accessible to the uri when includeAllWorkspaceSymbols is false', async () => {
-    const parser = await initializeParser()
-
-    const analyzer = new Analyzer({
-      parser,
+    const analyzer = await getAnalyzer({
       includeAllWorkspaceSymbols: false,
-      workspaceFolder: FIXTURE_FOLDER,
-    })
-    await analyzer.initiateBackgroundAnalysis({
-      backgroundAnalysisMaxFiles: defaultConfig.backgroundAnalysisMaxFiles,
-      globPattern: defaultConfig.globPattern,
+      runBackgroundAnalysis: true,
     })
 
     expect(
@@ -578,13 +569,30 @@ describe('findDeclarationsMatchingWord', () => {
     `)
   })
 
-  it('returns symbols depending on the scope', async () => {
-    const parser = await initializeParser()
+  it('resolves sourced file not covered by the background analysis glob', async () => {
+    async function expectThatSourcingWorksWhenIncludeAllWorkspaceSymbolsIs(v: boolean) {
+      const analyzer = await getAnalyzer({
+        runBackgroundAnalysis: true,
+        includeAllWorkspaceSymbols: v,
+      })
 
-    const analyzer = new Analyzer({
-      parser,
+      expect(
+        analyzer.findDeclarationsMatchingWord({
+          word: 'XXX',
+          uri: FIXTURE_URI.SOURCING2,
+          exactMatch: true,
+          position: { line: 2, character: 21 }, // XXX
+        }),
+      ).toHaveLength(1)
+    }
+
+    await expectThatSourcingWorksWhenIncludeAllWorkspaceSymbolsIs(false)
+    await expectThatSourcingWorksWhenIncludeAllWorkspaceSymbolsIs(true)
+  })
+
+  it('returns symbols depending on the scope', async () => {
+    const analyzer = await getAnalyzer({
       includeAllWorkspaceSymbols: false,
-      workspaceFolder: FIXTURE_FOLDER,
     })
 
     const findWordFromLine = (word: string, line: number) =>
@@ -742,40 +750,46 @@ describe('findDeclarationsMatchingWord', () => {
 })
 
 describe('commentsAbove', () => {
-  it('returns a string of a comment block above a line', () => {
+  it('returns a string of a comment block above a line', async () => {
+    const analyzer = await getAnalyzer({})
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.COMMENT_DOC })
     expect(analyzer.commentsAbove(CURRENT_URI, 22)).toEqual(
       '```txt\ndoc for func_one\n```',
     )
   })
 
-  it('handles line breaks in comments', () => {
+  it('handles line breaks in comments', async () => {
+    const analyzer = await getAnalyzer({})
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.COMMENT_DOC })
     expect(analyzer.commentsAbove(CURRENT_URI, 28)).toEqual(
       '```txt\ndoc for func_two\nhas two lines\n```',
     )
   })
 
-  it('only returns connected comments', () => {
+  it('only returns connected comments', async () => {
+    const analyzer = await getAnalyzer({})
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.COMMENT_DOC })
     expect(analyzer.commentsAbove(CURRENT_URI, 36)).toEqual(
       '```txt\ndoc for func_three\n```',
     )
   })
 
-  it('returns null if no comment found', () => {
+  it('returns null if no comment found', async () => {
+    const analyzer = await getAnalyzer({})
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.COMMENT_DOC })
     expect(analyzer.commentsAbove(CURRENT_URI, 45)).toEqual(null)
   })
 
-  it('works for variables', () => {
+  it('works for variables', async () => {
+    const analyzer = await getAnalyzer({})
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.COMMENT_DOC })
     expect(analyzer.commentsAbove(CURRENT_URI, 42)).toEqual(
       '```txt\nworks for variables\n```',
     )
   })
 
-  it('returns connected comments with empty comment line', () => {
+  it('returns connected comments with empty comment line', async () => {
+    const analyzer = await getAnalyzer({})
     analyzer.analyze({ uri: CURRENT_URI, document: FIXTURE_DOCUMENT.COMMENT_DOC })
     expect(analyzer.commentsAbove(CURRENT_URI, 51)).toEqual(
       '```txt\nthis is also included\n\ndoc for func_four\n```',
@@ -785,15 +799,11 @@ describe('commentsAbove', () => {
 
 describe('initiateBackgroundAnalysis', () => {
   it('finds bash files', async () => {
-    const parser = await initializeParser()
-
     jest.spyOn(Date, 'now').mockImplementation(() => 0)
 
-    const newAnalyzer = new Analyzer({
-      parser,
-      workspaceFolder: FIXTURE_FOLDER,
-    })
-    const { filesParsed } = await newAnalyzer.initiateBackgroundAnalysis({
+    const analyzer = await getAnalyzer({})
+
+    const { filesParsed } = await analyzer.initiateBackgroundAnalysis({
       backgroundAnalysisMaxFiles: defaultConfig.backgroundAnalysisMaxFiles,
       globPattern: defaultConfig.globPattern,
     })
@@ -820,13 +830,9 @@ describe('initiateBackgroundAnalysis', () => {
       .spyOn(fsUtil, 'getFilePaths')
       .mockImplementation(() => Promise.reject(new Error('BOOM')))
 
-    const parser = await initializeParser()
+    const analyzer = await getAnalyzer({})
 
-    const newAnalyzer = new Analyzer({
-      parser,
-      workspaceFolder: FIXTURE_FOLDER,
-    })
-    const { filesParsed } = await newAnalyzer.initiateBackgroundAnalysis({
+    const { filesParsed } = await analyzer.initiateBackgroundAnalysis({
       backgroundAnalysisMaxFiles: defaultConfig.backgroundAnalysisMaxFiles,
       globPattern: defaultConfig.globPattern,
     })
@@ -836,15 +842,11 @@ describe('initiateBackgroundAnalysis', () => {
   })
 
   it('allows skipping the analysis', async () => {
-    const parser = await initializeParser()
-
     jest.spyOn(Date, 'now').mockImplementation(() => 0)
 
-    const newAnalyzer = new Analyzer({
-      parser,
-      workspaceFolder: FIXTURE_FOLDER,
-    })
-    const { filesParsed } = await newAnalyzer.initiateBackgroundAnalysis({
+    const analyzer = await getAnalyzer({})
+
+    const { filesParsed } = await analyzer.initiateBackgroundAnalysis({
       backgroundAnalysisMaxFiles: 0,
       globPattern: defaultConfig.globPattern,
     })
@@ -860,19 +862,15 @@ describe('getAllVariables', () => {
     const document = FIXTURE_DOCUMENT.SOURCING
     const { uri } = document
 
-    const parser = await initializeParser()
+    const analyzer = await getAnalyzer({ workspaceFolder: REPO_ROOT_FOLDER })
 
-    const newAnalyzer = new Analyzer({
-      parser,
-      workspaceFolder: REPO_ROOT_FOLDER,
-    })
     // NOTE: no background analysis
 
-    newAnalyzer.analyze({ uri, document })
+    analyzer.analyze({ uri, document })
 
     expect(
       updateSnapshotUris(
-        newAnalyzer.getAllVariables({
+        analyzer.getAllVariables({
           uri,
           position: { line: 20, character: 0 },
         }),

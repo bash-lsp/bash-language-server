@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.5.5
+
+- Use sourcing info even if `includeAllWorkspaceSymbols` is true to ensure that files not matching the `globPattern` (and therefor not part of the background analysis) is still resolved based on source commands. https://github.com/bash-lsp/bash-language-server/pull/695
+
 ## 4.5.4
 
 - Skip running ShellCheck for unsupported zsh files. We will still try for files without a shebang and without a known file extension. https://github.com/bash-lsp/bash-language-server/pull/694
