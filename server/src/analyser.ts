@@ -521,25 +521,49 @@ export default class Analyzer {
   }
 
   // Private methods
-  private getReachableUris({ uri: fromUri }: { uri?: string } = {}): string[] {
-    if (!fromUri || this.includeAllWorkspaceSymbols) {
+
+  /**
+   * Returns all reachable URIs from the given URI based on sourced commands
+   * If no URI is given, all URIs from the background analysis are returned.
+   * If the includeAllWorkspaceSymbols flag is set, all URIs from the background analysis are also included.
+   */
+  private getReachableUris({ fromUri }: { fromUri?: string } = {}): string[] {
+    if (!fromUri) {
       return Object.keys(this.uriToAnalyzedDocument)
     }
 
-    const uris = [fromUri, ...Array.from(this.findAllSourcedUris({ uri: fromUri }))]
+    const urisBasedOnSourcing = [
+      fromUri,
+      ...Array.from(this.findAllSourcedUris({ uri: fromUri })),
+    ]
 
+    if (this.includeAllWorkspaceSymbols) {
+      return Array.from(
+        new Set([...urisBasedOnSourcing, ...Object.keys(this.uriToAnalyzedDocument)]),
+      )
+    } else {
+      return urisBasedOnSourcing
+    }
+  }
+
+  private getAnalyzedReachableUris({ fromUri }: { fromUri?: string } = {}): string[] {
+    return this.ensureUrisAreAnalyzed(this.getReachableUris({ fromUri }))
+  }
+
+  private ensureUrisAreAnalyzed(uris: string[]): string[] {
     return uris.filter((uri) => {
       if (!this.uriToAnalyzedDocument[uri]) {
         // Either the background analysis didn't run or the file is outside
         // the workspace. Let us try to analyze the file.
         try {
+          logger.debug(`Analyzing file not covered by background analysis ${uri}...`)
           const fileContent = fs.readFileSync(new URL(uri), 'utf8')
           this.analyze({
             document: TextDocument.create(uri, 'shell', 1, fileContent),
             uri,
           })
         } catch (err) {
-          logger.warn(`Error while analyzing sourced file ${uri}: ${err}`)
+          logger.warn(`Error while analyzing file ${uri}: ${err}`)
           return false
         }
       }
@@ -559,7 +583,7 @@ export default class Analyzer {
     uri: fromUri,
     position,
   }: { uri?: string; position?: LSP.Position } = {}): LSP.SymbolInformation[] {
-    return this.getReachableUris({ uri: fromUri }).reduce((symbols, uri) => {
+    return this.getAnalyzedReachableUris({ fromUri }).reduce((symbols, uri) => {
       const analyzedDocument = this.uriToAnalyzedDocument[uri]
 
       if (analyzedDocument) {
