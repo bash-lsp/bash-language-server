@@ -556,7 +556,7 @@ export default class Analyzer {
         // Either the background analysis didn't run or the file is outside
         // the workspace. Let us try to analyze the file.
         try {
-          logger.debug(`Analyzing file not covered by background analysis ${uri}...`)
+          logger.debug(`Analyzing file not covered by background analysis ${uri}`)
           const fileContent = fs.readFileSync(new URL(uri), 'utf8')
           this.analyze({
             document: TextDocument.create(uri, 'shell', 1, fileContent),
