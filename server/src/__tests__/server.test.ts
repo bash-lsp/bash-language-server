@@ -560,61 +560,72 @@ describe('server', () => {
 
       // they are all variables
       expect(result).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "data": Object {
-                    "type": 3,
-                  },
-                  "documentation": undefined,
-                  "kind": 6,
-                  "label": "BOLD",
-                },
-                Object {
-                  "data": Object {
-                    "type": 3,
-                  },
-                  "documentation": Object {
-                    "kind": "markdown",
-                    "value": "Variable: **RED** - *defined in extension.inc*",
-                  },
-                  "kind": 6,
-                  "label": "RED",
-                },
-                Object {
-                  "data": Object {
-                    "type": 3,
-                  },
-                  "documentation": Object {
-                    "kind": "markdown",
-                    "value": "Variable: **GREEN** - *defined in extension.inc*",
-                  },
-                  "kind": 6,
-                  "label": "GREEN",
-                },
-                Object {
-                  "data": Object {
-                    "type": 3,
-                  },
-                  "documentation": Object {
-                    "kind": "markdown",
-                    "value": "Variable: **BLUE** - *defined in extension.inc*",
-                  },
-                  "kind": 6,
-                  "label": "BLUE",
-                },
-                Object {
-                  "data": Object {
-                    "type": 3,
-                  },
-                  "documentation": Object {
-                    "kind": "markdown",
-                    "value": "Variable: **RESET** - *defined in extension.inc*",
-                  },
-                  "kind": 6,
-                  "label": "RESET",
-                },
-              ]
-          `)
+        Array [
+          Object {
+            "data": Object {
+              "type": 3,
+            },
+            "documentation": undefined,
+            "kind": 6,
+            "label": "BOLD",
+          },
+          Object {
+            "data": Object {
+              "type": 3,
+            },
+            "documentation": Object {
+              "kind": "markdown",
+              "value": "Variable: **RED** - *defined in extension.inc*",
+            },
+            "kind": 6,
+            "label": "RED",
+          },
+          Object {
+            "data": Object {
+              "type": 3,
+            },
+            "documentation": Object {
+              "kind": "markdown",
+              "value": "Variable: **GREEN** - *defined in extension.inc*",
+            },
+            "kind": 6,
+            "label": "GREEN",
+          },
+          Object {
+            "data": Object {
+              "type": 3,
+            },
+            "documentation": Object {
+              "kind": "markdown",
+              "value": "Variable: **BLUE** - *defined in extension.inc*",
+            },
+            "kind": 6,
+            "label": "BLUE",
+          },
+          Object {
+            "data": Object {
+              "type": 3,
+            },
+            "documentation": Object {
+              "kind": "markdown",
+              "value": "Variable: **RESET** - *defined in extension.inc*",
+            },
+            "kind": 6,
+            "label": "RESET",
+          },
+          Object {
+            "data": Object {
+              "type": 3,
+            },
+            "documentation": Object {
+              "kind": "markdown",
+              "value": "Variable: **FILE_PATH** - *defined in extension.inc*",
+            },
+            "kind": 6,
+            "label": "FILE_PATH",
+          },
+        ]
+      `)
     })
   })
 

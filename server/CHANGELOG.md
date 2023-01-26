@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.6.0
+
+- Support parsing `: "${VARIABLE:="default"}"` as a variable definition https://github.com/bash-lsp/bash-language-server/pull/693
+
 ## 4.5.5
 
 - Use sourcing info even if `includeAllWorkspaceSymbols` is true to ensure that files not matching the `globPattern` (and therefore not part of the background analysis) is still resolved based on source commands. https://github.com/bash-lsp/bash-language-server/pull/695

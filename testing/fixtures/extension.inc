@@ -22,3 +22,7 @@ extensionFunc() {
 if [ "${ENV}" = "prod" ]; then
   RED="" # Ignored as we do not flowtrace.
 fi
+
+: "${FILE_PATH:="/default/file"}"
+
+printf 'Printing %s\n' "$FILE_PATH"
