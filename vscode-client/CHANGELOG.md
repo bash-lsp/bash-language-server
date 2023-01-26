@@ -1,5 +1,10 @@
 # Bash IDE
 
+## 1.32.0
+
+- Upgrade language server to 4.5.5.
+- Use sourcing info even if `includeAllWorkspaceSymbols` is true to ensure that files not matching the `globPattern` (and therefore not part of the background analysis) is still resolved based on source commands.
+
 ## 1.31.0
 
 - Upgrade language server to 4.5.4.
