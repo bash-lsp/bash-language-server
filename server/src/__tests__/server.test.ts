@@ -177,29 +177,30 @@ describe('server', () => {
       const fixableDiagnostic = diagnostics.filter(({ code }) => code === 'SC2086')[0]
 
       expect(fixableDiagnostic).toMatchInlineSnapshot(`
-              Object {
-                "code": "SC2086",
-                "codeDescription": Object {
-                  "href": "https://www.shellcheck.net/wiki/SC2086",
-                },
-                "message": "Double quote to prevent globbing and word splitting.",
-                "range": Object {
-                  "end": Object {
-                    "character": 13,
-                    "line": 55,
-                  },
-                  "start": Object {
-                    "character": 5,
-                    "line": 55,
-                  },
-                },
-                "severity": 3,
-                "source": "shellcheck",
-                "tags": undefined,
-              }
-          `)
-
-      // TODO: we could find the diagnostics and then use the range to test the code action
+        Object {
+          "code": "SC2086",
+          "codeDescription": Object {
+            "href": "https://www.shellcheck.net/wiki/SC2086",
+          },
+          "data": Object {
+            "id": "shellcheck|2086|55:5-55:13",
+          },
+          "message": "Double quote to prevent globbing and word splitting.",
+          "range": Object {
+            "end": Object {
+              "character": 13,
+              "line": 55,
+            },
+            "start": Object {
+              "character": 5,
+              "line": 55,
+            },
+          },
+          "severity": 3,
+          "source": "shellcheck",
+          "tags": undefined,
+        }
+      `)
 
       const onCodeAction = connection.onCodeAction.mock.calls[0][0]
 

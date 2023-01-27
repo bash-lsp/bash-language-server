@@ -23,9 +23,9 @@ type LinterOptions = {
   cwd?: string
 }
 
-type LintingResult = {
+export type LintingResult = {
   diagnostics: LSP.Diagnostic[]
-  codeActions: LSP.CodeAction[]
+  codeActions: Record<string, LSP.CodeAction | undefined>
 }
 
 export class Linter {
@@ -53,7 +53,7 @@ export class Linter {
     additionalShellCheckArguments: string[] = [],
   ): Promise<LintingResult> {
     if (!this._canLint) {
-      return { diagnostics: [], codeActions: [] }
+      return { diagnostics: [], codeActions: {} }
     }
 
     const { uri } = document
@@ -80,7 +80,7 @@ export class Linter {
 
     if (shellDialect && !SUPPORTED_BASH_DIALECTS.includes(shellDialect)) {
       // We found a dialect that isn't supported by ShellCheck.
-      return { diagnostics: [], codeActions: [] }
+      return { diagnostics: [], codeActions: {} }
     }
 
     // NOTE: that ShellCheck actually does shebang parsing, but we manually
@@ -99,7 +99,7 @@ export class Linter {
     )
 
     if (!this._canLint) {
-      return { diagnostics: [], codeActions: [] }
+      return { diagnostics: [], codeActions: {} }
     }
 
     // Clean up the debounced function
@@ -180,40 +180,37 @@ export class Linter {
   }
 }
 
-function mapShellCheckResult({
-  uri,
-  result,
-}: {
-  uri: string
-  result: ShellCheckResult
-}): {
-  diagnostics: LSP.Diagnostic[]
-  codeActions: LSP.CodeAction[]
-} {
-  const diagnostics: LSP.Diagnostic[] = []
-  const codeActions: LSP.CodeAction[] = []
+function mapShellCheckResult({ uri, result }: { uri: string; result: ShellCheckResult }) {
+  const diagnostics: LintingResult['diagnostics'] = []
+  const codeActions: LintingResult['codeActions'] = {}
 
   for (const comment of result.comments) {
-    const start: LSP.Position = {
-      line: comment.line - 1,
-      character: comment.column - 1,
-    }
-    const end: LSP.Position = {
-      line: comment.endLine - 1,
-      character: comment.endColumn - 1,
-    }
+    const range = LSP.Range.create(
+      {
+        line: comment.line - 1,
+        character: comment.column - 1,
+      },
+      {
+        line: comment.endLine - 1,
+        character: comment.endColumn - 1,
+      },
+    )
+
+    const id = `shellcheck|${comment.code}|${range.start.line}:${range.start.character}-${range.end.line}:${range.end.character}`
 
     const diagnostic: LSP.Diagnostic = {
       message: comment.message,
       severity: LEVEL_TO_SEVERITY[comment.level] || LSP.DiagnosticSeverity.Error,
       code: `SC${comment.code}`,
       source: 'shellcheck',
-      range: LSP.Range.create(start, end),
+      range,
       codeDescription: {
         href: `https://www.shellcheck.net/wiki/SC${comment.code}`,
       },
       tags: CODE_TO_TAGS[comment.code],
-      // NOTE: we could use the 'data' property this enable easier fingerprinting
+      data: {
+        id,
+      },
     }
 
     diagnostics.push(diagnostic)
@@ -225,7 +222,7 @@ function mapShellCheckResult({
     })
 
     if (codeAction) {
-      codeActions.push(codeAction)
+      codeActions[id] = codeAction
     }
   }
 

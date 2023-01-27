@@ -4,7 +4,6 @@ import { isDeepStrictEqual } from 'node:util'
 
 import * as TurndownService from 'turndown'
 import * as LSP from 'vscode-languageserver/node'
-import { CodeAction } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import Analyzer from './analyser'
@@ -13,7 +12,7 @@ import * as config from './config'
 import Executables from './executables'
 import { initializeParser } from './parser'
 import * as ReservedWords from './reserved-words'
-import { Linter } from './shellcheck'
+import { Linter, LintingResult } from './shellcheck'
 import { SNIPPETS } from './snippets'
 import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
@@ -37,7 +36,9 @@ export default class BashServer {
   private executables: Executables
   private linter?: Linter
   private workspaceFolder: string | null
-  private uriToCodeActions: { [uri: string]: CodeAction[] | undefined } = {}
+  private uriToCodeActions: {
+    [uri: string]: LintingResult['codeActions'] | undefined
+  } = {}
 
   private constructor({
     analyzer,
@@ -385,41 +386,15 @@ export default class BashServer {
   // ==============================
 
   private async onCodeAction(params: LSP.CodeActionParams): Promise<LSP.CodeAction[]> {
-    const codeActions = this.uriToCodeActions[params.textDocument.uri]
+    const codeActionsForUri = this.uriToCodeActions[params.textDocument.uri] || {}
 
-    if (!codeActions) {
-      return []
-    }
+    const codeActions = params.context.diagnostics
+      .map(({ data }) => codeActionsForUri[data?.id])
+      .filter((action): action is LSP.CodeAction => action != null)
 
-    const getDiagnosticsFingerPrint = (diagnostics?: LSP.Diagnostic[]): string[] =>
-      diagnostics
-        ?.map(({ code, source, range }) =>
-          code !== undefined && source && range
-            ? JSON.stringify({
-                code,
-                source,
-                range,
-              })
-            : null,
-        )
-        .filter((fingerPrint): fingerPrint is string => fingerPrint != null) || []
+    logger.debug(`onCodeAction: found ${codeActions.length} code action(s)`)
 
-    const paramsDiagnosticsKeys = getDiagnosticsFingerPrint(params.context.diagnostics)
-
-    // find actions that match the paramsDiagnosticsKeys
-    const actions = codeActions.filter((action) => {
-      const actionDiagnosticsKeys = getDiagnosticsFingerPrint(action.diagnostics)
-      // actions without diagnostics are always returned
-      if (actionDiagnosticsKeys.length === 0) {
-        return true
-      }
-
-      return actionDiagnosticsKeys.some((actionDiagnosticKey) =>
-        paramsDiagnosticsKeys.includes(actionDiagnosticKey),
-      )
-    })
-
-    return actions
+    return codeActions
   }
 
   private onCompletion(params: LSP.TextDocumentPositionParams): BashCompletionItem[] {
