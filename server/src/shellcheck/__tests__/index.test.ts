@@ -54,7 +54,7 @@ describe('linter', () => {
     })
 
     expect(result).toEqual({
-      codeActions: [],
+      codeActions: {},
       diagnostics: [],
     })
 
@@ -76,13 +76,16 @@ describe('linter', () => {
     const [result] = await getLintingResult({ document: textToDoc(shell) })
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "codeActions": Array [
-          Object {
+        "codeActions": Object {
+          "shellcheck|2086|1:5-1:9": Object {
             "diagnostics": Array [
               Object {
                 "code": "SC2086",
                 "codeDescription": Object {
                   "href": "https://www.shellcheck.net/wiki/SC2086",
+                },
+                "data": Object {
+                  "id": "shellcheck|2086|1:5-1:9",
                 },
                 "message": "Double quote to prevent globbing and word splitting.",
                 "range": Object {
@@ -135,12 +138,15 @@ describe('linter', () => {
             "kind": "quickfix",
             "title": "Apply fix for SC2086",
           },
-        ],
+        },
         "diagnostics": Array [
           Object {
             "code": "SC2154",
             "codeDescription": Object {
               "href": "https://www.shellcheck.net/wiki/SC2154",
+            },
+            "data": Object {
+              "id": "shellcheck|2154|1:5-1:9",
             },
             "message": "foo is referenced but not assigned.",
             "range": Object {
@@ -161,6 +167,9 @@ describe('linter', () => {
             "code": "SC2086",
             "codeDescription": Object {
               "href": "https://www.shellcheck.net/wiki/SC2086",
+            },
+            "data": Object {
+              "id": "shellcheck|2086|1:5-1:9",
             },
             "message": "Double quote to prevent globbing and word splitting.",
             "range": Object {
@@ -197,7 +206,7 @@ describe('linter', () => {
 
     const result = await promises[promises.length - 1]
     expect(result).toEqual({
-      codeActions: [],
+      codeActions: {},
       diagnostics: [],
     })
   })
@@ -209,7 +218,7 @@ describe('linter', () => {
     })
 
     expect(result).toEqual({
-      codeActions: [],
+      codeActions: {},
       diagnostics: [],
     })
   })
@@ -222,12 +231,15 @@ describe('linter', () => {
 
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "codeActions": Array [],
+        "codeActions": Object {},
         "diagnostics": Array [
           Object {
             "code": "SC1091",
             "codeDescription": Object {
               "href": "https://www.shellcheck.net/wiki/SC1091",
+            },
+            "data": Object {
+              "id": "shellcheck|1091|3:7-3:19",
             },
             "message": "Not following: shellcheck/sourced.sh: openBinaryFile: does not exist (No such file or directory)",
             "range": Object {
@@ -248,6 +260,9 @@ describe('linter', () => {
             "code": "SC2154",
             "codeDescription": Object {
               "href": "https://www.shellcheck.net/wiki/SC2154",
+            },
+            "data": Object {
+              "id": "shellcheck|2154|5:6-5:10",
             },
             "message": "foo is referenced but not assigned.",
             "range": Object {
@@ -276,7 +291,7 @@ describe('linter', () => {
       sourcePaths: [path.resolve(FIXTURE_FOLDER)],
     })
     expect(result).toEqual({
-      codeActions: [],
+      codeActions: {},
       diagnostics: [],
     })
   })
