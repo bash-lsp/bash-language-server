@@ -16,9 +16,9 @@ convenience - it proxies to the `package.json` files in the `vscode-client` and
 This guide presumes you have the following dependencies installed:
 
 - [`yarn`][yarn].
-- [`node`][node] (v6 or newer)
+- [`node`][node] (v14 or newer)
 - `g++`
-- `make`
+- `make` (optional)
 
 ## Initial setup
 
@@ -83,6 +83,20 @@ reload your vscode window to re-launch the server.
 
 ```
 yarn run reinstall-server
+```
+
+If you for some reason cannot get access to logs through the client,
+then you can hack the `server/util/logger` with:
+
+```typescript
+const fs = require('fs')
+const util = require('util')
+const log_file = fs.createWriteStream(`/tmp/bash-language-server-debug.log`, {
+  flags: 'w',
+})
+
+// inside log function
+log_file.write(`${severity} ${util.format(message)}\n`)
 ```
 
 ## Performance
