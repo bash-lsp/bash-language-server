@@ -1,53 +1,53 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`findReferences returns a list of locations if parameter is found 1`] = `
-Array [
-  Object {
-    "range": Object {
-      "end": Object {
+[
+  {
+    "range": {
+      "end": {
         "character": 12,
         "line": 148,
       },
-      "start": Object {
+      "start": {
         "character": 0,
         "line": 148,
       },
     },
     "uri": "dummy-uri.sh",
   },
-  Object {
-    "range": Object {
-      "end": Object {
+  {
+    "range": {
+      "end": {
         "character": 45,
         "line": 152,
       },
-      "start": Object {
+      "start": {
         "character": 33,
         "line": 152,
       },
     },
     "uri": "dummy-uri.sh",
   },
-  Object {
-    "range": Object {
-      "end": Object {
+  {
+    "range": {
+      "end": {
         "character": 20,
         "line": 162,
       },
-      "start": Object {
+      "start": {
         "character": 8,
         "line": 162,
       },
     },
     "uri": "dummy-uri.sh",
   },
-  Object {
-    "range": Object {
-      "end": Object {
+  {
+    "range": {
+      "end": {
         "character": 31,
         "line": 165,
       },
-      "start": Object {
+      "start": {
         "character": 19,
         "line": 165,
       },
@@ -58,16 +58,16 @@ Array [
 `;
 
 exports[`getDeclarationsForUri issue 101 1`] = `
-Array [
-  Object {
+[
+  {
     "kind": 12,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 1,
           "line": 14,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 3,
         },
@@ -76,16 +76,16 @@ Array [
     },
     "name": "add_a_user",
   },
-  Object {
+  {
     "containerName": "add_a_user",
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 9,
           "line": 5,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 5,
         },
@@ -94,16 +94,16 @@ Array [
     },
     "name": "USER",
   },
-  Object {
+  {
     "containerName": "add_a_user",
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 13,
           "line": 6,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 6,
         },
@@ -112,16 +112,16 @@ Array [
     },
     "name": "PASSWORD",
   },
-  Object {
+  {
     "containerName": "add_a_user",
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 13,
           "line": 9,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 9,
         },
@@ -134,16 +134,16 @@ Array [
 `;
 
 exports[`getDeclarationsForUri returns a list of SymbolInformation if uri is found 1`] = `
-Array [
-  Object {
+[
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 8,
           "line": 21,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 21,
         },
@@ -152,15 +152,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 8,
           "line": 30,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 30,
         },
@@ -169,15 +169,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 68,
           "line": 38,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 38,
         },
@@ -186,15 +186,15 @@ Array [
     },
     "name": "configures",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 27,
           "line": 40,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 40,
         },
@@ -203,15 +203,15 @@ Array [
     },
     "name": "npm_config_loglevel",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 31,
           "line": 48,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 48,
         },
@@ -220,15 +220,15 @@ Array [
     },
     "name": "npm_config_loglevel",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 22,
           "line": 53,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 53,
         },
@@ -237,15 +237,15 @@ Array [
     },
     "name": "node",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 6,
           "line": 54,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 54,
         },
@@ -254,15 +254,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 15,
           "line": 69,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 69,
         },
@@ -271,15 +271,15 @@ Array [
     },
     "name": "TMP",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 12,
           "line": 71,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 71,
         },
@@ -288,15 +288,15 @@ Array [
     },
     "name": "TMP",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 19,
           "line": 73,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 73,
         },
@@ -305,15 +305,15 @@ Array [
     },
     "name": "TMP",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 11,
           "line": 81,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 81,
         },
@@ -322,15 +322,15 @@ Array [
     },
     "name": "BACK",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 5,
           "line": 83,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 83,
         },
@@ -339,15 +339,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 12,
           "line": 84,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 84,
         },
@@ -356,15 +356,15 @@ Array [
     },
     "name": "tar",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 25,
           "line": 86,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 86,
         },
@@ -373,15 +373,15 @@ Array [
     },
     "name": "tar",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 22,
           "line": 89,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 89,
         },
@@ -390,15 +390,15 @@ Array [
     },
     "name": "tar",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 8,
           "line": 90,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 90,
         },
@@ -407,15 +407,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 8,
           "line": 97,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 97,
         },
@@ -424,15 +424,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 11,
           "line": 116,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 116,
         },
@@ -441,15 +441,15 @@ Array [
     },
     "name": "MAKE",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 25,
           "line": 119,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 119,
         },
@@ -458,15 +458,15 @@ Array [
     },
     "name": "make",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 26,
           "line": 123,
         },
-        "start": Object {
+        "start": {
           "character": 4,
           "line": 123,
         },
@@ -475,15 +475,15 @@ Array [
     },
     "name": "make",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 17,
           "line": 127,
         },
-        "start": Object {
+        "start": {
           "character": 6,
           "line": 127,
         },
@@ -492,15 +492,15 @@ Array [
     },
     "name": "make",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 14,
           "line": 131,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 131,
         },
@@ -509,15 +509,15 @@ Array [
     },
     "name": "make",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 13,
           "line": 138,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 138,
         },
@@ -526,15 +526,15 @@ Array [
     },
     "name": "make",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 12,
           "line": 145,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 145,
         },
@@ -543,15 +543,15 @@ Array [
     },
     "name": "clean",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 37,
           "line": 148,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 148,
         },
@@ -560,15 +560,15 @@ Array [
     },
     "name": "node_version",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 6,
           "line": 149,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 149,
         },
@@ -577,15 +577,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 18,
           "line": 158,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 158,
         },
@@ -594,15 +594,15 @@ Array [
     },
     "name": "t",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 16,
           "line": 170,
         },
-        "start": Object {
+        "start": {
           "character": 6,
           "line": 170,
         },
@@ -611,15 +611,15 @@ Array [
     },
     "name": "t",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 25,
           "line": 179,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 177,
         },
@@ -628,15 +628,15 @@ Array [
     },
     "name": "url",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 6,
           "line": 181,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 181,
         },
@@ -645,15 +645,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 9,
           "line": 183,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 183,
         },
@@ -662,15 +662,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 24,
           "line": 187,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 185,
         },
@@ -679,15 +679,15 @@ Array [
     },
     "name": "url",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 8,
           "line": 188,
         },
-        "start": Object {
+        "start": {
           "character": 2,
           "line": 188,
         },
@@ -696,15 +696,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 11,
           "line": 190,
         },
-        "start": Object {
+        "start": {
           "character": 4,
           "line": 190,
         },
@@ -713,15 +713,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 65,
           "line": 205,
         },
-        "start": Object {
+        "start": {
           "character": 6,
           "line": 205,
         },
@@ -730,15 +730,15 @@ Array [
     },
     "name": "ver",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 15,
           "line": 206,
         },
-        "start": Object {
+        "start": {
           "character": 6,
           "line": 206,
         },
@@ -747,15 +747,15 @@ Array [
     },
     "name": "isnpm10",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 21,
           "line": 211,
         },
-        "start": Object {
+        "start": {
           "character": 12,
           "line": 211,
         },
@@ -764,15 +764,15 @@ Array [
     },
     "name": "isnpm10",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 21,
           "line": 215,
         },
-        "start": Object {
+        "start": {
           "character": 12,
           "line": 215,
         },
@@ -781,15 +781,15 @@ Array [
     },
     "name": "isnpm10",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 11,
           "line": 220,
         },
-        "start": Object {
+        "start": {
           "character": 6,
           "line": 220,
         },
@@ -798,15 +798,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 18,
           "line": 225,
         },
-        "start": Object {
+        "start": {
           "character": 10,
           "line": 225,
         },
@@ -815,15 +815,15 @@ Array [
     },
     "name": "clean",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 15,
           "line": 230,
         },
-        "start": Object {
+        "start": {
           "character": 10,
           "line": 230,
         },
@@ -832,15 +832,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 22,
           "line": 232,
         },
-        "start": Object {
+        "start": {
           "character": 10,
           "line": 232,
         },
@@ -849,15 +849,15 @@ Array [
     },
     "name": "NODE",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 16,
           "line": 233,
         },
-        "start": Object {
+        "start": {
           "character": 10,
           "line": 233,
         },
@@ -866,15 +866,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 22,
           "line": 235,
         },
-        "start": Object {
+        "start": {
           "character": 10,
           "line": 235,
         },
@@ -883,15 +883,15 @@ Array [
     },
     "name": "NODE",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 16,
           "line": 236,
         },
-        "start": Object {
+        "start": {
           "character": 10,
           "line": 236,
         },
@@ -900,15 +900,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 21,
           "line": 255,
         },
-        "start": Object {
+        "start": {
           "character": 8,
           "line": 255,
         },
@@ -917,15 +917,15 @@ Array [
     },
     "name": "make",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 6,
           "line": 265,
         },
-        "start": Object {
+        "start": {
           "character": 0,
           "line": 265,
         },
@@ -934,15 +934,15 @@ Array [
     },
     "name": "ret",
   },
-  Object {
+  {
     "kind": 13,
-    "location": Object {
-      "range": Object {
-        "end": Object {
+    "location": {
+      "range": {
+        "end": {
           "character": 24,
           "line": 273,
         },
-        "start": Object {
+        "start": {
           "character": 5,
           "line": 273,
         },

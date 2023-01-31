@@ -70,17 +70,17 @@ describe('server', () => {
   it('initializes and responds to capabilities', async () => {
     const { server } = await initializeServer()
     expect(server.capabilities()).toMatchInlineSnapshot(`
-      Object {
-        "codeActionProvider": Object {
-          "codeActionKinds": Array [
+      {
+        "codeActionProvider": {
+          "codeActionKinds": [
             "quickfix",
           ],
           "resolveProvider": false,
           "workDoneProgress": false,
         },
-        "completionProvider": Object {
+        "completionProvider": {
           "resolveProvider": true,
-          "triggerCharacters": Array [
+          "triggerCharacters": [
             "$",
             "{",
           ],
@@ -177,21 +177,21 @@ describe('server', () => {
       const fixableDiagnostic = diagnostics.filter(({ code }) => code === 'SC2086')[0]
 
       expect(fixableDiagnostic).toMatchInlineSnapshot(`
-        Object {
+        {
           "code": "SC2086",
-          "codeDescription": Object {
+          "codeDescription": {
             "href": "https://www.shellcheck.net/wiki/SC2086",
           },
-          "data": Object {
+          "data": {
             "id": "shellcheck|2086|55:5-55:13",
           },
           "message": "Double quote to prevent globbing and word splitting.",
-          "range": Object {
-            "end": Object {
+          "range": {
+            "end": {
               "character": 13,
               "line": 55,
             },
-            "start": Object {
+            "start": {
               "character": 5,
               "line": 55,
             },
@@ -226,35 +226,35 @@ describe('server', () => {
       expect(
         codeAction.edit?.changes && codeAction.edit?.changes[FIXTURE_URI.COMMENT_DOC],
       ).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "newText": "\\"",
-                  "range": Object {
-                    "end": Object {
-                      "character": 13,
-                      "line": 55,
-                    },
-                    "start": Object {
-                      "character": 13,
-                      "line": 55,
-                    },
-                  },
-                },
-                Object {
-                  "newText": "\\"",
-                  "range": Object {
-                    "end": Object {
-                      "character": 5,
-                      "line": 55,
-                    },
-                    "start": Object {
-                      "character": 5,
-                      "line": 55,
-                    },
-                  },
-                },
-              ]
-          `)
+        [
+          {
+            "newText": """,
+            "range": {
+              "end": {
+                "character": 13,
+                "line": 55,
+              },
+              "start": {
+                "character": 13,
+                "line": 55,
+              },
+            },
+          },
+          {
+            "newText": """,
+            "range": {
+              "end": {
+                "character": 5,
+                "line": 55,
+              },
+              "start": {
+                "character": 5,
+                "line": 55,
+              },
+            },
+          },
+        ]
+      `)
     })
   })
 
@@ -454,20 +454,20 @@ describe('server', () => {
       )
 
       expect(resultVariable).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "data": Object {
-                    "type": 3,
-                  },
-                  "documentation": Object {
-                    "kind": "markdown",
-                    "value": "Variable: **BLUE** - *defined in extension.inc*",
-                  },
-                  "kind": 6,
-                  "label": "BLUE",
-                },
-              ]
-          `)
+        [
+          {
+            "data": {
+              "type": 3,
+            },
+            "documentation": {
+              "kind": "markdown",
+              "value": "Variable: **BLUE** - *defined in extension.inc*",
+            },
+            "kind": 6,
+            "label": "BLUE",
+          },
+        ]
+      `)
 
       const resultFunction = await onCompletion(
         {
@@ -485,24 +485,24 @@ describe('server', () => {
       )
 
       expect(resultFunction).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "data": Object {
-                    "type": 3,
-                  },
-                  "documentation": Object {
-                    "kind": "markdown",
-                    "value": "Function: **add_a_user** - *defined in issue101.sh*
+        [
+          {
+            "data": {
+              "type": 3,
+            },
+            "documentation": {
+              "kind": "markdown",
+              "value": "Function: **add_a_user** - *defined in issue101.sh*
 
-              \`\`\`txt
-              Helper function to add a user
-              \`\`\`",
-                  },
-                  "kind": 3,
-                  "label": "add_a_user",
-                },
-              ]
-          `)
+        \`\`\`txt
+        Helper function to add a user
+        \`\`\`",
+            },
+            "kind": 3,
+            "label": "add_a_user",
+          },
+        ]
+      `)
     })
 
     it('responds to onCompletion with local symbol when word is found in multiple files', async () => {
@@ -526,17 +526,17 @@ describe('server', () => {
       )
 
       expect(result).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "data": Object {
-                    "type": 3,
-                  },
-                  "documentation": undefined,
-                  "kind": 6,
-                  "label": "BOLD",
-                },
-              ]
-          `)
+        [
+          {
+            "data": {
+              "type": 3,
+            },
+            "documentation": undefined,
+            "kind": 6,
+            "label": "BOLD",
+          },
+        ]
+      `)
     })
 
     it('responds to onCompletion with all variables when starting to expand parameters', async () => {
@@ -561,64 +561,64 @@ describe('server', () => {
 
       // they are all variables
       expect(result).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "data": Object {
+        [
+          {
+            "data": {
               "type": 3,
             },
             "documentation": undefined,
             "kind": 6,
             "label": "BOLD",
           },
-          Object {
-            "data": Object {
+          {
+            "data": {
               "type": 3,
             },
-            "documentation": Object {
+            "documentation": {
               "kind": "markdown",
               "value": "Variable: **RED** - *defined in extension.inc*",
             },
             "kind": 6,
             "label": "RED",
           },
-          Object {
-            "data": Object {
+          {
+            "data": {
               "type": 3,
             },
-            "documentation": Object {
+            "documentation": {
               "kind": "markdown",
               "value": "Variable: **GREEN** - *defined in extension.inc*",
             },
             "kind": 6,
             "label": "GREEN",
           },
-          Object {
-            "data": Object {
+          {
+            "data": {
               "type": 3,
             },
-            "documentation": Object {
+            "documentation": {
               "kind": "markdown",
               "value": "Variable: **BLUE** - *defined in extension.inc*",
             },
             "kind": 6,
             "label": "BLUE",
           },
-          Object {
-            "data": Object {
+          {
+            "data": {
               "type": 3,
             },
-            "documentation": Object {
+            "documentation": {
               "kind": "markdown",
               "value": "Variable: **RESET** - *defined in extension.inc*",
             },
             "kind": 6,
             "label": "RESET",
           },
-          Object {
-            "data": Object {
+          {
+            "data": {
               "type": 3,
             },
-            "documentation": Object {
+            "documentation": {
               "kind": "markdown",
               "value": "Variable: **FILE_PATH** - *defined in extension.inc*",
             },
@@ -693,14 +693,14 @@ describe('server', () => {
       )
 
       expect(updateSnapshotUris(result)).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "range": Object {
-              "end": Object {
+        [
+          {
+            "range": {
+              "end": {
                 "character": 0,
                 "line": 0,
               },
-              "start": Object {
+              "start": {
                 "character": 0,
                 "line": 0,
               },
@@ -734,33 +734,33 @@ describe('server', () => {
       )
 
       expect(result1).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "range": Object {
-                    "end": Object {
-                      "character": 12,
-                      "line": 0,
-                    },
-                    "start": Object {
-                      "character": 9,
-                      "line": 0,
-                    },
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "end": Object {
-                      "character": 28,
-                      "line": 1,
-                    },
-                    "start": Object {
-                      "character": 25,
-                      "line": 1,
-                    },
-                  },
-                },
-              ]
-          `)
+        [
+          {
+            "range": {
+              "end": {
+                "character": 12,
+                "line": 0,
+              },
+              "start": {
+                "character": 9,
+                "line": 0,
+              },
+            },
+          },
+          {
+            "range": {
+              "end": {
+                "character": 28,
+                "line": 1,
+              },
+              "start": {
+                "character": 25,
+                "line": 1,
+              },
+            },
+          },
+        ]
+      `)
 
       const result2 = await onDocumentHighlight(
         {
@@ -777,7 +777,7 @@ describe('server', () => {
         {} as any,
       )
 
-      expect(result2).toMatchInlineSnapshot(`Array []`)
+      expect(result2).toMatchInlineSnapshot(`[]`)
 
       const result3 = await onDocumentHighlight(
         {
@@ -795,117 +795,117 @@ describe('server', () => {
       )
 
       expect(result3).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "range": Object {
-                    "end": Object {
-                      "character": 1,
-                      "line": 2,
-                    },
-                    "start": Object {
-                      "character": 0,
-                      "line": 2,
-                    },
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "end": Object {
-                      "character": 1,
-                      "line": 4,
-                    },
-                    "start": Object {
-                      "character": 0,
-                      "line": 4,
-                    },
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "end": Object {
-                      "character": 9,
-                      "line": 8,
-                    },
-                    "start": Object {
-                      "character": 8,
-                      "line": 8,
-                    },
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "end": Object {
-                      "character": 11,
-                      "line": 12,
-                    },
-                    "start": Object {
-                      "character": 10,
-                      "line": 12,
-                    },
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "end": Object {
-                      "character": 13,
-                      "line": 15,
-                    },
-                    "start": Object {
-                      "character": 12,
-                      "line": 15,
-                    },
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "end": Object {
-                      "character": 13,
-                      "line": 19,
-                    },
-                    "start": Object {
-                      "character": 12,
-                      "line": 19,
-                    },
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "end": Object {
-                      "character": 15,
-                      "line": 20,
-                    },
-                    "start": Object {
-                      "character": 14,
-                      "line": 20,
-                    },
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "end": Object {
-                      "character": 11,
-                      "line": 29,
-                    },
-                    "start": Object {
-                      "character": 10,
-                      "line": 29,
-                    },
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "end": Object {
-                      "character": 9,
-                      "line": 32,
-                    },
-                    "start": Object {
-                      "character": 8,
-                      "line": 32,
-                    },
-                  },
-                },
-              ]
-          `)
+        [
+          {
+            "range": {
+              "end": {
+                "character": 1,
+                "line": 2,
+              },
+              "start": {
+                "character": 0,
+                "line": 2,
+              },
+            },
+          },
+          {
+            "range": {
+              "end": {
+                "character": 1,
+                "line": 4,
+              },
+              "start": {
+                "character": 0,
+                "line": 4,
+              },
+            },
+          },
+          {
+            "range": {
+              "end": {
+                "character": 9,
+                "line": 8,
+              },
+              "start": {
+                "character": 8,
+                "line": 8,
+              },
+            },
+          },
+          {
+            "range": {
+              "end": {
+                "character": 11,
+                "line": 12,
+              },
+              "start": {
+                "character": 10,
+                "line": 12,
+              },
+            },
+          },
+          {
+            "range": {
+              "end": {
+                "character": 13,
+                "line": 15,
+              },
+              "start": {
+                "character": 12,
+                "line": 15,
+              },
+            },
+          },
+          {
+            "range": {
+              "end": {
+                "character": 13,
+                "line": 19,
+              },
+              "start": {
+                "character": 12,
+                "line": 19,
+              },
+            },
+          },
+          {
+            "range": {
+              "end": {
+                "character": 15,
+                "line": 20,
+              },
+              "start": {
+                "character": 14,
+                "line": 20,
+              },
+            },
+          },
+          {
+            "range": {
+              "end": {
+                "character": 11,
+                "line": 29,
+              },
+              "start": {
+                "character": 10,
+                "line": 29,
+              },
+            },
+          },
+          {
+            "range": {
+              "end": {
+                "character": 9,
+                "line": 32,
+              },
+              "start": {
+                "character": 8,
+                "line": 32,
+              },
+            },
+          },
+        ]
+      `)
     })
   })
 
@@ -926,16 +926,16 @@ describe('server', () => {
       )
 
       expect(updateSnapshotUris(result)).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "kind": 13,
-            "location": Object {
-              "range": Object {
-                "end": Object {
+            "location": {
+              "range": {
+                "end": {
                   "character": 16,
                   "line": 10,
                 },
-                "start": Object {
+                "start": {
                   "character": 0,
                   "line": 10,
                 },
@@ -944,15 +944,15 @@ describe('server', () => {
             },
             "name": "BOLD",
           },
-          Object {
+          {
             "kind": 12,
-            "location": Object {
-              "range": Object {
-                "end": Object {
+            "location": {
+              "range": {
+                "end": {
                   "character": 1,
                   "line": 22,
                 },
-                "start": Object {
+                "start": {
                   "character": 0,
                   "line": 20,
                 },
@@ -1005,20 +1005,20 @@ describe('server', () => {
       })
 
       expect(result).toMatchInlineSnapshot(`
-              Object {
-                "contents": Object {
-                  "kind": "markdown",
-                  "value": "Function: **hello_world** - *defined on line 8*
+        {
+          "contents": {
+            "kind": "markdown",
+            "value": "Function: **hello_world** - *defined on line 8*
 
-              \`\`\`txt
-              this is a comment
-              describing the function
-              hello_world
-              this function takes two arguments
-              \`\`\`",
-                },
-              }
-          `)
+        \`\`\`txt
+        this is a comment
+        describing the function
+        hello_world
+        this function takes two arguments
+        \`\`\`",
+          },
+        }
+      `)
     })
 
     it('displays correct documentation for symbols in file that override path executables', async () => {
@@ -1028,17 +1028,17 @@ describe('server', () => {
       })
 
       expect(result).toMatchInlineSnapshot(`
-              Object {
-                "contents": Object {
-                  "kind": "markdown",
-                  "value": "Function: **ls** - *defined on line 6*
+        {
+          "contents": {
+            "kind": "markdown",
+            "value": "Function: **ls** - *defined on line 6*
 
-              \`\`\`txt
-              override documentation for \`ls\` symbol
-              \`\`\`",
-                },
-              }
-          `)
+        \`\`\`txt
+        override documentation for \`ls\` symbol
+        \`\`\`",
+          },
+        }
+      `)
     })
 
     it('returns executable documentation if the function is not redefined', async () => {
@@ -1192,53 +1192,53 @@ describe('server', () => {
       })
 
       expect(resultIncludingCurrentSymbol).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "range": Object {
-              "end": Object {
+        [
+          {
+            "range": {
+              "end": {
                 "character": 19,
                 "line": 40,
               },
-              "start": Object {
+              "start": {
                 "character": 0,
                 "line": 40,
               },
             },
             "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh",
           },
-          Object {
-            "range": Object {
-              "end": Object {
+          {
+            "range": {
+              "end": {
                 "character": 21,
                 "line": 48,
               },
-              "start": Object {
+              "start": {
                 "character": 2,
                 "line": 48,
               },
             },
             "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh",
           },
-          Object {
-            "range": Object {
-              "end": Object {
+          {
+            "range": {
+              "end": {
                 "character": 26,
                 "line": 50,
               },
-              "start": Object {
+              "start": {
                 "character": 7,
                 "line": 50,
               },
             },
             "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh",
           },
-          Object {
-            "range": Object {
-              "end": Object {
+          {
+            "range": {
+              "end": {
                 "character": 26,
                 "line": 42,
               },
-              "start": Object {
+              "start": {
                 "character": 7,
                 "line": 42,
               },
@@ -1249,40 +1249,40 @@ describe('server', () => {
       `)
 
       expect(resultExcludingCurrentSymbol).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "range": Object {
-              "end": Object {
+        [
+          {
+            "range": {
+              "end": {
                 "character": 19,
                 "line": 40,
               },
-              "start": Object {
+              "start": {
                 "character": 0,
                 "line": 40,
               },
             },
             "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh",
           },
-          Object {
-            "range": Object {
-              "end": Object {
+          {
+            "range": {
+              "end": {
                 "character": 21,
                 "line": 48,
               },
-              "start": Object {
+              "start": {
                 "character": 2,
                 "line": 48,
               },
             },
             "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh",
           },
-          Object {
-            "range": Object {
-              "end": Object {
+          {
+            "range": {
+              "end": {
                 "character": 26,
                 "line": 42,
               },
-              "start": Object {
+              "start": {
                 "character": 7,
                 "line": 42,
               },
