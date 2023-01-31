@@ -105,7 +105,7 @@ describe('linter', () => {
             ],
             "edit": {
               "changes": {
-                "file:///Users/kenneth/git/bash-language-server/testing/fixtures//foo.sh": [
+                "${FIXTURE_DOCUMENT_URI}": [
                   {
                     "newText": """,
                     "range": {
