@@ -4,13 +4,13 @@ import { LOG_LEVEL_ENV_VAR } from '../util/logger'
 describe('ConfigSchema', () => {
   it('returns a default', () => {
     expect(ConfigSchema.parse({})).toMatchInlineSnapshot(`
-      Object {
+      {
         "backgroundAnalysisMaxFiles": 500,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
         "includeAllWorkspaceSymbols": false,
         "logLevel": "info",
-        "shellcheckArguments": Array [],
+        "shellcheckArguments": [],
         "shellcheckPath": "shellcheck",
       }
     `)
@@ -26,13 +26,13 @@ describe('ConfigSchema', () => {
         shellcheckPath: '',
       }),
     ).toMatchInlineSnapshot(`
-      Object {
+      {
         "backgroundAnalysisMaxFiles": 1,
         "explainshellEndpoint": "localhost:8080",
         "globPattern": "**/*@(.sh)",
         "includeAllWorkspaceSymbols": true,
         "logLevel": "info",
-        "shellcheckArguments": Array [
+        "shellcheckArguments": [
           "-e",
           "SC2001",
           "-e",
@@ -56,13 +56,13 @@ describe('getConfigFromEnvironmentVariables', () => {
     process.env = {}
     const { config } = getConfigFromEnvironmentVariables()
     expect(config).toMatchInlineSnapshot(`
-      Object {
+      {
         "backgroundAnalysisMaxFiles": 500,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
         "includeAllWorkspaceSymbols": false,
         "logLevel": "info",
-        "shellcheckArguments": Array [],
+        "shellcheckArguments": [],
         "shellcheckPath": "shellcheck",
       }
     `)
@@ -74,13 +74,13 @@ describe('getConfigFromEnvironmentVariables', () => {
     }
     const { config } = getConfigFromEnvironmentVariables()
     expect(config).toMatchInlineSnapshot(`
-      Object {
+      {
         "backgroundAnalysisMaxFiles": 500,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
         "includeAllWorkspaceSymbols": false,
         "logLevel": "info",
-        "shellcheckArguments": Array [],
+        "shellcheckArguments": [],
         "shellcheckPath": "",
       }
     `)
@@ -97,13 +97,13 @@ describe('getConfigFromEnvironmentVariables', () => {
     }
     const { config } = getConfigFromEnvironmentVariables()
     expect(config).toMatchInlineSnapshot(`
-      Object {
+      {
         "backgroundAnalysisMaxFiles": 1,
         "explainshellEndpoint": "localhost:8080",
         "globPattern": "*.*",
         "includeAllWorkspaceSymbols": false,
         "logLevel": "error",
-        "shellcheckArguments": Array [
+        "shellcheckArguments": [
           "-e",
           "SC2001",
         ],

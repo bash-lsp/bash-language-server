@@ -75,25 +75,25 @@ describe('linter', () => {
 
     const [result] = await getLintingResult({ document: textToDoc(shell) })
     expect(result).toMatchInlineSnapshot(`
-      Object {
-        "codeActions": Object {
-          "shellcheck|2086|1:5-1:9": Object {
-            "diagnostics": Array [
-              Object {
+      {
+        "codeActions": {
+          "shellcheck|2086|1:5-1:9": {
+            "diagnostics": [
+              {
                 "code": "SC2086",
-                "codeDescription": Object {
+                "codeDescription": {
                   "href": "https://www.shellcheck.net/wiki/SC2086",
                 },
-                "data": Object {
+                "data": {
                   "id": "shellcheck|2086|1:5-1:9",
                 },
                 "message": "Double quote to prevent globbing and word splitting.",
-                "range": Object {
-                  "end": Object {
+                "range": {
+                  "end": {
                     "character": 9,
                     "line": 1,
                   },
-                  "start": Object {
+                  "start": {
                     "character": 5,
                     "line": 1,
                   },
@@ -103,30 +103,30 @@ describe('linter', () => {
                 "tags": undefined,
               },
             ],
-            "edit": Object {
-              "changes": Object {
-                "${FIXTURE_DOCUMENT_URI}": Array [
-                  Object {
-                    "newText": "\\"",
-                    "range": Object {
-                      "end": Object {
+            "edit": {
+              "changes": {
+                "file:///Users/kenneth/git/bash-language-server/testing/fixtures//foo.sh": [
+                  {
+                    "newText": """,
+                    "range": {
+                      "end": {
                         "character": 9,
                         "line": 1,
                       },
-                      "start": Object {
+                      "start": {
                         "character": 9,
                         "line": 1,
                       },
                     },
                   },
-                  Object {
-                    "newText": "\\"",
-                    "range": Object {
-                      "end": Object {
+                  {
+                    "newText": """,
+                    "range": {
+                      "end": {
                         "character": 5,
                         "line": 1,
                       },
-                      "start": Object {
+                      "start": {
                         "character": 5,
                         "line": 1,
                       },
@@ -139,22 +139,22 @@ describe('linter', () => {
             "title": "Apply fix for SC2086",
           },
         },
-        "diagnostics": Array [
-          Object {
+        "diagnostics": [
+          {
             "code": "SC2154",
-            "codeDescription": Object {
+            "codeDescription": {
               "href": "https://www.shellcheck.net/wiki/SC2154",
             },
-            "data": Object {
+            "data": {
               "id": "shellcheck|2154|1:5-1:9",
             },
             "message": "foo is referenced but not assigned.",
-            "range": Object {
-              "end": Object {
+            "range": {
+              "end": {
                 "character": 9,
                 "line": 1,
               },
-              "start": Object {
+              "start": {
                 "character": 5,
                 "line": 1,
               },
@@ -163,21 +163,21 @@ describe('linter', () => {
             "source": "shellcheck",
             "tags": undefined,
           },
-          Object {
+          {
             "code": "SC2086",
-            "codeDescription": Object {
+            "codeDescription": {
               "href": "https://www.shellcheck.net/wiki/SC2086",
             },
-            "data": Object {
+            "data": {
               "id": "shellcheck|2086|1:5-1:9",
             },
             "message": "Double quote to prevent globbing and word splitting.",
-            "range": Object {
-              "end": Object {
+            "range": {
+              "end": {
                 "character": 9,
                 "line": 1,
               },
-              "start": Object {
+              "start": {
                 "character": 5,
                 "line": 1,
               },
@@ -230,24 +230,24 @@ describe('linter', () => {
     })
 
     expect(result).toMatchInlineSnapshot(`
-      Object {
-        "codeActions": Object {},
-        "diagnostics": Array [
-          Object {
+      {
+        "codeActions": {},
+        "diagnostics": [
+          {
             "code": "SC1091",
-            "codeDescription": Object {
+            "codeDescription": {
               "href": "https://www.shellcheck.net/wiki/SC1091",
             },
-            "data": Object {
+            "data": {
               "id": "shellcheck|1091|3:7-3:19",
             },
             "message": "Not following: shellcheck/sourced.sh: openBinaryFile: does not exist (No such file or directory)",
-            "range": Object {
-              "end": Object {
+            "range": {
+              "end": {
                 "character": 19,
                 "line": 3,
               },
-              "start": Object {
+              "start": {
                 "character": 7,
                 "line": 3,
               },
@@ -256,21 +256,21 @@ describe('linter', () => {
             "source": "shellcheck",
             "tags": undefined,
           },
-          Object {
+          {
             "code": "SC2154",
-            "codeDescription": Object {
+            "codeDescription": {
               "href": "https://www.shellcheck.net/wiki/SC2154",
             },
-            "data": Object {
+            "data": {
               "id": "shellcheck|2154|5:6-5:10",
             },
             "message": "foo is referenced but not assigned.",
-            "range": Object {
-              "end": Object {
+            "range": {
+              "end": {
                 "character": 10,
                 "line": 5,
               },
-              "start": Object {
+              "start": {
                 "character": 6,
                 "line": 5,
               },

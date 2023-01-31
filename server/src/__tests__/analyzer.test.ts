@@ -69,15 +69,15 @@ describe('analyze', () => {
       document: FIXTURE_DOCUMENT.MISSING_NODE,
     })
     expect(diagnostics).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "message": "Syntax error: \\"fi\\" missing",
-          "range": Object {
-            "end": Object {
+      [
+        {
+          "message": "Syntax error: "fi" missing",
+          "range": {
+            "end": {
               "character": 0,
               "line": 12,
             },
-            "start": Object {
+            "start": {
               "character": 0,
               "line": 12,
             },
@@ -112,19 +112,19 @@ describe('analyze', () => {
     })
     expect(diagnostics).not.toEqual([])
     expect(diagnostics).toMatchInlineSnapshot(`
-      Array [
-        Object {
+      [
+        {
           "message": "Source command could not be analyzed: non-constant source not supported.
 
-      Note that enabling the configuration flag \\"includeAllWorkspaceSymbols\\"
+      Note that enabling the configuration flag "includeAllWorkspaceSymbols"
       would include all symbols in the workspace regardless of source commands.
       But be aware that this will lead to false positive suggestions.",
-          "range": Object {
-            "end": Object {
+          "range": {
+            "end": {
               "character": 16,
               "line": 21,
             },
-            "start": Object {
+            "start": {
               "character": 2,
               "line": 21,
             },
@@ -157,14 +157,14 @@ describe('findDeclarationLocations', () => {
       position: { character: 10, line: 2 },
     })
     expect(updateSnapshotUris(result)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "range": Object {
-            "end": Object {
+      [
+        {
+          "range": {
+            "end": {
               "character": 0,
               "line": 0,
             },
-            "start": Object {
+            "start": {
               "character": 0,
               "line": 0,
             },
@@ -188,14 +188,14 @@ describe('findDeclarationLocations', () => {
       position: { character: 10, line: 16 },
     })
     expect(updateSnapshotUris(result)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "range": Object {
-            "end": Object {
+      [
+        {
+          "range": {
+            "end": {
               "character": 0,
               "line": 0,
             },
-            "start": Object {
+            "start": {
               "character": 0,
               "line": 0,
             },
@@ -215,14 +215,14 @@ describe('findDeclarationLocations', () => {
       word: 'node_version',
     })
     expect(updateSnapshotUris(result)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "range": Object {
-            "end": Object {
+      [
+        {
+          "range": {
+            "end": {
               "character": 37,
               "line": 148,
             },
-            "start": Object {
+            "start": {
               "character": 0,
               "line": 148,
             },
@@ -241,14 +241,14 @@ describe('findDeclarationLocations', () => {
       word: 'X',
     })
     expect(updateSnapshotUris(result)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "range": Object {
-            "end": Object {
+      [
+        {
+          "range": {
+            "end": {
               "character": 17,
               "line": 12,
             },
-            "start": Object {
+            "start": {
               "character": 10,
               "line": 12,
             },
@@ -267,14 +267,14 @@ describe('findDeclarationLocations', () => {
       word: 'i',
     })
     expect(updateSnapshotUris(result)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "range": Object {
-            "end": Object {
+      [
+        {
+          "range": {
+            "end": {
               "character": 5,
               "line": 37,
             },
-            "start": Object {
+            "start": {
               "character": 4,
               "line": 37,
             },
@@ -429,16 +429,16 @@ describe('findDeclarationsMatchingWord', () => {
         }),
       ),
     ).toMatchInlineSnapshot(`
-      Array [
-        Object {
+      [
+        {
           "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 27,
                 "line": 40,
               },
-              "start": Object {
+              "start": {
                 "character": 0,
                 "line": 40,
               },
@@ -457,7 +457,7 @@ describe('findDeclarationsMatchingWord', () => {
         exactMatch: false,
         position: { line: 1000, character: 0 },
       }),
-    ).toMatchInlineSnapshot(`Array []`)
+    ).toMatchInlineSnapshot(`[]`)
 
     expect(
       updateSnapshotUris(
@@ -469,16 +469,16 @@ describe('findDeclarationsMatchingWord', () => {
         }),
       ),
     ).toMatchInlineSnapshot(`
-      Array [
-        Object {
+      [
+        {
           "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 25,
                 "line": 6,
               },
-              "start": Object {
+              "start": {
                 "character": 6,
                 "line": 6,
               },
@@ -500,16 +500,16 @@ describe('findDeclarationsMatchingWord', () => {
         }),
       ),
     ).toMatchInlineSnapshot(`
-      Array [
-        Object {
+      [
+        {
           "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 25,
                 "line": 6,
               },
-              "start": Object {
+              "start": {
                 "character": 6,
                 "line": 6,
               },
@@ -535,7 +535,7 @@ describe('findDeclarationsMatchingWord', () => {
         exactMatch: false,
         position: { line: 1000, character: 0 },
       }),
-    ).toMatchInlineSnapshot(`Array []`)
+    ).toMatchInlineSnapshot(`[]`)
 
     expect(
       updateSnapshotUris(
@@ -547,16 +547,16 @@ describe('findDeclarationsMatchingWord', () => {
         }),
       ),
     ).toMatchInlineSnapshot(`
-      Array [
-        Object {
+      [
+        {
           "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 25,
                 "line": 6,
               },
-              "start": Object {
+              "start": {
                 "character": 6,
                 "line": 6,
               },
@@ -609,16 +609,16 @@ describe('findDeclarationsMatchingWord', () => {
 
     // First definition
     expect(updateSnapshotUris(findWordFromLine('X', 3))).toMatchInlineSnapshot(`
-      Array [
-        Object {
+      [
+        {
           "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 9,
                 "line": 2,
               },
-              "start": Object {
+              "start": {
                 "character": 0,
                 "line": 2,
               },
@@ -632,17 +632,17 @@ describe('findDeclarationsMatchingWord', () => {
 
     // Local variable definition
     expect(updateSnapshotUris(findWordFromLine('X', 13))).toMatchInlineSnapshot(`
-      Array [
-        Object {
+      [
+        {
           "containerName": "g",
           "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 17,
                 "line": 12,
               },
-              "start": Object {
+              "start": {
                 "character": 10,
                 "line": 12,
               },
@@ -656,17 +656,17 @@ describe('findDeclarationsMatchingWord', () => {
 
     // Local function definition
     expect(updateSnapshotUris(findWordFromLine('f', 23))).toMatchInlineSnapshot(`
-      Array [
-        Object {
+      [
+        {
           "containerName": "g",
           "kind": 12,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 5,
                 "line": 21,
               },
-              "start": Object {
+              "start": {
                 "character": 4,
                 "line": 18,
               },
@@ -680,16 +680,16 @@ describe('findDeclarationsMatchingWord', () => {
 
     // Last definition
     expect(updateSnapshotUris(findWordFromLine('X', 1000))).toMatchInlineSnapshot(`
-      Array [
-        Object {
+      [
+        {
           "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 9,
                 "line": 4,
               },
-              "start": Object {
+              "start": {
                 "character": 0,
                 "line": 4,
               },
@@ -702,16 +702,16 @@ describe('findDeclarationsMatchingWord', () => {
     `)
 
     expect(updateSnapshotUris(findWordFromLine('f', 1000))).toMatchInlineSnapshot(`
-      Array [
-        Object {
+      [
+        {
           "kind": 12,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 1,
                 "line": 30,
               },
-              "start": Object {
+              "start": {
                 "character": 0,
                 "line": 7,
               },
@@ -725,17 +725,17 @@ describe('findDeclarationsMatchingWord', () => {
 
     // Global variable defined inside a function
     expect(updateSnapshotUris(findWordFromLine('GLOBAL_1', 1000))).toMatchInlineSnapshot(`
-      Array [
-        Object {
+      [
+        {
           "containerName": "g",
           "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 23,
                 "line": 13,
               },
-              "start": Object {
+              "start": {
                 "character": 4,
                 "line": 13,
               },
@@ -876,16 +876,16 @@ describe('getAllVariables', () => {
         }),
       ),
     ).toMatchInlineSnapshot(`
-      Array [
-        Object {
+      [
+        {
           "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 16,
                 "line": 10,
               },
-              "start": Object {
+              "start": {
                 "character": 0,
                 "line": 10,
               },
@@ -894,15 +894,15 @@ describe('getAllVariables', () => {
           },
           "name": "BOLD",
         },
-        Object {
+        {
           "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 18,
                 "line": 4,
               },
-              "start": Object {
+              "start": {
                 "character": 0,
                 "line": 4,
               },
@@ -911,15 +911,15 @@ describe('getAllVariables', () => {
           },
           "name": "RED",
         },
-        Object {
+        {
           "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 20,
                 "line": 5,
               },
-              "start": Object {
+              "start": {
                 "character": 0,
                 "line": 5,
               },
@@ -928,15 +928,15 @@ describe('getAllVariables', () => {
           },
           "name": "GREEN",
         },
-        Object {
+        {
           "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 25,
                 "line": 6,
               },
-              "start": Object {
+              "start": {
                 "character": 6,
                 "line": 6,
               },
@@ -945,15 +945,15 @@ describe('getAllVariables', () => {
           },
           "name": "BLUE",
         },
-        Object {
+        {
           "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 23,
                 "line": 7,
               },
-              "start": Object {
+              "start": {
                 "character": 7,
                 "line": 7,
               },
@@ -962,15 +962,15 @@ describe('getAllVariables', () => {
           },
           "name": "BOLD",
         },
-        Object {
+        {
           "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 19,
                 "line": 10,
               },
-              "start": Object {
+              "start": {
                 "character": 2,
                 "line": 10,
               },
@@ -979,15 +979,15 @@ describe('getAllVariables', () => {
           },
           "name": "RESET",
         },
-        Object {
+        {
           "kind": 13,
-          "location": Object {
-            "range": Object {
-              "end": Object {
+          "location": {
+            "range": {
+              "end": {
                 "character": 14,
                 "line": 25,
               },
-              "start": Object {
+              "start": {
                 "character": 5,
                 "line": 25,
               },

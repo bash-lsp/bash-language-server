@@ -1,183 +1,183 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`getSourcedUris returns a set of sourced files 2`] = `
-Array [
-  Object {
+[
+  {
     "error": null,
-    "range": Object {
-      "end": Object {
+    "range": {
+      "end": {
         "character": 28,
         "line": 1,
       },
-      "start": Object {
+      "start": {
         "character": 6,
         "line": 1,
       },
     },
     "uri": "file:///Users/bash/file-in-path.sh",
   },
-  Object {
+  {
     "error": null,
-    "range": Object {
-      "end": Object {
+    "range": {
+      "end": {
         "character": 33,
         "line": 3,
       },
-      "start": Object {
+      "start": {
         "character": 6,
         "line": 3,
       },
     },
     "uri": "file:///bin/extension.inc",
   },
-  Object {
+  {
     "error": null,
-    "range": Object {
-      "end": Object {
+    "range": {
+      "end": {
         "character": 22,
         "line": 5,
       },
-      "start": Object {
+      "start": {
         "character": 6,
         "line": 5,
       },
     },
     "uri": "file:///Users/bash/x",
   },
-  Object {
+  {
     "error": null,
-    "range": Object {
-      "end": Object {
+    "range": {
+      "end": {
         "character": 36,
         "line": 7,
       },
-      "start": Object {
+      "start": {
         "character": 6,
         "line": 7,
       },
     },
     "uri": "file:///Users/scripts/release-client.sh",
   },
-  Object {
+  {
     "error": null,
-    "range": Object {
-      "end": Object {
+    "range": {
+      "end": {
         "character": 23,
         "line": 9,
       },
-      "start": Object {
+      "start": {
         "character": 6,
         "line": 9,
       },
     },
     "uri": "file:///Users/bash-user/myscript",
   },
-  Object {
+  {
     "error": "non-constant source not supported",
-    "range": Object {
-      "end": Object {
+    "range": {
+      "end": {
         "character": 23,
         "line": 13,
       },
-      "start": Object {
+      "start": {
         "character": 6,
         "line": 13,
       },
     },
     "uri": null,
   },
-  Object {
+  {
     "error": "non-constant source not supported",
-    "range": Object {
-      "end": Object {
+    "range": {
+      "end": {
         "character": 66,
         "line": 16,
       },
-      "start": Object {
+      "start": {
         "character": 49,
         "line": 16,
       },
     },
     "uri": null,
   },
-  Object {
+  {
     "error": "non-constant source not supported",
-    "range": Object {
-      "end": Object {
+    "range": {
+      "end": {
         "character": 66,
         "line": 18,
       },
-      "start": Object {
+      "start": {
         "character": 6,
         "line": 18,
       },
     },
     "uri": null,
   },
-  Object {
+  {
     "error": null,
-    "range": Object {
-      "end": Object {
+    "range": {
+      "end": {
         "character": 30,
         "line": 25,
       },
-      "start": Object {
+      "start": {
         "character": 8,
         "line": 25,
       },
     },
     "uri": "file:///Users/bash/issue206.sh",
   },
-  Object {
+  {
     "error": "non-constant source not supported",
-    "range": Object {
-      "end": Object {
+    "range": {
+      "end": {
         "character": 22,
         "line": 47,
       },
-      "start": Object {
+      "start": {
         "character": 8,
         "line": 47,
       },
     },
     "uri": null,
   },
-  Object {
+  {
     "error": "non-constant source not supported",
-    "range": Object {
-      "end": Object {
+    "range": {
+      "end": {
         "character": 39,
         "line": 59,
       },
-      "start": Object {
+      "start": {
         "character": 8,
         "line": 59,
       },
     },
     "uri": null,
   },
-  Object {
+  {
     "error": "non-constant source not supported",
-    "range": Object {
-      "end": Object {
+    "range": {
+      "end": {
         "character": 42,
         "line": 62,
       },
-      "start": Object {
+      "start": {
         "character": 8,
         "line": 62,
       },
     },
     "uri": null,
   },
-  Object {
+  {
     "error": "non-constant source not supported",
-    "range": Object {
-      "end": Object {
+    "range": {
+      "end": {
         "character": 67,
         "line": 89,
       },
-      "start": Object {
+      "start": {
         "character": 10,
         "line": 89,
       },
