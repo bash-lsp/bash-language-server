@@ -52,12 +52,12 @@
       "<rootDir>/vscode-client/out"
     ],
     "transform": {
-      "\\.ts$": "ts-jest"
-    },
-    "globals": {
-      "ts-jest": {
-        "tsconfig": "./server/tsconfig.json"
-      }
+      "\\.ts$": [
+        "ts-jest",
+        {
+          "tsconfig": "./server/tsconfig.json"
+        }
+      ]
     },
     "testMatch": [
       "<rootDir>/**/__tests__/*.ts"
