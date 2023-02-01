@@ -62,31 +62,13 @@ describe('analyze', () => {
     expect(loggerWarn).not.toHaveBeenCalled()
   })
 
-  it('parses files with a missing nodes and return relevant diagnostics', async () => {
+  it('parses files with a missing nodes', async () => {
     const analyzer = await getAnalyzer({})
     const diagnostics = analyzer.analyze({
       uri: CURRENT_URI,
       document: FIXTURE_DOCUMENT.MISSING_NODE,
     })
-    expect(diagnostics).toMatchInlineSnapshot(`
-      [
-        {
-          "message": "Syntax error: "fi" missing",
-          "range": {
-            "end": {
-              "character": 0,
-              "line": 12,
-            },
-            "start": {
-              "character": 0,
-              "line": 12,
-            },
-          },
-          "severity": 2,
-          "source": "bash-language-server",
-        },
-      ]
-    `)
+    expect(diagnostics).toEqual([])
     expect(loggerWarn).toHaveBeenCalledWith(
       'Error while parsing dummy-uri.sh: syntax error',
     )

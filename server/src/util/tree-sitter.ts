@@ -1,4 +1,4 @@
-import { Diagnostic, DiagnosticSeverity, Range } from 'vscode-languageserver/node'
+import * as LSP from 'vscode-languageserver/node'
 import { SyntaxNode } from 'web-tree-sitter'
 
 /**
@@ -14,8 +14,8 @@ export function forEach(node: SyntaxNode, callback: (n: SyntaxNode) => void | bo
   }
 }
 
-export function range(n: SyntaxNode): Range {
-  return Range.create(
+export function range(n: SyntaxNode): LSP.Range {
+  return LSP.Range.create(
     n.startPosition.row,
     n.startPosition.column,
     n.endPosition.row,
@@ -55,25 +55,4 @@ export function findParent(
     node = node.parent
   }
   return null
-}
-
-export function getDiagnosticsForMissingNodes(node: SyntaxNode) {
-  const diagnostics: Diagnostic[] = []
-
-  forEach(node, (node) => {
-    if (node.isMissing()) {
-      diagnostics.push(
-        Diagnostic.create(
-          range(node),
-          `Syntax error: "${node.type}" missing`,
-          DiagnosticSeverity.Warning,
-          undefined,
-          'bash-language-server',
-        ),
-      )
-    }
-    return node.hasError()
-  })
-
-  return diagnostics
 }
