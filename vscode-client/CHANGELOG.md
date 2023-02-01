@@ -1,5 +1,11 @@
 # Bash IDE
 
+## 1.33.0
+
+- Upgrade language server to 4.6.2.
+- Remove diagnostics for missing nodes that turns out to be unstable (this was introduced in 1.30.0).
+- Support parsing `: "${VARIABLE:="default"}"` as a variable definition.
+
 ## 1.32.0
 
 - Upgrade language server to 4.5.5.
