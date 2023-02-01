@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.6.2
+
+- Remove diagnostics for missing nodes that turns out to be unstable (this was introduced in 4.5.3) https://github.com/bash-lsp/bash-language-server/pull/708
+
 ## 4.6.1
 
 - Fix the ShellCheck code action feature that for some clients did not return any code actions. https://github.com/bash-lsp/bash-language-server/pull/700
