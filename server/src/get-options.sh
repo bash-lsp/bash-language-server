@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-COMPLETIONSDIR="$(pkg-config --variable=completionsdir bash-completion)"
+COMPLETIONSDIR="$(pkg-config --variable=completionsdir bash-completion || echo "${PREFIX:-/usr}/share/bash-completion/completions")"
 DATADIR="$(dirname "$(dirname "${COMPLETIONSDIR}")")"
 
-# Exit if bash-completion isn't installed.
-if (( $? != 0 ))
+# Exit if bash-completion isn't installed or COMPLETIONSDIR is invalid.
+if (( $? != 0 )) || [ ! -d "${COMPLETIONSDIR}" ]
 then
 	exit 1
 fi
