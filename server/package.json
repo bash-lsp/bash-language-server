@@ -24,7 +24,7 @@
     "vscode-languageserver": "8.0.2",
     "vscode-languageserver-textdocument": "1.0.8",
     "web-tree-sitter": "0.20.7",
-    "zod": "3.20.2"
+    "zod": "3.20.5"
   },
   "scripts": {
     "prepublishOnly": "cd ../ && yarn run compile && cp README.md server/"
