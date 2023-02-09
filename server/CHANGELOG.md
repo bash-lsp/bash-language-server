@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.7.0
+
+- Support for bash options auto completions when using Brew or when `pkg-config` fails, but bash completions are found in `"${PREFIX:-/usr}/share/bash-completion/bash_completion"` https://github.com/bash-lsp/bash-language-server/pull/717
+
 ## 4.6.2
 
 - Remove diagnostics for missing nodes that turns out to be unstable (this was introduced in 4.5.3) https://github.com/bash-lsp/bash-language-server/pull/708
