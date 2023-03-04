@@ -132,4 +132,15 @@ describe('parseShellCheckDirective', () => {
   it('parses a line with no directive', () => {
     expect(parseShellCheckDirective('# foo bar')).toEqual([])
   })
+
+  it('does not throw on invalid directives', () => {
+    expect(parseShellCheckDirective('# shellcheck')).toEqual([])
+    expect(parseShellCheckDirective('# shellcheck disable = ')).toEqual([])
+    expect(parseShellCheckDirective('# shellcheck disable=SC2-SC1')).toEqual([
+      { type: 'disable', rules: [] },
+    ])
+    expect(parseShellCheckDirective('# shellcheck disable=SC0-SC-1')).toEqual([
+      { type: 'disable', rules: ['SC0-SC-1'] },
+    ])
+  })
 })

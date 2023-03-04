@@ -45,7 +45,7 @@ export function parseShellCheckDirective(line: string): Directive[] {
       ? (typeKey as DirectiveType)
       : null
 
-    if (!type) {
+    if (!type || !directiveValue) {
       continue
     }
 
