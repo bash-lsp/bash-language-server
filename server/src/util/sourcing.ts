@@ -3,6 +3,8 @@ import * as path from 'path'
 import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
 
+import { parseShellCheckDirective } from '../shellcheck/directive'
+import { discriminate } from './discriminate'
 import { untildify } from './fs'
 import * as TreeSitterUtil from './tree-sitter'
 
@@ -61,6 +63,40 @@ function getSourcedPathInfoFromNode({
       commandNameNode.type === 'command_name' &&
       SOURCING_COMMANDS.includes(commandNameNode.text)
     ) {
+      const previousCommentNode =
+        node.previousSibling?.type === 'comment' ? node.previousSibling : null
+
+      if (previousCommentNode?.text.includes('shellcheck')) {
+        const directives = parseShellCheckDirective(previousCommentNode.text)
+        const sourcedPath = directives.find(discriminate('type', 'source'))?.path
+
+        if (sourcedPath === '/dev/null') {
+          return null
+        }
+
+        if (sourcedPath) {
+          return {
+            sourcedPath,
+          }
+        }
+
+        const isNotFollowErrorDisabled = !!directives
+          .filter(discriminate('type', 'disable'))
+          .flatMap(({ rules }) => rules)
+          .find((rule) => rule === 'SC1091')
+
+        if (isNotFollowErrorDisabled) {
+          return null
+        }
+
+        const rootFolder = directives.find(discriminate('type', 'source-path'))?.path
+        if (rootFolder && rootFolder !== 'SCRIPTDIR' && argumentNode.type === 'word') {
+          return {
+            sourcedPath: path.join(rootFolder, argumentNode.text),
+          }
+        }
+      }
+
       if (argumentNode.type === 'word') {
         return {
           sourcedPath: argumentNode.text,

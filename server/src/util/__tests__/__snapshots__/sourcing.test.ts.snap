@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getSourcedUris returns a set of sourced files 2`] = `
+exports[`getSourcedUris returns a set of sourced files (but ignores some unhandled cases) 2`] = `
 [
   {
     "error": null,
