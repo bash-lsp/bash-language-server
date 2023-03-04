@@ -1,5 +1,12 @@
 # Bash IDE
 
+## 1.34.0
+
+- Upgrade language server to 4.8.1.
+- Use ShellCheck directives when analyzing source commands
+- Support for bash options auto completions when using Brew or when `pkg-config` fails, but bash completions are found in `"${PREFIX:-/usr}/share/bash-completion/bash_completion"`
+
+
 ## 1.33.0
 
 - Upgrade language server to 4.6.2.
