@@ -98,9 +98,10 @@ describe('analyze', () => {
         {
           "message": "Source command could not be analyzed: non-constant source not supported.
 
-      Note that enabling the configuration flag "includeAllWorkspaceSymbols"
-      would include all symbols in the workspace regardless of source commands.
-      But be aware that this will lead to false positive suggestions.",
+      Consider adding a ShellCheck directive above this line to fix or ignore this:
+      # shellcheck source=/my-file.sh # specify the file to source
+      # shellcheck source-path=my_script_folder # specify the folder to search in
+      # shellcheck source=/dev/null # to ignore the error",
           "range": {
             "end": {
               "character": 16,
