@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import * as os from 'os'
 import * as Parser from 'web-tree-sitter'
 
+import { REPO_ROOT_FOLDER } from '../../../../testing/fixtures'
 import { initializeParser } from '../../parser'
 import { getSourceCommands } from '../sourcing'
 
@@ -12,8 +13,6 @@ let parser: Parser
 beforeAll(async () => {
   parser = await initializeParser()
 })
-
-jest.spyOn(fs, 'existsSync').mockImplementation(() => true)
 
 // mock os.homedir() to return a fixed path
 jest.spyOn(os, 'homedir').mockImplementation(() => '/Users/bash-user')
@@ -29,7 +28,9 @@ describe('getSourcedUris', () => {
     expect(sourceCommands).toEqual([])
   })
 
-  it('returns a set of sourced files', () => {
+  it('returns a set of sourced files (but ignores some unhandled cases)', () => {
+    jest.spyOn(fs, 'existsSync').mockImplementation(() => true)
+
     const fileContent = `
       source file-in-path.sh # does not contain a slash (i.e. is maybe somewhere on the path)
 
@@ -73,7 +74,7 @@ describe('getSourcedUris', () => {
       done
 
       # ======================================
-      # example of sourcing through a function
+      # Example of sourcing through a function
       # ======================================
 
       loadlib () {
@@ -148,5 +149,68 @@ describe('getSourcedUris', () => {
     `)
 
     expect(sourceCommands).toMatchSnapshot()
+  })
+
+  it('returns a set of sourced files and parses ShellCheck directives', () => {
+    jest.restoreAllMocks()
+
+    const fileContent = `
+      . ./scripts/release-client.sh
+
+      source ./testing/fixtures/issue206.sh
+
+      # shellcheck source=/dev/null
+      source ./IM_NOT_THERE.sh
+
+      # shellcheck source-path=testing/fixtures
+      source missing-node.sh # source path by directive
+
+      # shellcheck source=./testing/fixtures/install.sh
+      source "$X" # source by directive
+
+      # shellcheck source=./some-file-that-does-not-exist.sh
+      source "$Y" # not source due to invalid directive
+
+      # shellcheck source-path=SCRIPTDIR # note that this is already the behaviour of bash language server
+      source ./testing/fixtures/issue101.sh
+      `
+
+    const sourceCommands = getSourceCommands({
+      fileUri,
+      rootPath: REPO_ROOT_FOLDER,
+      tree: parser.parse(fileContent),
+    })
+
+    const sourcedUris = new Set(
+      sourceCommands
+        .map((sourceCommand) => sourceCommand.uri)
+        .filter((uri) => uri !== null),
+    )
+
+    expect(sourcedUris).toEqual(
+      new Set([
+        `file://${REPO_ROOT_FOLDER}/scripts/release-client.sh`,
+        `file://${REPO_ROOT_FOLDER}/testing/fixtures/issue206.sh`,
+        `file://${REPO_ROOT_FOLDER}/testing/fixtures/missing-node.sh`,
+        `file://${REPO_ROOT_FOLDER}/testing/fixtures/install.sh`,
+        `file://${REPO_ROOT_FOLDER}/testing/fixtures/issue101.sh`,
+      ]),
+    )
+
+    expect(
+      sourceCommands
+        .filter((command) => command.error)
+        .map(({ error, range }) => ({
+          error,
+          line: range.start.line,
+        })),
+    ).toMatchInlineSnapshot(`
+      [
+        {
+          "error": "failed to resolve path",
+          "line": 15,
+        },
+      ]
+    `)
   })
 })
