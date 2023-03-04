@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.8.1
+
+- Ensure ShellCheck directive parse does not throw on malformed input https://github.com/bash-lsp/bash-language-server/pull/749
+
 ## 4.8.0
 
 - Use ShellCheck directives when analyzing source commands https://github.com/bash-lsp/bash-language-server/pull/747
