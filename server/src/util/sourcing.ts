@@ -59,6 +59,11 @@ function getSourcedPathInfoFromNode({
 }): null | { sourcedPath?: string; parseError?: string } {
   if (node.type === 'command') {
     const [commandNameNode, argumentNode] = node.namedChildren
+
+    if (!commandNameNode || !argumentNode) {
+      return null
+    }
+
     if (
       commandNameNode.type === 'command_name' &&
       SOURCING_COMMANDS.includes(commandNameNode.text)
