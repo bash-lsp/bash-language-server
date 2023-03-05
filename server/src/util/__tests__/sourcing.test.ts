@@ -173,6 +173,8 @@ describe('getSourcedUris', () => {
 
       # shellcheck source-path=SCRIPTDIR # note that this is already the behaviour of bash language server
       source ./testing/fixtures/issue101.sh
+
+      source # not finished
       `
 
     const sourceCommands = getSourceCommands({
