@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.35.0
+- Upgrade language server to 4.8.2.
+- ShellCheck: avoid using the diagnostic tag "deprecated" which renders diagnostics with a strike through
+
 ## 1.34.0
 
 - Upgrade language server to 4.8.1.
