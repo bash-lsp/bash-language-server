@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.8.2
+
+- ShellCheck: avoid using the diagnostic tag "deprecated" that allow clients to render diagnostics with a strike through https://github.com/bash-lsp/bash-language-server/pull/753
+
 ## 4.8.1
 
 - Ensure ShellCheck directive parse does not throw on malformed input https://github.com/bash-lsp/bash-language-server/pull/749
