@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.8.3
+
+- Skip sending a `client/registerCapability` request when dynamic capability registration is not supported by the client https://github.com/bash-lsp/bash-language-server/pull/763
+
 ## 4.8.2
 
 - ShellCheck: avoid using the diagnostic tag "deprecated" that allow clients to render diagnostics with a strike through https://github.com/bash-lsp/bash-language-server/pull/753
