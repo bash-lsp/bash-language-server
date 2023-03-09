@@ -138,6 +138,8 @@ export default class BashServer {
    */
   public register(connection: LSP.Connection): void {
     const hasConfigurationCapability = !!this.clientCapabilities?.workspace?.configuration
+    const canDynamicallyRegisterConfigurationChangeNotification =
+      !!this.clientCapabilities?.workspace?.didChangeConfiguration?.dynamicRegistration
 
     let currentDocument: TextDocument | null = null
     let initialized = false // Whether the client finished initializing
@@ -190,9 +192,11 @@ export default class BashServer {
 
       if (hasConfigurationCapability) {
         // Register event for all configuration changes.
-        connection.client.register(LSP.DidChangeConfigurationNotification.type, {
-          section: CONFIGURATION_SECTION,
-        })
+        if (canDynamicallyRegisterConfigurationChangeNotification) {
+          connection.client.register(LSP.DidChangeConfigurationNotification.type, {
+            section: CONFIGURATION_SECTION,
+          })
+        }
 
         // get current configuration from client
         const configObject = await connection.workspace.getConfiguration(
