@@ -16,7 +16,7 @@
     "link-server": "npm uninstall -g bash-language-server && yarn compile && yarn unlink bash-language-server && cd server && yarn link && cd ../vscode-client && yarn link bash-language-server"
   },
   "devDependencies": {
-    "@types/jest": "29.4.2",
+    "@types/jest": "29.4.4",
     "@types/node": "18.15.3",
     "@typescript-eslint/eslint-plugin": "5.55.0",
     "@typescript-eslint/parser": "5.55.0",
