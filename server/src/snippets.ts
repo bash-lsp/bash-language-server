@@ -135,6 +135,66 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: '/dev/${1|null,stdin,stdout,stderr|}',
   },
   {
+    documentation: '[al]pha[num]eric characters',
+    label: '[[:alnum:]]',
+    insertText: '[[:alnum:]]',
+  },
+  {
+    documentation: '[alpha]betic characters',
+    label: '[[:alpha:]]',
+    insertText: '[[:alpha:]]',
+  },
+  {
+    documentation: '[blank] characters',
+    label: '[[:blank:]]',
+    insertText: '[[:blank:]]',
+  },
+  {
+    documentation: '[c]o[nt]ro[l] characters',
+    label: '[[:cntrl:]]',
+    insertText: '[[:cntrl:]]',
+  },
+  {
+    documentation: '[digit] characters',
+    label: '[[:digit:]]',
+    insertText: '[[:digit:]]',
+  },
+  {
+    documentation: '[graph]ical characters',
+    label: '[[:graph:]]',
+    insertText: '[[:graph:]]',
+  },
+  {
+    documentation: '[lower] characters',
+    label: '[[:lower:]]',
+    insertText: '[[:lower:]]',
+  },
+  {
+    documentation: '[print]able characters',
+    label: '[[:print:]]',
+    insertText: '[[:print:]]',
+  },
+  {
+    documentation: '[punct]uation characters',
+    label: '[[:punct:]]',
+    insertText: '[[:punct:]]',
+  },
+  {
+    documentation: '[space] characters',
+    label: '[[:space:]]',
+    insertText: '[[:space:]]',
+  },
+  {
+    documentation: '[upper] characters',
+    label: '[[:upper:]]',
+    insertText: '[[:upper:]]',
+  },
+  {
+    documentation: 'hexadecimal characters',
+    label: '[[:xdigit:]]',
+    insertText: '[[:xdigit:]]',
+  },
+  {
     label: 'sed:filter-by-pattern',
     insertText:
       "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '/${3:pattern}/p' ${4:path/to/file}",
