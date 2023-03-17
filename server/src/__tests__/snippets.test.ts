@@ -17,9 +17,11 @@ describe('snippets', () => {
         expect(stringDocumentation).toContain(label)
         const secondLine = stringDocumentation.split('\n')[1]
         try {
-          expect(
-            secondLine.startsWith(label) || secondLine.startsWith(`[${label}]`),
-          ).toBe(true)
+          if (!label.startsWith('['))
+            expect(
+              secondLine.startsWith(label) || secondLine.startsWith(`[${label}]`),
+            ).toBe(true)
+          else expect(secondLine).toBe(label)
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error(`Did not start with label: ${label}`, secondLine)
