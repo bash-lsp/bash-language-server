@@ -142,6 +142,11 @@ export const SNIPPETS: BashCompletionItem[] = [
   {
     label: 'sed:filter-by-line-number',
     insertText:
+      "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '${3:number}p' ${4:path/to/file}",
+  },
+  {
+    label: 'sed:filter-by-line-numbers',
+    insertText:
       "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '${3:from},${4:to}p' ${5:path/to/file}",
   },
   {
