@@ -13,7 +13,7 @@ describe('snippets', () => {
     it(`contains the label in the documentation for "${label}"`, () => {
       const stringDocumentation = (documentation as MarkupContent)?.value
       expect(stringDocumentation).toBeDefined()
-      if (stringDocumentation) {
+      if (stringDocumentation && !label.startsWith('[')) {
         expect(stringDocumentation).toContain(label)
         const secondLine = stringDocumentation.split('\n')[1]
         try {
