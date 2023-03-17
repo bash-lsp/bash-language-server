@@ -135,9 +135,34 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: '/dev/${1|null,stdin,stdout,stderr|}',
   },
   {
-    label: 'sed:filter-lines',
+    label: 'sed:filter-by-pattern',
     insertText:
-      "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '/${3:pattern}/' ${4:path/to/file}",
+      "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '/${3:pattern}/p' ${4:path/to/file}",
+  },
+  {
+    label: 'sed:filter-by-line-number',
+    insertText:
+      "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '${3:from},${4:to}p' ${5:path/to/file}",
+  },
+  {
+    label: 'sed:replace-first',
+    insertText:
+      "sed ${1|--regexp-extended,-E|} 's/${2:pattern}/${3:replacement}/' ${4:path/to/file}",
+  },
+  {
+    label: 'sed:replace-all',
+    insertText:
+      "sed ${1|--regexp-extended,-E|} 's/${2:pattern}/${3:replacement}/g' ${4:path/to/file}",
+  },
+  {
+    label: 'sed:transliterate',
+    insertText:
+      "sed ${1|--regexp-extended,-E|} 'y/${2:source-characters}/${3:replacement-characters}/g' ${4:path/to/file}",
+  },
+  {
+    label: 'sed:read-all',
+    insertText:
+      "sed ${1|--regexp-extended,-E|} ':x N $! bx ${2:command}' ${3:path/to/file}",
   },
   {
     label: 'awk:filter-lines',
