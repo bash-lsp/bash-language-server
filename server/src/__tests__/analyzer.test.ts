@@ -107,7 +107,9 @@ describe('analyze', () => {
       Consider adding a ShellCheck directive above this line to fix or ignore this:
       # shellcheck source=/my-file.sh # specify the file to source
       # shellcheck source-path=my_script_folder # specify the folder to search in
-      # shellcheck source=/dev/null # to ignore the error",
+      # shellcheck source=/dev/null # to ignore the error
+
+      Disable this message by changing the configuration option "enableSourceErrorDiagnostics"",
           "range": {
             "end": {
               "character": 16,
