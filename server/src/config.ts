@@ -20,7 +20,7 @@ export const ConfigSchema = z.object({
   logLevel: z.enum(LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
 
   // Controls how symbols (e.g. variables and functions) are included and used for completion and documentation.
-  // If false, then we only include symbols from sourced files (i.e. using non dynamic statements like 'source file.sh' or '. file.sh').
+  // If false, then we only include symbols from sourced files (i.e. using non dynamic statements like 'source file.sh' or '. file.sh' or following ShellCheck directives).
   // If true, then all symbols from the workspace are included.
   includeAllWorkspaceSymbols: z.boolean().default(false),
 
