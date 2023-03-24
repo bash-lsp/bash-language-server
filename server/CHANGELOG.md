@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.8.4
+
+- Make source error diagnostics ("Source command could not be analyzed") configurable with the `enableSourceErrorDiagnostics` flag.
+
 ## 4.8.3
 
 - Skip sending a `client/registerCapability` request when dynamic capability registration is not supported by the client https://github.com/bash-lsp/bash-language-server/pull/763

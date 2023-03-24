@@ -37,6 +37,11 @@
           "description": "Maximum number of files to analyze in the background. Set to 0 to disable background analysis.",
           "minimum": 0
         },
+        "bashIde.enableSourceErrorDiagnostics": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable diagnostics for source errors. Ignored if includeAllWorkspaceSymbols is true."
+        },
         "bashIde.explainshellEndpoint": {
           "type": "string",
           "default": "",
@@ -50,7 +55,7 @@
         "bashIde.includeAllWorkspaceSymbols": {
           "type": "boolean",
           "default": false,
-          "description": "Controls how symbols (e.g. variables and functions) are included and used for completion and documentation. If false (default and recommended), then we only include symbols from sourced files (i.e. using non dynamic statements like 'source file.sh' or '. file.sh'). If true, then all symbols from the workspace are included."
+          "description": "Controls how symbols (e.g. variables and functions) are included and used for completion and documentation. If false (default and recommended), then we only include symbols from sourced files (i.e. using non dynamic statements like 'source file.sh' or '. file.sh' or following ShellCheck directives). If true, then all symbols from the workspace are included."
         },
         "bashIde.logLevel": {
           "type": "string",
