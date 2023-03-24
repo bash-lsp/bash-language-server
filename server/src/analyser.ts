@@ -95,29 +95,33 @@ export default class Analyzer {
       tree,
     }
 
-    const showSourceErrorDiagnostics =
-      this.enableSourceErrorDiagnostics && !this.includeAllWorkspaceSymbols
-    if (showSourceErrorDiagnostics) {
+    if (!this.includeAllWorkspaceSymbols) {
       sourceCommands
         .filter((sourceCommand) => sourceCommand.error)
         .forEach((sourceCommand) => {
-          diagnostics.push(
-            LSP.Diagnostic.create(
-              sourceCommand.range,
-              [
-                `Source command could not be analyzed: ${sourceCommand.error}.\n`,
-                'Consider adding a ShellCheck directive above this line to fix or ignore this:',
-                '# shellcheck source=/my-file.sh # specify the file to source',
-                '# shellcheck source-path=my_script_folder # specify the folder to search in',
-                '# shellcheck source=/dev/null # to ignore the error',
-                '',
-                'Disable this message by changing the configuration option "enableSourceErrorDiagnostics"',
-              ].join('\n'),
-              LSP.DiagnosticSeverity.Information,
-              undefined,
-              'bash-language-server',
-            ),
+          logger.warn(
+            `${uri} line ${sourceCommand.range.start.line}: ${sourceCommand.error}`,
           )
+
+          if (this.enableSourceErrorDiagnostics) {
+            diagnostics.push(
+              LSP.Diagnostic.create(
+                sourceCommand.range,
+                [
+                  `Source command could not be analyzed: ${sourceCommand.error}.\n`,
+                  'Consider adding a ShellCheck directive above this line to fix or ignore this:',
+                  '# shellcheck source=/my-file.sh # specify the file to source',
+                  '# shellcheck source-path=my_script_folder # specify the folder to search in',
+                  '# shellcheck source=/dev/null # to ignore the error',
+                  '',
+                  'Disable this message by changing the configuration option "enableSourceErrorDiagnostics"',
+                ].join('\n'),
+                LSP.DiagnosticSeverity.Information,
+                undefined,
+                'bash-language-server',
+              ),
+            )
+          }
         })
     }
 

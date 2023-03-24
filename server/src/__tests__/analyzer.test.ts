@@ -814,6 +814,8 @@ describe('initiateBackgroundAnalysis', () => {
       [expect.stringContaining('missing-node2.sh: syntax error')],
       [expect.stringContaining('not-a-shell-script.sh: syntax error')],
       [expect.stringContaining('parse-problems.sh: syntax error')],
+      [expect.stringContaining('sourcing.sh line 16: failed to resolve path')],
+      [expect.stringContaining('sourcing.sh line 21: non-constant source not supported')],
     ])
 
     // Intro, stats on glob, one file skipped due to shebang, and outro
