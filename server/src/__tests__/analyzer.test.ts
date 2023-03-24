@@ -27,10 +27,12 @@ const loggerInfo = jest.spyOn(Logger.prototype, 'info')
 const loggerWarn = jest.spyOn(Logger.prototype, 'warn')
 
 async function getAnalyzer({
+  enableSourceErrorDiagnostics = false,
   includeAllWorkspaceSymbols = false,
   workspaceFolder = FIXTURE_FOLDER,
   runBackgroundAnalysis = false,
 }: {
+  enableSourceErrorDiagnostics?: boolean
   includeAllWorkspaceSymbols?: boolean
   workspaceFolder?: string
   runBackgroundAnalysis?: boolean
@@ -38,6 +40,7 @@ async function getAnalyzer({
   const parser = await initializeParser()
 
   const analyzer = new Analyzer({
+    enableSourceErrorDiagnostics,
     parser,
     includeAllWorkspaceSymbols,
     workspaceFolder,
@@ -87,7 +90,10 @@ describe('analyze', () => {
   })
 
   it('returns a list of diagnostics for a file with sourcing issues', async () => {
-    const analyzer = await getAnalyzer({})
+    const analyzer = await getAnalyzer({
+      enableSourceErrorDiagnostics: true,
+      includeAllWorkspaceSymbols: false,
+    })
     const diagnostics = analyzer.analyze({
       uri: CURRENT_URI,
       document: FIXTURE_DOCUMENT.SOURCING,
@@ -125,6 +131,15 @@ describe('analyze', () => {
       document: FIXTURE_DOCUMENT.SOURCING,
     })
     expect(diagnostics2).toEqual([])
+
+    // or if enableSourceErrorDiagnostics is false
+    analyzer.setIncludeAllWorkspaceSymbols(false)
+    analyzer.setEnableSourceErrorDiagnostics(false)
+    const diagnostics3 = analyzer.analyze({
+      uri: CURRENT_URI,
+      document: FIXTURE_DOCUMENT.SOURCING,
+    })
+    expect(diagnostics3).toEqual([])
   })
 })
 

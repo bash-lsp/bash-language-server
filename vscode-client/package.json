@@ -37,6 +37,11 @@
           "description": "Maximum number of files to analyze in the background. Set to 0 to disable background analysis.",
           "minimum": 0
         },
+        "bashIde.enableSourceErrorDiagnostics": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable diagnostics for source errors. Ignored if includeAllWorkspaceSymbols is true."
+        },
         "bashIde.explainshellEndpoint": {
           "type": "string",
           "default": "",

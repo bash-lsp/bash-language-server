@@ -34,20 +34,24 @@ type AnalyzedDocument = {
  * tree-sitter to find definitions, reference, etc.
  */
 export default class Analyzer {
+  private enableSourceErrorDiagnostics: boolean
   private includeAllWorkspaceSymbols: boolean
   private parser: Parser
   private uriToAnalyzedDocument: Record<string, AnalyzedDocument | undefined> = {}
   private workspaceFolder: string | null
 
   public constructor({
+    enableSourceErrorDiagnostics = false,
     includeAllWorkspaceSymbols = false,
     parser,
     workspaceFolder,
   }: {
+    enableSourceErrorDiagnostics?: boolean
     includeAllWorkspaceSymbols?: boolean
     parser: Parser
     workspaceFolder: string | null
   }) {
+    this.enableSourceErrorDiagnostics = enableSourceErrorDiagnostics
     this.includeAllWorkspaceSymbols = includeAllWorkspaceSymbols
     this.parser = parser
     this.workspaceFolder = workspaceFolder
@@ -91,7 +95,9 @@ export default class Analyzer {
       tree,
     }
 
-    if (!this.includeAllWorkspaceSymbols) {
+    const showSourceErrorDiagnostics =
+      this.enableSourceErrorDiagnostics && !this.includeAllWorkspaceSymbols
+    if (showSourceErrorDiagnostics) {
       sourceCommands
         .filter((sourceCommand) => sourceCommand.error)
         .forEach((sourceCommand) => {
@@ -511,6 +517,10 @@ export default class Analyzer {
       params.position.line,
       params.position.character,
     )
+  }
+
+  public setEnableSourceErrorDiagnostics(enableSourceErrorDiagnostics: boolean): void {
+    this.enableSourceErrorDiagnostics = enableSourceErrorDiagnostics
   }
 
   public setIncludeAllWorkspaceSymbols(includeAllWorkspaceSymbols: boolean): void {

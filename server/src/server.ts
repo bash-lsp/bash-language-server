@@ -269,6 +269,10 @@ export default class BashServer {
             this.linter = new Linter({ executablePath: shellcheckPath })
           }
 
+          this.analyzer.setEnableSourceErrorDiagnostics(
+            this.config.enableSourceErrorDiagnostics,
+          )
+
           this.analyzer.setIncludeAllWorkspaceSymbols(
             this.config.includeAllWorkspaceSymbols,
           )

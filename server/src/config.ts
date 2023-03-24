@@ -6,6 +6,9 @@ export const ConfigSchema = z.object({
   // Maximum number of files to analyze in the background. Set to 0 to disable background analysis.
   backgroundAnalysisMaxFiles: z.number().int().min(0).default(500),
 
+  // Enable diagnostics for source errors. Ignored if includeAllWorkspaceSymbols is true.
+  enableSourceErrorDiagnostics: z.boolean().default(false),
+
   // Glob pattern for finding and parsing shell script files in the workspace. Used by the background analysis features across files.
   globPattern: z.string().trim().default('**/*@(.sh|.inc|.bash|.command)'),
 
@@ -47,6 +50,7 @@ export function getConfigFromEnvironmentVariables(): {
 } {
   const rawConfig = {
     backgroundAnalysisMaxFiles: toNumber(process.env.BACKGROUND_ANALYSIS_MAX_FILES),
+    enableSourceErrorDiagnostics: toBoolean(process.env.ENABLE_SOURCE_ERROR_DIAGNOSTICS),
     explainshellEndpoint: process.env.EXPLAINSHELL_ENDPOINT,
     globPattern: process.env.GLOB_PATTERN,
     includeAllWorkspaceSymbols: toBoolean(process.env.INCLUDE_ALL_WORKSPACE_SYMBOLS),
