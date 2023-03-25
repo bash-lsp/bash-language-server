@@ -6,6 +6,7 @@ describe('ConfigSchema', () => {
     expect(ConfigSchema.parse({})).toMatchInlineSnapshot(`
       {
         "backgroundAnalysisMaxFiles": 500,
+        "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
         "includeAllWorkspaceSymbols": false,
@@ -28,6 +29,7 @@ describe('ConfigSchema', () => {
     ).toMatchInlineSnapshot(`
       {
         "backgroundAnalysisMaxFiles": 1,
+        "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "localhost:8080",
         "globPattern": "**/*@(.sh)",
         "includeAllWorkspaceSymbols": true,
@@ -58,6 +60,7 @@ describe('getConfigFromEnvironmentVariables', () => {
     expect(config).toMatchInlineSnapshot(`
       {
         "backgroundAnalysisMaxFiles": 500,
+        "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
         "includeAllWorkspaceSymbols": false,
@@ -76,6 +79,7 @@ describe('getConfigFromEnvironmentVariables', () => {
     expect(config).toMatchInlineSnapshot(`
       {
         "backgroundAnalysisMaxFiles": 500,
+        "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
         "includeAllWorkspaceSymbols": false,
@@ -99,6 +103,7 @@ describe('getConfigFromEnvironmentVariables', () => {
     expect(config).toMatchInlineSnapshot(`
       {
         "backgroundAnalysisMaxFiles": 1,
+        "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "localhost:8080",
         "globPattern": "*.*",
         "includeAllWorkspaceSymbols": false,

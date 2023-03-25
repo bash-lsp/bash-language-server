@@ -34,20 +34,24 @@ type AnalyzedDocument = {
  * tree-sitter to find definitions, reference, etc.
  */
 export default class Analyzer {
+  private enableSourceErrorDiagnostics: boolean
   private includeAllWorkspaceSymbols: boolean
   private parser: Parser
   private uriToAnalyzedDocument: Record<string, AnalyzedDocument | undefined> = {}
   private workspaceFolder: string | null
 
   public constructor({
+    enableSourceErrorDiagnostics = false,
     includeAllWorkspaceSymbols = false,
     parser,
     workspaceFolder,
   }: {
+    enableSourceErrorDiagnostics?: boolean
     includeAllWorkspaceSymbols?: boolean
     parser: Parser
     workspaceFolder: string | null
   }) {
+    this.enableSourceErrorDiagnostics = enableSourceErrorDiagnostics
     this.includeAllWorkspaceSymbols = includeAllWorkspaceSymbols
     this.parser = parser
     this.workspaceFolder = workspaceFolder
@@ -95,21 +99,29 @@ export default class Analyzer {
       sourceCommands
         .filter((sourceCommand) => sourceCommand.error)
         .forEach((sourceCommand) => {
-          diagnostics.push(
-            LSP.Diagnostic.create(
-              sourceCommand.range,
-              [
-                `Source command could not be analyzed: ${sourceCommand.error}.\n`,
-                'Consider adding a ShellCheck directive above this line to fix or ignore this:',
-                '# shellcheck source=/my-file.sh # specify the file to source',
-                '# shellcheck source-path=my_script_folder # specify the folder to search in',
-                '# shellcheck source=/dev/null # to ignore the error',
-              ].join('\n'),
-              LSP.DiagnosticSeverity.Information,
-              undefined,
-              'bash-language-server',
-            ),
+          logger.warn(
+            `${uri} line ${sourceCommand.range.start.line}: ${sourceCommand.error}`,
           )
+
+          if (this.enableSourceErrorDiagnostics) {
+            diagnostics.push(
+              LSP.Diagnostic.create(
+                sourceCommand.range,
+                [
+                  `Source command could not be analyzed: ${sourceCommand.error}.\n`,
+                  'Consider adding a ShellCheck directive above this line to fix or ignore this:',
+                  '# shellcheck source=/my-file.sh # specify the file to source',
+                  '# shellcheck source-path=my_script_folder # specify the folder to search in',
+                  '# shellcheck source=/dev/null # to ignore the error',
+                  '',
+                  'Disable this message by changing the configuration option "enableSourceErrorDiagnostics"',
+                ].join('\n'),
+                LSP.DiagnosticSeverity.Information,
+                undefined,
+                'bash-language-server',
+              ),
+            )
+          }
         })
     }
 
@@ -511,6 +523,10 @@ export default class Analyzer {
       params.position.line,
       params.position.character,
     )
+  }
+
+  public setEnableSourceErrorDiagnostics(enableSourceErrorDiagnostics: boolean): void {
+    this.enableSourceErrorDiagnostics = enableSourceErrorDiagnostics
   }
 
   public setIncludeAllWorkspaceSymbols(includeAllWorkspaceSymbols: boolean): void {

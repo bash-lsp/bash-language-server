@@ -27,10 +27,12 @@ const loggerInfo = jest.spyOn(Logger.prototype, 'info')
 const loggerWarn = jest.spyOn(Logger.prototype, 'warn')
 
 async function getAnalyzer({
+  enableSourceErrorDiagnostics = false,
   includeAllWorkspaceSymbols = false,
   workspaceFolder = FIXTURE_FOLDER,
   runBackgroundAnalysis = false,
 }: {
+  enableSourceErrorDiagnostics?: boolean
   includeAllWorkspaceSymbols?: boolean
   workspaceFolder?: string
   runBackgroundAnalysis?: boolean
@@ -38,6 +40,7 @@ async function getAnalyzer({
   const parser = await initializeParser()
 
   const analyzer = new Analyzer({
+    enableSourceErrorDiagnostics,
     parser,
     includeAllWorkspaceSymbols,
     workspaceFolder,
@@ -87,7 +90,10 @@ describe('analyze', () => {
   })
 
   it('returns a list of diagnostics for a file with sourcing issues', async () => {
-    const analyzer = await getAnalyzer({})
+    const analyzer = await getAnalyzer({
+      enableSourceErrorDiagnostics: true,
+      includeAllWorkspaceSymbols: false,
+    })
     const diagnostics = analyzer.analyze({
       uri: CURRENT_URI,
       document: FIXTURE_DOCUMENT.SOURCING,
@@ -101,7 +107,9 @@ describe('analyze', () => {
       Consider adding a ShellCheck directive above this line to fix or ignore this:
       # shellcheck source=/my-file.sh # specify the file to source
       # shellcheck source-path=my_script_folder # specify the folder to search in
-      # shellcheck source=/dev/null # to ignore the error",
+      # shellcheck source=/dev/null # to ignore the error
+
+      Disable this message by changing the configuration option "enableSourceErrorDiagnostics"",
           "range": {
             "end": {
               "character": 16,
@@ -125,6 +133,15 @@ describe('analyze', () => {
       document: FIXTURE_DOCUMENT.SOURCING,
     })
     expect(diagnostics2).toEqual([])
+
+    // or if enableSourceErrorDiagnostics is false
+    analyzer.setIncludeAllWorkspaceSymbols(false)
+    analyzer.setEnableSourceErrorDiagnostics(false)
+    const diagnostics3 = analyzer.analyze({
+      uri: CURRENT_URI,
+      document: FIXTURE_DOCUMENT.SOURCING,
+    })
+    expect(diagnostics3).toEqual([])
   })
 })
 
@@ -797,6 +814,8 @@ describe('initiateBackgroundAnalysis', () => {
       [expect.stringContaining('missing-node2.sh: syntax error')],
       [expect.stringContaining('not-a-shell-script.sh: syntax error')],
       [expect.stringContaining('parse-problems.sh: syntax error')],
+      [expect.stringContaining('sourcing.sh line 16: failed to resolve path')],
+      [expect.stringContaining('sourcing.sh line 21: non-constant source not supported')],
     ])
 
     // Intro, stats on glob, one file skipped due to shebang, and outro

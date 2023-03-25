@@ -1,5 +1,9 @@
 # Bash IDE
 
+## 1.36.0
+- Upgrade language server to 4.8.4.
+- Source error diagnostics ("Source command could not be analyzed") is now disabled by default and can be re-enable using the  `enableSourceErrorDiagnostics` configuration flag.
+
 ## 1.35.0
 - Upgrade language server to 4.8.2.
 - ShellCheck: avoid using the diagnostic tag "deprecated" which renders diagnostics with a strike through

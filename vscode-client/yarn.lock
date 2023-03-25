@@ -33,19 +33,19 @@ balanced-match@^1.0.0:
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
-bash-language-server@4.8.2:
-  version "4.8.2"
-  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-4.8.2.tgz#89a4d045ce2edd2416a8c9aa4368c2ec6fe25e51"
-  integrity sha512-B/jBGVeRMdQs+fHkEDycxD6L8/nf2WwoH3r+kt+O4GqknZ9AX3gNVE8sGjCOf0iLEvAChi6tqefYRRY2nKM4xw==
+bash-language-server@4.8.4:
+  version "4.8.4"
+  resolved "https://registry.yarnpkg.com/bash-language-server/-/bash-language-server-4.8.4.tgz#e4276594c1d5a47006f3a49876b1f26a88c4f32f"
+  integrity sha512-k8bw2G4bzpe8Pv20Isch6KoAVsOdm4dNZNPTQmdf0zapOPiDRAOehd1MpoxameKgwz6njF6oRUaxH6W+4LTUKw==
   dependencies:
     fast-glob "3.2.12"
     fuzzy-search "3.2.1"
     node-fetch "2.6.9"
-    turndown "7.1.1"
+    turndown "7.1.2"
     vscode-languageserver "8.0.2"
     vscode-languageserver-textdocument "1.0.8"
     web-tree-sitter "0.20.7"
-    zod "3.21.0"
+    zod "3.21.4"
 
 brace-expansion@^2.0.1:
   version "2.0.1"
@@ -195,10 +195,10 @@ tr46@~0.0.3:
   resolved "https://registry.yarnpkg.com/tr46/-/tr46-0.0.3.tgz#8184fd347dac9cdc185992f3a6622e14b9d9ab6a"
   integrity sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==
 
-turndown@7.1.1:
-  version "7.1.1"
-  resolved "https://registry.yarnpkg.com/turndown/-/turndown-7.1.1.tgz#96992f2d9b40a1a03d3ea61ad31b5a5c751ef77f"
-  integrity sha512-BEkXaWH7Wh7e9bd2QumhfAXk5g34+6QUmmWx+0q6ThaVOLuLUqsnkq35HQ5SBHSaxjSfSM7US5o4lhJNH7B9MA==
+turndown@7.1.2:
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/turndown/-/turndown-7.1.2.tgz#7feb838c78f14241e79ed92a416e0d213e044a29"
+  integrity sha512-ntI9R7fcUKjqBP6QU8rBK2Ehyt8LAzt3UBT9JR9tgo6GtuKvyUzpayWmeMKJw1DPdXzktvtIT8m2mVXz+bL/Qg==
   dependencies:
     domino "^2.1.6"
 
@@ -282,7 +282,7 @@ yallist@^4.0.0:
   resolved "https://registry.yarnpkg.com/yallist/-/yallist-4.0.0.tgz#9bb92790d9c0effec63be73519e11a35019a3a72"
   integrity sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==
 
-zod@3.21.0:
-  version "3.21.0"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-3.21.0.tgz#9e3cbbf741071bfed9c000d2b4e64d4d97291d12"
-  integrity sha512-UYdykTcVxB6lfdyLzAqLyyYAlOcpoluECvjsdoaqfQmz9p+3LRaIqYcNiL/J2kFYp66fBM8wwBvIGVEjq7KtZw==
+zod@3.21.4:
+  version "3.21.4"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.21.4.tgz#10882231d992519f0a10b5dd58a38c9dabbb64db"
+  integrity sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==
