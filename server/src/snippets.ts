@@ -135,9 +135,99 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: '/dev/${1|null,stdin,stdout,stderr|}',
   },
   {
-    label: 'sed:filter-lines',
+    documentation: '[al]pha[num]eric characters',
+    label: '[[:alnum:]]',
+    insertText: '[[:alnum:]]',
+  },
+  {
+    documentation: '[alpha]betic characters',
+    label: '[[:alpha:]]',
+    insertText: '[[:alpha:]]',
+  },
+  {
+    documentation: '[blank] characters',
+    label: '[[:blank:]]',
+    insertText: '[[:blank:]]',
+  },
+  {
+    documentation: '[c]o[nt]ro[l] characters',
+    label: '[[:cntrl:]]',
+    insertText: '[[:cntrl:]]',
+  },
+  {
+    documentation: '[digit] characters',
+    label: '[[:digit:]]',
+    insertText: '[[:digit:]]',
+  },
+  {
+    documentation: '[graph]ical characters',
+    label: '[[:graph:]]',
+    insertText: '[[:graph:]]',
+  },
+  {
+    documentation: '[lower] characters',
+    label: '[[:lower:]]',
+    insertText: '[[:lower:]]',
+  },
+  {
+    documentation: '[print]able characters',
+    label: '[[:print:]]',
+    insertText: '[[:print:]]',
+  },
+  {
+    documentation: '[punct]uation characters',
+    label: '[[:punct:]]',
+    insertText: '[[:punct:]]',
+  },
+  {
+    documentation: '[space] characters',
+    label: '[[:space:]]',
+    insertText: '[[:space:]]',
+  },
+  {
+    documentation: '[upper] characters',
+    label: '[[:upper:]]',
+    insertText: '[[:upper:]]',
+  },
+  {
+    documentation: 'hexadecimal characters',
+    label: '[[:xdigit:]]',
+    insertText: '[[:xdigit:]]',
+  },
+  {
+    label: 'sed:filter-by-pattern',
     insertText:
-      "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '/${3:pattern}/' ${4:path/to/file}",
+      "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '/${3:pattern}/p' ${4:path/to/file}",
+  },
+  {
+    label: 'sed:filter-by-line-number',
+    insertText:
+      "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '${3:number}p' ${4:path/to/file}",
+  },
+  {
+    label: 'sed:filter-by-line-numbers',
+    insertText:
+      "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '${3:from},${4:to}p' ${5:path/to/file}",
+  },
+  {
+    label: 'sed:replace-first',
+    insertText:
+      "sed ${1|--regexp-extended,-E|} 's/${2:pattern}/${3:replacement}/' ${4:path/to/file}",
+  },
+  {
+    label: 'sed:replace-all',
+    insertText:
+      "sed ${1|--regexp-extended,-E|} 's/${2:pattern}/${3:replacement}/g' ${4:path/to/file}",
+  },
+  {
+    label: 'sed:transliterate',
+    insertText:
+      "sed ${1|--regexp-extended,-E|} 'y/${2:source-characters}/${3:replacement-characters}/g' ${4:path/to/file}",
+  },
+  {
+    label: 'sed:read-all',
+    insertText:
+      "sed ${1|--regexp-extended,-E|} ':x N $! bx ${2:command}' ${3:path/to/file}",
   },
   {
     label: 'awk:filter-lines',
