@@ -176,7 +176,8 @@ export const SNIPPETS: BashCompletionItem[] = [
   {
     documentation: '"printf" invocation',
     label: 'printf',
-    insertText: 'printf \'%s\' "${1:message}"',
+    insertText:
+      'printf \'${1|%c,%s,%d,%f,%15c,%15s,%15d,%15f,%.5s,%.5d,%.5f|}\' "${2:message}"',
   },
   {
     documentation: '"source" invocation',
