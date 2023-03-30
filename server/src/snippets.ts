@@ -221,31 +221,42 @@ export const SNIPPETS: BashCompletionItem[] = [
       '[[ ${1:argument1} ${2|-ef,-nt,-ot,==,=,!=,=~,<,>,-eq,-ne,-lt,-le,-gt,-ge|} ${3:argument2} ]]',
   },
   {
-    label: 'sed:filter-by-pattern',
+    documentation: 'line print',
+    label: 'sed:print',
+    insertText: "sed '' ${1:path/to/file}",
+  },
+  {
+    documentation: 'line pattern filter',
+    label: 'sed:filter-by-line-pattern',
     insertText:
       "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '/${3:pattern}/p' ${4:path/to/file}",
   },
   {
+    documentation: 'line number filter',
     label: 'sed:filter-by-line-number',
     insertText:
       "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '${3:number}p' ${4:path/to/file}",
   },
   {
+    documentation: 'line number filter',
     label: 'sed:filter-by-line-numbers',
     insertText:
       "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '${3:from},${4:to}p' ${5:path/to/file}",
   },
   {
+    documentation: 'single replacement',
     label: 'sed:replace-first',
     insertText:
       "sed ${1|--regexp-extended,-E|} 's/${2:pattern}/${3:replacement}/' ${4:path/to/file}",
   },
   {
+    documentation: 'global replacement',
     label: 'sed:replace-all',
     insertText:
       "sed ${1|--regexp-extended,-E|} 's/${2:pattern}/${3:replacement}/g' ${4:path/to/file}",
   },
   {
+    documentation: 'transliteration',
     label: 'sed:transliterate',
     insertText:
       "sed ${1|--regexp-extended,-E|} 'y/${2:source-characters}/${3:replacement-characters}/g' ${4:path/to/file}",
@@ -253,7 +264,7 @@ export const SNIPPETS: BashCompletionItem[] = [
   {
     label: 'sed:read-all',
     insertText:
-      "sed ${1|--regexp-extended,-E|} ':x N $! bx ${2:command}' ${3:path/to/file}",
+      "sed ${1|--regexp-extended,-E|} ':${2:x} N $! b$2 ${3:command}' ${4:path/to/file}",
   },
   {
     label: 'awk:filter-lines',
