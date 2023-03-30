@@ -262,6 +262,7 @@ export const SNIPPETS: BashCompletionItem[] = [
       "sed ${1|--regexp-extended,-E|} 'y/${2:source-characters}/${3:replacement-characters}/g' ${4:path/to/file}",
   },
   {
+    documentation: 'whole file read',
     label: 'sed:read-all',
     insertText:
       "sed ${1|--regexp-extended,-E|} ':${2:x} N $! b$2 ${3:command}' ${4:path/to/file}",
