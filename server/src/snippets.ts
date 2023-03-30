@@ -342,6 +342,16 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: "awk RS='^$' '{ ${1:command} }' ${2:path/to/file}",
   },
   {
+    documentation: 'node print',
+    label: 'jq:print',
+    insertText: "jq '.${1:path/to/node}' ${2:path/to/file}",
+  },
+  {
+    documentation: 'node print',
+    label: 'yq:print',
+    insertText: "yq '.${1:path/to/node}' ${2:path/to/file}",
+  },
+  {
     documentation: 'home directory',
     label: '~',
     insertText: '$HOME',
