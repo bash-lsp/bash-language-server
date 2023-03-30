@@ -179,7 +179,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: '"\\${${1:variable}%%${2:pattern}}"',
   },
   {
-    documentation: '.. brace expansion',
+    documentation: '.. expansion',
     label: 'range',
     insertText: '{${1:from}..${2:to}}',
   },
