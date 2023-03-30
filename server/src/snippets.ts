@@ -268,8 +268,39 @@ export const SNIPPETS: BashCompletionItem[] = [
       "sed ${1|--regexp-extended,-E|} ':${2:x} N $! b$2 ${3:command}' ${4:path/to/file}",
   },
   {
-    label: 'awk:filter-lines',
+    documentation: 'line print',
+    label: 'awk:print',
+    insertText: "awk '/./' ${1:path/to/file}",
+  },
+  {
+    documentation: 'line pattern filter',
+    label: 'awk:filter-by-line-pattern',
     insertText: "awk '/${1:pattern}/' ${2:path/to/file}",
+  },
+  {
+    documentation: 'line number filter',
+    label: 'awk:filter-by-line-number',
+    insertText: "awk 'NR == ${1:number}' ${2:path/to/file}",
+  },
+  {
+    documentation: 'line number filter',
+    label: 'awk:filter-by-line-numbers',
+    insertText: "awk 'NR >= ${1:from} && NR <= ${2:to}' ${3:path/to/file}",
+  },
+  {
+    documentation: 'single replacement',
+    label: 'awk:replace-first',
+    insertText: 'awk \'{ sub("${1:pattern}", "${2:replacement}") }\' ${3:path/to/file}',
+  },
+  {
+    documentation: 'global replacement',
+    label: 'awk:replace-all',
+    insertText: 'awk \'{ gsub("${1:pattern}", "${2:replacement}") }\' ${3:path/to/file}',
+  },
+  {
+    documentation: 'whole file read',
+    label: 'awk:read-all',
+    insertText: "awk RS='^$' '{ ${1:command} }' ${2:path/to/file}",
   },
   {
     documentation: '[dev]ice name',
