@@ -1,10 +1,34 @@
 /**
+ * Naming convention for `documentation`:
+ * - for Bash operators it's '<operator> operator'
+ * - for Bash parameter expansions it's '<expansion> expansion'
+ * - for Bash documentation it's 'documentation definition' or '"<documentation>" documentation definition'
+ * - for Bash functions it's 'function definition' or '"<function>" function definition'
+ * - for Bash builtins it's '"<builtin>" invocation'
+ * - for Bash character classes it's any string with optional mnemonics depicted via square brackets
+ * - for shell shebang it's 'shebang'
+ * - for anything else it's any string
+ *
  * Naming convention for `label`:
- * - is always a language keyword, builtin name or expansion symbol like `:-`.
- * - If a snippet is for a builtin then builtin name is used.
- * - If a snippet is for expansion then expansion symbol is used.
- * - If a snippet is for a specific external program like **awk** then program name must be added to `prefix` like this:
- *  `awk:{{snippet-prefix}}`.
+ * - for shell shebang it's 'shebang'
+ * - for Bash operators it's '<operator>[<nested-operator>]', where:
+ *   - <operator> is Bash operator
+ *   - <nested-operator> is 'test'
+ *     used when [[ command is contained in <operator> condition
+ *   - term delimiter: dot, like 'if.test'
+ * - for Bash parameter expansions it's '[<prefix>]<expression>', where:
+ *   - <prefix> is one of 'set'/'error'
+ *     used when expansion modifies variable or prints error to stderr
+ *   - <expession> is 'if-(set|unset)[-or-[not-]null]'
+ *   - term delimiter: dash, like 'set-if-unset-or-null'
+ * - for Bash brace expansion it's 'range'
+ * - for Bash documentation it's one of 'documentation'/'<documentation>'
+ * - for Bash functions it's one of 'function'/'<function>'
+ * - for Bash builtins it's '<builtin>'
+ * - for Bash character classes it's '<character-class>'
+ * - for Sed it's 'sed:<expression>'
+ * - for Awk it's 'awk:<expression>'
+ * - for anything else it's any string
  */
 import { CompletionItemKind, InsertTextFormat, MarkupKind } from 'vscode-languageserver'
 
