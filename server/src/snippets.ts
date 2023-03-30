@@ -12,6 +12,7 @@ import { BashCompletionItem } from './types'
 
 export const SNIPPETS: BashCompletionItem[] = [
   {
+    documentation: 'shebang',
     label: 'shebang',
     insertText: '#!/usr/bin/env ${1|bash,sh|}',
   },
@@ -93,10 +94,12 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: ['for ${1:variable} in */; do', '\t$0', 'done'].join('\n'),
   },
   {
+    documentation: 'function definition',
     label: 'function',
     insertText: ['${1:function_name}() {', '\t$0', '}'].join('\n'),
   },
   {
+    documentation: '"main" function definition',
     label: 'main',
     insertText: ['main() {', '\t$0', '}'].join('\n'),
   },
