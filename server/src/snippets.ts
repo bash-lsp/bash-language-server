@@ -318,6 +318,11 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: "awk RS='^$' '{ ${1:command} }' ${2:path/to/file}",
   },
   {
+    documentation: 'home directory',
+    label: '~',
+    insertText: '$HOME',
+  },
+  {
     documentation: '[dev]ice name',
     label: 'dev',
     insertText: '/dev/${1|null,stdin,stdout,stderr|}',
