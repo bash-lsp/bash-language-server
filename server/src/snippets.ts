@@ -16,14 +16,17 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: '#!/usr/bin/env ${1|bash,sh|}',
   },
   {
+    documentation: 'if operator',
     label: 'if',
     insertText: ['if ${1:command}; then', '\t$0', 'fi'].join('\n'),
   },
   {
+    documentation: 'if else operator',
     label: 'if-else',
     insertText: ['if ${1:command}; then', '\t${2:echo}', 'else', '\t$0', 'fi'].join('\n'),
   },
   {
+    documentation: 'if operator',
     label: 'if.test',
     insertText: [
       'if [[ $${1:variable} ${2|==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; then',
@@ -32,6 +35,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     ].join('\n'),
   },
   {
+    documentation: 'if else operator',
     label: 'if-else.test',
     insertText: [
       'if [[ $${1:variable} ${2|==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; then',
@@ -41,10 +45,12 @@ export const SNIPPETS: BashCompletionItem[] = [
     ].join('\n'),
   },
   {
+    documentation: 'while operator',
     label: 'while',
     insertText: ['while ${1:command}; do', '\t$0', 'done'].join('\n'),
   },
   {
+    documentation: 'while operator',
     label: 'while.test',
     insertText: [
       'while [[ $${1:variable} ${2|==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; do',
@@ -53,10 +59,12 @@ export const SNIPPETS: BashCompletionItem[] = [
     ].join('\n'),
   },
   {
+    documentation: 'until operator',
     label: 'until',
     insertText: ['until ${1:command}; do', '\t$0', 'done'].join('\n'),
   },
   {
+    documentation: 'until operator',
     label: 'until.test',
     insertText: [
       'until [[ $${1:variable} ${2|==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; do',
@@ -65,18 +73,22 @@ export const SNIPPETS: BashCompletionItem[] = [
     ].join('\n'),
   },
   {
+    documentation: 'for operator',
     label: 'for',
     insertText: ['for ${1:variable} in ${2:list}; do', '\t$0', 'done'].join('\n'),
   },
   {
+    documentation: 'for operator',
     label: 'for.range',
     insertText: ['for ${1:variable} in $(seq ${2:to}); do', '\t$0', 'done'].join('\n'),
   },
   {
+    documentation: 'for operator',
     label: 'for.file',
     insertText: ['for ${1:variable} in *; do', '\t$0', 'done'].join('\n'),
   },
   {
+    documentation: 'for operator',
     label: 'for.directory',
     insertText: ['for ${1:variable} in */; do', '\t$0', 'done'].join('\n'),
   },
