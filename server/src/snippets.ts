@@ -24,16 +24,61 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: ['if ${1:command}; then', '\t${2:echo}', 'else', '\t$0', 'fi'].join('\n'),
   },
   {
+    label: 'if.test',
+    insertText: [
+      'if [[ $${1:variable} ${2|==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; then',
+      '\t$0',
+      'fi',
+    ].join('\n'),
+  },
+  {
+    label: 'if-else.test',
+    insertText: [
+      'if [[ $${1:variable} ${2|==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; then',
+      'else',
+      '\t$0',
+      'fi',
+    ].join('\n'),
+  },
+  {
     label: 'while',
     insertText: ['while ${1:command}; do', '\t$0', 'done'].join('\n'),
+  },
+  {
+    label: 'while.test',
+    insertText: [
+      'while [[ $${1:variable} ${2|==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; do',
+      '\t$0',
+      'done',
+    ].join('\n'),
   },
   {
     label: 'until',
     insertText: ['until ${1:command}; do', '\t$0', 'done'].join('\n'),
   },
   {
+    label: 'until.test',
+    insertText: [
+      'until [[ $${1:variable} ${2|==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; do',
+      '\t$0',
+      'done',
+    ].join('\n'),
+  },
+  {
     label: 'for',
     insertText: ['for ${1:variable} in ${2:list}; do', '\t$0', 'done'].join('\n'),
+  },
+  {
+    label: 'for.range',
+    insertText: ['for ${1:variable} in $(seq ${2:to}); do', '\t$0', 'done'].join('\n'),
+  },
+  {
+    label: 'for.file',
+    insertText: ['for ${1:variable} in *; do', '\t$0', 'done'].join('\n'),
+  },
+  {
+    label: 'for.directory',
+    insertText: ['for ${1:variable} in */; do', '\t$0', 'done'].join('\n'),
   },
   {
     label: 'function',
