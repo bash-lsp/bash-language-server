@@ -169,42 +169,52 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: '{${1:from}..${2:to}}',
   },
   {
+    documentation: '"echo" invocation',
     label: 'echo',
     insertText: 'echo "${1:message}"',
   },
   {
+    documentation: '"printf" invocation',
     label: 'printf',
     insertText: 'printf \'%s\' "${1:message}"',
   },
   {
+    documentation: '"source" invocation',
     label: 'source',
-    insertText: 'source "${1:path/to/file}"',
+    insertText: '${1|source,.|} "${2:path/to/file}"',
   },
   {
+    documentation: '"alias" invocation',
     label: 'alias',
     insertText: 'alias ${1:name}=${2:value}',
   },
   {
+    documentation: '"cd" invocation',
     label: 'cd',
     insertText: 'cd "${1:path/to/directory}"',
   },
   {
+    documentation: '"getopts" invocation',
     label: 'getopts',
     insertText: 'getopts ${1:optstring} ${2:name}',
   },
   {
+    documentation: '"jobs" invocation',
     label: 'jobs',
     insertText: 'jobs -x ${1:command}',
   },
   {
+    documentation: '"kill" invocation',
     label: 'kill',
     insertText: 'kill ${1|-l,-L|}',
   },
   {
+    documentation: '"let" invocation',
     label: 'let',
     insertText: 'let ${1:argument}',
   },
   {
+    documentation: '"test" invocation',
     label: 'test',
     insertText:
       '[[ ${1:argument1} ${2|-ef,-nt,-ot,==,=,!=,=~,<,>,-eq,-ne,-lt,-le,-gt,-ge|} ${3:argument2} ]]',
