@@ -104,6 +104,21 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: ['main() {', '\t$0', '}'].join('\n'),
   },
   {
+    documentation: 'documentation definition',
+    label: 'documentation',
+    insertText: [
+      '# ${1:function_name} ${2:function_parameters}',
+      '# ${3:function_description}',
+      '#',
+      '# Output:',
+      '#   ${4:function_output}',
+      '#',
+      '# Return:',
+      '# - ${5:0} when ${6:all parameters are correct}',
+      '# - ${7:1} ${8:otherwise}',
+    ].join('\n'),
+  },
+  {
     documentation: ':- expansion',
     label: 'if-unset-or-null',
     insertText: '"\\${${1:variable}:-${2:default}}"',
