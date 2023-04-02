@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.9.0
+
+- Add more snippets and change their naming convention https://github.com/bash-lsp/bash-language-server/pull/805
+
 ## 4.8.4
 
 - Make source error diagnostics ("Source command could not be analyzed") configurable with the `enableSourceErrorDiagnostics` flag.
