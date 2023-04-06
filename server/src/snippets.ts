@@ -54,7 +54,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     documentation: 'if operator',
     label: 'if-test',
     insertText: [
-      'if [[ $${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; then',
+      'if [[ ${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} ${3:variable} ]]; then',
       '\t$0',
       'fi',
     ].join('\n'),
@@ -63,7 +63,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     documentation: 'if else operator',
     label: 'if-else-test',
     insertText: [
-      'if [[ $${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; then',
+      'if [[ ${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} ${3:variable} ]]; then',
       'else',
       '\t$0',
       'fi',
@@ -78,7 +78,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     documentation: 'while operator',
     label: 'while-test',
     insertText: [
-      'while [[ $${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; do',
+      'while [[ ${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} ${3:variable} ]]; do',
       '\t$0',
       'done',
     ].join('\n'),
@@ -92,7 +92,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     documentation: 'until operator',
     label: 'until-test',
     insertText: [
-      'until [[ $${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; do',
+      'until [[ ${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} ${3:variable} ]]; do',
       '\t$0',
       'done',
     ].join('\n'),
