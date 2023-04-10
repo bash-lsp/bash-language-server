@@ -438,6 +438,7 @@ export const SNIPPETS: BashCompletionItem[] = [
   data: {
     type: CompletionItemKind.Snippet,
   },
+  kind: CompletionItemKind.Snippet,
 }))
 
 function markdownBlock(text: string, language: string): string {
