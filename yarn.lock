@@ -1429,10 +1429,10 @@ eslint-plugin-simple-import-sort@10.0.0:
   resolved "https://registry.yarnpkg.com/eslint-plugin-simple-import-sort/-/eslint-plugin-simple-import-sort-10.0.0.tgz#cc4ceaa81ba73252427062705b64321946f61351"
   integrity sha512-AeTvO9UCMSNzIHRkg8S6c3RPy5YEwKWSQPx3DYghLedo2ZQxowPFLGDN1AZ2evfg6r6mjBSZSLxLFsWSu3acsw==
 
-eslint-plugin-sort-class-members@1.17.0:
-  version "1.17.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-sort-class-members/-/eslint-plugin-sort-class-members-1.17.0.tgz#6b801091434a65e0e53b40c633f7f327eb1d3162"
-  integrity sha512-VnWa5a7nUhIQ5NDbchLAGLokOY3YCH5B2vIaus9Eq9jPSWYRRRH4MMBjrz+S+RSeMIOQOXI4tDfSZ4WcmQ5RIg==
+eslint-plugin-sort-class-members@1.17.1:
+  version "1.17.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-sort-class-members/-/eslint-plugin-sort-class-members-1.17.1.tgz#bf76796953dc0711854a322f5203fb1ba829ffa0"
+  integrity sha512-qLUeVJDGRUAww4ndgyTux07b1NGSeyYo/tA6/jD66U9LDoQsvZ/n+Yd/as7lc6NVT2wDfFh9256k9ktOnE6iQA==
 
 eslint-scope@^5.1.1:
   version "5.1.1"
