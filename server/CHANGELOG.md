@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 4.9.1
+
+- Snippets: add kind https://github.com/bash-lsp/bash-language-server/pull/816
+- Snippets: use "-" instead of "." in snippets https://github.com/bash-lsp/bash-language-server/pull/812
+
 ## 4.9.0
 
 - Add more snippets and change their naming convention https://github.com/bash-lsp/bash-language-server/pull/805
