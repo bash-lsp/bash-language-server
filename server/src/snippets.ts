@@ -15,7 +15,7 @@
  *   - <operator> is Bash operator
  *   - <nested-operator> is 'test'
  *     used when [[ command is contained in <operator> condition
- *   - term delimiter: dot, like 'if.test'
+ *   - term delimiter: dash, like 'if-test'
  * - for Bash parameter expansions it's '[<prefix>]<expression>', where:
  *   - <prefix> is one of 'set'/'error'
  *     used when expansion modifies variable or prints error to stderr
@@ -52,18 +52,18 @@ export const SNIPPETS: BashCompletionItem[] = [
   },
   {
     documentation: 'if operator',
-    label: 'if.test',
+    label: 'if-test',
     insertText: [
-      'if [[ $${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; then',
+      'if [[ ${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} ${3:variable} ]]; then',
       '\t$0',
       'fi',
     ].join('\n'),
   },
   {
     documentation: 'if else operator',
-    label: 'if-else.test',
+    label: 'if-else-test',
     insertText: [
-      'if [[ $${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; then',
+      'if [[ ${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} ${3:variable} ]]; then',
       'else',
       '\t$0',
       'fi',
@@ -76,9 +76,9 @@ export const SNIPPETS: BashCompletionItem[] = [
   },
   {
     documentation: 'while operator',
-    label: 'while.test',
+    label: 'while-test',
     insertText: [
-      'while [[ $${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; do',
+      'while [[ ${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} ${3:variable} ]]; do',
       '\t$0',
       'done',
     ].join('\n'),
@@ -90,9 +90,9 @@ export const SNIPPETS: BashCompletionItem[] = [
   },
   {
     documentation: 'until operator',
-    label: 'until.test',
+    label: 'until-test',
     insertText: [
-      'until [[ $${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} $${3:variable} ]]; do',
+      'until [[ ${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} ${3:variable} ]]; do',
       '\t$0',
       'done',
     ].join('\n'),
