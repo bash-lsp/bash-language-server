@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 4.9.2
+
+- Fix flags/options insertion issue for some clients https://github.com/bash-lsp/bash-language-server/pull/847
+- Dependencies
+
 ## 4.9.1
 
 - Snippets: add kind https://github.com/bash-lsp/bash-language-server/pull/816
