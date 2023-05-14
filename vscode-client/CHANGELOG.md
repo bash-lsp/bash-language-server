@@ -1,5 +1,10 @@
 # Bash IDE
 
+## 1.37.0
+- Upgrade language server to 4.9.2.
+- Fix flags/options insertion issue.
+- More snippets.
+
 ## 1.36.0
 - Upgrade language server to 4.8.4.
 - Source error diagnostics ("Source command could not be analyzed") is now disabled by default and can be re-enable using the  `enableSourceErrorDiagnostics` configuration flag.
