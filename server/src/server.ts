@@ -813,8 +813,7 @@ function getMarkdownContent(documentation: string, language?: string): LSP.Marku
   }
 }
 
-function getCommandOptions(name: string, word: string): string[] {
-  // TODO: The options could be cached.
+export function getCommandOptions(name: string, word: string): string[] {
   const options = spawnSync(path.join(__dirname, '../src/get-options.sh'), [name, word])
 
   if (options.status !== 0) {

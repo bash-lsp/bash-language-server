@@ -1,5 +1,3 @@
-import * as Process from 'node:child_process'
-import * as Path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 import * as LSP from 'vscode-languageserver/node'
@@ -13,7 +11,7 @@ import {
   updateSnapshotUris,
 } from '../../../testing/fixtures'
 import { getMockConnection } from '../../../testing/mocks'
-import LspServer from '../server'
+import LspServer, { getCommandOptions } from '../server'
 import { CompletionItemDataType } from '../types'
 import { Logger } from '../util/logger'
 
@@ -295,15 +293,10 @@ describe('server', () => {
     })
 
     it('responds to onCompletion with options list when command name is found', async () => {
-      // This doesn't work on all hosts:
-      const getOptionsResult = Process.spawnSync(
-        Path.join(__dirname, '../src/get-options.sh'),
-        ['find', '-'],
-      )
-
-      if (getOptionsResult.status !== 0) {
+      if (getCommandOptions('find', '-').length === 0) {
+        // This might not work on all systems
         // eslint-disable-next-line no-console
-        console.warn('Skipping onCompletion test as get-options.sh failed')
+        console.warn('Skipping onCompletion test as getCommandOptions failed')
         return
       }
 
@@ -330,11 +323,10 @@ describe('server', () => {
         expect.arrayContaining([
           {
             data: {
-              name: expect.stringMatching(RegExp('--line-.*')),
               type: CompletionItemDataType.Symbol,
             },
             kind: expect.any(Number),
-            label: expect.stringMatching(RegExp('--line-.*')),
+            label: '--line-buffered',
           },
         ]),
       )
