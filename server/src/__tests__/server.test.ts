@@ -327,6 +327,7 @@ describe('server', () => {
             },
             kind: expect.any(Number),
             label: '--line-buffered',
+            insertText: 'buffered',
           },
         ]),
       )
