@@ -440,20 +440,6 @@ export default class BashServer {
       }
     }
 
-    let options: string[] = []
-    if (word?.startsWith('-')) {
-      const commandName = this.analyzer.commandNameAtPoint(
-        params.textDocument.uri,
-        params.position.line,
-        // Go one character back to get completion on the current word
-        Math.max(params.position.character - 1, 0),
-      )
-
-      if (commandName) {
-        options = getCommandOptions(commandName, word)
-      }
-    }
-
     const currentUri = params.textDocument.uri
 
     // TODO: an improvement here would be to detect if the current word is
@@ -518,13 +504,26 @@ export default class BashServer {
       },
     }))
 
-    const optionsCompletions = options.map((option) => ({
-      label: option,
-      kind: LSP.CompletionItemKind.Constant,
-      data: {
-        type: CompletionItemDataType.Symbol,
-      },
-    }))
+    let optionsCompletions: BashCompletionItem[] = []
+    if (word?.startsWith('-')) {
+      const commandName = this.analyzer.commandNameAtPoint(
+        params.textDocument.uri,
+        params.position.line,
+        // Go one character back to get completion on the current word
+        Math.max(params.position.character - 1, 0),
+      )
+
+      if (commandName) {
+        optionsCompletions = getCommandOptions(commandName, word).map((option) => ({
+          label: option,
+          insertText: option.slice(word.length),
+          kind: LSP.CompletionItemKind.Constant,
+          data: {
+            type: CompletionItemDataType.Symbol,
+          },
+        }))
+      }
+    }
 
     const allCompletions = [
       ...reservedWordsCompletions,
@@ -813,8 +812,7 @@ function getMarkdownContent(documentation: string, language?: string): LSP.Marku
   }
 }
 
-function getCommandOptions(name: string, word: string): string[] {
-  // TODO: The options could be cached.
+export function getCommandOptions(name: string, word: string): string[] {
   const options = spawnSync(path.join(__dirname, '../src/get-options.sh'), [name, word])
 
   if (options.status !== 0) {
