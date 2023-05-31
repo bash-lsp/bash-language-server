@@ -327,7 +327,19 @@ describe('server', () => {
             },
             kind: expect.any(Number),
             label: '--line-buffered',
-            insertText: 'buffered',
+            textEdit: {
+              newText: 'buffered',
+              range: {
+                start: {
+                  character: 12,
+                  line: 2,
+                },
+                end: {
+                  character: 12,
+                  line: 2,
+                },
+              },
+            },
           },
         ]),
       )
