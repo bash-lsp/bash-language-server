@@ -62,9 +62,6 @@
     "testMatch": [
       "<rootDir>/**/__tests__/*.ts"
     ],
-    "setupFiles": [
-      "./setupJest.ts"
-    ],
     "collectCoverageFrom": [
       "**/*.ts",
       "!**/__test__/*",
