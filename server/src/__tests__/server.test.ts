@@ -1067,16 +1067,16 @@ describe('server', () => {
     })
 
     it('responds with documentation even if parsing fails', async () => {
-      const result = await getHoverResult(FIXTURE_URI.MISSING_NODE2, {
-        // sleep
-        line: 12,
-        character: 4,
+      const result = await getHoverResult(FIXTURE_URI.MISSING_NODE, {
+        // echo
+        line: 11,
+        character: 2,
       })
 
       expect(result).toEqual({
         contents: {
           kind: 'markdown',
-          value: expect.stringContaining('sleep'),
+          value: expect.stringContaining('echo'),
         },
       })
     })

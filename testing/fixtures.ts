@@ -23,7 +23,6 @@ export const FIXTURE_URI = {
   MISSING_EXTENSION: `file://${path.join(FIXTURE_FOLDER, 'extension')}`,
   EXTENSION_INC: `file://${path.join(FIXTURE_FOLDER, 'extension.inc')}`,
   MISSING_NODE: `file://${path.join(FIXTURE_FOLDER, 'missing-node.sh')}`,
-  MISSING_NODE2: `file://${path.join(FIXTURE_FOLDER, 'missing-node2.sh')}`,
   OPTIONS: `file://${path.join(FIXTURE_FOLDER, 'options.sh')}`,
   OVERRIDE_SYMBOL: `file://${path.join(FIXTURE_FOLDER, 'override-executable-symbol.sh')}`,
   PARSE_PROBLEMS: `file://${path.join(FIXTURE_FOLDER, 'parse-problems.sh')}`,
