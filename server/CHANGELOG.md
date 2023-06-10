@@ -1,9 +1,14 @@
 # Bash Language Server
 
+## 4.9.3
+
+- Fix flags/options insertion issue for some clients by using textEdits https://github.com/bash-lsp/bash-language-server/pull/861
+- Dependency upgrades
+
 ## 4.9.2
 
 - Fix flags/options insertion issue for some clients https://github.com/bash-lsp/bash-language-server/pull/847
-- Dependencies
+- Dependency upgrades
 
 ## 4.9.1
 

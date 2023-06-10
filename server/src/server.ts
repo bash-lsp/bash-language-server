@@ -516,10 +516,22 @@ export default class BashServer {
       if (commandName) {
         optionsCompletions = getCommandOptions(commandName, word).map((option) => ({
           label: option,
-          insertText: option.slice(word.length),
           kind: LSP.CompletionItemKind.Constant,
           data: {
             type: CompletionItemDataType.Symbol,
+          },
+          textEdit: {
+            newText: option.slice(word.length),
+            range: {
+              start: {
+                character: params.position.character,
+                line: params.position.line,
+              },
+              end: {
+                character: params.position.character,
+                line: params.position.line,
+              },
+            },
           },
         }))
       }
