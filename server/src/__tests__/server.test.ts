@@ -16,7 +16,7 @@ import { CompletionItemDataType } from '../types'
 import { Logger } from '../util/logger'
 
 // Skip ShellCheck throttle delay in test cases
-jest.spyOn(global, 'setTimeout').mockImplementation((fn) => {
+jest.spyOn(global, 'setTimeout').mockImplementation((fn: any) => {
   fn()
   return 0 as any
 })

@@ -32,7 +32,7 @@
  */
 import { CompletionItemKind, InsertTextFormat, MarkupKind } from 'vscode-languageserver'
 
-import { BashCompletionItem } from './types'
+import { BashCompletionItem, CompletionItemDataType } from './types'
 
 export const SNIPPETS: BashCompletionItem[] = [
   {
@@ -436,7 +436,7 @@ export const SNIPPETS: BashCompletionItem[] = [
 
   insertTextFormat: InsertTextFormat.Snippet,
   data: {
-    type: CompletionItemKind.Snippet,
+    type: CompletionItemDataType.Snippet,
   },
   kind: CompletionItemKind.Snippet,
 }))
