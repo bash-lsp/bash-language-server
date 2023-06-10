@@ -16,7 +16,7 @@ import { Logger } from '../util/logger'
 const CURRENT_URI = 'dummy-uri.sh'
 
 // if you add a .sh file to testing/fixtures, update this value
-const FIXTURE_FILES_MATCHING_GLOB = 17
+const FIXTURE_FILES_MATCHING_GLOB = 16
 
 const defaultConfig = getDefaultConfiguration()
 
@@ -811,7 +811,6 @@ describe('initiateBackgroundAnalysis', () => {
     expect(loggerWarn).toHaveBeenCalled()
     expect(loggerWarn.mock.calls).toEqual([
       [expect.stringContaining('missing-node.sh: syntax error')],
-      [expect.stringContaining('missing-node2.sh: syntax error')],
       [expect.stringContaining('not-a-shell-script.sh: syntax error')],
       [expect.stringContaining('parse-problems.sh: syntax error')],
       [expect.stringContaining('sourcing.sh line 16: failed to resolve path')],
