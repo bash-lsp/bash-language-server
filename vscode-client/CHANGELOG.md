@@ -1,5 +1,8 @@
 # Bash IDE
 
+## 1.38.0
+- Upgrade language server to 4.10.0.
+
 ## 1.37.0
 - Upgrade language server to 4.9.2.
 - Fix flags/options insertion issue.
