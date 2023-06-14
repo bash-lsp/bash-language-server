@@ -24,9 +24,9 @@
     fastq "^1.6.0"
 
 "@types/vscode@^1.44.0":
-  version "1.79.0"
-  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.79.0.tgz#e2aed1bb3946ae2bebbc3b88020d0efe18f941a9"
-  integrity sha512-Tfowu2rSW8hVGbqzQLSPlOEiIOYYryTkgJ+chMecpYiJcnw9n0essvSiclnK+Qh/TcSVJHgaK4EMrQDZjZJ/Sw==
+  version "1.79.1"
+  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.79.1.tgz#ab568315f9c844a8f4fa8f168b2d6dbf1f58dd02"
+  integrity sha512-Ikwc4YbHABzqthrWfeAvItaAIfX9mdjMWxqNgTpGjhgOu0TMRq9LzyZ2yBK0JhYqoSjEubEPawf6zJgnl6Egtw==
 
 balanced-match@^1.0.0:
   version "1.0.2"
