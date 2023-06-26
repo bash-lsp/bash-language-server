@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 4.10.1
+
+- Handle tree-sitter-bash parse errors gracefully
+
 ## 4.10.0
 
 - Upgrade tree-sitter-bash from [2022 November](https://api.github.com/repos/tree-sitter/tree-sitter-bash/git/commits/4488aa41406547e478636a4fcfd24f5bbc3f2f74) to [2023 May](https://api.github.com/repos/tree-sitter/tree-sitter-bash/git/commits/ee2a8f9906b53a785b784ee816c0016c2b6866d2)

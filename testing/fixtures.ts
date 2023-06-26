@@ -17,6 +17,7 @@ type FIXTURE_KEY = keyof typeof FIXTURE_URI
 
 export const FIXTURE_URI = {
   COMMENT_DOC: `file://${path.join(FIXTURE_FOLDER, 'comment-doc-on-hover.sh')}`,
+  CRASH: `file://${path.join(FIXTURE_FOLDER, 'crash.zsh')}`,
   INSTALL: `file://${path.join(FIXTURE_FOLDER, 'install.sh')}`,
   ISSUE101: `file://${path.join(FIXTURE_FOLDER, 'issue101.sh')}`,
   ISSUE206: `file://${path.join(FIXTURE_FOLDER, 'issue206.sh')}`,

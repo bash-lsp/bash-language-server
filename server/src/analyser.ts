@@ -70,8 +70,14 @@ export default class Analyzer {
   }): LSP.Diagnostic[] {
     const diagnostics: LSP.Diagnostic[] = []
     const fileContent = document.getText()
+    let tree: Parser.Tree
 
-    const tree = this.parser.parse(fileContent)
+    try {
+      tree = this.parser.parse(fileContent)
+    } catch (error) {
+      logger.warn(`Tree sitter crashed while parsing ${uri}: ${error}`)
+      return []
+    }
 
     const globalDeclarations = getGlobalDeclarations({ tree, uri })
 
