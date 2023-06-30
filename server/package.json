@@ -17,7 +17,7 @@
     "node": ">=14.18.0"
   },
   "dependencies": {
-    "fast-glob": "3.2.12",
+    "fast-glob": "3.3.0",
     "fuzzy-search": "3.2.1",
     "node-fetch": "2.6.12",
     "turndown": "7.1.2",
