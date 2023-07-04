@@ -37,7 +37,7 @@
     "@types/vscode": "1.67.0"
   },
   "engines": {
-    "node": ">=14",
+    "node": ">=16",
     "pnpm": "8.x"
   },
   "jest": {

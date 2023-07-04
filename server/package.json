@@ -14,7 +14,7 @@
     "url": "https://github.com/bash-lsp/bash-language-server"
   },
   "engines": {
-    "node": ">=14.18.0"
+    "node": ">=16"
   },
   "dependencies": {
     "fast-glob": "3.3.0",
