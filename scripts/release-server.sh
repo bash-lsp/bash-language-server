@@ -14,9 +14,9 @@ if [ "$version" = "$publishedVersion" ]; then
     exit 0
 fi
 
-pnpm run clean
+pnpm clean
 pnpm install
-pnpm run verify:bail
+pnpm verify:bail
 
 cd server
 npm publish

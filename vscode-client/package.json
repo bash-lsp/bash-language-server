@@ -82,7 +82,7 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "cd .. && pnpm run compile"
+    "vscode:prepublish": "cd .. && pnpm compile"
   },
   "dependencies": {
     "bash-language-server": "4.10.1",
