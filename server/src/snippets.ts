@@ -392,7 +392,7 @@ export const SNIPPETS: BashCompletionItem[] = [
   },
   {
     documentation: 'condition combination',
-    label: 'find:filter-by-file-combined-condition',
+    label: 'find:filter-by-combined-condition',
     insertText: "find ${1:path/to/directory} ${2:condition} -${3|and,or,a,o|} ${4:condition}",
   },
   {
