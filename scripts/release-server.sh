@@ -19,6 +19,6 @@ pnpm install
 pnpm verify:bail
 
 cd server
-# npm publish
-npm publish --tag beta # for releasing beta versions
+npm publish
+# npm publish --tag beta # for releasing beta versions
 tagRelease $tag

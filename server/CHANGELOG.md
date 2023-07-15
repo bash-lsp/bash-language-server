@@ -1,6 +1,6 @@
 # Bash Language Server
 
-## 5.0.0 (beta)
+## 5.0.0
 
 - Downgrade tree sitter to a stable version https://github.com/bash-lsp/bash-language-server/pull/911
 - Drop support for Node.js 14 that is no longer maintained (security updates ended 30 Apr 2023) https://github.com/bash-lsp/bash-language-server/pull/893
