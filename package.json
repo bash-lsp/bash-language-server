@@ -8,9 +8,9 @@
     "lint": "pnpm lint:bail --fix",
     "lint:bail": "eslint . --ext js,ts,tsx --cache",
     "test": "jest --runInBand",
-    "test:coverage": "pnpm test --coverage",
-    "test:watch": "pnpm test --watch",
-    "verify": "pnpm lint && pnpm compile && pnpm test",
+    "test:coverage": "pnpm run test --coverage",
+    "test:watch": "pnpm run test --watch",
+    "verify": "pnpm lint && pnpm compile && pnpm run test",
     "verify:bail": "pnpm lint:bail && pnpm compile && pnpm test:coverage",
     "reinstall-server": "npm uninstall -g bash-language-server && pnpm compile && npm i -g ./server",
     "link-server": "npm uninstall -g bash-language-server && pnpm compile && pnpm unlink --dir=vscode-client bash-language-server && cd server && pnpm link . && cd ../vscode-client && pnpm link bash-language-server"
