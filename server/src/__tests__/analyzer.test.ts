@@ -144,7 +144,9 @@ describe('analyze', () => {
     expect(diagnostics3).toEqual([])
   })
 
-  it('handles tree-sitter crashes gracefully', async () => {
+  it('ensures tree-sitter does not crash', async () => {
+    // newer version of tree-sitter will crash on this file and never respond
+    // to new queries.
     const analyzer = await getAnalyzer({ runBackgroundAnalysis: false })
 
     // Parse the file
@@ -152,11 +154,6 @@ describe('analyze', () => {
       uri: FIXTURE_URI.CRASH,
       document: FIXTURE_DOCUMENT.CRASH,
     })
-
-    expect(loggerWarn).toHaveBeenCalled()
-    expect(loggerWarn.mock.calls).toEqual([
-      [expect.stringContaining('Tree sitter crashed while parsing')],
-    ])
 
     const result = analyzer.findAllSourcedUris({ uri: FIXTURE_URI.CRASH })
     expect(result).toEqual(new Set([]))
