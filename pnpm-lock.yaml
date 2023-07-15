@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@types/vscode': 1.67.0
+  '@types/vscode': 1.80.0
 
 importers:
 
@@ -113,8 +113,8 @@ importers:
         version: 8.0.2
     devDependencies:
       '@types/vscode':
-        specifier: 1.67.0
-        version: 1.67.0
+        specifier: 1.80.0
+        version: 1.80.0
 
 packages:
 
@@ -950,8 +950,8 @@ packages:
     resolution: {integrity: sha512-FDJNkyhmKLw7uEvTxx5tSXfPeQpO0iy73Ry+PmYZJvQy0QIWX8a7kJ4kLWRf+EbTPJEPDSgPXHaM7pzr5lmvCg==}
     dev: true
 
-  /@types/vscode@1.67.0:
-    resolution: {integrity: sha512-GH8BDf8cw9AC9080uneJfulhSa7KHSMI2s/CyKePXoGNos9J486w2V4YKoeNUqIEkW4hKoEAWp6/cXTwyGj47g==}
+  /@types/vscode@1.80.0:
+    resolution: {integrity: sha512-qK/CmOdS2o7ry3k6YqU4zD3R2AYlJfbwBoSbKpBoP+GpXNE+0NEgJOli4n0bm0diK5kfBnchgCEj4igQz/44Hg==}
     dev: true
 
   /@types/yargs-parser@21.0.0:
