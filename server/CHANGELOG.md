@@ -1,5 +1,14 @@
 # Bash Language Server
 
+## 4.10.3
+
+- Use cat as man pager https://github.com/bash-lsp/bash-language-server/pull/909
+
+## 4.10.2
+
+- Bump semver development dependency causing false positive distributions security warnings https://github.com/bash-lsp/bash-language-server/pull/905
+
+
 ## 4.10.1
 
 - Handle tree-sitter-bash parse errors gracefully
