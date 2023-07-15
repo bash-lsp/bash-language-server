@@ -13,7 +13,8 @@
     "verify": "pnpm lint && pnpm compile && pnpm run test",
     "verify:bail": "pnpm lint:bail && pnpm compile && pnpm test:coverage",
     "reinstall-server": "npm uninstall -g bash-language-server && pnpm compile && npm i -g ./server",
-    "link-server": "npm uninstall -g bash-language-server && pnpm compile && pnpm unlink --dir=vscode-client bash-language-server && cd server && pnpm link . && cd ../vscode-client && pnpm link bash-language-server"
+    "link-server": "npm uninstall -g bash-language-server && pnpm compile && pnpm unlink --dir=vscode-client bash-language-server && cd server && pnpm link . && cd ../vscode-client && pnpm link bash-language-server",
+    "postinstall": "pnpm --dir=vscode-client install --ignore-workspace"
   },
   "devDependencies": {
     "@types/jest": "29.5.3",
