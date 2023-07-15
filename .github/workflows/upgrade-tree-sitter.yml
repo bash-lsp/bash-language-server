@@ -11,13 +11,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js 14
-        uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v2
         with:
-          node-version: 14
+          version: 8
 
-      - name: Install dependencies
-        run: yarn install
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - run: pnpm install --frozen-lockfile
 
       - name: Upgrade tree-sitter wasm
         run: bash scripts/upgrade-tree-sitter.sh

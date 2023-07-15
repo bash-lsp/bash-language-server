@@ -1,5 +1,10 @@
 # Bash Language Server
 
+## 5.0.0 (beta)
+
+- Drop support for Node.js 14 that is no longer maintained (security updates ended 30 Apr 2023)
+- Internal changes: switch from yarn classic to pnpm
+
 ## 4.10.3
 
 - Use cat as man pager https://github.com/bash-lsp/bash-language-server/pull/909

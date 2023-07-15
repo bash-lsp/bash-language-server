@@ -2,18 +2,18 @@
   "private": true,
   "scripts": {
     "clean": "rm -rf *.log */*.log */out node_modules vscode-client/node_modules server/node_modules",
-    "postinstall": "cd server && yarn install && cd ../vscode-client && yarn install && cd ..",
+    "preinstall": "npx only-allow pnpm",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
-    "lint": "yarn lint:bail --fix",
+    "lint": "pnpm lint:bail --fix",
     "lint:bail": "eslint . --ext js,ts,tsx --cache",
     "test": "jest --runInBand",
-    "test:coverage": "yarn run test --coverage",
-    "test:watch": "yarn run test --watch",
-    "verify": "yarn run lint && yarn run compile && yarn run test",
-    "verify:bail": "yarn run lint:bail && yarn run compile && yarn run test:coverage",
-    "reinstall-server": "npm uninstall -g bash-language-server && yarn compile && npm i -g ./server",
-    "link-server": "npm uninstall -g bash-language-server && yarn compile && yarn unlink bash-language-server && cd server && yarn link && cd ../vscode-client && yarn link bash-language-server"
+    "test:coverage": "pnpm run test --coverage",
+    "test:watch": "pnpm run test --watch",
+    "verify": "pnpm lint && pnpm compile && pnpm run test",
+    "verify:bail": "pnpm lint:bail && pnpm compile && pnpm test:coverage",
+    "reinstall-server": "npm uninstall -g bash-language-server && pnpm compile && npm i -g ./server",
+    "link-server": "npm uninstall -g bash-language-server && pnpm compile && pnpm unlink --dir=vscode-client bash-language-server && cd server && pnpm link . && cd ../vscode-client && pnpm link bash-language-server"
   },
   "devDependencies": {
     "@types/jest": "29.5.3",
@@ -33,9 +33,12 @@
     "vscode-languageserver": "8.0.2",
     "vscode-languageserver-textdocument": "1.0.8"
   },
-  "dependencies": {},
   "resolutions": {
-    "sane": "^5.0.0"
+    "@types/vscode": "1.67.0"
+  },
+  "engines": {
+    "node": ">=16",
+    "pnpm": "8.x"
   },
   "jest": {
     "preset": "ts-jest",

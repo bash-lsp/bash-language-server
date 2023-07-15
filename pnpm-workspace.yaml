@@ -1,0 +1,3 @@
+packages:
+  - 'server'
+  - 'vscode-client'
