@@ -53,7 +53,7 @@ const WORDS_WITHOUT_DOCUMENTATION = new Set([
 ])
 
 /**
- * Get documentation for the given word by usingZZ help and man.
+ * Get documentation for the given word by using help and man.
  */
 export async function getShellDocumentationWithoutCache({
   word,
@@ -73,7 +73,7 @@ export async function getShellDocumentationWithoutCache({
     // We have experimented with setting MANWIDTH to different values for reformatting.
     // The default line width of the terminal works fine for hover, but could be better
     // for completions.
-    { type: 'man', command: `man ${word} | col -bx` },
+    { type: 'man', command: `man -P cat ${word} | col -bx` },
   ]
 
   for (const { type, command } of DOCUMENTATION_COMMANDS) {
