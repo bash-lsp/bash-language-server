@@ -1,5 +1,20 @@
 # Bash Language Server
 
+## 5.0.0
+
+- Downgrade tree sitter to a stable version https://github.com/bash-lsp/bash-language-server/pull/911
+- Drop support for Node.js 14 that is no longer maintained (security updates ended 30 Apr 2023) https://github.com/bash-lsp/bash-language-server/pull/893
+- Internal changes: switch from yarn classic to pnpm https://github.com/bash-lsp/bash-language-server/pull/893
+
+## 4.10.3
+
+- Use cat as man pager https://github.com/bash-lsp/bash-language-server/pull/909
+
+## 4.10.2
+
+- Bump semver development dependency causing false positive distributions security warnings https://github.com/bash-lsp/bash-language-server/pull/905
+
+
 ## 4.10.1
 
 - Handle tree-sitter-bash parse errors gracefully

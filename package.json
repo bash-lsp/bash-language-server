@@ -2,27 +2,28 @@
   "private": true,
   "scripts": {
     "clean": "rm -rf *.log */*.log */out node_modules vscode-client/node_modules server/node_modules",
-    "postinstall": "cd server && yarn install && cd ../vscode-client && yarn install && cd ..",
+    "preinstall": "npx only-allow pnpm",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
-    "lint": "yarn lint:bail --fix",
+    "lint": "pnpm lint:bail --fix",
     "lint:bail": "eslint . --ext js,ts,tsx --cache",
     "test": "jest --runInBand",
-    "test:coverage": "yarn run test --coverage",
-    "test:watch": "yarn run test --watch",
-    "verify": "yarn run lint && yarn run compile && yarn run test",
-    "verify:bail": "yarn run lint:bail && yarn run compile && yarn run test:coverage",
-    "reinstall-server": "npm uninstall -g bash-language-server && yarn compile && npm i -g ./server",
-    "link-server": "npm uninstall -g bash-language-server && yarn compile && yarn unlink bash-language-server && cd server && yarn link && cd ../vscode-client && yarn link bash-language-server"
+    "test:coverage": "pnpm run test --coverage",
+    "test:watch": "pnpm run test --watch",
+    "verify": "pnpm lint && pnpm compile && pnpm run test",
+    "verify:bail": "pnpm lint:bail && pnpm compile && pnpm test:coverage",
+    "reinstall-server": "npm uninstall -g bash-language-server && pnpm compile && npm i -g ./server",
+    "link-server": "npm uninstall -g bash-language-server && pnpm compile && pnpm unlink --dir=vscode-client bash-language-server && cd server && pnpm link . && cd ../vscode-client && pnpm link bash-language-server",
+    "postinstall": "pnpm --dir=vscode-client install --ignore-workspace"
   },
   "devDependencies": {
-    "@types/jest": "29.5.2",
+    "@types/jest": "29.5.3",
     "@types/node": "18.16.19",
-    "@typescript-eslint/eslint-plugin": "5.61.0",
-    "@typescript-eslint/parser": "5.61.0",
-    "eslint": "8.44.0",
+    "@typescript-eslint/eslint-plugin": "5.62.0",
+    "@typescript-eslint/parser": "5.62.0",
+    "eslint": "8.45.0",
     "eslint-config-prettier": "8.8.0",
-    "eslint-plugin-jest": "27.2.2",
+    "eslint-plugin-jest": "27.2.3",
     "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-simple-import-sort": "10.0.0",
     "eslint-plugin-sort-class-members": "1.18.0",
@@ -33,9 +34,12 @@
     "vscode-languageserver": "8.0.2",
     "vscode-languageserver-textdocument": "1.0.8"
   },
-  "dependencies": {},
   "resolutions": {
-    "sane": "^5.0.0"
+    "@types/vscode": "1.80.0"
+  },
+  "engines": {
+    "node": ">=16",
+    "pnpm": "8.x"
   },
   "jest": {
     "preset": "ts-jest",

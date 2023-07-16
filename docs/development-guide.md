@@ -15,17 +15,15 @@ convenience - it proxies to the `package.json` files in the `vscode-client` and
 
 This guide presumes you have the following dependencies installed:
 
-- [`yarn`][yarn].
-- [`node`][node] (v14 or newer)
-- `g++`
-- `make` (optional)
+- [`pnpm`][pnpm].
+- [`node`][node] (v16 or newer)
 
 ## Initial setup
 
 Run the following in the root of the project
 
 ```
-yarn install
+pnpm install
 ```
 
 This uses the `postinstall` hook to install the dependencies in each of the
@@ -35,7 +33,7 @@ To make sure that everything is configured correctly run the following command
 to compile both the client and the server once
 
 ```
-yarn run compile
+pnpm compile
 ```
 
 Now, depending on which part you want to work on follow the relevant section
@@ -45,10 +43,10 @@ below.
 
 To support a good develop workflow we set up [eslint][eslint], [Prettier][prettier] and integration tests using [Jest][jest]:
 
-    yarn verify  # (runs lint, prettier and tests)
-    yarn lint
-    yarn test
-    yarn test:coverage
+    pnpm verify  # (runs lint, prettier and tests)
+    pnpm lint
+    pnpm test
+    pnpm test:coverage
 
 ## Working on the client
 
@@ -70,7 +68,7 @@ As the server is embedded into the VS Code client, you can link any server
 changes into the local installation of your VS Code client by running this once:
 
 ```
-yarn link-server
+pnpm link-server
 ```
 
 After that follow the steps above to work on the client.
@@ -82,7 +80,7 @@ and install the server globally whenever you've made a change, and then
 reload your vscode window to re-launch the server.
 
 ```
-yarn run reinstall-server
+pnpm reinstall-server
 ```
 
 If you for some reason cannot get access to logs through the client,
@@ -111,5 +109,5 @@ To analyze the performance of the extension or server using the Chrome inspector
 [jest]: https://facebook.github.io/jest/
 [prettier]: https://prettier.io/
 [eslint]: https://eslint.org/
-[yarn]: https://yarnpkg.com/lang/en/docs/install/
+[pnpm]: https://pnpm.io/installation
 [node]: https://nodejs.org/en/download/
