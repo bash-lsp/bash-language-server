@@ -26,8 +26,7 @@
  * - for Bash functions it's one of 'function'/'<function>'
  * - for Bash builtins it's '<builtin>'
  * - for Bash character classes it's '<character-class>'
- * - for Sed it's 'sed:<expression>'
- * - for Awk it's 'awk:<expression>'
+ * - for external commands it's '<command>-<expression>'
  * - for anything else it's any string
  */
 import { CompletionItemKind, InsertTextFormat, MarkupKind } from 'vscode-languageserver'
@@ -261,94 +260,94 @@ export const SNIPPETS: BashCompletionItem[] = [
   },
   {
     documentation: 'line print',
-    label: 'sed:print',
+    label: 'sed-print',
     insertText: "sed '' ${1:path/to/file}",
   },
   {
     documentation: 'line pattern filter',
-    label: 'sed:filter-by-line-pattern',
+    label: 'sed-filter-by-line-pattern',
     insertText:
       "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '/${3:pattern}/p' ${4:path/to/file}",
   },
   {
     documentation: 'line number filter',
-    label: 'sed:filter-by-line-number',
+    label: 'sed-filter-by-line-number',
     insertText:
       "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '${3:number}p' ${4:path/to/file}",
   },
   {
     documentation: 'line number filter',
-    label: 'sed:filter-by-line-numbers',
+    label: 'sed-filter-by-line-numbers',
     insertText:
       "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '${3:from},${4:to}p' ${5:path/to/file}",
   },
   {
     documentation: 'single replacement',
-    label: 'sed:replace-first',
+    label: 'sed-replace-first',
     insertText:
       "sed ${1|--regexp-extended,-E|} 's${2|/,\||}${3:pattern}$2${4:replacement}$2' ${5:path/to/file}",
   },
   {
     documentation: 'global replacement',
-    label: 'sed:replace-all',
+    label: 'sed-replace-all',
     insertText:
       "sed ${1|--regexp-extended,-E|} 's${2|/,\||}${3:pattern}$2${4:replacement}$2g' ${5:path/to/file}",
   },
   {
     documentation: 'transliteration',
-    label: 'sed:transliterate',
+    label: 'sed-transliterate',
     insertText:
       "sed ${1|--regexp-extended,-E|} 'y${2|/,\||}${3:source-characters}$2${3:replacement-characters}$2g' ${4:path/to/file}",
   },
   {
     documentation: 'whole file read',
-    label: 'sed:read-all',
+    label: 'sed-read-all',
     insertText:
       "sed ${1|--regexp-extended,-E|} ':${2:x} N $! b$2 ${3:command}' ${4:path/to/file}",
   },
   {
     documentation: 'line print',
-    label: 'awk:print',
+    label: 'awk-print',
     insertText: "awk '/./' ${1:path/to/file}",
   },
   {
     documentation: 'line pattern filter',
-    label: 'awk:filter-by-line-pattern',
+    label: 'awk-filter-by-line-pattern',
     insertText: "awk '/${1:pattern}/' ${2:path/to/file}",
   },
   {
     documentation: 'line number filter',
-    label: 'awk:filter-by-line-number',
+    label: 'awk-filter-by-line-number',
     insertText: "awk 'NR == ${1:number}' ${2:path/to/file}",
   },
   {
     documentation: 'line number filter',
-    label: 'awk:filter-by-line-numbers',
+    label: 'awk-filter-by-line-numbers',
     insertText: "awk 'NR >= ${1:from} && NR <= ${2:to}' ${3:path/to/file}",
   },
   {
     documentation: 'single replacement',
-    label: 'awk:replace-first',
+    label: 'awk-replace-first',
     insertText: 'awk \'{ sub("${1:pattern}", "${2:replacement}") }\' ${3:path/to/file}',
   },
   {
     documentation: 'global replacement',
-    label: 'awk:replace-all',
+    label: 'awk-replace-all',
     insertText: 'awk \'{ gsub("${1:pattern}", "${2:replacement}") }\' ${3:path/to/file}',
   },
   {
     documentation: 'whole file read',
-    label: 'awk:read-all',
+    label: 'awk-read-all',
     insertText: "awk RS='^$' '{ ${1:command} }' ${2:path/to/file}",
   },
   {
     documentation: 'node print',
-    label: 'jq:print',
+    label: 'jq-print',
     insertText: "jq '.${1:path/to/node}' ${2:path/to/file}",
   },
   {
     documentation: 'node print',
-    label: 'yq:print',
+    label: 'yq-print',
     insertText: "yq '.${1:path/to/node}' ${2:path/to/file}",
   },
   {
