@@ -3,7 +3,7 @@
   "description": "A language server for Bash",
   "author": "Mads Hartmann",
   "license": "MIT",
-  "version": "4.10.1",
+  "version": "5.0.0",
   "main": "./out/server.js",
   "typings": "./out/server.d.ts",
   "bin": {
@@ -14,7 +14,7 @@
     "url": "https://github.com/bash-lsp/bash-language-server"
   },
   "engines": {
-    "node": ">=14.18.0"
+    "node": ">=16"
   },
   "dependencies": {
     "fast-glob": "3.3.0",
@@ -27,7 +27,7 @@
     "zod": "3.21.4"
   },
   "scripts": {
-    "prepublishOnly": "cd ../ && yarn run compile && cp README.md server/"
+    "prepublishOnly": "cd ../ && pnpm compile && cp README.md server/"
   },
   "devDependencies": {
     "@types/fuzzy-search": "2.1.2",

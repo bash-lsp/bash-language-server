@@ -11,7 +11,8 @@
       "es2016"
     ],
     "rootDir": ".",
-    "sourceMap": true
+    "sourceMap": true,
+    "skipLibCheck": true,
   },
   "include": [
     "testing"
