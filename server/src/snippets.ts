@@ -286,19 +286,19 @@ export const SNIPPETS: BashCompletionItem[] = [
     documentation: 'single replacement',
     label: 'sed:replace-first',
     insertText:
-      "sed ${1|--regexp-extended,-E|} 's/${2:pattern}/${3:replacement}/' ${4:path/to/file}",
+      "sed ${1|--regexp-extended,-E|} 's${2|/,\||}${3:pattern}$2${4:replacement}$2' ${5:path/to/file}",
   },
   {
     documentation: 'global replacement',
     label: 'sed:replace-all',
     insertText:
-      "sed ${1|--regexp-extended,-E|} 's/${2:pattern}/${3:replacement}/g' ${4:path/to/file}",
+      "sed ${1|--regexp-extended,-E|} 's${2|/,\||}${3:pattern}$2${4:replacement}$2g' ${5:path/to/file}",
   },
   {
     documentation: 'transliteration',
     label: 'sed:transliterate',
     insertText:
-      "sed ${1|--regexp-extended,-E|} 'y/${2:source-characters}/${3:replacement-characters}/g' ${4:path/to/file}",
+      "sed ${1|--regexp-extended,-E|} 'y${2|/,\||}${3:source-characters}$2${3:replacement-characters}$2g' ${4:path/to/file}",
   },
   {
     documentation: 'whole file read',
