@@ -129,6 +129,7 @@ export default class BashServer {
         resolveProvider: false,
         workDoneProgress: false,
       },
+      renameProvider: { prepareProvider: true },
     }
   }
 
@@ -169,6 +170,8 @@ export default class BashServer {
     connection.onHover(this.onHover.bind(this))
     connection.onReferences(this.onReferences.bind(this))
     connection.onWorkspaceSymbol(this.onWorkspaceSymbol.bind(this))
+    connection.onPrepareRename(this.onPrepareRename.bind(this))
+    connection.onRenameRequest(this.onRenameRequest.bind(this))
 
     /**
      * The initialized notification is sent from the client to the server after
@@ -716,6 +719,14 @@ export default class BashServer {
   private onWorkspaceSymbol(params: LSP.WorkspaceSymbolParams): LSP.SymbolInformation[] {
     logger.debug('onWorkspaceSymbol')
     return this.analyzer.findDeclarationsWithFuzzySearch(params.query)
+  }
+
+  private onPrepareRename(params: LSP.PrepareRenameParams): LSP.Range | null {
+    return null
+  }
+
+  private onRenameRequest(params: LSP.RenameParams): LSP.WorkspaceEdit | null {
+    return null
   }
 }
 
