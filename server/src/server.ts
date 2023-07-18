@@ -722,7 +722,30 @@ export default class BashServer {
   }
 
   private onPrepareRename(params: LSP.PrepareRenameParams): LSP.Range | null {
-    return null
+    const renamable = this.analyzer.renamableAtPointFromTextPosition(params)
+    this.logRequest({ request: 'onPrepareRename', params, word: renamable?.word })
+
+    const throwRenameError = (message: string) => {
+      throw new LSP.ResponseError(LSP.LSPErrorCodes.RequestFailed, message)
+    }
+
+    if (!renamable) {
+      return null
+    }
+
+    if (Builtins.isBuiltin(renamable.word)) {
+      throwRenameError('You cannot rename a built-in command.')
+    }
+
+    if (this.executables.isExecutableOnPATH(renamable.word)) {
+      throwRenameError('You cannot rename an executable.')
+    }
+
+    if (ReservedWords.isReservedWord(renamable.word)) {
+      throwRenameError('You cannot rename a reserved word.')
+    }
+
+    return renamable.range
   }
 
   private onRenameRequest(params: LSP.RenameParams): LSP.WorkspaceEdit | null {

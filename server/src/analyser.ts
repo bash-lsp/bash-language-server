@@ -525,6 +525,32 @@ export default class Analyzer {
     )
   }
 
+  public renamableAtPointFromTextPosition(
+    params: LSP.TextDocumentPositionParams,
+  ): { word: string; range: LSP.Range } | null {
+    const node = this.nodeAtPoint(
+      params.textDocument.uri,
+      params.position.line,
+      params.position.character,
+    )
+
+    if (!node) {
+      return null
+    }
+
+    if (
+      node.type === 'variable_name' ||
+      (node.type === 'word' &&
+        node.parent &&
+        (node.parent.type === 'function_definition' ||
+          node.parent.type === 'command_name'))
+    ) {
+      return { word: node.text.trim(), range: TreeSitterUtil.range(node) }
+    }
+
+    return null
+  }
+
   public setEnableSourceErrorDiagnostics(enableSourceErrorDiagnostics: boolean): void {
     this.enableSourceErrorDiagnostics = enableSourceErrorDiagnostics
   }
