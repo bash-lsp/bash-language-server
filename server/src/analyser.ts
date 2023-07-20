@@ -525,9 +525,12 @@ export default class Analyzer {
     )
   }
 
+  /**
+   * Find a possibly renamable word at the given text position.
+   */
   public renamableAtPointFromTextPosition(
     params: LSP.TextDocumentPositionParams,
-  ): { word: string; range: LSP.Range } | null {
+  ): { word: string; range: LSP.Range; type: 'variable' | 'function' } | null {
     const node = this.nodeAtPoint(
       params.textDocument.uri,
       params.position.line,
@@ -545,7 +548,11 @@ export default class Analyzer {
         (node.parent.type === 'function_definition' ||
           node.parent.type === 'command_name'))
     ) {
-      return { word: node.text.trim(), range: TreeSitterUtil.range(node) }
+      return {
+        word: node.text.trim(),
+        range: TreeSitterUtil.range(node),
+        type: node.type === 'variable_name' ? 'variable' : 'function',
+      }
     }
 
     return null

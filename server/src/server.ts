@@ -392,6 +392,10 @@ export default class BashServer {
     )
   }
 
+  private throwResponseError(message: string, code = LSP.LSPErrorCodes.RequestFailed) {
+    throw new LSP.ResponseError(code, message)
+  }
+
   // ==============================
   // Language server event handlers
   // ==============================
@@ -725,24 +729,24 @@ export default class BashServer {
     const renamable = this.analyzer.renamableAtPointFromTextPosition(params)
     this.logRequest({ request: 'onPrepareRename', params, word: renamable?.word })
 
-    const throwRenameError = (message: string) => {
-      throw new LSP.ResponseError(LSP.LSPErrorCodes.RequestFailed, message)
-    }
-
-    if (!renamable) {
+    if (
+      !renamable ||
+      (renamable.type === 'variable' &&
+        (renamable.word === '_' || !/^[a-z_][\w]*$/i.test(renamable.word)))
+    ) {
       return null
     }
 
     if (Builtins.isBuiltin(renamable.word)) {
-      throwRenameError('You cannot rename a built-in command.')
+      this.throwResponseError('You cannot rename a built-in command.')
     }
 
     if (this.executables.isExecutableOnPATH(renamable.word)) {
-      throwRenameError('You cannot rename an executable.')
+      this.throwResponseError('You cannot rename an executable.')
     }
 
     if (ReservedWords.isReservedWord(renamable.word)) {
-      throwRenameError('You cannot rename a reserved word.')
+      this.throwResponseError('You cannot rename a reserved word.')
     }
 
     return renamable.range
