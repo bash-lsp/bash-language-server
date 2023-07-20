@@ -776,6 +776,29 @@ export default class BashServer {
       this.throwResponseError('Invalid function name given.')
     }
 
+    const declarations = this.analyzer.findDeclarationsMatchingWord({
+      exactMatch: true,
+      position: params.position,
+      uri: params.textDocument.uri,
+      word: renamable.word,
+    })
+
+    if (declarations.length === 0) {
+      const occurrences = this.analyzer.findOccurrences(
+        params.textDocument.uri,
+        renamable.word,
+      )
+
+      return <LSP.WorkspaceEdit>{
+        changes: {
+          [params.textDocument.uri]: occurrences.map((occurrence) => ({
+            range: occurrence.range,
+            newText: params.newName,
+          })),
+        },
+      }
+    }
+
     return null
   }
 }
