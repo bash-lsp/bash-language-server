@@ -753,6 +753,29 @@ export default class BashServer {
   }
 
   private onRenameRequest(params: LSP.RenameParams): LSP.WorkspaceEdit | null {
+    const renamable = this.analyzer.renamableAtPointFromTextPosition(params)
+    this.logRequest({ request: 'onRenameRequest', params, word: renamable?.word })
+
+    if (
+      !renamable ||
+      Builtins.isBuiltin(renamable.word) ||
+      this.executables.isExecutableOnPATH(renamable.word) ||
+      ReservedWords.isReservedWord(renamable.word)
+    ) {
+      return null
+    }
+
+    if (
+      renamable.type === 'variable' &&
+      (params.newName === '_' || !/^[a-z_][\w]*$/i.test(params.newName))
+    ) {
+      this.throwResponseError('Invalid variable name given.')
+    }
+
+    if (renamable.type === 'function' && params.newName.includes('$')) {
+      this.throwResponseError('Invalid function name given.')
+    }
+
     return null
   }
 }
