@@ -784,18 +784,48 @@ export default class BashServer {
     })
 
     if (declarations.length === 0) {
-      const occurrences = this.analyzer.findOccurrences(
+      const locations = this.analyzer.findOccurrences(
         params.textDocument.uri,
         renamable.word,
       )
 
       return <LSP.WorkspaceEdit>{
         changes: {
-          [params.textDocument.uri]: occurrences.map((occurrence) => ({
-            range: occurrence.range,
+          [params.textDocument.uri]: locations.map((location) => ({
+            range: location.range,
             newText: params.newName,
           })),
         },
+      }
+    }
+
+    const parentFunction = this.analyzer.findParentFunction(
+      params.textDocument.uri,
+      params.position.line,
+      params.position.character,
+    )
+
+    if (parentFunction) {
+      const declaration = declarations.find(
+        (declaration) => declaration.containerName === parentFunction.name,
+      )
+      const ranges = declaration
+        ? this.analyzer.findOccurrencesWithin(
+            params.textDocument.uri,
+            parentFunction.range,
+            renamable.word,
+          )
+        : null
+
+      if (ranges) {
+        return <LSP.WorkspaceEdit>{
+          changes: {
+            [params.textDocument.uri]: ranges.map((range) => ({
+              range,
+              newText: params.newName,
+            })),
+          },
+        }
       }
     }
 

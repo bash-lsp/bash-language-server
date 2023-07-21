@@ -332,6 +332,63 @@ export default class Analyzer {
     return locations
   }
 
+  public findOccurrencesWithin(uri: string, scope: LSP.Range, word: string): LSP.Range[] {
+    const analyzedDocument = this.uriToAnalyzedDocument[uri]
+    const ranges: LSP.Range[] = []
+
+    if (!analyzedDocument?.tree?.rootNode) {
+      return ranges
+    }
+
+    const baseNode = analyzedDocument.tree.rootNode.descendantForPosition(
+      { row: scope.start.line, column: scope.start.character },
+      { row: scope.end.line, column: scope.end.character },
+    )
+
+    TreeSitterUtil.forEach(baseNode, (n) => {
+      let namedNode: Parser.SyntaxNode | null = null
+
+      if (TreeSitterUtil.isReference(n)) {
+        namedNode = n.firstNamedChild || n
+      } else if (TreeSitterUtil.isDefinition(n)) {
+        namedNode = n.firstNamedChild
+      }
+
+      if (namedNode && namedNode.text === word) {
+        const range = TreeSitterUtil.range(namedNode)
+
+        if (!ranges.some((r) => isDeepStrictEqual(r, range))) {
+          ranges.push(range)
+        }
+      }
+    })
+
+    return ranges
+  }
+
+  public findParentFunction(
+    uri: string,
+    line: number,
+    column: number,
+  ): { name: string; range: LSP.Range } | null {
+    const node = this.nodeAtPoint(uri, line, column)
+
+    if (!node) {
+      return null
+    }
+
+    const parent = TreeSitterUtil.findParent(
+      node,
+      (n) => n.type === 'function_definition',
+    )
+
+    if (!parent || !parent.firstChild) {
+      return null
+    }
+
+    return { name: parent.firstChild.text.trim(), range: TreeSitterUtil.range(parent) }
+  }
+
   public getAllVariables({
     position,
     uri,
