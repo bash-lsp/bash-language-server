@@ -354,6 +354,16 @@ export default class Analyzer {
         namedNode = n.firstNamedChild
       }
 
+      if (n !== baseNode && n.type === 'function_definition') {
+        for (const declaration of n.descendantsOfType('declaration_command')) {
+          const variableName = declaration.descendantsOfType('variable_name')[0].text
+
+          if (variableName === word) {
+            return false
+          }
+        }
+      }
+
       if (namedNode && namedNode.text === word) {
         const range = TreeSitterUtil.range(namedNode)
 
@@ -361,6 +371,8 @@ export default class Analyzer {
           ranges.push(range)
         }
       }
+
+      return true
     })
 
     return ranges
