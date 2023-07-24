@@ -333,17 +333,16 @@ export default class Analyzer {
   }
 
   public findOccurrencesWithin(uri: string, scope: LSP.Range, word: string): LSP.Range[] {
-    const analyzedDocument = this.uriToAnalyzedDocument[uri]
+    const baseNode = this.nodeAtPoints(
+      uri,
+      { line: scope.start.line, column: scope.start.character },
+      { line: scope.end.line, column: scope.end.character },
+    )
     const ranges: LSP.Range[] = []
 
-    if (!analyzedDocument?.tree?.rootNode) {
+    if (!baseNode) {
       return ranges
     }
-
-    const baseNode = analyzedDocument.tree.rootNode.descendantForPosition(
-      { row: scope.start.line, column: scope.start.character },
-      { row: scope.end.line, column: scope.end.character },
-    )
 
     TreeSitterUtil.forEach(baseNode, (n) => {
       let namedNode: Parser.SyntaxNode | null = null
@@ -790,5 +789,22 @@ export default class Analyzer {
     }
 
     return tree.rootNode.descendantForPosition({ row: line, column })
+  }
+
+  private nodeAtPoints(
+    uri: string,
+    start: { line: number; column: number },
+    end: { line: number; column: number },
+  ): Parser.SyntaxNode | null {
+    const rootNode = this.uriToAnalyzedDocument[uri]?.tree?.rootNode
+
+    if (!rootNode) {
+      return null
+    }
+
+    return rootNode.descendantForPosition(
+      { row: start.line, column: start.column },
+      { row: end.line, column: end.column },
+    )
   }
 }
