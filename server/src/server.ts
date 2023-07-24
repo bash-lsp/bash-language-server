@@ -799,17 +799,23 @@ export default class BashServer {
       }
     }
 
-    const parentFunction = this.analyzer.findParentFunction(
-      params.textDocument.uri,
-      params.position.line,
-      params.position.character,
-    )
+    const parentFunctions = this.analyzer.findParentFunctions(params.textDocument.uri, {
+      line: params.position.line,
+      column: params.position.character,
+    })
 
-    if (parentFunction) {
-      const declaration = declarations.find(
-        (declaration) => declaration.containerName === parentFunction.name,
+    if (parentFunctions.length > 0) {
+      const containerNames = declarations
+        .filter(
+          (declaration) =>
+            declaration.containerName &&
+            declaration.location.uri === params.textDocument.uri,
+        )
+        .map((declaration) => declaration.containerName)
+      const parentFunction = parentFunctions.find((parent) =>
+        containerNames.includes(parent.name),
       )
-      const ranges = declaration
+      const ranges = parentFunction
         ? this.analyzer.findOccurrencesWithin(
             params.textDocument.uri,
             parentFunction.range,

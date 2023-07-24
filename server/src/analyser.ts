@@ -379,10 +379,12 @@ export default class Analyzer {
 
   public findParentFunction(
     uri: string,
-    line: number,
-    column: number,
+    start: { line: number; column: number },
+    end?: { line: number; column: number },
   ): { name: string; range: LSP.Range } | null {
-    const node = this.nodeAtPoint(uri, line, column)
+    const node = end
+      ? this.nodeAtPoints(uri, start, end)
+      : this.nodeAtPoint(uri, start.line, start.column)
 
     if (!node) {
       return null
@@ -398,6 +400,33 @@ export default class Analyzer {
     }
 
     return { name: parent.firstNamedChild.text, range: TreeSitterUtil.range(parent) }
+  }
+
+  public findParentFunctions(
+    uri: string,
+    start: { line: number; column: number },
+    end?: { line: number; column: number },
+  ): { name: string; range: LSP.Range }[] {
+    const parents = []
+
+    let parent = this.findParentFunction(uri, start, end)
+    while (parent) {
+      parents.push(parent)
+
+      parent = this.findParentFunction(
+        uri,
+        {
+          line: parent.range.start.line,
+          column: parent.range.start.character,
+        },
+        {
+          line: parent.range.end.line,
+          column: parent.range.end.character,
+        },
+      )
+    }
+
+    return parents
   }
 
   public getAllVariables({
