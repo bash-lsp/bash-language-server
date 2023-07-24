@@ -394,11 +394,11 @@ export default class Analyzer {
       (n) => n.type === 'function_definition',
     )
 
-    if (!parent || !parent.firstChild) {
+    if (!parent || !parent.firstNamedChild) {
       return null
     }
 
-    return { name: parent.firstChild.text.trim(), range: TreeSitterUtil.range(parent) }
+    return { name: parent.firstNamedChild.text, range: TreeSitterUtil.range(parent) }
   }
 
   public getAllVariables({
