@@ -799,12 +799,15 @@ export default class BashServer {
       }
     }
 
-    const parentFunctions = this.analyzer.findParentFunctions(params.textDocument.uri, {
-      line: params.position.line,
-      column: params.position.character,
-    })
+    const parentFunctions =
+      renamable.type === 'variable'
+        ? this.analyzer.findParentFunctions(params.textDocument.uri, {
+            line: params.position.line,
+            column: params.position.character,
+          })
+        : null
 
-    if (parentFunctions.length > 0) {
+    if (parentFunctions && parentFunctions.length > 0) {
       const containerNames = declarations
         .filter(
           (declaration) =>
