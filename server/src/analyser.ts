@@ -363,6 +363,19 @@ export default class Analyzer {
         }
       }
 
+      if (n !== baseNode && n.type === 'subshell') {
+        for (const declaration of n.descendantsOfType([
+          'variable_assignment',
+          'function_definition',
+        ])) {
+          const name = declaration.firstNamedChild?.text
+
+          if (name === word) {
+            return false
+          }
+        }
+      }
+
       if (namedNode && namedNode.text === word) {
         const range = TreeSitterUtil.range(namedNode)
 
