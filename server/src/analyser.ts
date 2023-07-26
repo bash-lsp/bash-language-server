@@ -377,14 +377,12 @@ export default class Analyzer {
     return ranges
   }
 
-  public findParentFunction(
+  public findParentScope(
     uri: string,
     start: { line: number; column: number },
-    end?: { line: number; column: number },
-  ): { name: string; range: LSP.Range } | null {
-    const node = end
-      ? this.nodeAtPoints(uri, start, end)
-      : this.nodeAtPoint(uri, start.line, start.column)
+    end: { line: number; column: number },
+  ): LSP.Range | null {
+    const node = this.nodeAtPoints(uri, start, end)
 
     if (!node) {
       return null
@@ -392,41 +390,16 @@ export default class Analyzer {
 
     const parent = TreeSitterUtil.findParent(
       node,
-      (n) => n.type === 'function_definition',
+      (n) =>
+        n.type === 'subshell' ||
+        (n.type === 'function_definition' && n.lastChild?.type !== 'subshell'),
     )
 
-    if (!parent || !parent.firstNamedChild) {
+    if (!parent) {
       return null
     }
 
-    return { name: parent.firstNamedChild.text, range: TreeSitterUtil.range(parent) }
-  }
-
-  public findParentFunctions(
-    uri: string,
-    start: { line: number; column: number },
-    end?: { line: number; column: number },
-  ): { name: string; range: LSP.Range }[] {
-    const parents = []
-
-    let parent = this.findParentFunction(uri, start, end)
-    while (parent) {
-      parents.push(parent)
-
-      parent = this.findParentFunction(
-        uri,
-        {
-          line: parent.range.start.line,
-          column: parent.range.start.character,
-        },
-        {
-          line: parent.range.end.line,
-          column: parent.range.end.character,
-        },
-      )
-    }
-
-    return parents
+    return TreeSitterUtil.range(parent)
   }
 
   public getAllVariables({

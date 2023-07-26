@@ -799,42 +799,37 @@ export default class BashServer {
       }
     }
 
-    const parentFunctions =
-      renamable.type === 'variable'
-        ? this.analyzer.findParentFunctions(params.textDocument.uri, {
-            line: params.position.line,
-            column: params.position.character,
-          })
-        : null
-
-    if (parentFunctions && parentFunctions.length > 0) {
-      const containerNames = declarations
-        .filter(
-          (declaration) =>
-            declaration.containerName &&
-            declaration.location.uri === params.textDocument.uri,
-        )
-        .map((declaration) => declaration.containerName)
-      const parentFunction = parentFunctions.find((parent) =>
-        containerNames.includes(parent.name),
-      )
-      const ranges = parentFunction
-        ? this.analyzer.findOccurrencesWithin(
-            params.textDocument.uri,
-            parentFunction.range,
-            renamable.word,
-          )
-        : null
-
-      if (ranges) {
-        return <LSP.WorkspaceEdit>{
-          changes: {
-            [params.textDocument.uri]: ranges.map((range) => ({
-              range,
-              newText: params.newName,
-            })),
+    const localDeclaration = declarations.find(
+      (declaration) => declaration.location.uri === params.textDocument.uri,
+    )
+    const parentScope = localDeclaration
+      ? this.analyzer.findParentScope(
+          params.textDocument.uri,
+          {
+            line: localDeclaration.location.range.start.line,
+            column: localDeclaration.location.range.start.character,
           },
-        }
+          {
+            line: localDeclaration.location.range.end.line,
+            column: localDeclaration.location.range.end.character,
+          },
+        )
+      : null
+
+    if (parentScope) {
+      const ranges = this.analyzer.findOccurrencesWithin(
+        params.textDocument.uri,
+        parentScope,
+        renamable.word,
+      )
+
+      return <LSP.WorkspaceEdit>{
+        changes: {
+          [params.textDocument.uri]: ranges.map((range) => ({
+            range,
+            newText: params.newName,
+          })),
+        },
       }
     }
 
