@@ -816,10 +816,10 @@ export default class BashServer {
         )
       : null
 
-    if (parentScope) {
+    if (parentScope && parentScope.type !== renamable.type) {
       const ranges = this.analyzer.findOccurrencesWithin(
         params.textDocument.uri,
-        parentScope,
+        parentScope.range,
         renamable.word,
       )
 

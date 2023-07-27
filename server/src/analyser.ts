@@ -394,7 +394,7 @@ export default class Analyzer {
     uri: string,
     start: { line: number; column: number },
     end: { line: number; column: number },
-  ): LSP.Range | null {
+  ): { type: 'subshell' | 'function'; range: LSP.Range } | null {
     const node = this.nodeAtPoints(uri, start, end)
 
     if (!node) {
@@ -412,7 +412,10 @@ export default class Analyzer {
       return null
     }
 
-    return TreeSitterUtil.range(parent)
+    return {
+      type: parent.type === 'subshell' ? 'subshell' : 'function',
+      range: TreeSitterUtil.range(parent),
+    }
   }
 
   public getAllVariables({
