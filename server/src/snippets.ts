@@ -1,7 +1,6 @@
 /**
  * Naming convention for `documentation`:
  * - for Bash operators it's '<operator> operator'
- * - for Bash parameter expansions it's '<expansion> expansion'
  * - for Bash documentation it's 'documentation definition' or '"<documentation>" documentation definition'
  * - for Bash functions it's 'function definition' or '"<function>" function definition'
  * - for Bash builtins it's '"<builtin>" invocation'
@@ -10,7 +9,7 @@
  * - for anything else it's any string
  *
  * Naming convention for `label`:
- * - for shell shebang it's 'shebang'
+ * - for shell shebang it's 'shebang' or 'shebang-with-arguments'
  * - for Bash operators it's '<operator>[<nested-operator>]', where:
  *   - <operator> is Bash operator
  *   - <nested-operator> is 'test'
@@ -41,91 +40,438 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: '#!/usr/bin/env ${1|bash,sh|}',
   },
   {
-    documentation: 'if operator',
+    documentation: 'shebang-with-arguments',
+    label: 'shebang-with-arguments',
+    insertText: '#!/usr/bin/env ${1|-S,--split-string|} ${2|bash,sh|} ${3|argument ...|}',
+  },
+  {
+    label: 'and',
+    documentation: 'and operator',
+    insertText: '${1:first-expression} && ${2:second-expression}',
+  },
+  {
+    label: 'or',
+    documentation: 'or operator',
+    insertText: '${1:first-expression} || ${2:second-expression}',
+  },
+  {
     label: 'if',
-    insertText: ['if ${1:command}; then', '\t$0', 'fi'].join('\n'),
-  },
-  {
-    documentation: 'if else operator',
-    label: 'if-else',
-    insertText: ['if ${1:command}; then', '\t${2:echo}', 'else', '\t$0', 'fi'].join('\n'),
-  },
-  {
     documentation: 'if operator',
-    label: 'if-test',
-    insertText: [
-      'if [[ ${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} ${3:variable} ]]; then',
-      '\t$0',
-      'fi',
-    ].join('\n'),
+    insertText: ['if ${1:condition}; then', '\t${2:command ...}', 'fi'].join('\n'),
   },
   {
-    documentation: 'if else operator',
-    label: 'if-else-test',
+    label: 'if-else',
+    documentation: 'if-else operator',
     insertText: [
-      'if [[ ${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} ${3:variable} ]]; then',
+      'if ${1:condition}; then',
+      '\t${2:command ...}',
       'else',
-      '\t$0',
+      '\t${3:command ...}',
       'fi',
     ].join('\n'),
   },
   {
-    documentation: 'while operator',
+    label: 'if-less',
+    documentation: 'if with number comparison',
+    insertText: [
+      'if (( "${1:first-expression}" < "${2:second-expression}" )); then',
+      '\t${3:command ...}',
+      'fi',
+    ].join('\n'),
+  },
+  {
+    label: 'if-greater',
+    documentation: 'if with number comparison',
+    insertText: [
+      'if (( "${1:first-expression}" > "${2:second-expression}" )); then',
+      '\t${3:command ...}',
+      'fi',
+    ].join('\n'),
+  },
+  {
+    label: 'if-less-or-equal',
+    documentation: 'if with number comparison',
+    insertText: [
+      'if (( "${1:first-expression}" <= "${2:second-expression}" )); then',
+      '\t${3:command ...}',
+      'fi',
+    ].join('\n'),
+  },
+  {
+    label: 'if-greater-or-equal',
+    documentation: 'if with number comparison',
+    insertText: [
+      'if (( "${1:first-expression}" >= "${2:second-expression}" )); then',
+      '\t${3:command ...}',
+      'fi',
+    ].join('\n'),
+  },
+  {
+    label: 'if-equal',
+    documentation: 'if with number comparison',
+    insertText: [
+      'if (( "${1:first-expression}" == "${2:second-expression}" )); then',
+      '\t${3:command ...}',
+      'fi',
+    ].join('\n'),
+  },
+  {
+    label: 'if-not-equal',
+    documentation: 'if with number comparison',
+    insertText: [
+      'if (( "${1:first-expression}" != "${2:second-expression}" )); then',
+      '\t${3:command ...}',
+      'fi',
+    ].join('\n'),
+  },
+  {
+    label: 'if-string-equal',
+    documentation: 'if with string comparison',
+    insertText: [
+      'if [[ "${1:first-expression}" == "${2:second-expression}" ]]; then',
+      '\t${3:command ...}',
+      'fi',
+    ].join('\n'),
+  },
+  {
+    label: 'if-string-not-equal',
+    documentation: 'if with string comparison',
+    insertText: [
+      'if [[ "${1:first-expression}" != "${2:second-expression}" ]]; then',
+      '\t${3:command ...}',
+      'fi',
+    ].join('\n'),
+  },
+  {
+    label: 'if-string-empty',
+    documentation: 'if with string comparison (has [z]ero length)',
+    insertText: ['if [[ -z "${1:expression}" ]]; then', '\t${2:command ...}', 'fi'].join(
+      '\n',
+    ),
+  },
+  {
+    label: 'if-string-not-empty',
+    documentation: 'if with string comparison ([n]ot empty)',
+    insertText: ['if [[ -n "${1:expression}" ]]; then', '\t${2:command ...}', 'fi'].join(
+      '\n',
+    ),
+  },
+  {
+    label: 'if-defined',
+    documentation: 'if with variable existence check',
+    insertText: ['if [[ -n "${${1:variable}+x}" ]]', '\t${2:command ...}', 'fi'].join(
+      '\n',
+    ),
+  },
+  {
+    label: 'if-not-defined',
+    documentation: 'if with variable existence check',
+    insertText: ['if [[ -z "${${1:variable}+x}" ]]', '\t${2:command ...}', 'fi'].join(
+      '\n',
+    ),
+  },
+  {
     label: 'while',
-    insertText: ['while ${1:command}; do', '\t$0', 'done'].join('\n'),
-  },
-  {
     documentation: 'while operator',
-    label: 'while-test',
+    insertText: ['while ${1:condition}; do', '\t${2:command ...}', 'done'].join('\n'),
+  },
+  {
+    label: 'while-else',
+    documentation: 'while-else operator',
     insertText: [
-      'while [[ ${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} ${3:variable} ]]; do',
-      '\t$0',
+      'while ${1:condition}; do',
+      '\t${2:command ...}',
+      'else',
+      '\t${3:command ...}',
       'done',
     ].join('\n'),
   },
   {
-    documentation: 'until operator',
+    label: 'while-less',
+    documentation: 'while with number comparison',
+    insertText: [
+      'while (( "${1:first-expression}" < "${2:second-expression}" )); do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'while-greater',
+    documentation: 'while with number comparison',
+    insertText: [
+      'while (( "${1:first-expression}" > "${2:second-expression}" )); do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'while-less-or-equal',
+    documentation: 'while with number comparison',
+    insertText: [
+      'while (( "${1:first-expression}" <= "${2:second-expression}" )); do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'while-greater-or-equal',
+    documentation: 'while with number comparison',
+    insertText: [
+      'while (( "${1:first-expression}" >= "${2:second-expression}" )); do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'while-equal',
+    documentation: 'while with number comparison',
+    insertText: [
+      'while (( "${1:first-expression}" == "${2:second-expression}" )); do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'while-not-equal',
+    documentation: 'while with number comparison',
+    insertText: [
+      'while (( "${1:first-expression}" != "${2:second-expression}" )); do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'while-string-equal',
+    documentation: 'while with string comparison',
+    insertText: [
+      'while [[ "${1:first-expression}" == "${2:second-expression}" ]]; do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'while-string-not-equal',
+    documentation: 'while with string comparison',
+    insertText: [
+      'while [[ "${1:first-expression}" != "${2:second-expression}" ]]; do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'while-string-empty',
+    documentation: 'while with string comparison (has [z]ero length)',
+    insertText: [
+      'while [[ -z "${1:expression}" ]]; do',
+      '\t${2:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'while-string-not-empty',
+    documentation: 'while with string comparison ([n]ot empty)',
+    insertText: [
+      'while [[ -n "${1:expression}" ]]; do',
+      '\t${2:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'while-defined',
+    documentation: 'while with variable existence check',
+    insertText: [
+      'while [[ -n "${${1:variable}+x}" ]]',
+      '\t${2:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'while-not-defined',
+    documentation: 'while with variable existence check',
+    insertText: [
+      'while [[ -z "${${1:variable}+x}" ]]',
+      '\t${2:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
     label: 'until',
-    insertText: ['until ${1:command}; do', '\t$0', 'done'].join('\n'),
+    documentation: 'until operator',
+    insertText: ['until ${1:condition}; do', '\t${2:command ...}', 'done'].join('\n'),
   },
   {
-    documentation: 'until operator',
-    label: 'until-test',
+    label: 'until-else',
+    documentation: 'until-else operator',
     insertText: [
-      'until [[ ${1:variable} ${2|-ef,-nt,-ot,==,=~,!=,<,>,-lt,-le,-gt,-ge|} ${3:variable} ]]; do',
-      '\t$0',
+      'until ${1:condition}; do',
+      '\t${2:command ...}',
+      'else',
+      '\t${3:command ...}',
       'done',
     ].join('\n'),
   },
   {
-    documentation: 'for operator',
+    label: 'until-less',
+    documentation: 'until with number comparison',
+    insertText: [
+      'until (( "${1:first-expression}" < "${2:second-expression}" )); do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'until-greater',
+    documentation: 'until with number comparison',
+    insertText: [
+      'until (( "${1:first-expression}" > "${2:second-expression}" )); do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'until-less-or-equal',
+    documentation: 'until with number comparison',
+    insertText: [
+      'until (( "${1:first-expression}" <= "${2:second-expression}" )); do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'until-greater-or-equal',
+    documentation: 'until with number comparison',
+    insertText: [
+      'until (( "${1:first-expression}" >= "${2:second-expression}" )); do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'until-equal',
+    documentation: 'until with number comparison',
+    insertText: [
+      'until (( "${1:first-expression}" == "${2:second-expression}" )); do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'until-not-equal',
+    documentation: 'until with number comparison',
+    insertText: [
+      'until (( "${1:first-expression}" != "${2:second-expression}" )); do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'until-string-equal',
+    documentation: 'until with string comparison',
+    insertText: [
+      'until [[ "${1:first-expression}" == "${2:second-expression}" ]]; do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'until-string-not-equal',
+    documentation: 'until with string comparison',
+    insertText: [
+      'until [[ "${1:first-expression}" != "${2:second-expression}" ]]; do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'until-string-empty',
+    documentation: 'until with string comparison (has [z]ero length)',
+    insertText: [
+      'until [[ -z "${1:expression}" ]]; do',
+      '\t${2:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'until-string-not-empty',
+    documentation: 'until with string comparison ([n]ot empty)',
+    insertText: [
+      'until [[ -n "${1:expression}" ]]; do',
+      '\t${2:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'until-defined',
+    documentation: 'until with variable existence check',
+    insertText: [
+      'until [[ -n "${${1:variable}+x}" ]]',
+      '\t${2:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'until-not-defined',
+    documentation: 'until with variable existence check',
+    insertText: [
+      'until [[ -z "${${1:variable}+x}" ]]',
+      '\t${2:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
     label: 'for',
-    insertText: ['for ${1:variable} in ${2:list}; do', '\t$0', 'done'].join('\n'),
-  },
-  {
     documentation: 'for operator',
-    label: 'for.range',
-    insertText: ['for ${1:variable} in $(seq ${2:to}); do', '\t$0', 'done'].join('\n'),
+    insertText: [
+      'for ${1:item} in ${2:expression}; do',
+      '\t${3:command ...}',
+      'done',
+    ].join('\n'),
   },
   {
-    documentation: 'for operator',
-    label: 'for.file',
-    insertText: ['for ${1:variable} in *; do', '\t$0', 'done'].join('\n'),
+    label: 'for-range',
+    documentation: 'for with range',
+    insertText: [
+      'for ${1:item} in $(seq ${2:from} ${3:to}); do',
+      '\t${4:command ...}',
+      'done',
+    ].join('\n'),
   },
   {
-    documentation: 'for operator',
-    label: 'for.directory',
-    insertText: ['for ${1:variable} in */; do', '\t$0', 'done'].join('\n'),
+    label: 'for-stepped-range',
+    documentation: 'for with stepped range',
+    insertText: [
+      'for ${1:item} in $(seq ${2:from} ${3:step} ${4:to}); do',
+      '\t${5:command ...}',
+      'done',
+    ].join('\n'),
   },
   {
-    documentation: 'function definition',
+    label: 'for-files',
+    documentation: 'for with files',
+    insertText: [
+      'for ${1:item} in *.${2:extension}; do',
+      '\t${4:command ...}',
+      'done',
+    ].join('\n'),
+  },
+  {
+    label: 'case',
+    documentation: 'case operator',
+    insertText: [
+      'case "${1:expression}" in',
+      '\t${2:pattern})',
+      '\t\t${3:command ...}',
+      '\t\t;;',
+      '\t*)',
+      '\t\t${4:command ...}',
+      '\t\t;;',
+      'end',
+    ].join('\n'),
+  },
+  {
     label: 'function',
-    insertText: ['${1:function_name}() {', '\t$0', '}'].join('\n'),
-  },
-  {
-    documentation: '"main" function definition',
-    label: 'main',
-    insertText: ['main() {', '\t$0', '}'].join('\n'),
+    documentation: 'function definition',
+    insertText: ['${1:name}() {', '\t${2:command ...}', '}'].join('\n'),
   },
   {
     documentation: 'documentation definition',
@@ -143,62 +489,62 @@ export const SNIPPETS: BashCompletionItem[] = [
     ].join('\n'),
   },
   {
-    documentation: ':- expansion',
+    documentation: 'if unset or null',
     label: 'if-unset-or-null',
     insertText: '"\\${${1:variable}:-${2:default}}"',
   },
   {
-    documentation: '- expansion',
+    documentation: 'if unset',
     label: 'if-unset',
     insertText: '"\\${${1:variable}-${2:default}}"',
   },
   {
-    documentation: ':= expansion',
+    documentation: 'set if unset or null',
     label: 'set-if-unset-or-null',
     insertText: '"\\${${1:variable}:=${2:default}}"',
   },
   {
-    documentation: '= expansion',
+    documentation: 'set if unset',
     label: 'set-if-unset',
     insertText: '"\\${${1:variable}=${2:default}}"',
   },
   {
-    documentation: ':? expansion',
+    documentation: 'error if unset or null',
     label: 'error-if-unset-or-null',
     insertText: '"\\${${1:variable}:?${2:error_message}}"',
   },
   {
-    documentation: '? expansion',
+    documentation: 'error if unset',
     label: 'error-if-unset',
     insertText: '"\\${${1:variable}?${2:error_message}}"',
   },
   {
-    documentation: ':+ expansion',
+    documentation: 'if set or not null',
     label: 'if-set-or-not-null',
     insertText: '"\\${${1:variable}:+${2:alternative}}"',
   },
   {
-    documentation: '+ expansion',
+    documentation: 'if set',
     label: 'if-set',
     insertText: '"\\${${1:variable}+${2:alternative}}"',
   },
   {
-    documentation: '# expansion',
+    documentation: 'without shortest leading pattern',
     label: 'without-shortest-leading-pattern',
     insertText: '"\\${${1:variable}#${2:pattern}}"',
   },
   {
-    documentation: '## expansion',
+    documentation: 'without longest leading pattern',
     label: 'without-longest-leading-pattern',
     insertText: '"\\${${1:variable}##${2:pattern}}"',
   },
   {
-    documentation: '% expansion',
+    documentation: 'without shortest trailing pattern',
     label: 'without-shortest-trailing-pattern',
     insertText: '"\\${${1:variable}%${2:pattern}}"',
   },
   {
-    documentation: '%% expansion',
+    documentation: 'without longest trailing pattern',
     label: 'without-longest-trailing-pattern',
     insertText: '"\\${${1:variable}%%${2:pattern}}"',
   },
