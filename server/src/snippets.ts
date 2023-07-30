@@ -19,15 +19,14 @@
  * - for Bash parameter expansions it's '[<prefix>]<expression>', where:
  *   - <prefix> is one of 'set'/'error'
  *     used when expansion modifies variable or prints error to stderr
- *   - <expession> is 'if-(set|unset)[-or-[not-]null]'
+ *   - <expression> is 'if-(set|unset)[-or-[not-]null]'
  *   - term delimiter: dash, like 'set-if-unset-or-null'
  * - for Bash brace expansion it's 'range'
  * - for Bash documentation it's one of 'documentation'/'<documentation>'
  * - for Bash functions it's one of 'function'/'<function>'
  * - for Bash builtins it's '<builtin>'
  * - for Bash character classes it's '<character-class>'
- * - for Sed it's 'sed:<expression>'
- * - for Awk it's 'awk:<expression>'
+ * - for external command it's '<command>:<expression>'
  * - for anything else it's any string
  */
 import { CompletionItemKind, InsertTextFormat, MarkupKind } from 'vscode-languageserver'
@@ -350,6 +349,57 @@ export const SNIPPETS: BashCompletionItem[] = [
     documentation: 'node print',
     label: 'yq:print',
     insertText: "yq '.${1:path/to/node}' ${2:path/to/file}",
+  },
+  {
+    documentation: 'contents addition or replacement',
+    label: 'zip:add-or-replace',
+    insertText: 'zip ${1:path/to/archive} ${2:path/to/file}',
+  },
+  {
+    documentation: 'contents deletion',
+    label: 'zip:delete',
+    insertText: 'zip ${1|--delete,-d|} ${2:path/to/archive} ${3:path/to/file}',
+  },
+  {
+    documentation: 'contents update',
+    label: 'zip:update',
+    insertText: 'zip ${1|--update,-u|} ${2:path/to/archive} ${3:path/to/file}',
+  },
+  {
+    documentation: 'contents extraction',
+    label: 'unzip:extract',
+    insertText: 'unzip ${1:path/to/archive} -d ${2:path/to/directory}',
+  },
+  {
+    documentation: 'contents print',
+    label: 'unzip:print',
+    insertText: 'unzip ${1:path/to/archive}',
+  },
+  {
+    documentation: 'file characteristic filter',
+    label: 'find:filter-by-file-characteristic',
+    insertText: 'find ${1:path/to/directory} -${2|readable,writable|}',
+  },
+  {
+    documentation: 'file type filter',
+    label: 'find:filter-by-file-type',
+    insertText: 'find ${1:path/to/directory} -type ${2|b,c,d,p,f,l,s,D|}',
+  },
+  {
+    documentation: 'file name filter',
+    label: 'find:filter-by-file-name',
+    insertText: 'find ${1:path/to/directory} -${2|name,iname|} ${3:path/to/file}',
+  },
+  {
+    documentation: 'condition combination',
+    label: 'find:filter-by-combined-condition',
+    insertText:
+      'find ${1:path/to/directory} ${2:condition} -${3|and,or,a,o|} ${4:condition}',
+  },
+  {
+    documentation: 'modification',
+    label: 'find:modify-all',
+    insertText: 'find ${1:path/to/directory} ${2:condition} -exec ${3:action} ;',
   },
   {
     documentation: 'home directory',
