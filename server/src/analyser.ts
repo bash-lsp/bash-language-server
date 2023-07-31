@@ -275,6 +275,108 @@ export default class Analyzer {
     })
   }
 
+  // TODO: Handle function definitions
+  public findOriginalDeclaration({
+    position,
+    uri,
+    word,
+  }: {
+    position: LSP.Position
+    uri: string
+    word: string
+  }): LSP.Location | null {
+    const node = this.nodeAtPoint(uri, position.line, position.character)
+
+    if (!node) {
+      return null
+    }
+
+    let originalDeclaration: Parser.SyntaxNode | null | undefined
+
+    let parent = this.findParentScopeNode(
+      uri,
+      { line: node.startPosition.row, column: node.startPosition.column },
+      { line: node.endPosition.row, column: node.endPosition.column },
+    )
+    let continueSearching = false
+    let boundary = position.line
+    while (parent) {
+      if (parent.type === 'function_definition' && parent.lastChild) {
+        const functionBody = parent.lastChild
+        TreeSitterUtil.forEach(functionBody, (n) => {
+          if (
+            (originalDeclaration && !continueSearching) ||
+            n.startPosition.row > boundary
+          ) {
+            return false
+          }
+
+          const isExport = n.firstChild?.text === 'export'
+          const variable = n.descendantsOfType('variable_name').at(0)
+          if (n.type === 'declaration_command' && !isExport && variable?.text === word) {
+            originalDeclaration = variable
+            continueSearching = false
+          }
+
+          return true
+        })
+      } else if (parent.type === 'subshell') {
+        TreeSitterUtil.forEach(parent, (n) => {
+          if (
+            (originalDeclaration && !continueSearching) ||
+            n.startPosition.row > boundary
+          ) {
+            return false
+          }
+
+          let variable: Parser.SyntaxNode | null | undefined
+          let variableText: string | undefined
+
+          if (
+            n.type === 'declaration_command' ||
+            n.type === 'for_statement' ||
+            (n.type === 'command' && n.text.includes(':='))
+          ) {
+            variable = n.descendantsOfType('variable_name').at(0)
+            variableText = variable?.text
+          } else if (TreeSitterUtil.isDefinition(n)) {
+            variable = n.firstNamedChild
+            variableText = variable?.text
+          } else if (n.type === 'c_style_for_statement') {
+            variable = n.descendantsOfType('word').at(0)
+            variableText = variable?.text.split('=').at(0)?.trim()
+          }
+
+          if (variableText === word) {
+            originalDeclaration = variable
+            continueSearching = n.type === 'command'
+          }
+
+          return true
+        })
+      }
+
+      if (originalDeclaration && !continueSearching) {
+        break
+      }
+
+      boundary = parent.startPosition.row
+      parent = this.findParentScopeNode(
+        uri,
+        { line: parent.startPosition.row, column: parent.startPosition.column },
+        { line: parent.endPosition.row, column: parent.endPosition.column },
+      )
+    }
+
+    // TODO: Handle global definitions
+
+    // TODO: Return LSP.SymbolInformation to help differentiate between local
+    // and global definitions using .containerName
+    return originalDeclaration
+      ? LSP.Location.create(uri, TreeSitterUtil.range(originalDeclaration))
+      : null
+  }
+
   /**
    * Find all the locations where the given word was defined or referenced.
    * This will include commands, functions, variables, etc.
@@ -355,7 +457,7 @@ export default class Analyzer {
 
       if (n !== baseNode && n.type === 'function_definition') {
         for (const declaration of n.descendantsOfType('declaration_command')) {
-          const variableName = declaration.descendantsOfType('variable_name')[0].text
+          const variableName = declaration.descendantsOfType('variable_name').at(0)?.text
 
           if (variableName === word) {
             return false
@@ -395,18 +497,7 @@ export default class Analyzer {
     start: { line: number; column: number },
     end: { line: number; column: number },
   ): { type: 'subshell' | 'function'; range: LSP.Range } | null {
-    const node = this.nodeAtPoints(uri, start, end)
-
-    if (!node) {
-      return null
-    }
-
-    const parent = TreeSitterUtil.findParent(
-      node,
-      (n) =>
-        n.type === 'subshell' ||
-        (n.type === 'function_definition' && n.lastChild?.type !== 'subshell'),
-    )
+    const parent = this.findParentScopeNode(uri, start, end)
 
     if (!parent) {
       return null
@@ -789,6 +880,31 @@ export default class Analyzer {
     addSourcedFilesFromUri(uri)
 
     return allSourcedUris
+  }
+
+  private findParentScopeNode(
+    uri: string,
+    start: { line: number; column: number },
+    end: { line: number; column: number },
+  ): Parser.SyntaxNode | null {
+    const node = this.nodeAtPoints(uri, start, end)
+
+    if (!node) {
+      return null
+    }
+
+    const parent = TreeSitterUtil.findParent(
+      node,
+      (n) =>
+        n.type === 'subshell' ||
+        (n.type === 'function_definition' && n.lastChild?.type !== 'subshell'),
+    )
+
+    if (!parent) {
+      return null
+    }
+
+    return parent
   }
 
   /**

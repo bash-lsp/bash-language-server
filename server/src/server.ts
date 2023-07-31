@@ -776,14 +776,13 @@ export default class BashServer {
       this.throwResponseError('Invalid function name given.')
     }
 
-    const declarations = this.analyzer.findDeclarationsMatchingWord({
-      exactMatch: true,
+    const declaration = this.analyzer.findOriginalDeclaration({
       position: params.position,
       uri: params.textDocument.uri,
       word: renamable.word,
     })
 
-    if (declarations.length === 0) {
+    if (!declaration) {
       const locations = this.analyzer.findOccurrences(
         params.textDocument.uri,
         renamable.word,
@@ -799,19 +798,16 @@ export default class BashServer {
       }
     }
 
-    const localDeclaration = declarations.find(
-      (declaration) => declaration.location.uri === params.textDocument.uri,
-    )
-    const parentScope = localDeclaration
+    const parentScope = declaration
       ? this.analyzer.findParentScope(
           params.textDocument.uri,
           {
-            line: localDeclaration.location.range.start.line,
-            column: localDeclaration.location.range.start.character,
+            line: declaration.range.start.line,
+            column: declaration.range.start.character,
           },
           {
-            line: localDeclaration.location.range.end.line,
-            column: localDeclaration.location.range.end.character,
+            line: declaration.range.end.line,
+            column: declaration.range.end.character,
           },
         )
       : null
