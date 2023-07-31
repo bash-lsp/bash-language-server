@@ -14,6 +14,32 @@ export function forEach(node: SyntaxNode, callback: (n: SyntaxNode) => void | bo
   }
 }
 
+/**
+ * Recursively iterates over all nodes, like forEach, but does it serially on
+ * each level of the tree.
+ */
+export function serialForEach(nodes: SyntaxNode[], callback: (n: SyntaxNode) => boolean) {
+  let toFollow: SyntaxNode[] = []
+
+  for (const n of nodes) {
+    if (callback(n)) {
+      toFollow.push(n)
+    }
+  }
+
+  toFollow = toFollow.reduce((children, n) => {
+    for (const c of n.children) {
+      children.push(c)
+    }
+
+    return children
+  }, [] as typeof toFollow)
+
+  if (toFollow.length) {
+    serialForEach(toFollow, callback)
+  }
+}
+
 export function range(n: SyntaxNode): LSP.Range {
   return LSP.Range.create(
     n.startPosition.row,

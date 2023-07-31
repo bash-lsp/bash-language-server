@@ -303,7 +303,7 @@ export default class Analyzer {
     while (parent) {
       if (parent.type === 'function_definition' && parent.lastChild) {
         const functionBody = parent.lastChild
-        TreeSitterUtil.forEach(functionBody, (n) => {
+        TreeSitterUtil.serialForEach(functionBody.children, (n) => {
           if (
             (originalDeclaration && !continueSearching) ||
             n.startPosition.row > boundary
@@ -321,7 +321,7 @@ export default class Analyzer {
           return true
         })
       } else if (parent.type === 'subshell') {
-        TreeSitterUtil.forEach(parent, (n) => {
+        TreeSitterUtil.serialForEach(parent.children, (n) => {
           if (
             (originalDeclaration && !continueSearching) ||
             n.startPosition.row > boundary
