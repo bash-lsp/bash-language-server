@@ -780,6 +780,7 @@ export default class BashServer {
       position: params.position,
       uri: params.textDocument.uri,
       word: renamable.word,
+      type: renamable.type,
     })
 
     if (!declaration) {

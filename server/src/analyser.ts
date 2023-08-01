@@ -275,15 +275,16 @@ export default class Analyzer {
     })
   }
 
-  // TODO: Handle function definitions
   public findOriginalDeclaration({
     position,
     uri,
     word,
+    type,
   }: {
     position: LSP.Position
     uri: string
     word: string
+    type: 'variable' | 'function'
   }): LSP.Location | null {
     const node = this.nodeAtPoint(uri, position.line, position.character)
 
@@ -301,7 +302,11 @@ export default class Analyzer {
     let continueSearching = false
     let boundary = position.line
     while (parent) {
-      if (parent.type === 'function_definition' && parent.lastChild) {
+      if (
+        type === 'variable' &&
+        parent.type === 'function_definition' &&
+        parent.lastChild
+      ) {
         const functionBody = parent.lastChild
         TreeSitterUtil.serialForEach(functionBody.children, (n) => {
           if (
@@ -329,26 +334,37 @@ export default class Analyzer {
             return false
           }
 
-          let variable: Parser.SyntaxNode | null | undefined
-          let variableText: string | undefined
+          let node: Parser.SyntaxNode | null | undefined
+          let nodeText: string | undefined
 
-          if (
-            n.type === 'declaration_command' ||
-            n.type === 'for_statement' ||
-            (n.type === 'command' && n.text.includes(':='))
-          ) {
-            variable = n.descendantsOfType('variable_name').at(0)
-            variableText = variable?.text
-          } else if (TreeSitterUtil.isDefinition(n)) {
-            variable = n.firstNamedChild
-            variableText = variable?.text
-          } else if (n.type === 'c_style_for_statement') {
-            variable = n.descendantsOfType('word').at(0)
-            variableText = variable?.text.split('=').at(0)?.trim()
+          switch (type) {
+            case 'variable':
+              if (
+                n.type === 'declaration_command' ||
+                n.type === 'for_statement' ||
+                (n.type === 'command' && n.text.includes(':='))
+              ) {
+                node = n.descendantsOfType('variable_name').at(0)
+                nodeText = node?.text
+              } else if (n.type === 'variable_assignment') {
+                node = n.firstNamedChild
+                nodeText = node?.text
+              } else if (n.type === 'c_style_for_statement') {
+                node = n.descendantsOfType('word').at(0)
+                nodeText = node?.text.split('=').at(0)?.trim()
+              }
+              break
+
+            case 'function':
+              if (n.type === 'function_definition') {
+                node = n.firstNamedChild
+                nodeText = node?.text
+              }
+              break
           }
 
-          if (variableText === word) {
-            originalDeclaration = variable
+          if (nodeText === word) {
+            originalDeclaration = node
             continueSearching = n.type === 'command'
           }
 
@@ -434,6 +450,7 @@ export default class Analyzer {
     return locations
   }
 
+  // TODO: Return more accurate results
   public findOccurrencesWithin(uri: string, scope: LSP.Range, word: string): LSP.Range[] {
     const baseNode = this.nodeAtPoints(
       uri,
