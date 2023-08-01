@@ -311,14 +311,17 @@ export default class Analyzer {
         TreeSitterUtil.serialForEach(functionBody.children, (n) => {
           if (
             (originalDeclaration && !continueSearching) ||
-            n.startPosition.row > boundary
+            n.startPosition.row > boundary ||
+            n.type === 'function_definition' ||
+            n.type === 'subshell'
           ) {
             return false
           }
 
-          const isExport = n.firstChild?.text === 'export'
+          const isLocal =
+            n.firstChild && ['local', 'declare', 'typeset'].includes(n.firstChild.text)
           const variable = n.descendantsOfType('variable_name').at(0)
-          if (n.type === 'declaration_command' && !isExport && variable?.text === word) {
+          if (n.type === 'declaration_command' && isLocal && variable?.text === word) {
             originalDeclaration = variable
             continueSearching = false
           }
@@ -329,7 +332,9 @@ export default class Analyzer {
         TreeSitterUtil.serialForEach(parent.children, (n) => {
           if (
             (originalDeclaration && !continueSearching) ||
-            n.startPosition.row > boundary
+            n.startPosition.row > boundary ||
+            n.type === 'function_definition' ||
+            n.type === 'subshell'
           ) {
             return false
           }
@@ -349,9 +354,6 @@ export default class Analyzer {
               } else if (n.type === 'variable_assignment') {
                 node = n.firstNamedChild
                 nodeText = node?.text
-              } else if (n.type === 'c_style_for_statement') {
-                node = n.descendantsOfType('word').at(0)
-                nodeText = node?.text.split('=').at(0)?.trim()
               }
               break
 
