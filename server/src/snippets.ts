@@ -606,6 +606,36 @@ export const SNIPPETS: BashCompletionItem[] = [
       "sed ${1|-E,--regexp-extended|} ':${2:x} N $! b$2 ${3:command}' ${4:file}",
   },
   {
+    documentation: 'skip-first',
+    label: 'skip-first',
+    insertText: 'tail ${1|-n,-c,--lines,--bytes|} +${2:count}',
+  },
+  {
+    documentation: 'skip-last',
+    label: 'skip-last',
+    insertText: 'head ${1|-n,-c,--lines,--bytes|} -${2:count}',
+  },
+  {
+    documentation: 'take-first',
+    label: 'take-first',
+    insertText: 'head ${1|-n,-c,--lines,--bytes|} ${2:count}',
+  },
+  {
+    documentation: 'take-last',
+    label: 'take-last',
+    insertText: 'tail ${1|-n,-c,--lines,--bytes|} ${2:count}',
+  },
+  {
+    documentation: 'take-range',
+    label: 'take-range',
+    insertText: "sed ${1|-n,--quiet|} '${2:from},${3:to}p'",
+  },
+  {
+    documentation: 'take-stepped-range',
+    label: 'take-stepped-range',
+    insertText: "sed ${1|-n,--quiet|} '${2:from},${3:to}p' | sed $1 '1~${4:step}p'",
+  },
+  {
     documentation: 'json print',
     label: 'json',
     insertText: "jq '.${1:node}' ${2:file}",
