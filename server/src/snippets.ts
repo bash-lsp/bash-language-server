@@ -639,6 +639,11 @@ export const SNIPPETS: BashCompletionItem[] = [
     label: 'device',
     insertText: '/dev/${1|null,stdin,stdout,stderr|}',
   },
+  {
+    documentation: 'comment',
+    label: 'comment definition',
+    insertText: '# ${1:description}',
+  },
 ].map((item) => ({
   ...item,
   documentation: {
