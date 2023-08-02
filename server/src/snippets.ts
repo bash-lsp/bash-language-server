@@ -491,29 +491,17 @@ export const SNIPPETS: BashCompletionItem[] = [
   {
     documentation: 'block',
     label: 'block',
-    insertText: [
-      '{',
-      '\t${1:command ...}',
-      '}',
-    ].join('\n'),
+    insertText: ['{', '\t${1:command ...}', '}'].join('\n'),
   },
   {
     documentation: 'block redirected',
     label: 'block-redirected',
-    insertText: [
-      '{',
-      '\t${1:command ...}',
-      '} > ${2:file}',
-    ].join('\n'),
+    insertText: ['{', '\t${1:command ...}', '} > ${2:file}'].join('\n'),
   },
   {
     documentation: 'block stderr redirected',
     label: 'block-stderr-redirected',
-    insertText: [
-      '{',
-      '\t${1:command ...}',
-      '} 2> ${2:file}',
-    ].join('\n'),
+    insertText: ['{', '\t${1:command ...}', '} 2> ${2:file}'].join('\n'),
   },
   {
     documentation: 'variable',
@@ -588,17 +576,17 @@ export const SNIPPETS: BashCompletionItem[] = [
   {
     documentation: 'string-match',
     label: 'string filtering',
-    insertText: 'sed ${1|-E -n,--regexp-extended --quiet|} \'/${2:pattern}/p\'',
+    insertText: "sed ${1|-E -n,--regexp-extended --quiet|} '/${2:pattern}/p'",
   },
   {
     documentation: 'string-replace',
     label: 'string replacement',
-    insertText: 'sed ${1|-E,--regexp-extended|} \'s/${2:pattern}/${3:replacement}/\'',
+    insertText: "sed ${1|-E,--regexp-extended|} 's/${2:pattern}/${3:replacement}/'",
   },
   {
     documentation: 'string-replace-all',
     label: 'string replacement',
-    insertText: 'sed ${1|-E,--regexp-extended|} \'s/${2:pattern}/${3:replacement}/g\'',
+    insertText: "sed ${1|-E,--regexp-extended|} 's/${2:pattern}/${3:replacement}/g'",
   },
   {
     documentation: 'string-transliterate',
@@ -618,12 +606,7 @@ export const SNIPPETS: BashCompletionItem[] = [
       "sed ${1|-E,--regexp-extended|} ':${2:x} N $! b$2 ${3:command}' ${4:file}",
   },
   {
-    documentation: 'node print',
-    label: 'json',
-    insertText: "jq '.${1:node}' ${2:file}",
-  },
-  {
-    documentation: 'node print',
+    documentation: 'json print',
     label: 'json',
     insertText: "jq '.${1:node}' ${2:file}",
   },
