@@ -568,22 +568,22 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: '"\\${${1:variable}%${2:pattern}}"',
   },
   {
-    documentation: 'string-match',
-    label: 'string filtering',
+    documentation: 'string filtering',
+    label: 'string-match',
     insertText: "sed ${1|-E -n,--regexp-extended --quiet|} '/${2:pattern}/p'",
   },
   {
-    documentation: 'string-replace',
-    label: 'string replacement',
+    documentation: 'string replacement',
+    label: 'string-replace',
     insertText: "sed ${1|-E,--regexp-extended|} 's/${2:pattern}/${3:replacement}/'",
   },
   {
-    documentation: 'string-replace-all',
-    label: 'string replacement',
+    documentation: 'string replacement',
+    label: 'string-replace-all',
     insertText: "sed ${1|-E,--regexp-extended|} 's/${2:pattern}/${3:replacement}/g'",
   },
   {
-    documentation: 'string-transliterate',
+    documentation: 'string transliterate',
     label: 'string-transliterate',
     insertText:
       "sed ${1|-E,--regexp-extended|} 'y/${2:source-characters}/${3:replacement-characters}/g'",
@@ -600,38 +600,38 @@ export const SNIPPETS: BashCompletionItem[] = [
       "sed ${1|-E,--regexp-extended|} ':${2:x} N $! b$2 ${3:command}' ${4:file}",
   },
   {
-    documentation: 'skip-first',
+    documentation: 'skip first',
     label: 'skip-first',
     insertText: 'tail ${1|-n,-c,--lines,--bytes|} +${2:count}',
   },
   {
-    documentation: 'skip-last',
+    documentation: 'skip last',
     label: 'skip-last',
     insertText: 'head ${1|-n,-c,--lines,--bytes|} -${2:count}',
   },
   {
-    documentation: 'take-first',
+    documentation: 'take first',
     label: 'take-first',
     insertText: 'head ${1|-n,-c,--lines,--bytes|} ${2:count}',
   },
   {
-    documentation: 'take-last',
+    documentation: 'take last',
     label: 'take-last',
     insertText: 'tail ${1|-n,-c,--lines,--bytes|} ${2:count}',
   },
   {
-    documentation: 'take-range',
+    documentation: 'take range',
     label: 'take-range',
     insertText: "sed ${1|-n,--quiet|} '${2:from},${3:to}p'",
   },
   {
-    documentation: 'take-stepped-range',
+    documentation: 'take stepped range',
     label: 'take-stepped-range',
     insertText: "sed ${1|-n,--quiet|} '${2:from},${3:to}p' | sed $1 '1~${4:step}p'",
   },
   {
     documentation: 'json print',
-    label: 'json',
+    label: 'json-print',
     insertText: "jq '.${1:node}' ${2:file}",
   },
   {
