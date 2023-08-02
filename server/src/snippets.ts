@@ -645,7 +645,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: [
       '_$1_completions()',
       '{',
-      '\treadarray -t COMPREPLY < <(compgen -W "-h --help -v --version" "${COMP_WORDS[1]}")',
+      '\treadarray -t COMPREPLY < <(compgen -W "-h --help -v --version" "\${COMP_WORDS[1]}")',
       '}',
       '',
       'complete -F _$1_completions ${1:command}',
