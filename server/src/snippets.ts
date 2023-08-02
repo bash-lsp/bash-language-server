@@ -640,6 +640,18 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: '/dev/${1|null,stdin,stdout,stderr|}',
   },
   {
+    documentation: 'completion',
+    label: 'completion definition',
+    insertText: [
+      '_$1_completions()',
+      '{',
+      '\treadarray -t COMPREPLY < <(compgen -W "-h --help -v --version" "${COMP_WORDS[1]}")',
+      '}',
+      '',
+      'complete -F _$1_completions ${1:command}',
+    ].join('\n'),
+  },
+  {
     documentation: 'comment',
     label: 'comment definition',
     insertText: '# ${1:description}',
