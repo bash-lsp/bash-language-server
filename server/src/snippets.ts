@@ -3,7 +3,6 @@
  * - for Bash operators it's '<operator> operator'
  * - for Bash documentation it's 'documentation definition' or '"<documentation>" documentation definition'
  * - for Bash functions it's 'function definition' or '"<function>" function definition'
- * - for Bash builtins it's '"<builtin>" invocation'
  * - for Bash character classes it's any string with optional mnemonics depicted via square brackets
  * - for shell shebang it's 'shebang'
  * - for anything else it's any string
@@ -20,13 +19,8 @@
  *     used when expansion modifies variable or prints error to stderr
  *   - <expession> is 'if-(set|unset)[-or-[not-]null]'
  *   - term delimiter: dash, like 'set-if-unset-or-null'
- * - for Bash brace expansion it's 'range'
  * - for Bash documentation it's one of 'documentation'/'<documentation>'
  * - for Bash functions it's one of 'function'/'<function>'
- * - for Bash builtins it's '<builtin>'
- * - for Bash character classes it's '<character-class>'
- * - for Sed it's 'sed:<expression>'
- * - for Awk it's 'awk:<expression>'
  * - for anything else it's any string
  */
 import { CompletionItemKind, InsertTextFormat, MarkupKind } from 'vscode-languageserver'
