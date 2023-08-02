@@ -489,6 +489,53 @@ export const SNIPPETS: BashCompletionItem[] = [
     ].join('\n'),
   },
   {
+    documentation: 'block',
+    label: 'block',
+    insertText: [
+      '{',
+      '\t${1:command ...}',
+      '}',
+    ].join('\n'),
+  },
+  {
+    documentation: 'block redirected',
+    label: 'block-redirected',
+    insertText: [
+      '{',
+      '\t${1:command ...}',
+      '} > ${2:file}',
+    ].join('\n'),
+  },
+  {
+    documentation: 'block stderr redirected',
+    label: 'block-stderr-redirected',
+    insertText: [
+      '{',
+      '\t${1:command ...}',
+      '} 2> ${2:file}',
+    ].join('\n'),
+  },
+  {
+    documentation: 'variable',
+    label: 'variable',
+    insertText: 'declare ${1:variable}=${2:value}',
+  },
+  {
+    documentation: 'variable index',
+    label: 'variable-index',
+    insertText: '${1:variable}[${2:index}]=${3:value}',
+  },
+  {
+    documentation: 'variable append',
+    label: 'variable-append',
+    insertText: '${1:variable}+=${2:value}',
+  },
+  {
+    documentation: 'variable-prepend',
+    label: 'variable-prepend',
+    insertText: '${1:variable}=${2:value}\\$$1',
+  },
+  {
     documentation: 'if unset or null',
     label: 'if-unset-or-null',
     insertText: '"\\${${1:variable}:-${2:default}}"',
@@ -529,243 +576,61 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: '"\\${${1:variable}+${2:alternative}}"',
   },
   {
-    documentation: 'without shortest leading pattern',
-    label: 'without-shortest-leading-pattern',
+    documentation: 'string shortest leading replacement',
+    label: 'string-remove-leading',
     insertText: '"\\${${1:variable}#${2:pattern}}"',
   },
   {
-    documentation: 'without longest leading pattern',
-    label: 'without-longest-leading-pattern',
-    insertText: '"\\${${1:variable}##${2:pattern}}"',
-  },
-  {
-    documentation: 'without shortest trailing pattern',
-    label: 'without-shortest-trailing-pattern',
+    documentation: 'string shortest trailing replacement',
+    label: 'string-remove-trailing',
     insertText: '"\\${${1:variable}%${2:pattern}}"',
   },
   {
-    documentation: 'without longest trailing pattern',
-    label: 'without-longest-trailing-pattern',
-    insertText: '"\\${${1:variable}%%${2:pattern}}"',
+    documentation: 'string-match',
+    label: 'string filtering',
+    insertText: 'sed ${1|-E -n,--regexp-extended --quiet|} \'/${2:pattern}/p\'',
   },
   {
-    documentation: '.. expansion',
-    label: 'range',
-    insertText: '{${1:from}..${2:to}}',
+    documentation: 'string-replace',
+    label: 'string replacement',
+    insertText: 'sed ${1|-E,--regexp-extended|} \'s/${2:pattern}/${3:replacement}/\'',
   },
   {
-    documentation: '"echo" invocation',
-    label: 'echo',
-    insertText: 'echo "${1:message}"',
+    documentation: 'string-replace-all',
+    label: 'string replacement',
+    insertText: 'sed ${1|-E,--regexp-extended|} \'s/${2:pattern}/${3:replacement}/g\'',
   },
   {
-    documentation: '"printf" invocation',
-    label: 'printf',
+    documentation: 'string-transliterate',
+    label: 'string-transliterate',
     insertText:
-      'printf \'${1|%c,%s,%d,%f,%15c,%15s,%15d,%15f,%.5s,%.5d,%.5f|}\' "${2:message}"',
+      "sed ${1|-E,--regexp-extended|} 'y/${2:source-characters}/${3:replacement-characters}/g'",
   },
   {
-    documentation: '"source" invocation',
-    label: 'source',
-    insertText: '${1|source,.|} "${2:path/to/file}"',
+    documentation: 'file print',
+    label: 'file-print',
+    insertText: "sed '' ${1:file}",
   },
   {
-    documentation: '"alias" invocation',
-    label: 'alias',
-    insertText: 'alias ${1:name}=${2:value}',
-  },
-  {
-    documentation: '"cd" invocation',
-    label: 'cd',
-    insertText: 'cd "${1:path/to/directory}"',
-  },
-  {
-    documentation: '"getopts" invocation',
-    label: 'getopts',
-    insertText: 'getopts ${1:optstring} ${2:name}',
-  },
-  {
-    documentation: '"jobs" invocation',
-    label: 'jobs',
-    insertText: 'jobs -x ${1:command}',
-  },
-  {
-    documentation: '"kill" invocation',
-    label: 'kill',
-    insertText: 'kill ${1|-l,-L|}',
-  },
-  {
-    documentation: '"let" invocation',
-    label: 'let',
-    insertText: 'let ${1:argument}',
-  },
-  {
-    documentation: '"test" invocation',
-    label: 'test',
+    documentation: 'file read',
+    label: 'file-read',
     insertText:
-      '[[ ${1:argument1} ${2|-ef,-nt,-ot,==,=,!=,=~,<,>,-eq,-ne,-lt,-le,-gt,-ge|} ${3:argument2} ]]',
-  },
-  {
-    documentation: 'line print',
-    label: 'sed:print',
-    insertText: "sed '' ${1:path/to/file}",
-  },
-  {
-    documentation: 'line pattern filter',
-    label: 'sed:filter-by-line-pattern',
-    insertText:
-      "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '/${3:pattern}/p' ${4:path/to/file}",
-  },
-  {
-    documentation: 'line number filter',
-    label: 'sed:filter-by-line-number',
-    insertText:
-      "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '${3:number}p' ${4:path/to/file}",
-  },
-  {
-    documentation: 'line number filter',
-    label: 'sed:filter-by-line-numbers',
-    insertText:
-      "sed ${1|--regexp-extended,-E|} ${2|--quiet,-n|} '${3:from},${4:to}p' ${5:path/to/file}",
-  },
-  {
-    documentation: 'single replacement',
-    label: 'sed:replace-first',
-    insertText:
-      "sed ${1|--regexp-extended,-E|} 's/${2:pattern}/${3:replacement}/' ${4:path/to/file}",
-  },
-  {
-    documentation: 'global replacement',
-    label: 'sed:replace-all',
-    insertText:
-      "sed ${1|--regexp-extended,-E|} 's/${2:pattern}/${3:replacement}/g' ${4:path/to/file}",
-  },
-  {
-    documentation: 'transliteration',
-    label: 'sed:transliterate',
-    insertText:
-      "sed ${1|--regexp-extended,-E|} 'y/${2:source-characters}/${3:replacement-characters}/g' ${4:path/to/file}",
-  },
-  {
-    documentation: 'whole file read',
-    label: 'sed:read-all',
-    insertText:
-      "sed ${1|--regexp-extended,-E|} ':${2:x} N $! b$2 ${3:command}' ${4:path/to/file}",
-  },
-  {
-    documentation: 'line print',
-    label: 'awk:print',
-    insertText: "awk '/./' ${1:path/to/file}",
-  },
-  {
-    documentation: 'line pattern filter',
-    label: 'awk:filter-by-line-pattern',
-    insertText: "awk '/${1:pattern}/' ${2:path/to/file}",
-  },
-  {
-    documentation: 'line number filter',
-    label: 'awk:filter-by-line-number',
-    insertText: "awk 'NR == ${1:number}' ${2:path/to/file}",
-  },
-  {
-    documentation: 'line number filter',
-    label: 'awk:filter-by-line-numbers',
-    insertText: "awk 'NR >= ${1:from} && NR <= ${2:to}' ${3:path/to/file}",
-  },
-  {
-    documentation: 'single replacement',
-    label: 'awk:replace-first',
-    insertText: 'awk \'{ sub("${1:pattern}", "${2:replacement}") }\' ${3:path/to/file}',
-  },
-  {
-    documentation: 'global replacement',
-    label: 'awk:replace-all',
-    insertText: 'awk \'{ gsub("${1:pattern}", "${2:replacement}") }\' ${3:path/to/file}',
-  },
-  {
-    documentation: 'whole file read',
-    label: 'awk:read-all',
-    insertText: "awk RS='^$' '{ ${1:command} }' ${2:path/to/file}",
+      "sed ${1|-E,--regexp-extended|} ':${2:x} N $! b$2 ${3:command}' ${4:file}",
   },
   {
     documentation: 'node print',
-    label: 'jq:print',
-    insertText: "jq '.${1:path/to/node}' ${2:path/to/file}",
+    label: 'json',
+    insertText: "jq '.${1:node}' ${2:file}",
   },
   {
     documentation: 'node print',
-    label: 'yq:print',
-    insertText: "yq '.${1:path/to/node}' ${2:path/to/file}",
+    label: 'json',
+    insertText: "jq '.${1:node}' ${2:file}",
   },
   {
-    documentation: 'home directory',
-    label: '~',
-    insertText: '$HOME',
-  },
-  {
-    documentation: '[dev]ice name',
-    label: 'dev',
+    documentation: 'device',
+    label: 'device',
     insertText: '/dev/${1|null,stdin,stdout,stderr|}',
-  },
-  {
-    documentation: '[al]pha[num]eric characters',
-    label: 'alnum',
-    insertText: '[[:alnum:]]',
-  },
-  {
-    documentation: '[alpha]betic characters',
-    label: 'alpha',
-    insertText: '[[:alpha:]]',
-  },
-  {
-    documentation: '[blank] characters',
-    label: 'blank',
-    insertText: '[[:blank:]]',
-  },
-  {
-    documentation: '[c]o[nt]ro[l] characters',
-    label: 'cntrl',
-    insertText: '[[:cntrl:]]',
-  },
-  {
-    documentation: '[digit] characters',
-    label: 'digit',
-    insertText: '[[:digit:]]',
-  },
-  {
-    documentation: '[graph]ical characters',
-    label: 'graph',
-    insertText: '[[:graph:]]',
-  },
-  {
-    documentation: '[lower] characters',
-    label: 'lower',
-    insertText: '[[:lower:]]',
-  },
-  {
-    documentation: '[print]able characters',
-    label: 'print',
-    insertText: '[[:print:]]',
-  },
-  {
-    documentation: '[punct]uation characters',
-    label: 'punct',
-    insertText: '[[:punct:]]',
-  },
-  {
-    documentation: '[space] characters',
-    label: 'space',
-    insertText: '[[:space:]]',
-  },
-  {
-    documentation: '[upper] characters',
-    label: 'upper',
-    insertText: '[[:upper:]]',
-  },
-  {
-    documentation: 'hexadecimal characters',
-    label: 'xdigit',
-    insertText: '[[:xdigit:]]',
   },
 ].map((item) => ({
   ...item,
