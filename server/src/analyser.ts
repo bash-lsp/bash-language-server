@@ -308,14 +308,16 @@ export default class Analyzer {
         parent.lastChild
       ) {
         const functionBody = parent.lastChild
-        TreeSitterUtil.serialForEach(functionBody.children, (n) => {
+        TreeSitterUtil.breadthForEach(functionBody, (n) => {
           if (
             (originalDeclaration && !continueSearching) ||
-            n.startPosition.row > boundary ||
-            n.type === 'function_definition' ||
-            n.type === 'subshell'
+            n.startPosition.row > boundary
           ) {
-            return false
+            return { followChildren: false, stopBlock: true }
+          }
+
+          if (n.type === 'function_definition' || n.type === 'subshell') {
+            return { followChildren: false }
           }
 
           const isLocal =
@@ -326,17 +328,15 @@ export default class Analyzer {
             continueSearching = false
           }
 
-          return true
+          return { followChildren: true }
         })
       } else if (parent.type === 'subshell') {
-        TreeSitterUtil.serialForEach(parent.children, (n) => {
+        TreeSitterUtil.breadthForEach(parent, (n) => {
           if (
             (originalDeclaration && !continueSearching) ||
-            n.startPosition.row > boundary ||
-            n.type === 'function_definition' ||
-            n.type === 'subshell'
+            n.startPosition.row > boundary
           ) {
-            return false
+            return { followChildren: false, stopBlock: true }
           }
 
           let node: Parser.SyntaxNode | null | undefined
@@ -370,7 +370,11 @@ export default class Analyzer {
             continueSearching = n.type === 'command'
           }
 
-          return true
+          if (n.type === 'function_definition' || n.type === 'subshell') {
+            return { followChildren: false }
+          }
+
+          return { followChildren: true }
         })
       }
 
