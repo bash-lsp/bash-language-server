@@ -456,63 +456,75 @@ export default class Analyzer {
     return locations
   }
 
-  // TODO: Return more accurate results
+  // TODO: Handle non scoped occurrences
+  // TODO: Handle functions
   public findOccurrencesWithin(uri: string, scope: LSP.Range, word: string): LSP.Range[] {
     const baseNode = this.nodeAtPoints(
       uri,
       { line: scope.start.line, column: scope.start.character },
       { line: scope.end.line, column: scope.end.character },
     )
-    const ranges: LSP.Range[] = []
 
     if (!baseNode) {
-      return ranges
+      return []
     }
 
-    TreeSitterUtil.forEach(baseNode, (n) => {
-      let namedNode: Parser.SyntaxNode | null = null
+    const ignoredRanges: LSP.Range[] = []
 
-      if (TreeSitterUtil.isReference(n)) {
-        namedNode = n.firstNamedChild || n
-      } else if (TreeSitterUtil.isDefinition(n)) {
-        namedNode = n.firstNamedChild
-      }
+    // TODO: Handle these cases
+    // 1
+    // echo $var
+    // ...
+    // var="value"
+    // 2
+    // var="$var"
+    return baseNode
+      .descendantsOfType('variable_name')
+      .filter((n) => {
+        if (n.text !== word) {
+          return false
+        }
 
-      if (n !== baseNode && n.type === 'function_definition') {
-        for (const declaration of n.descendantsOfType('declaration_command')) {
-          const variableName = declaration.descendantsOfType('variable_name').at(0)?.text
+        const parentScope = this.findParentScopeNode(
+          uri,
+          { line: n.startPosition.row, column: n.startPosition.column },
+          { line: n.endPosition.row, column: n.endPosition.column },
+        )
 
-          if (variableName === word) {
-            return false
+        if (!parentScope || baseNode.equals(parentScope)) {
+          return true
+        }
+
+        const parentDeclaration = TreeSitterUtil.findParentOfType(
+          n,
+          parentScope.type === 'subshell' ? 'variable_assignment' : 'declaration_command',
+        )
+        const isVariableInIgnoredRange = ignoredRanges.some(
+          (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
+        )
+
+        if (!parentDeclaration) {
+          return !isVariableInIgnoredRange
+        }
+
+        const isLocalDeclaration =
+          parentScope.type === 'subshell'
+            ? !!parentDeclaration
+            : ['local', 'declare', 'typeset'].includes(
+                parentDeclaration.firstChild?.text ?? '',
+              )
+
+        if (isLocalDeclaration) {
+          if (!isVariableInIgnoredRange) {
+            ignoredRanges.push(TreeSitterUtil.range(parentScope))
           }
+
+          return false
         }
-      }
 
-      if (n !== baseNode && n.type === 'subshell') {
-        for (const declaration of n.descendantsOfType([
-          'variable_assignment',
-          'function_definition',
-        ])) {
-          const name = declaration.firstNamedChild?.text
-
-          if (name === word) {
-            return false
-          }
-        }
-      }
-
-      if (namedNode && namedNode.text === word) {
-        const range = TreeSitterUtil.range(namedNode)
-
-        if (!ranges.some((r) => isDeepStrictEqual(r, range))) {
-          ranges.push(range)
-        }
-      }
-
-      return true
-    })
-
-    return ranges
+        return true
+      })
+      .map((n) => TreeSitterUtil.range(n))
   }
 
   public findParentScope(

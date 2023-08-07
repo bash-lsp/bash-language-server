@@ -104,3 +104,7 @@ export function findParent(
   }
   return null
 }
+
+export function findParentOfType(start: SyntaxNode, type: string) {
+  return findParent(start, (n) => n.type === type)
+}
