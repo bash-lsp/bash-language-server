@@ -458,7 +458,12 @@ export default class Analyzer {
 
   // TODO: Handle non scoped occurrences
   // TODO: Handle functions
-  public findOccurrencesWithin(uri: string, scope: LSP.Range, word: string): LSP.Range[] {
+  public findOccurrencesWithin(
+    uri: string,
+    word: string,
+    start: LSP.Position,
+    scope: LSP.Range,
+  ): LSP.Range[] {
     const baseNode = this.nodeAtPoints(
       uri,
       { line: scope.start.line, column: scope.start.character },
@@ -471,15 +476,9 @@ export default class Analyzer {
 
     const ignoredRanges: LSP.Range[] = []
 
-    // TODO: Handle these cases
-    // 1
-    // echo $var
-    // ...
-    // var="value"
-    // 2
-    // var="$var"
+    // TODO: Handle var="$var" cases
     return baseNode
-      .descendantsOfType('variable_name')
+      .descendantsOfType('variable_name', { row: start.line, column: start.character })
       .filter((n) => {
         if (n.text !== word) {
           return false

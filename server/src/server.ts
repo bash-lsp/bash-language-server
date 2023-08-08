@@ -816,8 +816,9 @@ export default class BashServer {
     if (parentScope && parentScope.type !== renamable.type) {
       const ranges = this.analyzer.findOccurrencesWithin(
         params.textDocument.uri,
-        parentScope.range,
         renamable.word,
+        declaration.range.start,
+        parentScope.range,
       )
 
       return <LSP.WorkspaceEdit>{
