@@ -275,6 +275,9 @@ export default class Analyzer {
     })
   }
 
+  /**
+   * Find a symbol's original declaration with respect to its scope.
+   */
   public findOriginalDeclaration({
     position,
     uri,
@@ -294,11 +297,7 @@ export default class Analyzer {
 
     let originalDeclaration: Parser.SyntaxNode | null | undefined
 
-    let parent = this.findParentScopeNode(
-      uri,
-      { line: node.startPosition.row, column: node.startPosition.column },
-      { line: node.endPosition.row, column: node.endPosition.column },
-    )
+    let parent = this.findParentScopeNode(uri, node.startPosition, node.endPosition)
     let continueSearching = false
     let boundary = position.line
     while (parent) {
@@ -383,11 +382,7 @@ export default class Analyzer {
       }
 
       boundary = parent.startPosition.row
-      parent = this.findParentScopeNode(
-        uri,
-        { line: parent.startPosition.row, column: parent.startPosition.column },
-        { line: parent.endPosition.row, column: parent.endPosition.column },
-      )
+      parent = this.findParentScopeNode(uri, parent.startPosition, parent.endPosition)
     }
 
     // TODO: Handle global definitions
@@ -458,16 +453,21 @@ export default class Analyzer {
 
   // TODO: Handle non scoped occurrences
   // TODO: Handle functions
-  public findOccurrencesWithin(
-    uri: string,
-    word: string,
-    start: LSP.Position,
-    scope: LSP.Range,
-  ): LSP.Range[] {
+  public findOccurrencesWithin({
+    uri,
+    word,
+    start,
+    scope,
+  }: {
+    uri: string
+    word: string
+    start: LSP.Position
+    scope: LSP.Range
+  }): LSP.Range[] {
     const baseNode = this.nodeAtPoints(
       uri,
-      { line: scope.start.line, column: scope.start.character },
-      { line: scope.end.line, column: scope.end.character },
+      { row: scope.start.line, column: scope.start.character },
+      { row: scope.end.line, column: scope.end.character },
     )
 
     if (!baseNode) {
@@ -484,11 +484,7 @@ export default class Analyzer {
           return false
         }
 
-        const parentScope = this.findParentScopeNode(
-          uri,
-          { line: n.startPosition.row, column: n.startPosition.column },
-          { line: n.endPosition.row, column: n.endPosition.column },
-        )
+        const parentScope = this.findParentScopeNode(uri, n.startPosition, n.endPosition)
 
         if (!parentScope || baseNode.equals(parentScope)) {
           return true
@@ -526,20 +522,27 @@ export default class Analyzer {
       .map((n) => TreeSitterUtil.range(n))
   }
 
+  /**
+   * Find the parent function or subshell scope of the given range.
+   */
   public findParentScope(
     uri: string,
-    start: { line: number; column: number },
-    end: { line: number; column: number },
-  ): { type: 'subshell' | 'function'; range: LSP.Range } | null {
-    const parent = this.findParentScopeNode(uri, start, end)
+    start: LSP.Position,
+    end: LSP.Position,
+  ): { range: LSP.Range; type: 'function' | 'subshell' } | null {
+    const parent = this.findParentScopeNode(
+      uri,
+      { row: start.line, column: start.character },
+      { row: end.line, column: end.character },
+    )
 
     if (!parent) {
       return null
     }
 
     return {
-      type: parent.type === 'subshell' ? 'subshell' : 'function',
       range: TreeSitterUtil.range(parent),
+      type: parent.type === 'function_definition' ? 'function' : 'subshell',
     }
   }
 
@@ -736,10 +739,7 @@ export default class Analyzer {
     )
   }
 
-  /**
-   * Find a possibly renamable word at the given text position.
-   */
-  public renamableAtPointFromTextPosition(
+  public symbolAtPointFromTextPosition(
     params: LSP.TextDocumentPositionParams,
   ): { word: string; range: LSP.Range; type: 'variable' | 'function' } | null {
     const node = this.nodeAtPoint(
@@ -760,7 +760,7 @@ export default class Analyzer {
           node.parent.type === 'command_name'))
     ) {
       return {
-        word: node.text.trim(),
+        word: node.text,
         range: TreeSitterUtil.range(node),
         type: node.type === 'variable_name' ? 'variable' : 'function',
       }
@@ -918,8 +918,8 @@ export default class Analyzer {
 
   private findParentScopeNode(
     uri: string,
-    start: { line: number; column: number },
-    end: { line: number; column: number },
+    start: Parser.Point,
+    end: Parser.Point,
   ): Parser.SyntaxNode | null {
     const node = this.nodeAtPoints(uri, start, end)
 
@@ -961,8 +961,8 @@ export default class Analyzer {
 
   private nodeAtPoints(
     uri: string,
-    start: { line: number; column: number },
-    end: { line: number; column: number },
+    start: Parser.Point,
+    end: Parser.Point,
   ): Parser.SyntaxNode | null {
     const rootNode = this.uriToAnalyzedDocument[uri]?.tree?.rootNode
 
@@ -970,9 +970,6 @@ export default class Analyzer {
       return null
     }
 
-    return rootNode.descendantForPosition(
-      { row: start.line, column: start.column },
-      { row: end.line, column: end.column },
-    )
+    return rootNode.descendantForPosition(start, end)
   }
 }

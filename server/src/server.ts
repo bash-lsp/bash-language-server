@@ -726,67 +726,67 @@ export default class BashServer {
   }
 
   private onPrepareRename(params: LSP.PrepareRenameParams): LSP.Range | null {
-    const renamable = this.analyzer.renamableAtPointFromTextPosition(params)
-    this.logRequest({ request: 'onPrepareRename', params, word: renamable?.word })
+    const symbol = this.analyzer.symbolAtPointFromTextPosition(params)
+    this.logRequest({ request: 'onPrepareRename', params, word: symbol?.word })
 
     if (
-      !renamable ||
-      (renamable.type === 'variable' &&
-        (renamable.word === '_' || !/^[a-z_][\w]*$/i.test(renamable.word)))
+      !symbol ||
+      (symbol.type === 'variable' &&
+        (symbol.word === '_' || !/^[a-z_][\w]*$/i.test(symbol.word)))
     ) {
       return null
     }
 
-    if (Builtins.isBuiltin(renamable.word)) {
+    if (Builtins.isBuiltin(symbol.word)) {
       this.throwResponseError('You cannot rename a built-in command.')
     }
 
-    if (this.executables.isExecutableOnPATH(renamable.word)) {
+    if (this.executables.isExecutableOnPATH(symbol.word)) {
       this.throwResponseError('You cannot rename an executable.')
     }
 
-    if (ReservedWords.isReservedWord(renamable.word)) {
+    if (ReservedWords.isReservedWord(symbol.word)) {
       this.throwResponseError('You cannot rename a reserved word.')
     }
 
-    return renamable.range
+    return symbol.range
   }
 
   private onRenameRequest(params: LSP.RenameParams): LSP.WorkspaceEdit | null {
-    const renamable = this.analyzer.renamableAtPointFromTextPosition(params)
-    this.logRequest({ request: 'onRenameRequest', params, word: renamable?.word })
+    const symbol = this.analyzer.symbolAtPointFromTextPosition(params)
+    this.logRequest({ request: 'onRenameRequest', params, word: symbol?.word })
 
     if (
-      !renamable ||
-      Builtins.isBuiltin(renamable.word) ||
-      this.executables.isExecutableOnPATH(renamable.word) ||
-      ReservedWords.isReservedWord(renamable.word)
+      !symbol ||
+      Builtins.isBuiltin(symbol.word) ||
+      this.executables.isExecutableOnPATH(symbol.word) ||
+      ReservedWords.isReservedWord(symbol.word)
     ) {
       return null
     }
 
     if (
-      renamable.type === 'variable' &&
+      symbol.type === 'variable' &&
       (params.newName === '_' || !/^[a-z_][\w]*$/i.test(params.newName))
     ) {
       this.throwResponseError('Invalid variable name given.')
     }
 
-    if (renamable.type === 'function' && params.newName.includes('$')) {
+    if (symbol.type === 'function' && params.newName.includes('$')) {
       this.throwResponseError('Invalid function name given.')
     }
 
     const declaration = this.analyzer.findOriginalDeclaration({
       position: params.position,
       uri: params.textDocument.uri,
-      word: renamable.word,
-      type: renamable.type,
+      word: symbol.word,
+      type: symbol.type,
     })
 
     if (!declaration) {
       const locations = this.analyzer.findOccurrences(
         params.textDocument.uri,
-        renamable.word,
+        symbol.word,
       )
 
       return <LSP.WorkspaceEdit>{
@@ -802,24 +802,18 @@ export default class BashServer {
     const parentScope = declaration
       ? this.analyzer.findParentScope(
           params.textDocument.uri,
-          {
-            line: declaration.range.start.line,
-            column: declaration.range.start.character,
-          },
-          {
-            line: declaration.range.end.line,
-            column: declaration.range.end.character,
-          },
+          declaration.range.start,
+          declaration.range.end,
         )
       : null
 
-    if (parentScope && parentScope.type !== renamable.type) {
-      const ranges = this.analyzer.findOccurrencesWithin(
-        params.textDocument.uri,
-        renamable.word,
-        declaration.range.start,
-        parentScope.range,
-      )
+    if (parentScope && parentScope.type !== symbol.type) {
+      const ranges = this.analyzer.findOccurrencesWithin({
+        uri: params.textDocument.uri,
+        word: symbol.word,
+        start: declaration.range.start,
+        scope: parentScope.range,
+      })
 
       return <LSP.WorkspaceEdit>{
         changes: {
