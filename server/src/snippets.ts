@@ -640,7 +640,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: '/dev/${1|null,stdin,stdout,stderr|}',
   },
   {
-    label: 'option-parse',
+    label: 'parse',
     documentation: 'option parsing',
     insertText: [
       'while getopts "hv${1:single-letter-options}" ${2:option}; do',
@@ -659,7 +659,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     ].join('\n'),
   },
   {
-    label: 'option-manual-parse',
+    label: 'manual-parse',
     documentation: 'manual option parsing',
     insertText: [
       'while [[ -n "\\$1" ]]; do',
