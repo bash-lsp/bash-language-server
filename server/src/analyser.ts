@@ -297,7 +297,6 @@ export default class Analyzer {
 
     let originalDeclaration: Parser.SyntaxNode | null | undefined
 
-    // TODO: Handle var="$var" cases
     let parent = this.findParentScopeNode(uri, node.startPosition, node.endPosition)
     let continueSearching = false
     let boundary = position.line
@@ -318,12 +317,22 @@ export default class Analyzer {
             return false
           }
 
-          const isLocal =
-            n.firstChild && ['local', 'declare', 'typeset'].includes(n.firstChild.text)
-          const variable = n.descendantsOfType('variable_name').at(0)
-          if (n.type === 'declaration_command' && isLocal && variable?.text === word) {
-            originalDeclaration = variable
-            continueSearching = false
+          if (n.type === 'declaration_command') {
+            const isLocal = ['local', 'declare', 'typeset'].includes(
+              n.firstChild?.text ?? '',
+            )
+            const firstInstance = n.descendantsOfType('variable_name').at(0)
+            const instanceInExpression =
+              n.endPosition.row >= position.line &&
+              firstInstance &&
+              (firstInstance.endPosition.column < position.character ||
+                firstInstance.endPosition.row < position.line)
+            if (isLocal && firstInstance?.text === word && !instanceInExpression) {
+              originalDeclaration = firstInstance
+              continueSearching = false
+            }
+
+            return false
           }
 
           return true
@@ -339,32 +348,26 @@ export default class Analyzer {
           }
 
           let node: Parser.SyntaxNode | null | undefined
-          let nodeText: string | undefined
 
-          switch (type) {
-            case 'variable':
-              if (
-                n.type === 'declaration_command' ||
-                n.type === 'for_statement' ||
-                (n.type === 'command' && n.text.includes(':='))
-              ) {
-                node = n.descendantsOfType('variable_name').at(0)
-                nodeText = node?.text
-              } else if (n.type === 'variable_assignment') {
-                node = n.firstNamedChild
-                nodeText = node?.text
-              }
-              break
-
-            case 'function':
-              if (n.type === 'function_definition') {
-                node = n.firstNamedChild
-                nodeText = node?.text
-              }
-              break
+          if (
+            type === 'variable' &&
+            (n.type === 'declaration_command' ||
+              n.type === 'variable_assignment' ||
+              n.type === 'for_statement' ||
+              (n.type === 'command' && n.text.includes(':=')))
+          ) {
+            node = n.descendantsOfType('variable_name').at(0)
+          } else if (type === 'function' && n.type === 'function_definition') {
+            node = n.firstNamedChild
           }
 
-          if (nodeText === word) {
+          const instanceInExpression =
+            type === 'variable' &&
+            n.endPosition.row >= position.line &&
+            node &&
+            (node.endPosition.column < position.character ||
+              node.endPosition.row < position.line)
+          if (node?.text === word && !instanceInExpression) {
             originalDeclaration = node
             continueSearching = n.type === 'command'
           }
