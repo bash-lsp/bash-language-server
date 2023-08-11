@@ -308,16 +308,14 @@ export default class Analyzer {
         parent.lastChild
       ) {
         const functionBody = parent.lastChild
-        TreeSitterUtil.breadthForEach(functionBody, (n) => {
+        TreeSitterUtil.forEach(functionBody, (n) => {
           if (
             (originalDeclaration && !continueSearching) ||
-            n.startPosition.row > boundary
+            n.startPosition.row > boundary ||
+            n.type === 'function_definition' ||
+            n.type === 'subshell'
           ) {
-            return { followChildren: false, stopBlock: true }
-          }
-
-          if (n.type === 'function_definition' || n.type === 'subshell') {
-            return { followChildren: false }
+            return false
           }
 
           const isLocal =
@@ -328,15 +326,16 @@ export default class Analyzer {
             continueSearching = false
           }
 
-          return { followChildren: true }
+          return true
         })
       } else if (parent.type === 'subshell') {
-        TreeSitterUtil.breadthForEach(parent, (n) => {
+        TreeSitterUtil.forEach(parent, (n) => {
           if (
             (originalDeclaration && !continueSearching) ||
-            n.startPosition.row > boundary
+            n.startPosition.row > boundary ||
+            (n.type === 'subshell' && !parent?.equals(n))
           ) {
-            return { followChildren: false, stopBlock: true }
+            return false
           }
 
           let node: Parser.SyntaxNode | null | undefined
@@ -370,11 +369,11 @@ export default class Analyzer {
             continueSearching = n.type === 'command'
           }
 
-          if (n.type === 'function_definition' || n.type === 'subshell') {
-            return { followChildren: false }
+          if (n.type === 'function_definition') {
+            return false
           }
 
-          return { followChildren: true }
+          return true
         })
       }
 
