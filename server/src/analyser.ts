@@ -297,6 +297,7 @@ export default class Analyzer {
 
     let originalDeclaration: Parser.SyntaxNode | null | undefined
 
+    // TODO: Handle var="$var" cases
     let parent = this.findParentScopeNode(uri, node.startPosition, node.endPosition)
     let continueSearching = false
     let boundary = position.line
@@ -476,7 +477,6 @@ export default class Analyzer {
 
     const ignoredRanges: LSP.Range[] = []
 
-    // TODO: Handle var="$var" cases
     return baseNode
       .descendantsOfType('variable_name', { row: start.line, column: start.character })
       .filter((n) => {
@@ -485,32 +485,50 @@ export default class Analyzer {
         }
 
         const parentScope = this.findParentScopeNode(uri, n.startPosition, n.endPosition)
+        const parentDeclaration = TreeSitterUtil.findParentOfType(
+          n,
+          parentScope?.type === 'function_definition'
+            ? 'declaration_command'
+            : 'variable_assignment',
+        )
+        const firstInstance = parentDeclaration?.descendantsOfType('variable_name')?.at(0)
+
+        // Special handling for var="$var" cases
+        if (firstInstance?.text === word && !n.equals(firstInstance)) {
+          // `start.line` is assumed to be the same as the variable's original
+          // declaration line.
+          if (parentDeclaration?.startPosition.row === start.line) {
+            return false
+          }
+
+          // Returning true here is a good enough heuristic for most cases. It
+          // breaks down when redeclaration happens in multiple nested scopes,
+          // handling those more complex situations can be done later on if use
+          // cases arise.
+          return true
+        }
 
         if (!parentScope || baseNode.equals(parentScope)) {
           return true
         }
 
-        const parentDeclaration = TreeSitterUtil.findParentOfType(
-          n,
-          parentScope.type === 'subshell' ? 'variable_assignment' : 'declaration_command',
-        )
-        const isVariableInIgnoredRange = ignoredRanges.some(
+        const includeInstance = !ignoredRanges.some(
           (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
         )
 
         if (!parentDeclaration) {
-          return !isVariableInIgnoredRange
+          return includeInstance
         }
 
         const isLocalDeclaration =
-          parentScope.type === 'subshell'
+          firstInstance?.text === word &&
+          (parentScope.type === 'subshell'
             ? !!parentDeclaration
             : ['local', 'declare', 'typeset'].includes(
                 parentDeclaration.firstChild?.text ?? '',
-              )
-
+              ))
         if (isLocalDeclaration) {
-          if (!isVariableInIgnoredRange) {
+          if (includeInstance) {
             ignoredRanges.push(TreeSitterUtil.range(parentScope))
           }
 
