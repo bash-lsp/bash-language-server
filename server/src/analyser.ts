@@ -322,6 +322,7 @@ export default class Analyzer {
               n.firstChild?.text ?? '',
             )
             const firstInstance = n.descendantsOfType('variable_name').at(0)
+            // Check for var="$var" cases
             const instanceInExpression =
               n.endPosition.row >= position.line &&
               firstInstance &&
@@ -361,6 +362,7 @@ export default class Analyzer {
             node = n.firstNamedChild
           }
 
+          // Check for var="$var" cases
           const instanceInExpression =
             type === 'variable' &&
             n.endPosition.row >= position.line &&
@@ -390,8 +392,8 @@ export default class Analyzer {
 
     // TODO: Handle global definitions
 
-    // TODO: Return LSP.SymbolInformation to help differentiate between local
-    // and global definitions using .containerName
+    // TODO: Find a way to return something that differentiates between local
+    // and global definitions
     return originalDeclaration
       ? LSP.Location.create(uri, TreeSitterUtil.range(originalDeclaration))
       : null
@@ -455,91 +457,144 @@ export default class Analyzer {
   }
 
   // TODO: Handle non scoped occurrences
-  // TODO: Handle functions
   public findOccurrencesWithin({
     uri,
     word,
+    type,
     start,
     scope,
   }: {
     uri: string
     word: string
+    type: 'variable' | 'function'
     start: LSP.Position
     scope: LSP.Range
   }): LSP.Range[] {
-    const baseNode = this.nodeAtPoints(
+    const rootNode = this.uriToAnalyzedDocument[uri]?.tree.rootNode
+    const scopeNode = this.nodeAtPoints(
       uri,
       { row: scope.start.line, column: scope.start.character },
       { row: scope.end.line, column: scope.end.character },
     )
+    const baseNode =
+      type === 'variable' || scopeNode?.type === 'subshell' ? scopeNode : rootNode
 
     if (!baseNode) {
       return []
     }
 
+    const typeOfDescendants =
+      type === 'variable' ? 'variable_name' : ['function_definition', 'command_name']
+
     const ignoredRanges: LSP.Range[] = []
+    const filter =
+      type === 'variable'
+        ? (n: Parser.SyntaxNode) => {
+            if (n.text !== word) {
+              return false
+            }
+
+            const parentScope = this.findParentScopeNode(
+              uri,
+              n.startPosition,
+              n.endPosition,
+            )
+            const parentDeclaration = TreeSitterUtil.findParentOfType(
+              n,
+              parentScope?.type === 'function_definition'
+                ? 'declaration_command'
+                : 'variable_assignment',
+            )
+            const firstInstance = parentDeclaration
+              ?.descendantsOfType('variable_name')
+              ?.at(0)
+
+            // Special handling for var="$var" cases
+            if (firstInstance?.text === word && !n.equals(firstInstance)) {
+              // `start.line` is assumed to be the same as the variable's
+              // original declaration line.
+              if (parentDeclaration?.startPosition.row === start.line) {
+                return false
+              }
+
+              // Returning true here is a good enough heuristic for most cases.
+              // It breaks down when redeclaration happens in multiple nested
+              // scopes, handling those more complex situations can be done
+              // later on if use cases arise.
+              return true
+            }
+
+            if (!parentScope || baseNode.equals(parentScope)) {
+              return true
+            }
+
+            const includeInstance = !ignoredRanges.some(
+              (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
+            )
+
+            if (!parentDeclaration) {
+              return includeInstance
+            }
+
+            const isLocalDeclaration =
+              firstInstance?.text === word &&
+              (parentScope.type === 'subshell'
+                ? !!parentDeclaration
+                : ['local', 'declare', 'typeset'].includes(
+                    parentDeclaration.firstChild?.text ?? '',
+                  ))
+            if (isLocalDeclaration) {
+              if (includeInstance) {
+                ignoredRanges.push(TreeSitterUtil.range(parentScope))
+              }
+
+              return false
+            }
+
+            return true
+          }
+        : (n: Parser.SyntaxNode) => {
+            const text =
+              n.type === 'function_definition' ? n.firstNamedChild?.text : n.text
+            if (text !== word) {
+              return false
+            }
+
+            const parentScope = TreeSitterUtil.findParentOfType(n, 'subshell')
+
+            if (!parentScope || baseNode.equals(parentScope)) {
+              return true
+            }
+
+            const includeInstance = !ignoredRanges.some(
+              (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
+            )
+
+            if (n.type === 'command_name') {
+              return includeInstance
+            }
+
+            if (n.type === 'function_definition') {
+              if (includeInstance) {
+                ignoredRanges.push(TreeSitterUtil.range(parentScope))
+              }
+
+              return false
+            }
+
+            return true
+          }
 
     return baseNode
-      .descendantsOfType('variable_name', { row: start.line, column: start.character })
-      .filter((n) => {
-        if (n.text !== word) {
-          return false
+      .descendantsOfType(typeOfDescendants, { row: start.line, column: start.character })
+      .filter(filter)
+      .map((n) => {
+        if (n.type === 'function_definition' && n.firstNamedChild) {
+          return TreeSitterUtil.range(n.firstNamedChild)
         }
 
-        const parentScope = this.findParentScopeNode(uri, n.startPosition, n.endPosition)
-        const parentDeclaration = TreeSitterUtil.findParentOfType(
-          n,
-          parentScope?.type === 'function_definition'
-            ? 'declaration_command'
-            : 'variable_assignment',
-        )
-        const firstInstance = parentDeclaration?.descendantsOfType('variable_name')?.at(0)
-
-        // Special handling for var="$var" cases
-        if (firstInstance?.text === word && !n.equals(firstInstance)) {
-          // `start.line` is assumed to be the same as the variable's original
-          // declaration line.
-          if (parentDeclaration?.startPosition.row === start.line) {
-            return false
-          }
-
-          // Returning true here is a good enough heuristic for most cases. It
-          // breaks down when redeclaration happens in multiple nested scopes,
-          // handling those more complex situations can be done later on if use
-          // cases arise.
-          return true
-        }
-
-        if (!parentScope || baseNode.equals(parentScope)) {
-          return true
-        }
-
-        const includeInstance = !ignoredRanges.some(
-          (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
-        )
-
-        if (!parentDeclaration) {
-          return includeInstance
-        }
-
-        const isLocalDeclaration =
-          firstInstance?.text === word &&
-          (parentScope.type === 'subshell'
-            ? !!parentDeclaration
-            : ['local', 'declare', 'typeset'].includes(
-                parentDeclaration.firstChild?.text ?? '',
-              ))
-        if (isLocalDeclaration) {
-          if (includeInstance) {
-            ignoredRanges.push(TreeSitterUtil.range(parentScope))
-          }
-
-          return false
-        }
-
-        return true
+        return TreeSitterUtil.range(n)
       })
-      .map((n) => TreeSitterUtil.range(n))
   }
 
   /**
@@ -984,7 +1039,7 @@ export default class Analyzer {
     start: Parser.Point,
     end: Parser.Point,
   ): Parser.SyntaxNode | null {
-    const rootNode = this.uriToAnalyzedDocument[uri]?.tree?.rootNode
+    const rootNode = this.uriToAnalyzedDocument[uri]?.tree.rootNode
 
     if (!rootNode) {
       return null

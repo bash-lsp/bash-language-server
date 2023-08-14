@@ -799,18 +799,25 @@ export default class BashServer {
       }
     }
 
-    const parentScope = declaration
-      ? this.analyzer.findParentScope(
-          params.textDocument.uri,
-          declaration.range.start,
-          declaration.range.end,
-        )
-      : null
-
-    if (parentScope && parentScope.type !== symbol.type) {
+    let parentScope = this.analyzer.findParentScope(
+      params.textDocument.uri,
+      declaration.range.start,
+      declaration.range.end,
+    )
+    // If the symbol is a function, `parentScope` should be a subshell not the
+    // function definition itself.
+    if (parentScope?.type === symbol.type) {
+      parentScope = this.analyzer.findParentScope(
+        params.textDocument.uri,
+        parentScope.range.start,
+        parentScope.range.end,
+      )
+    }
+    if (parentScope) {
       const ranges = this.analyzer.findOccurrencesWithin({
         uri: params.textDocument.uri,
         word: symbol.word,
+        type: symbol.type,
         start: declaration.range.start,
         scope: parentScope.range,
       })
