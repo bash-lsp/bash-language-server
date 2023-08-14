@@ -784,15 +784,16 @@ export default class BashServer {
     })
 
     if (!declaration) {
-      const locations = this.analyzer.findOccurrences(
-        params.textDocument.uri,
-        symbol.word,
-      )
+      const ranges = this.analyzer.findOccurrencesWithin({
+        uri: params.textDocument.uri,
+        word: symbol.word,
+        type: symbol.type,
+      })
 
       return <LSP.WorkspaceEdit>{
         changes: {
-          [params.textDocument.uri]: locations.map((location) => ({
-            range: location.range,
+          [params.textDocument.uri]: ranges.map((range) => ({
+            range,
             newText: params.newName,
           })),
         },

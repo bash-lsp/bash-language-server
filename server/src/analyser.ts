@@ -456,7 +456,9 @@ export default class Analyzer {
     return locations
   }
 
-  // TODO: Handle non scoped occurrences
+  /**
+   * A more scope-aware version of findOccurrences.
+   */
   public findOccurrencesWithin({
     uri,
     word,
@@ -467,17 +469,20 @@ export default class Analyzer {
     uri: string
     word: string
     type: 'variable' | 'function'
-    start: LSP.Position
-    scope: LSP.Range
+    start?: LSP.Position
+    scope?: LSP.Range
   }): LSP.Range[] {
-    const rootNode = this.uriToAnalyzedDocument[uri]?.tree.rootNode
-    const scopeNode = this.nodeAtPoints(
-      uri,
-      { row: scope.start.line, column: scope.start.character },
-      { row: scope.end.line, column: scope.end.character },
-    )
+    const scopeNode = scope
+      ? this.nodeAtPoints(
+          uri,
+          { row: scope.start.line, column: scope.start.character },
+          { row: scope.end.line, column: scope.end.character },
+        )
+      : null
     const baseNode =
-      type === 'variable' || scopeNode?.type === 'subshell' ? scopeNode : rootNode
+      scopeNode && (type === 'variable' || scopeNode.type === 'subshell')
+        ? scopeNode
+        : this.uriToAnalyzedDocument[uri]?.tree.rootNode
 
     if (!baseNode) {
       return []
@@ -485,6 +490,9 @@ export default class Analyzer {
 
     const typeOfDescendants =
       type === 'variable' ? 'variable_name' : ['function_definition', 'command_name']
+    const startPosition = start
+      ? { row: start.line, column: start.character }
+      : baseNode.startPosition
 
     const ignoredRanges: LSP.Range[] = []
     const filter =
@@ -511,9 +519,9 @@ export default class Analyzer {
 
             // Special handling for var="$var" cases
             if (firstInstance?.text === word && !n.equals(firstInstance)) {
-              // `start.line` is assumed to be the same as the variable's
+              // `start?.line` is assumed to be the same as the variable's
               // original declaration line.
-              if (parentDeclaration?.startPosition.row === start.line) {
+              if (parentDeclaration?.startPosition.row === start?.line) {
                 return false
               }
 
@@ -586,7 +594,7 @@ export default class Analyzer {
           }
 
     return baseNode
-      .descendantsOfType(typeOfDescendants, { row: start.line, column: start.character })
+      .descendantsOfType(typeOfDescendants, startPosition)
       .filter(filter)
       .map((n) => {
         if (n.type === 'function_definition' && n.firstNamedChild) {
