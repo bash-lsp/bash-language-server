@@ -365,6 +365,7 @@ export default class Analyzer {
           // Check for var="$var" cases
           const instanceInExpression =
             type === 'variable' &&
+            n.type !== 'for_statement' &&
             n.endPosition.row >= position.line &&
             node &&
             (node.endPosition.column < position.character ||
