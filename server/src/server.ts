@@ -737,18 +737,6 @@ export default class BashServer {
       return null
     }
 
-    if (Builtins.isBuiltin(symbol.word)) {
-      this.throwResponseError('You cannot rename a built-in command.')
-    }
-
-    if (this.executables.isExecutableOnPATH(symbol.word)) {
-      this.throwResponseError('You cannot rename an executable.')
-    }
-
-    if (ReservedWords.isReservedWord(symbol.word)) {
-      this.throwResponseError('You cannot rename a reserved word.')
-    }
-
     return symbol.range
   }
 
@@ -756,12 +744,7 @@ export default class BashServer {
     const symbol = this.analyzer.symbolAtPointFromTextPosition(params)
     this.logRequest({ request: 'onRenameRequest', params, word: symbol?.word })
 
-    if (
-      !symbol ||
-      Builtins.isBuiltin(symbol.word) ||
-      this.executables.isExecutableOnPATH(symbol.word) ||
-      ReservedWords.isReservedWord(symbol.word)
-    ) {
+    if (!symbol) {
       return null
     }
 
@@ -805,8 +788,8 @@ export default class BashServer {
       declaration.range.start,
       declaration.range.end,
     )
-    // If the symbol is a function, `parentScope` should be a subshell not the
-    // function definition itself.
+    // If the symbol is a function, `parentScope` should be a parent function or
+    // a subshell, not the function definition itself.
     if (parentScope?.type === symbol.type) {
       parentScope = this.analyzer.findParentScope(
         params.textDocument.uri,
