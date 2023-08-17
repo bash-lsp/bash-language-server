@@ -297,7 +297,7 @@ export default class Analyzer {
 
     let originalDeclaration: Parser.SyntaxNode | null | undefined
 
-    let parent = this.findParentScopeNode(uri, node.startPosition, node.endPosition)
+    let parent = this.findParentScopeNode(node)
     let continueSearching = false
     let boundary = position.line
     while (parent) {
@@ -388,7 +388,7 @@ export default class Analyzer {
       }
 
       boundary = parent.startPosition.row
-      parent = this.findParentScopeNode(uri, parent.startPosition, parent.endPosition)
+      parent = this.findParentScopeNode(parent)
     }
 
     // TODO: Handle global definitions
@@ -503,11 +503,7 @@ export default class Analyzer {
               return false
             }
 
-            const parentScope = this.findParentScopeNode(
-              uri,
-              n.startPosition,
-              n.endPosition,
-            )
+            const parentScope = this.findParentScopeNode(n)
             const parentDeclaration = TreeSitterUtil.findParentOfType(
               n,
               parentScope?.type === 'function_definition'
@@ -614,11 +610,17 @@ export default class Analyzer {
     start: LSP.Position,
     end: LSP.Position,
   ): { range: LSP.Range; type: 'function' | 'subshell' } | null {
-    const parent = this.findParentScopeNode(
+    const node = this.nodeAtPoints(
       uri,
       { row: start.line, column: start.character },
       { row: end.line, column: end.character },
     )
+
+    if (!node) {
+      return null
+    }
+
+    const parent = this.findParentScopeNode(node)
 
     if (!parent) {
       return null
@@ -1000,29 +1002,16 @@ export default class Analyzer {
     return allSourcedUris
   }
 
-  private findParentScopeNode(
-    uri: string,
-    start: Parser.Point,
-    end: Parser.Point,
-  ): Parser.SyntaxNode | null {
-    const node = this.nodeAtPoints(uri, start, end)
-
-    if (!node) {
-      return null
-    }
-
-    const parent = TreeSitterUtil.findParent(
+  /**
+   * Returns the parent subshell or function definition of the given node.
+   */
+  private findParentScopeNode(node: Parser.SyntaxNode): Parser.SyntaxNode | null {
+    return TreeSitterUtil.findParent(
       node,
       (n) =>
         n.type === 'subshell' ||
-        (n.type === 'function_definition' && n.lastChild?.type !== 'subshell'),
+        (n.type === 'function_definition' && n.lastChild?.type === 'compound_statement'),
     )
-
-    if (!parent) {
-      return null
-    }
-
-    return parent
   }
 
   /**
