@@ -276,7 +276,8 @@ export default class Analyzer {
   }
 
   /**
-   * Find a symbol's original declaration and parent scope, if it has one.
+   * Find a symbol's original declaration and parent scope based on its original
+   * definition with respect to its scope.
    */
   public findOriginalDeclaration({
     position,
@@ -306,30 +307,33 @@ export default class Analyzer {
         parent.type === 'function_definition' &&
         parent.lastChild
       ) {
-        const functionBody = parent.lastChild
-        TreeSitterUtil.forEach(functionBody, (n) => {
+        const body = parent.lastChild
+        TreeSitterUtil.forEach(body, (n) => {
           if (
             (declaration && !continueSearching) ||
             n.startPosition.row > boundary ||
-            n.type === 'function_definition' ||
-            n.type === 'subshell'
+            ['function_definition', 'subshell'].includes(n.type)
           ) {
             return false
           }
 
           if (n.type === 'declaration_command') {
             const isLocal = ['local', 'declare', 'typeset'].includes(
-              n.firstChild?.text ?? '',
+              n.firstChild?.text as any,
             )
-            const firstInstance = n.descendantsOfType('variable_name').at(0)
+            const definedVariable = n.descendantsOfType('variable_name').at(0)
             // Check for var="$var" cases
-            const instanceInExpression =
+            const definedVariableInExpression =
               n.endPosition.row >= position.line &&
-              firstInstance &&
-              (firstInstance.endPosition.column < position.character ||
-                firstInstance.endPosition.row < position.line)
-            if (isLocal && firstInstance?.text === word && !instanceInExpression) {
-              declaration = firstInstance
+              definedVariable &&
+              (definedVariable.endPosition.column < position.character ||
+                definedVariable.endPosition.row < position.line)
+            if (
+              isLocal &&
+              definedVariable?.text === word &&
+              !definedVariableInExpression
+            ) {
+              declaration = definedVariable
               continueSearching = false
             }
 
@@ -348,30 +352,30 @@ export default class Analyzer {
             return false
           }
 
-          let node: Parser.SyntaxNode | null | undefined
+          let definedSymbol: Parser.SyntaxNode | null | undefined
+          // Check for var="$var" cases
+          let definedVariableInExpression = false
 
           if (
             type === 'variable' &&
-            (n.type === 'declaration_command' ||
-              n.type === 'variable_assignment' ||
-              n.type === 'for_statement' ||
+            (['declaration_command', 'variable_assignment', 'for_statement'].includes(
+              n.type,
+            ) ||
               (n.type === 'command' && n.text.includes(':=')))
           ) {
-            node = n.descendantsOfType('variable_name').at(0)
+            definedSymbol = n.descendantsOfType('variable_name').at(0)
+            definedVariableInExpression =
+              n.type !== 'for_statement' &&
+              n.endPosition.row >= position.line &&
+              !!definedSymbol &&
+              (definedSymbol.endPosition.column < position.character ||
+                definedSymbol.endPosition.row < position.line)
           } else if (type === 'function' && n.type === 'function_definition') {
-            node = n.firstNamedChild
+            definedSymbol = n.firstNamedChild
           }
 
-          // Check for var="$var" cases
-          const instanceInExpression =
-            type === 'variable' &&
-            n.type !== 'for_statement' &&
-            n.endPosition.row >= position.line &&
-            node &&
-            (node.endPosition.column < position.character ||
-              node.endPosition.row < position.line)
-          if (node?.text === word && !instanceInExpression) {
-            declaration = node
+          if (definedSymbol?.text === word && !definedVariableInExpression) {
+            declaration = definedSymbol
             continueSearching = n.type === 'command'
           }
 
@@ -505,21 +509,19 @@ export default class Analyzer {
             }
 
             const parentScope = this.parentScope(n)
-            const parentDeclaration = TreeSitterUtil.findParentOfType(
+            const definition = TreeSitterUtil.findParentOfType(
               n,
               parentScope?.type === 'function_definition'
                 ? 'declaration_command'
                 : 'variable_assignment',
             )
-            const firstInstance = parentDeclaration
-              ?.descendantsOfType('variable_name')
-              ?.at(0)
+            const definedVariable = definition?.descendantsOfType('variable_name')?.at(0)
 
             // Special handling for var="$var" cases
-            if (firstInstance?.text === word && !n.equals(firstInstance)) {
+            if (definedVariable?.text === word && !n.equals(definedVariable)) {
               // `start?.line` is assumed to be the same as the variable's
               // original declaration line.
-              if (parentDeclaration?.startPosition.row === start?.line) {
+              if (definition?.startPosition.row === start?.line) {
                 return false
               }
 
@@ -534,23 +536,23 @@ export default class Analyzer {
               return true
             }
 
-            const includeInstance = !ignoredRanges.some(
+            const includeDeclaration = !ignoredRanges.some(
               (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
             )
 
-            if (!parentDeclaration) {
-              return includeInstance
+            if (!definition) {
+              return includeDeclaration
             }
 
-            const isLocalDeclaration =
-              firstInstance?.text === word &&
+            const isLocalDefinition =
+              definedVariable?.text === word &&
               (parentScope.type === 'subshell'
-                ? !!parentDeclaration
+                ? !!definition
                 : ['local', 'declare', 'typeset'].includes(
-                    parentDeclaration.firstChild?.text ?? '',
+                    definition.firstChild?.text as any,
                   ))
-            if (isLocalDeclaration) {
-              if (includeInstance) {
+            if (isLocalDefinition) {
+              if (includeDeclaration) {
                 ignoredRanges.push(TreeSitterUtil.range(parentScope))
               }
 
@@ -572,16 +574,16 @@ export default class Analyzer {
               return true
             }
 
-            const includeInstance = !ignoredRanges.some(
+            const includeDeclaration = !ignoredRanges.some(
               (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
             )
 
             if (n.type === 'command_name') {
-              return includeInstance
+              return includeDeclaration
             }
 
             if (n.type === 'function_definition') {
-              if (includeInstance) {
+              if (includeDeclaration) {
                 ignoredRanges.push(TreeSitterUtil.range(parentScope))
               }
 
@@ -812,9 +814,7 @@ export default class Analyzer {
     if (
       node.type === 'variable_name' ||
       (node.type === 'word' &&
-        node.parent &&
-        (node.parent.type === 'function_definition' ||
-          node.parent.type === 'command_name'))
+        ['function_definition', 'command_name'].includes(node.parent?.type as any))
     ) {
       return {
         word: node.text,
