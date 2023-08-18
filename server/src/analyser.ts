@@ -276,7 +276,7 @@ export default class Analyzer {
   }
 
   /**
-   * Find a symbol's original declaration with respect to its scope.
+   * Find a symbol's original declaration and parent scope, if it has one.
    */
   public findOriginalDeclaration({
     position,
@@ -288,16 +288,16 @@ export default class Analyzer {
     uri: string
     word: string
     type: 'variable' | 'function'
-  }): LSP.Location | null {
+  }): { declaration: LSP.Location | null; parent: LSP.Location | null } {
     const node = this.nodeAtPoint(uri, position.line, position.character)
 
     if (!node) {
-      return null
+      return { declaration: null, parent: null }
     }
 
-    let originalDeclaration: Parser.SyntaxNode | null | undefined
+    let declaration: Parser.SyntaxNode | null | undefined
 
-    let parent = this.findParentScopeNode(node)
+    let parent = this.parentScope(node)
     let continueSearching = false
     let boundary = position.line
     while (parent) {
@@ -309,7 +309,7 @@ export default class Analyzer {
         const functionBody = parent.lastChild
         TreeSitterUtil.forEach(functionBody, (n) => {
           if (
-            (originalDeclaration && !continueSearching) ||
+            (declaration && !continueSearching) ||
             n.startPosition.row > boundary ||
             n.type === 'function_definition' ||
             n.type === 'subshell'
@@ -329,7 +329,7 @@ export default class Analyzer {
               (firstInstance.endPosition.column < position.character ||
                 firstInstance.endPosition.row < position.line)
             if (isLocal && firstInstance?.text === word && !instanceInExpression) {
-              originalDeclaration = firstInstance
+              declaration = firstInstance
               continueSearching = false
             }
 
@@ -341,7 +341,7 @@ export default class Analyzer {
       } else if (parent.type === 'subshell') {
         TreeSitterUtil.forEach(parent, (n) => {
           if (
-            (originalDeclaration && !continueSearching) ||
+            (declaration && !continueSearching) ||
             n.startPosition.row > boundary ||
             (n.type === 'subshell' && !parent?.equals(n))
           ) {
@@ -371,7 +371,7 @@ export default class Analyzer {
             (node.endPosition.column < position.character ||
               node.endPosition.row < position.line)
           if (node?.text === word && !instanceInExpression) {
-            originalDeclaration = node
+            declaration = node
             continueSearching = n.type === 'command'
           }
 
@@ -383,21 +383,22 @@ export default class Analyzer {
         })
       }
 
-      if (originalDeclaration && !continueSearching) {
+      if (declaration && !continueSearching) {
         break
       }
 
       boundary = parent.startPosition.row
-      parent = this.findParentScopeNode(parent)
+      parent = this.parentScope(parent)
     }
 
     // TODO: Handle global definitions
 
-    // TODO: Find a way to return something that differentiates between local
-    // and global definitions
-    return originalDeclaration
-      ? LSP.Location.create(uri, TreeSitterUtil.range(originalDeclaration))
-      : null
+    return {
+      declaration: declaration
+        ? LSP.Location.create(uri, TreeSitterUtil.range(declaration))
+        : null,
+      parent: parent ? LSP.Location.create(uri, TreeSitterUtil.range(parent)) : null,
+    }
   }
 
   /**
@@ -503,7 +504,7 @@ export default class Analyzer {
               return false
             }
 
-            const parentScope = this.findParentScopeNode(n)
+            const parentScope = this.parentScope(n)
             const parentDeclaration = TreeSitterUtil.findParentOfType(
               n,
               parentScope?.type === 'function_definition'
@@ -600,36 +601,6 @@ export default class Analyzer {
 
         return TreeSitterUtil.range(n)
       })
-  }
-
-  /**
-   * Find the parent function or subshell scope of the given range.
-   */
-  public findParentScope(
-    uri: string,
-    start: LSP.Position,
-    end: LSP.Position,
-  ): { range: LSP.Range; type: 'function' | 'subshell' } | null {
-    const node = this.nodeAtPoints(
-      uri,
-      { row: start.line, column: start.character },
-      { row: end.line, column: end.character },
-    )
-
-    if (!node) {
-      return null
-    }
-
-    const parent = this.findParentScopeNode(node)
-
-    if (!parent) {
-      return null
-    }
-
-    return {
-      range: TreeSitterUtil.range(parent),
-      type: parent.type === 'function_definition' ? 'function' : 'subshell',
-    }
   }
 
   public getAllVariables({
@@ -1005,7 +976,7 @@ export default class Analyzer {
   /**
    * Returns the parent subshell or function definition of the given node.
    */
-  private findParentScopeNode(node: Parser.SyntaxNode): Parser.SyntaxNode | null {
+  private parentScope(node: Parser.SyntaxNode): Parser.SyntaxNode | null {
     return TreeSitterUtil.findParent(
       node,
       (n) =>

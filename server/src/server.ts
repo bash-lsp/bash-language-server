@@ -759,7 +759,7 @@ export default class BashServer {
       this.throwResponseError('Invalid function name given.')
     }
 
-    const declaration = this.analyzer.findOriginalDeclaration({
+    const { declaration, parent } = this.analyzer.findOriginalDeclaration({
       position: params.position,
       uri: params.textDocument.uri,
       word: symbol.word,
@@ -783,27 +783,13 @@ export default class BashServer {
       }
     }
 
-    let parentScope = this.analyzer.findParentScope(
-      params.textDocument.uri,
-      declaration.range.start,
-      declaration.range.end,
-    )
-    // If the symbol is a function, `parentScope` should be a parent function or
-    // a subshell, not the function definition itself.
-    if (parentScope?.type === symbol.type) {
-      parentScope = this.analyzer.findParentScope(
-        params.textDocument.uri,
-        parentScope.range.start,
-        parentScope.range.end,
-      )
-    }
-    if (parentScope) {
+    if (parent) {
       const ranges = this.analyzer.findOccurrencesWithin({
         uri: params.textDocument.uri,
         word: symbol.word,
         type: symbol.type,
         start: declaration.range.start,
-        scope: parentScope.range,
+        scope: parent.range,
       })
 
       return <LSP.WorkspaceEdit>{
