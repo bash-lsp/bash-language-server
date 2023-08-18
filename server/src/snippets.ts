@@ -644,14 +644,14 @@ export const SNIPPETS: BashCompletionItem[] = [
     label: 'colors',
     insertText: [
       "declare black${1:_color}='\\e[30m'",
-			"declare red$1='\\e[31m'",
-			"declare green$1='\\e[32m'",
-			"declare yellow$1='\\e[33m'",
-			"declare blue$1='\\e[34m'",
-			"declare magenta$1='\\e[35m'",
-			"declare cyan$1='\\e[36m'",
-			"declare light_gray$1='\\e[37m'",
-    ].join('\n')
+      "declare red$1='\\e[31m'",
+      "declare green$1='\\e[32m'",
+      "declare yellow$1='\\e[33m'",
+      "declare blue$1='\\e[34m'",
+      "declare magenta$1='\\e[35m'",
+      "declare cyan$1='\\e[36m'",
+      "declare light_gray$1='\\e[37m'",
+    ].join('\n'),
   },
   {
     documentation: 'light colors',
@@ -664,8 +664,8 @@ export const SNIPPETS: BashCompletionItem[] = [
       "declare $1blue$2='\\e[94m'",
       "declare $1magenta$2='\\e[95m'",
       "declare $1cyan$2='\\e[96m'",
-      "declare $1white$2='\\e[97m'",      
-    ].join('\n')
+      "declare $1white$2='\\e[97m'",
+    ].join('\n'),
   },
   {
     documentation: 'background colors',
@@ -678,8 +678,8 @@ export const SNIPPETS: BashCompletionItem[] = [
       "declare $1blue$2='\\e[44m'",
       "declare $1magenta$2='\\e[45m'",
       "declare $1cyan$2='\\e[46m'",
-      "declare $1light_gray$2='\\e[47m'",      
-    ].join('\n')
+      "declare $1light_gray$2='\\e[47m'",
+    ].join('\n'),
   },
   {
     documentation: 'background light colors',
@@ -692,8 +692,8 @@ export const SNIPPETS: BashCompletionItem[] = [
       "declare $1blue$2='\\e[104m'",
       "declare $1magenta$2='\\e[105m'",
       "declare $1cyan$2='\\e[106m'",
-      "declare $1white$2='\\e[107m'",         
-    ].join('\n')
+      "declare $1white$2='\\e[107m'",
+    ].join('\n'),
   },
   {
     documentation: 'bold',
