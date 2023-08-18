@@ -640,6 +640,82 @@ export const SNIPPETS: BashCompletionItem[] = [
     insertText: '/dev/${1|null,stdin,stdout,stderr|}',
   },
   {
+    documentation: 'colors',
+    label: 'colors',
+    insertText: [
+      "declare black${1:_color}='\\e[30m'",
+			"declare red$1='\\e[31m'",
+			"declare green$1='\\e[32m'",
+			"declare yellow$1='\\e[33m'",
+			"declare blue$1='\\e[34m'",
+			"declare magenta$1='\\e[35m'",
+			"declare cyan$1='\\e[36m'",
+			"declare light_gray$1='\\e[37m'",
+    ].join('\n')
+  },
+  {
+    documentation: 'light colors',
+    label: 'colors-light',
+    insertText: [
+      "declare ${1:light_}black${2:_color}='\\e[90m'",
+      "declare $1red$2='\\e[91m'",
+      "declare $1green$2='\\e[92m'",
+      "declare $1yellow$2='\\e[93m'",
+      "declare $1blue$2='\\e[94m'",
+      "declare $1magenta$2='\\e[95m'",
+      "declare $1cyan$2='\\e[96m'",
+      "declare $1white$2='\\e[97m'",      
+    ].join('\n')
+  },
+  {
+    documentation: 'background colors',
+    label: 'colors-background',
+    insertText: [
+      "declare ${1:background_}black${2:_color}='\\e[40m'",
+      "declare $1red$2='\\e[41m'",
+      "declare $1green$2='\\e[42m'",
+      "declare $1yellow$2='\\e[43m'",
+      "declare $1blue$2='\\e[44m'",
+      "declare $1magenta$2='\\e[45m'",
+      "declare $1cyan$2='\\e[46m'",
+      "declare $1light_gray$2='\\e[47m'",      
+    ].join('\n')
+  },
+  {
+    documentation: 'background light colors',
+    label: 'colors-light-background',
+    insertText: [
+      "declare ${1:background_light_}black${2:_color}='\\e[100m'",
+      "declare $1red$2='\\e[101m'",
+      "declare $1green$2='\\e[102m'",
+      "declare $1yellow$2='\\e[103m'",
+      "declare $1blue$2='\\e[104m'",
+      "declare $1magenta$2='\\e[105m'",
+      "declare $1cyan$2='\\e[106m'",
+      "declare $1white$2='\\e[107m'",         
+    ].join('\n')
+  },
+  {
+    documentation: 'bold',
+    label: 'bold',
+    insertText: "declare ${1:bold}='\\e[1m'",
+  },
+  {
+    documentation: 'faint',
+    label: 'faint',
+    insertText: "declare ${1:faint}='\\e[2m'",
+  },
+  {
+    documentation: 'italics',
+    label: 'italics',
+    insertText: "declare ${1:italics}='\\e[3m'",
+  },
+  {
+    documentation: 'underlined',
+    label: 'underlined',
+    insertText: "declare ${1:underlined}='\\e[4m'",
+  },
+  {
     documentation: 'completion',
     label: 'completion definition',
     insertText: [
