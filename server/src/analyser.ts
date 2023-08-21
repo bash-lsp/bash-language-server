@@ -278,6 +278,9 @@ export default class Analyzer {
   /**
    * Find a symbol's original declaration and parent scope based on its original
    * definition with respect to its scope.
+   *
+   * TODO: Improve handling of multiple variable assignments and declarations in
+   * one declaration command.
    */
   public findOriginalDeclaration({
     position,
@@ -297,10 +300,55 @@ export default class Analyzer {
     }
 
     let declaration: Parser.SyntaxNode | null | undefined
-
     let parent = this.parentScope(node)
     let continueSearching = false
     let boundary = position.line
+
+    const find = (base: Parser.SyntaxNode) => {
+      TreeSitterUtil.forEach(base, (n) => {
+        if (
+          (declaration && !continueSearching) ||
+          n.startPosition.row > boundary ||
+          (n.type === 'subshell' && !n.equals(base))
+        ) {
+          return false
+        }
+
+        let definedSymbol: Parser.SyntaxNode | null | undefined
+        // Check for var="$var" cases
+        let definedVariableInExpression = false
+
+        if (
+          kind === LSP.SymbolKind.Variable &&
+          (['declaration_command', 'variable_assignment', 'for_statement'].includes(
+            n.type,
+          ) ||
+            (n.type === 'command' && n.text.includes(':=')))
+        ) {
+          definedSymbol = n.descendantsOfType('variable_name').at(0)
+          definedVariableInExpression =
+            n.type === 'variable_assignment' &&
+            n.endPosition.row >= position.line &&
+            !!definedSymbol &&
+            (definedSymbol.endPosition.column < position.character ||
+              definedSymbol.endPosition.row < position.line)
+        } else if (kind === LSP.SymbolKind.Function && n.type === 'function_definition') {
+          definedSymbol = n.firstNamedChild
+        }
+
+        if (definedSymbol?.text === word && !definedVariableInExpression) {
+          declaration = definedSymbol
+          continueSearching = n.type === 'command'
+        }
+
+        if (n.type === 'function_definition') {
+          return false
+        }
+
+        return true
+      })
+    }
+
     while (parent) {
       if (
         kind === LSP.SymbolKind.Variable &&
@@ -343,51 +391,7 @@ export default class Analyzer {
           return true
         })
       } else if (parent.type === 'subshell') {
-        TreeSitterUtil.forEach(parent, (n) => {
-          if (
-            (declaration && !continueSearching) ||
-            n.startPosition.row > boundary ||
-            (n.type === 'subshell' && !parent?.equals(n))
-          ) {
-            return false
-          }
-
-          let definedSymbol: Parser.SyntaxNode | null | undefined
-          // Check for var="$var" cases
-          let definedVariableInExpression = false
-
-          if (
-            kind === LSP.SymbolKind.Variable &&
-            (['declaration_command', 'variable_assignment', 'for_statement'].includes(
-              n.type,
-            ) ||
-              (n.type === 'command' && n.text.includes(':=')))
-          ) {
-            definedSymbol = n.descendantsOfType('variable_name').at(0)
-            definedVariableInExpression =
-              n.type !== 'for_statement' &&
-              n.endPosition.row >= position.line &&
-              !!definedSymbol &&
-              (definedSymbol.endPosition.column < position.character ||
-                definedSymbol.endPosition.row < position.line)
-          } else if (
-            kind === LSP.SymbolKind.Function &&
-            n.type === 'function_definition'
-          ) {
-            definedSymbol = n.firstNamedChild
-          }
-
-          if (definedSymbol?.text === word && !definedVariableInExpression) {
-            declaration = definedSymbol
-            continueSearching = n.type === 'command'
-          }
-
-          if (n.type === 'function_definition') {
-            return false
-          }
-
-          return true
-        })
+        find(parent)
       }
 
       if (declaration && !continueSearching) {
@@ -398,7 +402,13 @@ export default class Analyzer {
       parent = this.parentScope(parent)
     }
 
-    // TODO: Handle global definitions
+    if (!parent && (!declaration || continueSearching)) {
+      const root = this.uriToAnalyzedDocument[uri]?.tree.rootNode
+
+      if (root) {
+        find(root)
+      }
+    }
 
     return {
       declaration: declaration
@@ -467,6 +477,9 @@ export default class Analyzer {
 
   /**
    * A more scope-aware version of findOccurrences.
+   *
+   * TODO: Improve handling of multiple variable assignments and declarations in
+   * one declaration command.
    */
   public findOccurrencesWithin({
     uri,

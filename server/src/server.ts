@@ -765,33 +765,30 @@ export default class BashServer {
       word: symbol.word,
       kind: symbol.kind,
     })
+    const ranges = !declaration
+      ? this.analyzer.findOccurrencesWithin({
+          uri: params.textDocument.uri,
+          word: symbol.word,
+          kind: symbol.kind,
+        })
+      : parent
+      ? this.analyzer.findOccurrencesWithin({
+          uri: declaration.uri,
+          word: symbol.word,
+          kind: symbol.kind,
+          start: declaration.range.start,
+          scope: parent.range,
+        })
+      : declaration.uri === params.textDocument.uri
+      ? this.analyzer.findOccurrencesWithin({
+          uri: declaration.uri,
+          word: symbol.word,
+          kind: symbol.kind,
+          start: declaration.range.start,
+        })
+      : null
 
-    if (!declaration) {
-      const ranges = this.analyzer.findOccurrencesWithin({
-        uri: params.textDocument.uri,
-        word: symbol.word,
-        kind: symbol.kind,
-      })
-
-      return <LSP.WorkspaceEdit>{
-        changes: {
-          [params.textDocument.uri]: ranges.map((range) => ({
-            range,
-            newText: params.newName,
-          })),
-        },
-      }
-    }
-
-    if (parent) {
-      const ranges = this.analyzer.findOccurrencesWithin({
-        uri: params.textDocument.uri,
-        word: symbol.word,
-        kind: symbol.kind,
-        start: declaration.range.start,
-        scope: parent.range,
-      })
-
+    if (ranges) {
       return <LSP.WorkspaceEdit>{
         changes: {
           [params.textDocument.uri]: ranges.map((range) => ({
