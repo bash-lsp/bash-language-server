@@ -283,12 +283,12 @@ export default class Analyzer {
     position,
     uri,
     word,
-    type,
+    kind,
   }: {
     position: LSP.Position
     uri: string
     word: string
-    type: 'variable' | 'function'
+    kind: LSP.SymbolKind
   }): { declaration: LSP.Location | null; parent: LSP.Location | null } {
     const node = this.nodeAtPoint(uri, position.line, position.character)
 
@@ -303,7 +303,7 @@ export default class Analyzer {
     let boundary = position.line
     while (parent) {
       if (
-        type === 'variable' &&
+        kind === LSP.SymbolKind.Variable &&
         parent.type === 'function_definition' &&
         parent.lastChild
       ) {
@@ -357,7 +357,7 @@ export default class Analyzer {
           let definedVariableInExpression = false
 
           if (
-            type === 'variable' &&
+            kind === LSP.SymbolKind.Variable &&
             (['declaration_command', 'variable_assignment', 'for_statement'].includes(
               n.type,
             ) ||
@@ -370,7 +370,10 @@ export default class Analyzer {
               !!definedSymbol &&
               (definedSymbol.endPosition.column < position.character ||
                 definedSymbol.endPosition.row < position.line)
-          } else if (type === 'function' && n.type === 'function_definition') {
+          } else if (
+            kind === LSP.SymbolKind.Function &&
+            n.type === 'function_definition'
+          ) {
             definedSymbol = n.firstNamedChild
           }
 
@@ -468,13 +471,13 @@ export default class Analyzer {
   public findOccurrencesWithin({
     uri,
     word,
-    type,
+    kind,
     start,
     scope,
   }: {
     uri: string
     word: string
-    type: 'variable' | 'function'
+    kind: LSP.SymbolKind
     start?: LSP.Position
     scope?: LSP.Range
   }): LSP.Range[] {
@@ -486,7 +489,7 @@ export default class Analyzer {
         )
       : null
     const baseNode =
-      scopeNode && (type === 'variable' || scopeNode.type === 'subshell')
+      scopeNode && (kind === LSP.SymbolKind.Variable || scopeNode.type === 'subshell')
         ? scopeNode
         : this.uriToAnalyzedDocument[uri]?.tree.rootNode
 
@@ -495,14 +498,16 @@ export default class Analyzer {
     }
 
     const typeOfDescendants =
-      type === 'variable' ? 'variable_name' : ['function_definition', 'command_name']
+      kind === LSP.SymbolKind.Variable
+        ? 'variable_name'
+        : ['function_definition', 'command_name']
     const startPosition = start
       ? { row: start.line, column: start.character }
       : baseNode.startPosition
 
     const ignoredRanges: LSP.Range[] = []
     const filter =
-      type === 'variable'
+      kind === LSP.SymbolKind.Variable
         ? (n: Parser.SyntaxNode) => {
             if (n.text !== word) {
               return false
@@ -800,7 +805,7 @@ export default class Analyzer {
 
   public symbolAtPointFromTextPosition(
     params: LSP.TextDocumentPositionParams,
-  ): { word: string; range: LSP.Range; type: 'variable' | 'function' } | null {
+  ): { word: string; range: LSP.Range; kind: LSP.SymbolKind } | null {
     const node = this.nodeAtPoint(
       params.textDocument.uri,
       params.position.line,
@@ -819,7 +824,10 @@ export default class Analyzer {
       return {
         word: node.text,
         range: TreeSitterUtil.range(node),
-        type: node.type === 'variable_name' ? 'variable' : 'function',
+        kind:
+          node.type === 'variable_name'
+            ? LSP.SymbolKind.Variable
+            : LSP.SymbolKind.Function,
       }
     }
 

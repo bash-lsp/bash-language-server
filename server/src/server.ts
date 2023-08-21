@@ -731,7 +731,7 @@ export default class BashServer {
 
     if (
       !symbol ||
-      (symbol.type === 'variable' &&
+      (symbol.kind === LSP.SymbolKind.Variable &&
         (symbol.word === '_' || !/^[a-z_][\w]*$/i.test(symbol.word)))
     ) {
       return null
@@ -749,13 +749,13 @@ export default class BashServer {
     }
 
     if (
-      symbol.type === 'variable' &&
+      symbol.kind === LSP.SymbolKind.Variable &&
       (params.newName === '_' || !/^[a-z_][\w]*$/i.test(params.newName))
     ) {
       this.throwResponseError('Invalid variable name given.')
     }
 
-    if (symbol.type === 'function' && params.newName.includes('$')) {
+    if (symbol.kind === LSP.SymbolKind.Function && params.newName.includes('$')) {
       this.throwResponseError('Invalid function name given.')
     }
 
@@ -763,14 +763,14 @@ export default class BashServer {
       position: params.position,
       uri: params.textDocument.uri,
       word: symbol.word,
-      type: symbol.type,
+      kind: symbol.kind,
     })
 
     if (!declaration) {
       const ranges = this.analyzer.findOccurrencesWithin({
         uri: params.textDocument.uri,
         word: symbol.word,
-        type: symbol.type,
+        kind: symbol.kind,
       })
 
       return <LSP.WorkspaceEdit>{
@@ -787,7 +787,7 @@ export default class BashServer {
       const ranges = this.analyzer.findOccurrencesWithin({
         uri: params.textDocument.uri,
         word: symbol.word,
-        type: symbol.type,
+        kind: symbol.kind,
         start: declaration.range.start,
         scope: parent.range,
       })
