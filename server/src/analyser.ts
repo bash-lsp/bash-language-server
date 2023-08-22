@@ -304,7 +304,7 @@ export default class Analyzer {
     let continueSearching = false
     let boundary = position.line
 
-    const find = (base: Parser.SyntaxNode) => {
+    const findUsingGlobalSemantics = (base: Parser.SyntaxNode) => {
       TreeSitterUtil.forEach(base, (n) => {
         if (
           (declaration && !continueSearching) ||
@@ -391,7 +391,7 @@ export default class Analyzer {
           return true
         })
       } else if (parent.type === 'subshell') {
-        find(parent)
+        findUsingGlobalSemantics(parent)
       }
 
       if (declaration && !continueSearching) {
@@ -403,10 +403,19 @@ export default class Analyzer {
     }
 
     if (!parent && (!declaration || continueSearching)) {
-      const root = this.uriToAnalyzedDocument[uri]?.tree.rootNode
+      const uris = this.getReachableUris({ fromUri: uri })
 
-      if (root) {
-        find(root)
+      for (const u of uris) {
+        const root = this.uriToAnalyzedDocument[u]?.tree.rootNode
+
+        if (root) {
+          findUsingGlobalSemantics(root)
+        }
+
+        if (declaration && !continueSearching) {
+          uri = u
+          break
+        }
       }
     }
 
@@ -853,6 +862,26 @@ export default class Analyzer {
 
   public setIncludeAllWorkspaceSymbols(includeAllWorkspaceSymbols: boolean): void {
     this.includeAllWorkspaceSymbols = includeAllWorkspaceSymbols
+  }
+
+  // TODO: Handle cases where sourcing files gets sourced.
+  public findAllSourcingUris(uri: string): string[] {
+    if (this.includeAllWorkspaceSymbols) {
+      return Object.keys(this.uriToAnalyzedDocument)
+    }
+
+    const uris = []
+    for (const [u, ad] of Object.entries(this.uriToAnalyzedDocument)) {
+      if (ad?.sourcedUris) {
+        for (const v of ad.sourcedUris.values()) {
+          if (v === uri) {
+            uris.push(u)
+            break
+          }
+        }
+      }
+    }
+    return uris
   }
 
   // Private methods

@@ -765,6 +765,7 @@ export default class BashServer {
       word: symbol.word,
       kind: symbol.kind,
     })
+
     const ranges = !declaration
       ? this.analyzer.findOccurrencesWithin({
           uri: params.textDocument.uri,
@@ -773,7 +774,7 @@ export default class BashServer {
         })
       : parent
       ? this.analyzer.findOccurrencesWithin({
-          uri: declaration.uri,
+          uri: params.textDocument.uri,
           word: symbol.word,
           kind: symbol.kind,
           start: declaration.range.start,
@@ -781,13 +782,12 @@ export default class BashServer {
         })
       : declaration.uri === params.textDocument.uri
       ? this.analyzer.findOccurrencesWithin({
-          uri: declaration.uri,
+          uri: params.textDocument.uri,
           word: symbol.word,
           kind: symbol.kind,
           start: declaration.range.start,
         })
       : null
-
     if (ranges) {
       return <LSP.WorkspaceEdit>{
         changes: {
@@ -799,7 +799,36 @@ export default class BashServer {
       }
     }
 
-    return null
+    const edits: LSP.WorkspaceEdit = {}
+    if (declaration) {
+      edits.changes = {}
+
+      edits.changes[declaration.uri] = this.analyzer
+        .findOccurrencesWithin({
+          uri: declaration.uri,
+          word: symbol.word,
+          kind: symbol.kind,
+          start: declaration.range.start,
+        })
+        .map((range) => ({
+          range,
+          newText: params.newName,
+        }))
+
+      for (const uri of this.analyzer.findAllSourcingUris(declaration.uri)) {
+        edits.changes[uri] = this.analyzer
+          .findOccurrencesWithin({
+            uri,
+            word: symbol.word,
+            kind: symbol.kind,
+          })
+          .map((range) => ({
+            range,
+            newText: params.newName,
+          }))
+      }
+    }
+    return edits
   }
 }
 
