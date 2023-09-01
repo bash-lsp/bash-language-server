@@ -864,23 +864,41 @@ export default class Analyzer {
     this.includeAllWorkspaceSymbols = includeAllWorkspaceSymbols
   }
 
-  // TODO: Handle cases where sourcing files gets sourced.
-  public findAllSourcingUris(uri: string): string[] {
+  /**
+   * If `includeAllWorkspaceSymbols` is true, this returns all URIs from the
+   * background analysis. Else, it returns the URIs of the files that are
+   * connected to `uri` via sourcing.
+   */
+  public findAllConnectedUris(uri: string): string[] {
     if (this.includeAllWorkspaceSymbols) {
       return Object.keys(this.uriToAnalyzedDocument)
     }
 
-    const uris = []
-    for (const [u, ad] of Object.entries(this.uriToAnalyzedDocument)) {
-      if (ad?.sourcedUris) {
-        for (const v of ad.sourcedUris.values()) {
-          if (v === uri) {
-            uris.push(u)
+    const uriToAnalyzedDocument = Object.entries(this.uriToAnalyzedDocument)
+    const uris: string[] = []
+    let continueSearching = true
+
+    while (continueSearching) {
+      continueSearching = false
+
+      for (const [analyzedUri, analyzedDocument] of uriToAnalyzedDocument) {
+        if (!analyzedDocument) {
+          continue
+        }
+
+        for (const sourcedUri of analyzedDocument.sourcedUris.values()) {
+          if (
+            (sourcedUri === uri || uris.includes(sourcedUri)) &&
+            !uris.includes(analyzedUri)
+          ) {
+            uris.push(analyzedUri)
+            continueSearching = true
             break
           }
         }
       }
     }
+
     return uris
   }
 

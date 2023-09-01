@@ -815,7 +815,7 @@ export default class BashServer {
           newText: params.newName,
         }))
 
-      for (const uri of this.analyzer.findAllSourcingUris(declaration.uri)) {
+      for (const uri of this.analyzer.findAllConnectedUris(declaration.uri)) {
         edits.changes[uri] = this.analyzer
           .findOccurrencesWithin({
             uri,
