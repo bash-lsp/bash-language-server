@@ -780,21 +780,13 @@ export default class BashServer {
           start: declaration.range.start,
           scope: parent.range,
         })
-      : declaration.uri === params.textDocument.uri
-      ? this.analyzer.findOccurrencesWithin({
-          uri: params.textDocument.uri,
-          word: symbol.word,
-          kind: symbol.kind,
-          start: declaration.range.start,
-        })
       : null
     if (ranges) {
       return <LSP.WorkspaceEdit>{
         changes: {
-          [params.textDocument.uri]: ranges.map((range) => ({
-            range,
-            newText: params.newName,
-          })),
+          [params.textDocument.uri]: ranges.map((r) =>
+            LSP.TextEdit.replace(r, params.newName),
+          ),
         },
       }
     }
@@ -810,10 +802,7 @@ export default class BashServer {
           kind: symbol.kind,
           start: declaration.range.start,
         })
-        .map((range) => ({
-          range,
-          newText: params.newName,
-        }))
+        .map((r) => LSP.TextEdit.replace(r, params.newName))
 
       for (const uri of this.analyzer.findAllConnectedUris(declaration.uri)) {
         edits.changes[uri] = this.analyzer
@@ -822,10 +811,7 @@ export default class BashServer {
             word: symbol.word,
             kind: symbol.kind,
           })
-          .map((range) => ({
-            range,
-            newText: params.newName,
-          }))
+          .map((r) => LSP.TextEdit.replace(r, params.newName))
       }
     }
     return edits
