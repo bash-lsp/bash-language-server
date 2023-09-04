@@ -428,6 +428,67 @@ export default class Analyzer {
   }
 
   /**
+   * Like findOriginalDeclaration, but only searches within the file and doesn't
+   * take parent scopes into consideration.
+   *
+   * TODO: Improve handling of multiple variable assignments and declarations in
+   * one declaration command.
+   */
+  public findOriginalDeclarationWithinFile({
+    uri,
+    word,
+    kind,
+  }: {
+    uri: string
+    word: string
+    kind: LSP.SymbolKind
+  }): LSP.Location | null {
+    const rootNode = this.uriToAnalyzedDocument[uri]?.tree.rootNode
+
+    if (!rootNode) {
+      return null
+    }
+
+    let declaration: Parser.SyntaxNode | null | undefined
+    let continueSearching = false
+
+    TreeSitterUtil.forEach(rootNode, (n) => {
+      if ((declaration && !continueSearching) || n.type === 'subshell') {
+        return false
+      }
+
+      let definedSymbol: Parser.SyntaxNode | null | undefined
+
+      if (
+        kind === LSP.SymbolKind.Variable &&
+        (['declaration_command', 'variable_assignment', 'for_statement'].includes(
+          n.type,
+        ) ||
+          (n.type === 'command' && n.text.includes(':=')))
+      ) {
+        definedSymbol = n.descendantsOfType('variable_name').at(0)
+      } else if (kind === LSP.SymbolKind.Function && n.type === 'function_definition') {
+        definedSymbol = n.firstNamedChild
+      }
+
+      if (definedSymbol?.text === word) {
+        declaration = definedSymbol
+        continueSearching = n.type === 'command'
+      }
+
+      if (n.type === 'function_definition') {
+        return false
+      }
+
+      return true
+    })
+
+    return declaration
+      ? LSP.Location.create(uri, TreeSitterUtil.range(declaration))
+      : null
+  }
+
+  /**
    * Find all the locations where the given word was defined or referenced.
    * This will include commands, functions, variables, etc.
    *
@@ -495,12 +556,14 @@ export default class Analyzer {
     word,
     kind,
     start,
+    end,
     scope,
   }: {
     uri: string
     word: string
     kind: LSP.SymbolKind
     start?: LSP.Position
+    end?: LSP.Position
     scope?: LSP.Range
   }): LSP.Range[] {
     const scopeNode = scope
@@ -526,6 +589,9 @@ export default class Analyzer {
     const startPosition = start
       ? { row: start.line, column: start.character }
       : baseNode.startPosition
+    const endPosition = end
+      ? { row: end.line + 1, column: end.character + 1 }
+      : baseNode.endPosition
 
     const ignoredRanges: LSP.Range[] = []
     const filter =
@@ -545,18 +611,26 @@ export default class Analyzer {
             const definedVariable = definition?.descendantsOfType('variable_name')?.at(0)
 
             // Special handling for var="$var" cases
-            if (definedVariable?.text === word && !n.equals(definedVariable)) {
-              // `start?.line` is assumed to be the same as the variable's
-              // original declaration line.
-              if (definition?.startPosition.row === start?.line) {
-                return false
-              }
+            if (definedVariable?.text === word) {
+              if (n.equals(definedVariable)) {
+                // `end?.line` is assumed to be the same as the variable's
+                // declaration line.
+                if (definition?.startPosition.row === end?.line) {
+                  return false
+                }
+              } else {
+                // `start?.line` is assumed to be the same as the variable's
+                // original declaration line.
+                if (definition?.startPosition.row === start?.line) {
+                  return false
+                }
 
-              // Returning true here is a good enough heuristic for most cases.
-              // It breaks down when redeclaration happens in multiple nested
-              // scopes, handling those more complex situations can be done
-              // later on if use cases arise.
-              return true
+                // Returning true here is a good enough heuristic for most
+                // cases. It breaks down when redeclaration happens in multiple
+                // nested scopes, handling those more complex situations can be
+                // done later on if use cases arise.
+                return true
+              }
             }
 
             if (!parentScope || baseNode.equals(parentScope)) {
@@ -621,7 +695,7 @@ export default class Analyzer {
           }
 
     return baseNode
-      .descendantsOfType(typeOfDescendants, startPosition)
+      .descendantsOfType(typeOfDescendants, startPosition, endPosition)
       .filter(filter)
       .map((n) => {
         if (n.type === 'function_definition' && n.firstNamedChild) {
@@ -867,9 +941,9 @@ export default class Analyzer {
   /**
    * If `includeAllWorkspaceSymbols` is true, this returns all URIs from the
    * background analysis. Else, it returns the URIs of the files that are
-   * connected to `uri` via sourcing.
+   * linked to `uri` via sourcing.
    */
-  public findAllConnectedUris(uri: string): string[] {
+  public findAllLinkedUris(uri: string): string[] {
     if (this.includeAllWorkspaceSymbols) {
       return Object.keys(this.uriToAnalyzedDocument)
     }

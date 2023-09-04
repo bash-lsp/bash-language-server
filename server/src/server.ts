@@ -766,53 +766,48 @@ export default class BashServer {
       kind: symbol.kind,
     })
 
-    const ranges = !declaration
-      ? this.analyzer.findOccurrencesWithin({
-          uri: params.textDocument.uri,
-          word: symbol.word,
-          kind: symbol.kind,
-        })
-      : parent
-      ? this.analyzer.findOccurrencesWithin({
-          uri: params.textDocument.uri,
-          word: symbol.word,
-          kind: symbol.kind,
-          start: declaration.range.start,
-          scope: parent.range,
-        })
-      : null
-    if (ranges) {
+    // File-wide rename
+    if (!declaration || parent) {
       return <LSP.WorkspaceEdit>{
         changes: {
-          [params.textDocument.uri]: ranges.map((r) =>
-            LSP.TextEdit.replace(r, params.newName),
-          ),
+          [params.textDocument.uri]: this.analyzer
+            .findOccurrencesWithin({
+              uri: params.textDocument.uri,
+              word: symbol.word,
+              kind: symbol.kind,
+              start: declaration?.range.start,
+              scope: parent?.range,
+            })
+            .map((r) => LSP.TextEdit.replace(r, params.newName)),
         },
       }
     }
 
+    // Workspace-wide rename
     const edits: LSP.WorkspaceEdit = {}
-    if (declaration) {
-      edits.changes = {}
-
-      edits.changes[declaration.uri] = this.analyzer
+    edits.changes = {
+      [declaration.uri]: this.analyzer
         .findOccurrencesWithin({
           uri: declaration.uri,
           word: symbol.word,
           kind: symbol.kind,
           start: declaration.range.start,
         })
-        .map((r) => LSP.TextEdit.replace(r, params.newName))
-
-      for (const uri of this.analyzer.findAllConnectedUris(declaration.uri)) {
-        edits.changes[uri] = this.analyzer
-          .findOccurrencesWithin({
+        .map((r) => LSP.TextEdit.replace(r, params.newName)),
+    }
+    for (const uri of this.analyzer.findAllLinkedUris(declaration.uri)) {
+      edits.changes[uri] = this.analyzer
+        .findOccurrencesWithin({
+          uri,
+          word: symbol.word,
+          kind: symbol.kind,
+          end: this.analyzer.findOriginalDeclarationWithinFile({
             uri,
             word: symbol.word,
             kind: symbol.kind,
-          })
-          .map((r) => LSP.TextEdit.replace(r, params.newName))
-      }
+          })?.range.start,
+        })
+        .map((r) => LSP.TextEdit.replace(r, params.newName))
     }
     return edits
   }
