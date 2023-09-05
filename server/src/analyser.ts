@@ -589,114 +589,123 @@ export default class Analyzer {
     const startPosition = start
       ? { row: start.line, column: start.character }
       : baseNode.startPosition
-    const endPosition = end
-      ? { row: end.line + 1, column: end.character + 1 }
-      : baseNode.endPosition
+    // Special handling for cases like
+    // var="
+    //   $var
+    // "
+    let endPosition
+    if (end) {
+      const endNode = baseNode.descendantForPosition({
+        row: end.line,
+        column: end.character,
+      })
+      const parentNode =
+        endNode.type === 'variable_name'
+          ? TreeSitterUtil.findParentOfType(endNode, 'variable_assignment')
+          : null
+      parentNode && ({ endPosition } = parentNode)
+    }
 
     const ignoredRanges: LSP.Range[] = []
-    const filter =
-      kind === LSP.SymbolKind.Variable
-        ? (n: Parser.SyntaxNode) => {
-            if (n.text !== word) {
-              return false
-            }
+    const filterVariables = (n: Parser.SyntaxNode) => {
+      if (n.text !== word) {
+        return false
+      }
 
-            const parentScope = this.parentScope(n)
-            const definition = TreeSitterUtil.findParentOfType(
-              n,
-              parentScope?.type === 'function_definition'
-                ? 'declaration_command'
-                : 'variable_assignment',
-            )
-            const definedVariable = definition?.descendantsOfType('variable_name')?.at(0)
+      const parentScope = this.parentScope(n)
+      const definition = TreeSitterUtil.findParentOfType(
+        n,
+        parentScope?.type === 'function_definition'
+          ? 'declaration_command'
+          : 'variable_assignment',
+      )
+      const definedVariable = definition?.descendantsOfType('variable_name')?.at(0)
 
-            // Special handling for var="$var" cases
-            if (definedVariable?.text === word) {
-              if (n.equals(definedVariable)) {
-                // `end?.line` is assumed to be the same as the variable's
-                // declaration line.
-                if (definition?.startPosition.row === end?.line) {
-                  return false
-                }
-              } else {
-                // `start?.line` is assumed to be the same as the variable's
-                // original declaration line.
-                if (definition?.startPosition.row === start?.line) {
-                  return false
-                }
-
-                // Returning true here is a good enough heuristic for most
-                // cases. It breaks down when redeclaration happens in multiple
-                // nested scopes, handling those more complex situations can be
-                // done later on if use cases arise.
-                return true
-              }
-            }
-
-            if (!parentScope || baseNode.equals(parentScope)) {
-              return true
-            }
-
-            const includeDeclaration = !ignoredRanges.some(
-              (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
-            )
-
-            if (!definition) {
-              return includeDeclaration
-            }
-
-            const isLocalDefinition =
-              definedVariable?.text === word &&
-              (parentScope.type === 'subshell'
-                ? !!definition
-                : ['local', 'declare', 'typeset'].includes(
-                    definition.firstChild?.text as any,
-                  ))
-            if (isLocalDefinition) {
-              if (includeDeclaration) {
-                ignoredRanges.push(TreeSitterUtil.range(parentScope))
-              }
-
-              return false
-            }
-
-            return true
+      // Special handling for var="$var" cases
+      if (definedVariable?.text === word) {
+        if (n.equals(definedVariable)) {
+          // `end?.line` is assumed to be the same as the variable's declaration
+          // line; handles cases where $var should be renamed but var shouldn't.
+          if (definition?.startPosition.row === end?.line) {
+            return false
           }
-        : (n: Parser.SyntaxNode) => {
-            const text =
-              n.type === 'function_definition' ? n.firstNamedChild?.text : n.text
-            if (text !== word) {
-              return false
-            }
-
-            const parentScope = TreeSitterUtil.findParentOfType(n, 'subshell')
-
-            if (!parentScope || baseNode.equals(parentScope)) {
-              return true
-            }
-
-            const includeDeclaration = !ignoredRanges.some(
-              (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
-            )
-
-            if (n.type === 'command_name') {
-              return includeDeclaration
-            }
-
-            if (n.type === 'function_definition') {
-              if (includeDeclaration) {
-                ignoredRanges.push(TreeSitterUtil.range(parentScope))
-              }
-
-              return false
-            }
-
-            return true
+        } else {
+          // `start?.line` is assumed to be the same as the variable's original
+          // declaration line; handles cases where var should be renamed but
+          // $var shouldn't.
+          if (definition?.startPosition.row === start?.line) {
+            return false
           }
+
+          // Returning true here is a good enough heuristic for most cases. It
+          // breaks down when redeclaration happens in multiple nested scopes,
+          // handling those more complex situations can be done later on if use
+          // cases arise.
+          return true
+        }
+      }
+
+      if (!parentScope || baseNode.equals(parentScope)) {
+        return true
+      }
+
+      const includeDeclaration = !ignoredRanges.some(
+        (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
+      )
+
+      if (!definition) {
+        return includeDeclaration
+      }
+
+      const isLocalDefinition =
+        definedVariable?.text === word &&
+        (parentScope.type === 'subshell'
+          ? !!definition
+          : ['local', 'declare', 'typeset'].includes(definition.firstChild?.text as any))
+      if (isLocalDefinition) {
+        if (includeDeclaration) {
+          ignoredRanges.push(TreeSitterUtil.range(parentScope))
+        }
+
+        return false
+      }
+
+      return true
+    }
+    const filterFunctions = (n: Parser.SyntaxNode) => {
+      const text = n.type === 'function_definition' ? n.firstNamedChild?.text : n.text
+      if (text !== word) {
+        return false
+      }
+
+      const parentScope = TreeSitterUtil.findParentOfType(n, 'subshell')
+
+      if (!parentScope || baseNode.equals(parentScope)) {
+        return true
+      }
+
+      const includeDeclaration = !ignoredRanges.some(
+        (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
+      )
+
+      if (n.type === 'command_name') {
+        return includeDeclaration
+      }
+
+      if (n.type === 'function_definition') {
+        if (includeDeclaration) {
+          ignoredRanges.push(TreeSitterUtil.range(parentScope))
+        }
+
+        return false
+      }
+
+      return true
+    }
 
     return baseNode
       .descendantsOfType(typeOfDescendants, startPosition, endPosition)
-      .filter(filter)
+      .filter(kind === LSP.SymbolKind.Variable ? filterVariables : filterFunctions)
       .map((n) => {
         if (n.type === 'function_definition' && n.firstNamedChild) {
           return TreeSitterUtil.range(n.firstNamedChild)
