@@ -315,7 +315,9 @@ export default class Analyzer {
         }
 
         let definedSymbol: Parser.SyntaxNode | null | undefined
-        // Check for var="$var" cases
+        // In cases of var="$var", if $var is being renamed, the definition
+        // containing $var should be skipped and a higher scope should be
+        // checked.
         let definedVariableInExpression = false
 
         if (
@@ -341,10 +343,6 @@ export default class Analyzer {
           continueSearching = n.type === 'command'
         }
 
-        if (n.type === 'function_definition') {
-          return false
-        }
-
         return true
       })
     }
@@ -366,23 +364,25 @@ export default class Analyzer {
           }
 
           if (n.type === 'declaration_command') {
-            const isLocal = ['local', 'declare', 'typeset'].includes(
-              n.firstChild?.text as any,
-            )
-            const definedVariable = n.descendantsOfType('variable_name').at(0)
-            // Check for var="$var" cases
-            const definedVariableInExpression =
-              n.endPosition.row >= position.line &&
-              definedVariable &&
-              (definedVariable.endPosition.column < position.character ||
-                definedVariable.endPosition.row < position.line)
-            if (
-              isLocal &&
-              definedVariable?.text === word &&
-              !definedVariableInExpression
-            ) {
-              declaration = definedVariable
-              continueSearching = false
+            if (!['local', 'declare', 'typeset'].includes(n.firstChild?.text as any)) {
+              return false
+            }
+
+            for (const a of n.descendantsOfType('variable_assignment')) {
+              const definedVariable = a.descendantsOfType('variable_name').at(0)
+              // In cases of var="$var", if $var is being renamed, the
+              // definition containing $var should be skipped and a higher scope
+              // should be checked.
+              const definedVariableInExpression =
+                a.endPosition.row >= position.line &&
+                !!definedVariable &&
+                (definedVariable.endPosition.column < position.character ||
+                  definedVariable.endPosition.row < position.line)
+
+              if (definedVariable?.text === word && !definedVariableInExpression) {
+                declaration = definedVariable
+                continueSearching = false
+              }
             }
 
             return false
@@ -403,12 +403,14 @@ export default class Analyzer {
     }
 
     if (!parent && (!declaration || continueSearching)) {
-      const uris = this.getReachableUris({ fromUri: uri })
-
-      for (const u of uris) {
+      for (const u of this.getReachableUris({ fromUri: uri })) {
         const root = this.uriToAnalyzedDocument[u]?.tree.rootNode
 
         if (root) {
+          if (u !== uri) {
+            boundary = root.endPosition.row
+          }
+
           findUsingGlobalSemantics(root)
         }
 
