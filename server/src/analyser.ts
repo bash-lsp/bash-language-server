@@ -320,20 +320,34 @@ export default class Analyzer {
         // checked.
         let definedVariableInExpression = false
 
-        if (
-          kind === LSP.SymbolKind.Variable &&
-          (['declaration_command', 'variable_assignment', 'for_statement'].includes(
-            n.type,
-          ) ||
-            (n.type === 'command' && n.text.includes(':=')))
-        ) {
+        if (kind === LSP.SymbolKind.Variable && n.type === 'variable_assignment') {
+          const declarationCommand = TreeSitterUtil.findParentOfType(
+            n,
+            'declaration_command',
+          )
+
+          if (
+            declarationCommand &&
+            TreeSitterUtil.findParentOfType(declarationCommand, 'function_definition')
+              ?.lastChild?.type === 'compound_statement' &&
+            ['local', 'declare', 'typeset'].includes(
+              declarationCommand.firstChild?.text as any,
+            )
+          ) {
+            return false
+          }
+
           definedSymbol = n.descendantsOfType('variable_name').at(0)
           definedVariableInExpression =
-            n.type === 'variable_assignment' &&
             n.endPosition.row >= position.line &&
             !!definedSymbol &&
             (definedSymbol.endPosition.column < position.character ||
               definedSymbol.endPosition.row < position.line)
+        } else if (
+          kind === LSP.SymbolKind.Variable &&
+          (n.type === 'for_statement' || (n.type === 'command' && n.text.includes(':=')))
+        ) {
+          definedSymbol = n.descendantsOfType('variable_name').at(0)
         } else if (kind === LSP.SymbolKind.Function && n.type === 'function_definition') {
           definedSymbol = n.firstNamedChild
         }
@@ -382,6 +396,7 @@ export default class Analyzer {
               if (definedVariable?.text === word && !definedVariableInExpression) {
                 declaration = definedVariable
                 continueSearching = false
+                break
               }
             }
 
