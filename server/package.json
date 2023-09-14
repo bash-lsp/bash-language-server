@@ -31,8 +31,8 @@
   },
   "devDependencies": {
     "@types/fuzzy-search": "2.1.2",
-    "@types/node-fetch": "2.6.4",
-    "@types/turndown": "5.0.1",
-    "@types/urijs": "1.19.19"
+    "@types/node-fetch": "2.6.5",
+    "@types/turndown": "5.0.2",
+    "@types/urijs": "1.19.20"
   }
 }
