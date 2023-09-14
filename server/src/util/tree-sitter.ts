@@ -57,6 +57,10 @@ export function findParent(
   return null
 }
 
-export function findParentOfType(start: SyntaxNode, type: string) {
-  return findParent(start, (n) => n.type === type)
+export function findParentOfType(start: SyntaxNode, type: string | string[]) {
+  if (typeof type === 'string') {
+    return findParent(start, (n) => n.type === type)
+  }
+
+  return findParent(start, (n) => type.includes(n.type))
 }

@@ -382,19 +382,21 @@ export default class Analyzer {
               return false
             }
 
-            for (const a of n.descendantsOfType('variable_assignment')) {
-              const definedVariable = a.descendantsOfType('variable_name').at(0)
-              // In cases of var="$var", if $var is being renamed, the
-              // definition containing $var should be skipped and a higher scope
-              // should be checked.
-              const definedVariableInExpression =
-                a.endPosition.row >= position.line &&
-                !!definedVariable &&
-                (definedVariable.endPosition.column < position.character ||
-                  definedVariable.endPosition.row < position.line)
+            for (const v of n.descendantsOfType('variable_name')) {
+              if (TreeSitterUtil.findParentOfType(v, ['simple_expansion', 'expansion'])) {
+                continue
+              }
 
-              if (definedVariable?.text === word && !definedVariableInExpression) {
-                declaration = definedVariable
+              // In cases of var="$var", if $var is being renamed, var should be
+              // skipped and a higher scope should be checked for the original
+              // declaration.
+              const definedVariableInExpression =
+                n.endPosition.row >= position.line &&
+                (v.endPosition.column < position.character ||
+                  v.endPosition.row < position.line)
+
+              if (v.text === word && !definedVariableInExpression) {
+                declaration = v
                 continueSearching = false
                 break
               }
