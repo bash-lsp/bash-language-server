@@ -278,9 +278,6 @@ export default class Analyzer {
   /**
    * Find a symbol's original declaration and parent scope based on its original
    * definition with respect to its scope.
-   *
-   * TODO: Improve handling of multiple variable assignments and declarations in
-   * one declaration command.
    */
   public findOriginalDeclaration({
     position,
@@ -304,7 +301,23 @@ export default class Analyzer {
     let continueSearching = false
     let boundary = position.line
 
-    const findUsingGlobalSemantics = (base: Parser.SyntaxNode) => {
+    /**
+     * Estimates if the `position` of the `word` given is within the expression
+     * (after the equals sign) of the `definition` node (should be a declaration
+     * command or variable assignment) given.
+     *
+     * Important in cases of `var="$var"`, if the `word` is `$var` then `var`
+     * should be skipped and a higher scope should be checked for the original
+     * declaration.
+     */
+    const isDefinedVariableInExpression = (
+      definition: Parser.SyntaxNode,
+      variable: Parser.SyntaxNode,
+    ) =>
+      definition.endPosition.row >= position.line &&
+      (variable.endPosition.column < position.character ||
+        variable.endPosition.row < position.line)
+    const findUsingGlobalSemantics = (base: Parser.SyntaxNode, baseIsInUri = true) => {
       TreeSitterUtil.forEach(base, (n) => {
         if (
           (declaration && !continueSearching) ||
@@ -314,47 +327,83 @@ export default class Analyzer {
           return false
         }
 
-        let definedSymbol: Parser.SyntaxNode | null | undefined
-        // In cases of var="$var", if $var is being renamed, the definition
-        // containing $var should be skipped and a higher scope should be
-        // checked.
-        let definedVariableInExpression = false
-
-        if (kind === LSP.SymbolKind.Variable && n.type === 'variable_assignment') {
-          const declarationCommand = TreeSitterUtil.findParentOfType(
+        // Declaration commands are handled separately from variable assignments
+        // because declaration commands can declare variables without defining
+        // them, while variable assignments require both declaration and
+        // definition, so, there can be variable names within declaration
+        // commands that are not children of variable assignments.
+        if (kind === LSP.SymbolKind.Variable && n.type === 'declaration_command') {
+          const functionDefinition = TreeSitterUtil.findParentOfType(
             n,
-            'declaration_command',
+            'function_definition',
           )
+          const isLocalDeclaration =
+            !!functionDefinition &&
+            functionDefinition.lastChild?.type === 'compound_statement' &&
+            ['local', 'declare', 'typeset'].includes(n.firstChild?.text as any) &&
+            (base.type !== 'subshell' ||
+              base.startPosition.row < functionDefinition.startPosition.row)
 
-          if (
-            declarationCommand &&
-            TreeSitterUtil.findParentOfType(declarationCommand, 'function_definition')
-              ?.lastChild?.type === 'compound_statement' &&
-            ['local', 'declare', 'typeset'].includes(
-              declarationCommand.firstChild?.text as any,
-            )
-          ) {
+          for (const v of n.descendantsOfType('variable_name')) {
+            if (
+              v.text !== word ||
+              TreeSitterUtil.findParentOfType(v, ['simple_expansion', 'expansion'])
+            ) {
+              continue
+            }
+
+            if (isLocalDeclaration) {
+              // Update boundary since any other instance of word below n can
+              // now be considered local to a function or out of scope.
+              boundary = n.startPosition.row
+              break
+            }
+
+            if (baseIsInUri && !isDefinedVariableInExpression(n, v)) {
+              declaration = v
+              continueSearching = false
+              break
+            }
+          }
+
+          // This return is important as it makes sure that the next if
+          // statement only catches variable assignments outside of declaration
+          // commands.
+          return false
+        }
+
+        if (
+          kind === LSP.SymbolKind.Variable &&
+          (['variable_assignment', 'for_statement'].includes(n.type) ||
+            (n.type === 'command' && n.text.includes(':=')))
+        ) {
+          const definedVariable = n.descendantsOfType('variable_name').at(0)
+          const definedVariableInExpression =
+            baseIsInUri &&
+            n.type === 'variable_assignment' &&
+            !!definedVariable &&
+            isDefinedVariableInExpression(n, definedVariable)
+
+          if (definedVariable?.text === word && !definedVariableInExpression) {
+            declaration = definedVariable
+            continueSearching = n.type === 'command'
+
+            // The original declaration could be inside a for statement, so only
+            // return false when the original declaration is found.
             return false
           }
 
-          definedSymbol = n.descendantsOfType('variable_name').at(0)
-          definedVariableInExpression =
-            n.endPosition.row >= position.line &&
-            !!definedSymbol &&
-            (definedSymbol.endPosition.column < position.character ||
-              definedSymbol.endPosition.row < position.line)
-        } else if (
-          kind === LSP.SymbolKind.Variable &&
-          (n.type === 'for_statement' || (n.type === 'command' && n.text.includes(':=')))
-        ) {
-          definedSymbol = n.descendantsOfType('variable_name').at(0)
-        } else if (kind === LSP.SymbolKind.Function && n.type === 'function_definition') {
-          definedSymbol = n.firstNamedChild
+          return true
         }
 
-        if (definedSymbol?.text === word && !definedVariableInExpression) {
-          declaration = definedSymbol
-          continueSearching = n.type === 'command'
+        if (
+          kind === LSP.SymbolKind.Function &&
+          n.type === 'function_definition' &&
+          n.firstNamedChild?.text === word
+        ) {
+          declaration = n.firstNamedChild
+          continueSearching = false
+          return false
         }
 
         return true
@@ -377,35 +426,30 @@ export default class Analyzer {
             return false
           }
 
-          if (n.type === 'declaration_command') {
-            if (!['local', 'declare', 'typeset'].includes(n.firstChild?.text as any)) {
-              return false
-            }
+          if (n.type !== 'declaration_command') {
+            return true
+          }
 
-            for (const v of n.descendantsOfType('variable_name')) {
-              if (TreeSitterUtil.findParentOfType(v, ['simple_expansion', 'expansion'])) {
-                continue
-              }
-
-              // In cases of var="$var", if $var is being renamed, var should be
-              // skipped and a higher scope should be checked for the original
-              // declaration.
-              const definedVariableInExpression =
-                n.endPosition.row >= position.line &&
-                (v.endPosition.column < position.character ||
-                  v.endPosition.row < position.line)
-
-              if (v.text === word && !definedVariableInExpression) {
-                declaration = v
-                continueSearching = false
-                break
-              }
-            }
-
+          if (!['local', 'declare', 'typeset'].includes(n.firstChild?.text as any)) {
             return false
           }
 
-          return true
+          for (const v of n.descendantsOfType('variable_name')) {
+            if (
+              v.text !== word ||
+              TreeSitterUtil.findParentOfType(v, ['simple_expansion', 'expansion'])
+            ) {
+              continue
+            }
+
+            if (!isDefinedVariableInExpression(n, v)) {
+              declaration = v
+              continueSearching = false
+              break
+            }
+          }
+
+          return false
         })
       } else if (parent.type === 'subshell') {
         findUsingGlobalSemantics(parent)
@@ -415,6 +459,9 @@ export default class Analyzer {
         break
       }
 
+      // Update boundary since any other instance of word within or below the
+      // current parent can now be considered local to that parent or out of
+      // scope.
       boundary = parent.startPosition.row
       parent = this.parentScope(parent)
     }
@@ -423,12 +470,20 @@ export default class Analyzer {
       for (const u of this.getReachableUris({ fromUri: uri })) {
         const root = this.uriToAnalyzedDocument[u]?.tree.rootNode
 
-        if (root) {
-          if (u !== uri) {
-            boundary = root.endPosition.row
-          }
+        if (!root) {
+          continue
+        }
 
+        if (u === uri) {
+          // Reset boundary so globally defined variables within any functions
+          // already searched can be found.
+          boundary = position.line
           findUsingGlobalSemantics(root)
+        } else {
+          // Set boundary to EOF since any position taken from the original
+          // uri/file does not apply to other uris/files.
+          boundary = root.endPosition.row
+          findUsingGlobalSemantics(root, false)
         }
 
         if (declaration && !continueSearching) {
