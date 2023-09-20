@@ -484,6 +484,14 @@ export default class Analyzer {
       uris.reverse()
       uris.push(uri)
 
+      if (this.includeAllWorkspaceSymbols) {
+        uris.push(
+          ...Object.keys(this.uriToAnalyzedDocument).filter(
+            (u) => !(uris as string[]).includes(u),
+          ),
+        )
+      }
+
       for (const u of uris) {
         const root = this.uriToAnalyzedDocument[u]?.tree.rootNode
 
@@ -958,7 +966,7 @@ export default class Analyzer {
    */
   public findAllLinkedUris(uri: string): string[] {
     if (this.includeAllWorkspaceSymbols) {
-      return Object.keys(this.uriToAnalyzedDocument)
+      return Object.keys(this.uriToAnalyzedDocument).filter((u) => u !== uri)
     }
 
     const uriToAnalyzedDocument = Object.entries(this.uriToAnalyzedDocument)
