@@ -801,11 +801,6 @@ export default class BashServer {
           uri,
           word: symbol.word,
           kind: symbol.kind,
-          end: this.analyzer.findOriginalDeclarationWithinFile({
-            uri,
-            word: symbol.word,
-            kind: symbol.kind,
-          })?.range.start,
         })
         .map((r) => LSP.TextEdit.replace(r, params.newName))
     }

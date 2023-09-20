@@ -467,7 +467,24 @@ export default class Analyzer {
     }
 
     if (!parent && (!declaration || continueSearching)) {
-      for (const u of this.getReachableUris({ fromUri: uri })) {
+      // After processing, this should put uris higher in the sourcing tree
+      // ahead so the declaration found is from the first definition.
+      let uris: Set<string> | string[] = this.findAllSourcedUris({ uri })
+
+      for (const u1 of uris) {
+        for (const u2 of this.findAllSourcedUris({ uri: u1 })) {
+          if (uris.has(u2)) {
+            uris.delete(u2)
+            uris.add(u2)
+          }
+        }
+      }
+
+      uris = Array.from(uris)
+      uris.reverse()
+      uris.push(uri)
+
+      for (const u of uris) {
         const root = this.uriToAnalyzedDocument[u]?.tree.rootNode
 
         if (!root) {
@@ -499,67 +516,6 @@ export default class Analyzer {
         : null,
       parent: parent ? LSP.Location.create(uri, TreeSitterUtil.range(parent)) : null,
     }
-  }
-
-  /**
-   * Like findOriginalDeclaration, but only searches within the file and doesn't
-   * take parent scopes into consideration.
-   *
-   * TODO: Improve handling of multiple variable assignments and declarations in
-   * one declaration command.
-   */
-  public findOriginalDeclarationWithinFile({
-    uri,
-    word,
-    kind,
-  }: {
-    uri: string
-    word: string
-    kind: LSP.SymbolKind
-  }): LSP.Location | null {
-    const rootNode = this.uriToAnalyzedDocument[uri]?.tree.rootNode
-
-    if (!rootNode) {
-      return null
-    }
-
-    let declaration: Parser.SyntaxNode | null | undefined
-    let continueSearching = false
-
-    TreeSitterUtil.forEach(rootNode, (n) => {
-      if ((declaration && !continueSearching) || n.type === 'subshell') {
-        return false
-      }
-
-      let definedSymbol: Parser.SyntaxNode | null | undefined
-
-      if (
-        kind === LSP.SymbolKind.Variable &&
-        (['declaration_command', 'variable_assignment', 'for_statement'].includes(
-          n.type,
-        ) ||
-          (n.type === 'command' && n.text.includes(':=')))
-      ) {
-        definedSymbol = n.descendantsOfType('variable_name').at(0)
-      } else if (kind === LSP.SymbolKind.Function && n.type === 'function_definition') {
-        definedSymbol = n.firstNamedChild
-      }
-
-      if (definedSymbol?.text === word) {
-        declaration = definedSymbol
-        continueSearching = n.type === 'command'
-      }
-
-      if (n.type === 'function_definition') {
-        return false
-      }
-
-      return true
-    })
-
-    return declaration
-      ? LSP.Location.create(uri, TreeSitterUtil.range(declaration))
-      : null
   }
 
   /**
@@ -630,14 +586,12 @@ export default class Analyzer {
     word,
     kind,
     start,
-    end,
     scope,
   }: {
     uri: string
     word: string
     kind: LSP.SymbolKind
     start?: LSP.Position
-    end?: LSP.Position
     scope?: LSP.Range
   }): LSP.Range[] {
     const scopeNode = scope
@@ -663,22 +617,6 @@ export default class Analyzer {
     const startPosition = start
       ? { row: start.line, column: start.character }
       : baseNode.startPosition
-    // Special handling for cases like
-    // var="
-    //   $var
-    // "
-    let endPosition
-    if (end) {
-      const endNode = baseNode.descendantForPosition({
-        row: end.line,
-        column: end.character,
-      })
-      const parentNode =
-        endNode.type === 'variable_name'
-          ? TreeSitterUtil.findParentOfType(endNode, 'variable_assignment')
-          : null
-      parentNode && ({ endPosition } = parentNode)
-    }
 
     const ignoredRanges: LSP.Range[] = []
     const filterVariables = (n: Parser.SyntaxNode) => {
@@ -696,27 +634,19 @@ export default class Analyzer {
       const definedVariable = definition?.descendantsOfType('variable_name')?.at(0)
 
       // Special handling for var="$var" cases
-      if (definedVariable?.text === word) {
-        if (n.equals(definedVariable)) {
-          // `end?.line` is assumed to be the same as the variable's declaration
-          // line; handles cases where $var should be renamed but var shouldn't.
-          if (definition?.startPosition.row === end?.line) {
-            return false
-          }
-        } else {
-          // `start?.line` is assumed to be the same as the variable's original
-          // declaration line; handles cases where var should be renamed but
-          // $var shouldn't.
-          if (definition?.startPosition.row === start?.line) {
-            return false
-          }
-
-          // Returning true here is a good enough heuristic for most cases. It
-          // breaks down when redeclaration happens in multiple nested scopes,
-          // handling those more complex situations can be done later on if use
-          // cases arise.
-          return true
+      if (definedVariable?.text === word && !n.equals(definedVariable)) {
+        // `start?.line` is assumed to be the same as the variable's original
+        // declaration line; handles cases where var should be renamed but
+        // $var shouldn't.
+        if (definition?.startPosition.row === start?.line) {
+          return false
         }
+
+        // Returning true here is a good enough heuristic for most cases. It
+        // breaks down when redeclaration happens in multiple nested scopes,
+        // handling those more complex situations can be done later on if use
+        // cases arise.
+        return true
       }
 
       if (!parentScope || baseNode.equals(parentScope)) {
@@ -778,7 +708,7 @@ export default class Analyzer {
     }
 
     return baseNode
-      .descendantsOfType(typeOfDescendants, startPosition, endPosition)
+      .descendantsOfType(typeOfDescendants, startPosition)
       .filter(kind === LSP.SymbolKind.Variable ? filterVariables : filterFunctions)
       .map((n) => {
         if (n.type === 'function_definition' && n.firstNamedChild) {
