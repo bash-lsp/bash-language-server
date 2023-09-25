@@ -306,7 +306,7 @@ export default class Analyzer {
      * (after the equals sign) of the `definition` node (should be a declaration
      * command or variable assignment) given.
      *
-     * Important in cases of `var="$var"`, if the `word` is `$var` then `var`
+     * Important in cases of `var=$var`, if the `word` is `$var` then `var`
      * should be skipped and a higher scope should be checked for the original
      * declaration.
      */
@@ -585,9 +585,6 @@ export default class Analyzer {
 
   /**
    * A more scope-aware version of findOccurrences.
-   *
-   * TODO: Improve handling of multiple variable assignments and declarations in
-   * one declaration command.
    */
   public findOccurrencesWithin({
     uri,
@@ -632,20 +629,14 @@ export default class Analyzer {
         return false
       }
 
-      const parentScope = this.parentScope(n)
-      const definition = TreeSitterUtil.findParentOfType(
-        n,
-        parentScope?.type === 'function_definition'
-          ? 'declaration_command'
-          : 'variable_assignment',
-      )
-      const definedVariable = definition?.descendantsOfType('variable_name')?.at(0)
+      const definition = TreeSitterUtil.findParentOfType(n, 'variable_assignment')
+      const definedVariable = definition?.descendantsOfType('variable_name').at(0)
 
-      // Special handling for var="$var" cases
+      // For var=$var cases, this decides whether $var is an occurrence or not.
       if (definedVariable?.text === word && !n.equals(definedVariable)) {
         // `start?.line` is assumed to be the same as the variable's original
-        // declaration line; handles cases where var should be renamed but
-        // $var shouldn't.
+        // declaration line; handles cases where $var shouldn't be considered
+        // an occurrence.
         if (definition?.startPosition.row === start?.line) {
           return false
         }
@@ -657,26 +648,30 @@ export default class Analyzer {
         return true
       }
 
-      if (!parentScope || baseNode.equals(parentScope)) {
+      const parent = this.parentScope(n)
+
+      if (!parent || baseNode.equals(parent)) {
         return true
       }
 
+      const declarationCommand = TreeSitterUtil.findParentOfType(n, 'declaration_command')
       const includeDeclaration = !ignoredRanges.some(
         (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
       )
 
-      if (!definition) {
+      if (!definition && !declarationCommand) {
         return includeDeclaration
       }
 
-      const isLocalDefinition =
-        definedVariable?.text === word &&
-        (parentScope.type === 'subshell'
-          ? !!definition
-          : ['local', 'declare', 'typeset'].includes(definition.firstChild?.text as any))
-      if (isLocalDefinition) {
+      const isLocal =
+        (definedVariable?.text === word || !!(!definition && declarationCommand)) &&
+        (parent.type === 'subshell' ||
+          ['local', 'declare', 'typeset'].includes(
+            declarationCommand?.firstChild?.text as any,
+          ))
+      if (isLocal) {
         if (includeDeclaration) {
-          ignoredRanges.push(TreeSitterUtil.range(parentScope))
+          ignoredRanges.push(TreeSitterUtil.range(parent))
         }
 
         return false
