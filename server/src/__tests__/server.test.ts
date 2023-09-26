@@ -88,6 +88,9 @@ describe('server', () => {
         "documentSymbolProvider": true,
         "hoverProvider": true,
         "referencesProvider": true,
+        "renameProvider": {
+          "prepareProvider": true,
+        },
         "textDocumentSync": 1,
         "workspaceSymbolProvider": true,
       }
@@ -106,6 +109,8 @@ describe('server', () => {
     expect(connection.onHover).toHaveBeenCalledTimes(1)
     expect(connection.onReferences).toHaveBeenCalledTimes(1)
     expect(connection.onWorkspaceSymbol).toHaveBeenCalledTimes(1)
+    expect(connection.onPrepareRename).toHaveBeenCalledTimes(1)
+    expect(connection.onRenameRequest).toHaveBeenCalledTimes(1)
   })
 
   it('allows for defining workspace configuration', async () => {
