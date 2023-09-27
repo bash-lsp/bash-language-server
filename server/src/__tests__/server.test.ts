@@ -1339,4 +1339,116 @@ describe('server', () => {
       await lookupAndExpectNpmConfigLoglevelResult('npmloglevel') // fuzzy
     })
   })
+
+  describe('onPrepareRename', () => {
+    async function getPrepareRenameResult(line: LSP.uinteger, character: LSP.uinteger) {
+      const { connection } = await initializeServer()
+
+      return connection.onPrepareRename.mock.calls[0][0](
+        {
+          textDocument: {
+            uri: FIXTURE_URI.RENAMING,
+          },
+          position: { line, character },
+        },
+        {} as any,
+      )
+    }
+
+    it('returns null when a renamable symbol is not found', async () => {
+      // Shebang comment
+      expect(await getPrepareRenameResult(0, 0)).toBeNull()
+      // Empty line
+      expect(await getPrepareRenameResult(1, 0)).toBeNull()
+      // Special variable
+      expect(await getPrepareRenameResult(2, 7)).toBeNull()
+      // Positional parameter
+      expect(await getPrepareRenameResult(3, 7)).toBeNull()
+      // Invalidly named variable
+      expect(await getPrepareRenameResult(4, 0)).toBeNull()
+      // if keyword
+      expect(await getPrepareRenameResult(11, 0)).toBeNull()
+      // String
+      expect(await getPrepareRenameResult(11, 29)).toBeNull()
+      // Regular word
+      expect(await getPrepareRenameResult(15, 11)).toBeNull()
+
+      // Documents some of tree-sitter-bash's limitations when parsing
+      // constructs that affect renaming; these may fail in the future when
+      // parsing gets better.
+      // Variables inside a C-style for loop arithmetic expression
+      expect(await getPrepareRenameResult(19, 13)).toBeNull()
+      expect(await getPrepareRenameResult(19, 21)).toBeNull()
+      // Variable inside an arithmetic expansion
+      expect(await getPrepareRenameResult(20, 11)).toBeNull()
+    })
+
+    it('returns range when a renamable symbol is found', async () => {
+      // echo builtin command
+      expect(await getPrepareRenameResult(2, 0)).toMatchInlineSnapshot(`
+        {
+          "end": {
+            "character": 4,
+            "line": 2,
+          },
+          "start": {
+            "character": 0,
+            "line": 2,
+          },
+        }
+      `)
+      // ls executable command
+      expect(await getPrepareRenameResult(6, 12)).toMatchInlineSnapshot(`
+        {
+          "end": {
+            "character": 13,
+            "line": 6,
+          },
+          "start": {
+            "character": 11,
+            "line": 6,
+          },
+        }
+      `)
+      // Variable definition
+      expect(await getPrepareRenameResult(6, 3)).toMatchInlineSnapshot(`
+        {
+          "end": {
+            "character": 7,
+            "line": 6,
+          },
+          "start": {
+            "character": 0,
+            "line": 6,
+          },
+        }
+      `)
+      // Function definition
+      expect(await getPrepareRenameResult(7, 10)).toMatchInlineSnapshot(`
+        {
+          "end": {
+            "character": 11,
+            "line": 7,
+          },
+          "start": {
+            "character": 0,
+            "line": 7,
+          },
+        }
+      `)
+      // Function used as command
+      expect(await getPrepareRenameResult(11, 13)).toMatchInlineSnapshot(`
+        {
+          "end": {
+            "character": 19,
+            "line": 11,
+          },
+          "start": {
+            "character": 8,
+            "line": 11,
+          },
+        }
+      `)
+    })
+  })
 })

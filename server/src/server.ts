@@ -731,8 +731,7 @@ export default class BashServer {
 
     if (
       !symbol ||
-      (symbol.kind === LSP.SymbolKind.Variable &&
-        (symbol.word === '_' || !/^[a-z_][\w]*$/i.test(symbol.word)))
+      (symbol.kind === LSP.SymbolKind.Variable && !/^[a-z_][\w]*$/i.test(symbol.word))
     ) {
       return null
     }
