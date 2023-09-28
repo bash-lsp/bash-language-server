@@ -1345,12 +1345,7 @@ describe('server', () => {
       const { connection } = await initializeServer()
 
       return connection.onPrepareRename.mock.calls[0][0](
-        {
-          textDocument: {
-            uri: FIXTURE_URI.RENAMING,
-          },
-          position: { line, character },
-        },
+        { textDocument: { uri: FIXTURE_URI.RENAMING }, position: { line, character } },
         {} as any,
       )
     }
@@ -1465,6 +1460,43 @@ describe('server', () => {
           },
         }
       `)
+    })
+  })
+
+  describe('onRenameRequest', () => {
+    async function getRenameRequestResult(
+      line: LSP.uinteger,
+      character: LSP.uinteger,
+      newName = 'newName',
+    ) {
+      const { connection } = await initializeServer()
+
+      return connection.onRenameRequest.mock.calls[0][0](
+        {
+          textDocument: { uri: FIXTURE_URI.RENAMING },
+          position: { line, character },
+          newName,
+        },
+        {} as any,
+        {} as any,
+      )
+    }
+
+    // Sanity check; these cases should already be covered by onPrepareRename.
+    it('returns null when a renamable symbol is not found', async () => {
+      // Comment
+      expect(await getRenameRequestResult(2, 9)).toBeNull()
+    })
+
+    it('throws an error when newName is invalid', async () => {
+      // Variables
+      await expect(getRenameRequestResult(12, 0, '_')).rejects.toThrow()
+      await expect(getRenameRequestResult(12, 0, '2')).rejects.toThrow()
+      await expect(getRenameRequestResult(12, 0, '1abc')).rejects.toThrow()
+      await expect(getRenameRequestResult(12, 0, 'ab%c')).rejects.toThrow()
+      // Functions
+      await expect(getRenameRequestResult(13, 0, '$')).rejects.toThrow()
+      await expect(getRenameRequestResult(13, 0, 'new$name')).rejects.toThrow()
     })
   })
 })
