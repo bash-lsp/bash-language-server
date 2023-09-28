@@ -1356,96 +1356,112 @@ describe('server', () => {
     }
 
     it('returns null when a renamable symbol is not found', async () => {
-      // Shebang comment
-      expect(await getPrepareRenameResult(0, 0)).toBeNull()
       // Empty line
       expect(await getPrepareRenameResult(1, 0)).toBeNull()
-      // Special variable
-      expect(await getPrepareRenameResult(2, 7)).toBeNull()
-      // Positional parameter
+      // Comment
+      expect(await getPrepareRenameResult(2, 9)).toBeNull()
+      // Special variables
       expect(await getPrepareRenameResult(3, 7)).toBeNull()
-      // Invalidly named variable
       expect(await getPrepareRenameResult(4, 0)).toBeNull()
+      // Positional parameters
+      expect(await getPrepareRenameResult(6, 7)).toBeNull()
+      expect(await getPrepareRenameResult(7, 0)).toBeNull()
+      // Invalidly named variables
+      expect(await getPrepareRenameResult(9, 2)).toBeNull()
+      expect(await getPrepareRenameResult(10, 0)).toBeNull()
       // if keyword
-      expect(await getPrepareRenameResult(11, 0)).toBeNull()
+      expect(await getPrepareRenameResult(17, 1)).toBeNull()
       // String
-      expect(await getPrepareRenameResult(11, 29)).toBeNull()
+      expect(await getPrepareRenameResult(17, 29)).toBeNull()
       // Regular word
-      expect(await getPrepareRenameResult(15, 11)).toBeNull()
+      expect(await getPrepareRenameResult(21, 11)).toBeNull()
 
       // Documents some of tree-sitter-bash's limitations when parsing
       // constructs that affect renaming; these may fail in the future when
       // parsing gets better.
       // Variables inside a C-style for loop arithmetic expression
-      expect(await getPrepareRenameResult(19, 13)).toBeNull()
-      expect(await getPrepareRenameResult(19, 21)).toBeNull()
+      expect(await getPrepareRenameResult(25, 13)).toBeNull()
+      expect(await getPrepareRenameResult(25, 21)).toBeNull()
       // Variable inside an arithmetic expansion
-      expect(await getPrepareRenameResult(20, 11)).toBeNull()
+      expect(await getPrepareRenameResult(26, 11)).toBeNull()
     })
 
     it('returns range when a renamable symbol is found', async () => {
       // echo builtin command
-      expect(await getPrepareRenameResult(2, 0)).toMatchInlineSnapshot(`
+      expect(await getPrepareRenameResult(3, 2)).toMatchInlineSnapshot(`
         {
           "end": {
             "character": 4,
-            "line": 2,
+            "line": 3,
           },
           "start": {
             "character": 0,
-            "line": 2,
+            "line": 3,
           },
         }
       `)
       // ls executable command
-      expect(await getPrepareRenameResult(6, 12)).toMatchInlineSnapshot(`
+      expect(await getPrepareRenameResult(12, 12)).toMatchInlineSnapshot(`
         {
           "end": {
             "character": 13,
-            "line": 6,
+            "line": 12,
           },
           "start": {
             "character": 11,
-            "line": 6,
+            "line": 12,
           },
         }
       `)
       // Variable definition
-      expect(await getPrepareRenameResult(6, 3)).toMatchInlineSnapshot(`
+      expect(await getPrepareRenameResult(12, 0)).toMatchInlineSnapshot(`
         {
           "end": {
             "character": 7,
-            "line": 6,
+            "line": 12,
           },
           "start": {
             "character": 0,
-            "line": 6,
+            "line": 12,
+          },
+        }
+      `)
+      // Expanded variable
+      expect(await getPrepareRenameResult(18, 13)).toMatchInlineSnapshot(`
+        {
+          "end": {
+            "character": 15,
+            "line": 18,
+          },
+          "start": {
+            "character": 8,
+            "line": 18,
           },
         }
       `)
       // Function definition
-      expect(await getPrepareRenameResult(7, 10)).toMatchInlineSnapshot(`
+      expect(await getPrepareRenameResult(13, 10)).toMatchInlineSnapshot(`
         {
           "end": {
             "character": 11,
-            "line": 7,
+            "line": 13,
           },
           "start": {
             "character": 0,
-            "line": 7,
+            "line": 13,
           },
         }
       `)
       // Function used as command
-      expect(await getPrepareRenameResult(11, 13)).toMatchInlineSnapshot(`
+      expect(await getPrepareRenameResult(17, 13)).toMatchInlineSnapshot(`
         {
           "end": {
             "character": 19,
-            "line": 11,
+            "line": 17,
           },
           "start": {
             "character": 8,
-            "line": 11,
+            "line": 17,
           },
         }
       `)

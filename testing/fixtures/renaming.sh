@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 
-echo "$_"   # Special variable
-echo "$1"   # Positional parameter
-1abc="1abc" # Invalidly named variable
+# Special variables
+echo "$_"
+_="reassign"
+# Positional parameters
+echo "$1"
+2="reassign"
+# Invalidly named variables
+1abc="1abc"
+ab%c="ab%c"
 
 somevar="$(ls somedir)"
 somecommand() {
