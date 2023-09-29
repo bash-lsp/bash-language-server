@@ -1471,14 +1471,16 @@ describe('server', () => {
     ) {
       const { connection } = await initializeServer()
 
-      return connection.onRenameRequest.mock.calls[0][0](
-        {
-          textDocument: { uri: FIXTURE_URI.RENAMING },
-          position: { line, character },
-          newName,
-        },
-        {} as any,
-        {} as any,
+      return updateSnapshotUris(
+        await connection.onRenameRequest.mock.calls[0][0](
+          {
+            textDocument: { uri: FIXTURE_URI.RENAMING },
+            position: { line, character },
+            newName,
+          },
+          {} as any,
+          {} as any,
+        ),
       )
     }
 
@@ -1498,5 +1500,82 @@ describe('server', () => {
       await expect(getRenameRequestResult(13, 0, '$')).rejects.toThrow()
       await expect(getRenameRequestResult(13, 0, 'new$name')).rejects.toThrow()
     })
+
+    it('returns all instances within file when no declaration is found', async () => {
+      // $HOME variable
+      expect(await getRenameRequestResult(29, 9)).toMatchInlineSnapshot(`
+        {
+          "changes": {
+            "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+              {
+                "newText": "newName",
+                "range": {
+                  "end": {
+                    "character": 11,
+                    "line": 29,
+                  },
+                  "start": {
+                    "character": 7,
+                    "line": 29,
+                  },
+                },
+              },
+              {
+                "newText": "newName",
+                "range": {
+                  "end": {
+                    "character": 9,
+                    "line": 30,
+                  },
+                  "start": {
+                    "character": 5,
+                    "line": 30,
+                  },
+                },
+              },
+            ],
+          },
+        }
+      `)
+      // ls command
+      expect(await getRenameRequestResult(30, 0)).toMatchInlineSnapshot(`
+        {
+          "changes": {
+            "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+              {
+                "newText": "newName",
+                "range": {
+                  "end": {
+                    "character": 13,
+                    "line": 12,
+                  },
+                  "start": {
+                    "character": 11,
+                    "line": 12,
+                  },
+                },
+              },
+              {
+                "newText": "newName",
+                "range": {
+                  "end": {
+                    "character": 2,
+                    "line": 30,
+                  },
+                  "start": {
+                    "character": 0,
+                    "line": 30,
+                  },
+                },
+              },
+            ],
+          },
+        }
+      `)
+    })
+
+    it.todo('returns all instances within file when declaration is local to file')
+    it.todo('returns all instances within scope when declaration is local to scope')
+    it.todo('returns all instances across linked files')
   })
 })

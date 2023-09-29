@@ -53,6 +53,16 @@ export function updateSnapshotUris<
     }
 
     if (typeof data === 'object') {
+      if (data.changes) {
+        for (const key in data.changes) {
+          data.changes[key.replace(REPO_ROOT_FOLDER, '__REPO_ROOT_FOLDER__')] =
+            data.changes[key]
+          delete data.changes[key]
+        }
+
+        return data
+      }
+
       if (data.uri) {
         data.uri = data.uri.replace(REPO_ROOT_FOLDER, '__REPO_ROOT_FOLDER__')
       }
