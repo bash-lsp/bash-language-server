@@ -29,3 +29,14 @@ done
 
 echo "$HOME"
 ls "$HOME"
+
+variable_or_function="some value"
+function variable_or_function {
+	echo "$variable_or_function"
+
+	if [[ "$variable_or_function" == "true" ]]; then
+		variable_or_function
+	fi
+
+	variable_or_function="true"
+}

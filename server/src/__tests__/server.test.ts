@@ -1382,7 +1382,7 @@ describe('server', () => {
     })
 
     it('returns range when a renamable symbol is found', async () => {
-      // echo builtin command
+      // echo builtin
       expect(await getPrepareRenameResult(3, 2)).toMatchInlineSnapshot(`
         {
           "end": {
@@ -1395,7 +1395,7 @@ describe('server', () => {
           },
         }
       `)
-      // ls executable command
+      // ls executable
       expect(await getPrepareRenameResult(12, 12)).toMatchInlineSnapshot(`
         {
           "end": {
@@ -1502,7 +1502,7 @@ describe('server', () => {
     })
 
     it('returns all instances within file when no declaration is found', async () => {
-      // $HOME variable
+      // $HOME
       expect(await getRenameRequestResult(29, 9)).toMatchInlineSnapshot(`
         {
           "changes": {
@@ -1537,7 +1537,7 @@ describe('server', () => {
           },
         }
       `)
-      // ls command
+      // ls
       expect(await getRenameRequestResult(30, 0)).toMatchInlineSnapshot(`
         {
           "changes": {
@@ -1574,7 +1574,99 @@ describe('server', () => {
       `)
     })
 
-    it.todo('returns all instances within file when declaration is local to file')
+    it('returns all instances within file when declaration is local to file', async () => {
+      // $somevar
+      expect(await getRenameRequestResult(12, 0)).toMatchInlineSnapshot(`
+        {
+          "changes": {
+            "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+              {
+                "newText": "newName",
+                "range": {
+                  "end": {
+                    "character": 7,
+                    "line": 12,
+                  },
+                  "start": {
+                    "character": 0,
+                    "line": 12,
+                  },
+                },
+              },
+              {
+                "newText": "newName",
+                "range": {
+                  "end": {
+                    "character": 15,
+                    "line": 18,
+                  },
+                  "start": {
+                    "character": 8,
+                    "line": 18,
+                  },
+                },
+              },
+            ],
+          },
+        }
+      `)
+      // somecommand
+      expect(await getRenameRequestResult(17, 13)).toMatchInlineSnapshot(`
+        {
+          "changes": {
+            "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+              {
+                "newText": "newName",
+                "range": {
+                  "end": {
+                    "character": 11,
+                    "line": 13,
+                  },
+                  "start": {
+                    "character": 0,
+                    "line": 13,
+                  },
+                },
+              },
+              {
+                "newText": "newName",
+                "range": {
+                  "end": {
+                    "character": 19,
+                    "line": 17,
+                  },
+                  "start": {
+                    "character": 8,
+                    "line": 17,
+                  },
+                },
+              },
+            ],
+          },
+        }
+      `)
+    })
+
+    it('differentiates between variables and functions with same name', async () => {
+      const getChangeRanges = async (line: LSP.uinteger, character: LSP.uinteger) =>
+        Object.values(
+          ((await getRenameRequestResult(line, character)) as LSP.WorkspaceEdit)
+            .changes as {
+            [uri: LSP.DocumentUri]: LSP.TextEdit[]
+          },
+        )[0].map((c) => c.range)
+
+      // $variable_or_function
+      const varRanges = await getChangeRanges(32, 9)
+      // variable_or_function
+      const funcRanges = await getChangeRanges(33, 21)
+
+      expect(varRanges).toHaveLength(4)
+      expect(funcRanges).toHaveLength(2)
+      expect(varRanges).not.toContainEqual(funcRanges[0])
+      expect(varRanges).not.toContainEqual(funcRanges[1])
+    })
+
     it.todo('returns all instances within scope when declaration is local to scope')
     it.todo('returns all instances across linked files')
   })
