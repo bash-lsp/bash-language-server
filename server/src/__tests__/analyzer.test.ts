@@ -462,6 +462,23 @@ describe('findDeclarationsMatchingWord', () => {
           },
           "name": "npm_config_loglevel",
         },
+        {
+          "kind": 13,
+          "location": {
+            "range": {
+              "end": {
+                "character": 26,
+                "line": 97,
+              },
+              "start": {
+                "character": 0,
+                "line": 97,
+              },
+            },
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh",
+          },
+          "name": "npm_config_loglevel",
+        },
       ]
     `)
 

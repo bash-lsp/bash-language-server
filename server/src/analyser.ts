@@ -359,7 +359,7 @@ export default class Analyzer {
               break
             }
 
-            if (baseIsInUri && !isDefinedVariableInExpression(n, v)) {
+            if (!baseIsInUri || !isDefinedVariableInExpression(n, v)) {
               declaration = v
               continueSearching = false
               break
@@ -379,14 +379,16 @@ export default class Analyzer {
         ) {
           const definedVariable = n.descendantsOfType('variable_name').at(0)
           const definedVariableInExpression =
-            baseIsInUri &&
             n.type === 'variable_assignment' &&
             !!definedVariable &&
             isDefinedVariableInExpression(n, definedVariable)
 
-          if (definedVariable?.text === word && !definedVariableInExpression) {
+          if (
+            definedVariable?.text === word &&
+            (!baseIsInUri || !definedVariableInExpression)
+          ) {
             declaration = definedVariable
-            continueSearching = n.type === 'command'
+            continueSearching = base.type === 'subshell' && n.type === 'command'
 
             // The original declaration could be inside a for statement, so only
             // return false when the original declaration is found.
@@ -654,15 +656,11 @@ export default class Analyzer {
         return true
       }
 
-      const declarationCommand = TreeSitterUtil.findParentOfType(n, 'declaration_command')
       const includeDeclaration = !ignoredRanges.some(
         (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
       )
 
-      if (!definition && !declarationCommand) {
-        return includeDeclaration
-      }
-
+      const declarationCommand = TreeSitterUtil.findParentOfType(n, 'declaration_command')
       const isLocal =
         (definedVariable?.text === word || !!(!definition && declarationCommand)) &&
         (parent.type === 'subshell' ||
@@ -677,7 +675,7 @@ export default class Analyzer {
         return false
       }
 
-      return true
+      return includeDeclaration
     }
     const filterFunctions = (n: Parser.SyntaxNode) => {
       const text = n.type === 'function_definition' ? n.firstNamedChild?.text : n.text
@@ -695,10 +693,6 @@ export default class Analyzer {
         (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
       )
 
-      if (n.type === 'command_name') {
-        return includeDeclaration
-      }
-
       if (n.type === 'function_definition') {
         if (includeDeclaration) {
           ignoredRanges.push(TreeSitterUtil.range(parentScope))
@@ -707,7 +701,7 @@ export default class Analyzer {
         return false
       }
 
-      return true
+      return includeDeclaration
     }
 
     return baseNode
