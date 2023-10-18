@@ -30,7 +30,7 @@
     "prepublishOnly": "cd ../ && pnpm compile && cp README.md server/"
   },
   "devDependencies": {
-    "@types/fuzzy-search": "2.1.2",
+    "@types/fuzzy-search": "2.1.3",
     "@types/node-fetch": "2.6.6",
     "@types/turndown": "5.0.2",
     "@types/urijs": "1.19.20"
