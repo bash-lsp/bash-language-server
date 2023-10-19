@@ -9,6 +9,9 @@ import * as Parser from 'web-tree-sitter'
 
 import { flattenArray } from './util/array'
 import {
+  FindDeclarationParams,
+  findDeclarationUsingGlobalSemantics,
+  findDeclarationUsingLocalSemantics,
   getAllDeclarationsInTree,
   getGlobalDeclarations,
   getLocalDeclarations,
@@ -279,242 +282,83 @@ export default class Analyzer {
    * Find a symbol's original declaration and parent scope based on its original
    * definition with respect to its scope.
    */
-  public findOriginalDeclaration({
-    position,
-    uri,
-    word,
-    kind,
-  }: {
-    position: LSP.Position
-    uri: string
-    word: string
-    kind: LSP.SymbolKind
-  }): { declaration: LSP.Location | null; parent: LSP.Location | null } {
-    const node = this.nodeAtPoint(uri, position.line, position.character)
+  public findOriginalDeclaration(params: FindDeclarationParams['symbolInfo']): {
+    declaration: LSP.Location | null
+    parent: LSP.Location | null
+  } {
+    const node = this.nodeAtPoint(
+      params.uri,
+      params.position.line,
+      params.position.character,
+    )
 
     if (!node) {
       return { declaration: null, parent: null }
     }
 
-    let declaration: Parser.SyntaxNode | null | undefined
-    let parent = this.parentScope(node)
-    let continueSearching = false
-    let boundary = position.line
-
-    /**
-     * Estimates if the `position` of the `word` given is within the expression
-     * (after the equals sign) of the `definition` node (should be a declaration
-     * command or variable assignment) given.
-     *
-     * Important in cases of `var=$var`, if the `word` is `$var` then `var`
-     * should be skipped and a higher scope should be checked for the original
-     * declaration.
-     */
-    const isDefinedVariableInExpression = (
-      definition: Parser.SyntaxNode,
-      variable: Parser.SyntaxNode,
-    ) =>
-      definition.endPosition.row >= position.line &&
-      (variable.endPosition.column < position.character ||
-        variable.endPosition.row < position.line)
-    const findUsingGlobalSemantics = (base: Parser.SyntaxNode, baseIsInUri = true) => {
-      TreeSitterUtil.forEach(base, (n) => {
-        if (
-          (declaration && !continueSearching) ||
-          n.startPosition.row > boundary ||
-          (n.type === 'subshell' && !n.equals(base))
-        ) {
-          return false
-        }
-
-        // Declaration commands are handled separately from variable assignments
-        // because declaration commands can declare variables without defining
-        // them, while variable assignments require both declaration and
-        // definition, so, there can be variable names within declaration
-        // commands that are not children of variable assignments.
-        if (kind === LSP.SymbolKind.Variable && n.type === 'declaration_command') {
-          const functionDefinition = TreeSitterUtil.findParentOfType(
-            n,
-            'function_definition',
-          )
-          const isLocalDeclaration =
-            !!functionDefinition &&
-            functionDefinition.lastChild?.type === 'compound_statement' &&
-            ['local', 'declare', 'typeset'].includes(n.firstChild?.text as any) &&
-            (base.type !== 'subshell' ||
-              base.startPosition.row < functionDefinition.startPosition.row)
-
-          for (const v of n.descendantsOfType('variable_name')) {
-            if (
-              v.text !== word ||
-              TreeSitterUtil.findParentOfType(v, ['simple_expansion', 'expansion'])
-            ) {
-              continue
-            }
-
-            if (isLocalDeclaration) {
-              // Update boundary since any other instance of word below n can
-              // now be considered local to a function or out of scope.
-              boundary = n.startPosition.row
-              break
-            }
-
-            if (!baseIsInUri || !isDefinedVariableInExpression(n, v)) {
-              declaration = v
-              continueSearching = false
-              break
-            }
-          }
-
-          // This return is important as it makes sure that the next if
-          // statement only catches variable assignments outside of declaration
-          // commands.
-          return false
-        }
-
-        if (
-          kind === LSP.SymbolKind.Variable &&
-          (['variable_assignment', 'for_statement'].includes(n.type) ||
-            (n.type === 'command' && n.text.includes(':=')))
-        ) {
-          const definedVariable = n.descendantsOfType('variable_name').at(0)
-          const definedVariableInExpression =
-            n.type === 'variable_assignment' &&
-            !!definedVariable &&
-            isDefinedVariableInExpression(n, definedVariable)
-
-          if (
-            definedVariable?.text === word &&
-            (!baseIsInUri || !definedVariableInExpression)
-          ) {
-            declaration = definedVariable
-            continueSearching = base.type === 'subshell' && n.type === 'command'
-
-            // The original declaration could be inside a for statement, so only
-            // return false when the original declaration is found.
-            return false
-          }
-
-          return true
-        }
-
-        if (
-          kind === LSP.SymbolKind.Function &&
-          n.type === 'function_definition' &&
-          n.firstNamedChild?.text === word
-        ) {
-          declaration = n.firstNamedChild
-          continueSearching = false
-          return false
-        }
-
-        return true
-      })
+    const otherInfo: FindDeclarationParams['otherInfo'] = {
+      currentUri: params.uri,
+      boundary: params.position.line,
     }
+    let parent = this.parentScope(node)
+    let declaration: Parser.SyntaxNode | null | undefined
+    let continueSearching = false
 
+    // Search for local declaration within parents
     while (parent) {
       if (
-        kind === LSP.SymbolKind.Variable &&
+        params.kind === LSP.SymbolKind.Variable &&
         parent.type === 'function_definition' &&
         parent.lastChild
       ) {
-        const body = parent.lastChild
-        TreeSitterUtil.forEach(body, (n) => {
-          if (
-            (declaration && !continueSearching) ||
-            n.startPosition.row > boundary ||
-            ['function_definition', 'subshell'].includes(n.type)
-          ) {
-            return false
-          }
-
-          if (n.type !== 'declaration_command') {
-            return true
-          }
-
-          if (!['local', 'declare', 'typeset'].includes(n.firstChild?.text as any)) {
-            return false
-          }
-
-          for (const v of n.descendantsOfType('variable_name')) {
-            if (
-              v.text !== word ||
-              TreeSitterUtil.findParentOfType(v, ['simple_expansion', 'expansion'])
-            ) {
-              continue
-            }
-
-            if (!isDefinedVariableInExpression(n, v)) {
-              declaration = v
-              continueSearching = false
-              break
-            }
-          }
-
-          return false
-        })
+        ;({ declaration, continueSearching } = findDeclarationUsingLocalSemantics({
+          baseNode: parent.lastChild,
+          symbolInfo: params,
+          otherInfo,
+        }))
       } else if (parent.type === 'subshell') {
-        findUsingGlobalSemantics(parent)
+        ;({ declaration, continueSearching } = findDeclarationUsingGlobalSemantics({
+          baseNode: parent,
+          symbolInfo: params,
+          otherInfo,
+        }))
       }
 
       if (declaration && !continueSearching) {
         break
       }
 
-      // Update boundary since any other instance of word within or below the
-      // current parent can now be considered local to that parent or out of
-      // scope.
-      boundary = parent.startPosition.row
+      // Update boundary since any other instance within or below the current
+      // parent can now be considered local to that parent or out of scope.
+      otherInfo.boundary = parent.startPosition.row
       parent = this.parentScope(parent)
     }
 
+    // Search for global declaration within files
     if (!parent && (!declaration || continueSearching)) {
-      // After processing, this should put uris higher in the sourcing tree
-      // ahead so the declaration found is from the first definition.
-      let uris: Set<string> | string[] = this.findAllSourcedUris({ uri })
-
-      for (const u1 of uris) {
-        for (const u2 of this.findAllSourcedUris({ uri: u1 })) {
-          if (uris.has(u2)) {
-            uris.delete(u2)
-            uris.add(u2)
-          }
-        }
-      }
-
-      uris = Array.from(uris)
-      uris.reverse()
-      uris.push(uri)
-
-      if (this.includeAllWorkspaceSymbols) {
-        uris.push(
-          ...Object.keys(this.uriToAnalyzedDocument).filter(
-            (u) => !(uris as string[]).includes(u),
-          ),
-        )
-      }
-
-      for (const u of uris) {
-        const root = this.uriToAnalyzedDocument[u]?.tree.rootNode
+      for (const uri of this.getOrderedReachableUris({ fromUri: params.uri })) {
+        const root = this.uriToAnalyzedDocument[uri]?.tree.rootNode
 
         if (!root) {
           continue
         }
 
-        if (u === uri) {
-          // Reset boundary so globally defined variables within any functions
-          // already searched can be found.
-          boundary = position.line
-          findUsingGlobalSemantics(root)
-        } else {
-          // Set boundary to EOF since any position taken from the original
-          // uri/file does not apply to other uris/files.
-          boundary = root.endPosition.row
-          findUsingGlobalSemantics(root, false)
-        }
+        otherInfo.currentUri = uri
+        otherInfo.boundary =
+          uri === params.uri
+            ? // Reset boundary so globally defined variables within any
+              // functions already searched can be found.
+              params.position.line
+            : // Set boundary to EOF since any position taken from the original
+              // URI/file does not apply to other URIs/files.
+              root.endPosition.row
+        ;({ declaration, continueSearching } = findDeclarationUsingGlobalSemantics({
+          baseNode: root,
+          symbolInfo: params,
+          otherInfo,
+        }))
 
         if (declaration && !continueSearching) {
-          uri = u
           break
         }
       }
@@ -522,9 +366,11 @@ export default class Analyzer {
 
     return {
       declaration: declaration
-        ? LSP.Location.create(uri, TreeSitterUtil.range(declaration))
+        ? LSP.Location.create(otherInfo.currentUri, TreeSitterUtil.range(declaration))
         : null,
-      parent: parent ? LSP.Location.create(uri, TreeSitterUtil.range(parent)) : null,
+      parent: parent
+        ? LSP.Location.create(params.uri, TreeSitterUtil.range(parent))
+        : null,
     }
   }
 
@@ -586,7 +432,8 @@ export default class Analyzer {
   }
 
   /**
-   * A more scope-aware version of findOccurrences.
+   * A more scope-aware version of findOccurrences that differentiates between
+   * functions and variables.
    */
   public findOccurrencesWithin({
     uri,
@@ -634,10 +481,11 @@ export default class Analyzer {
       const definition = TreeSitterUtil.findParentOfType(n, 'variable_assignment')
       const definedVariable = definition?.descendantsOfType('variable_name').at(0)
 
-      // For var=$var cases, this decides whether $var is an occurrence or not.
+      // For self-assignment `var=$var` cases; this decides whether `$var` is an
+      // occurrence or not.
       if (definedVariable?.text === word && !n.equals(definedVariable)) {
-        // `start?.line` is assumed to be the same as the variable's original
-        // declaration line; handles cases where $var shouldn't be considered
+        // `start.line` is assumed to be the same as the variable's original
+        // declaration line; handles cases where `$var` shouldn't be considered
         // an occurrence.
         if (definition?.startPosition.row === start?.line) {
           return false
@@ -949,8 +797,8 @@ export default class Analyzer {
   }
 
   /**
-   * If `includeAllWorkspaceSymbols` is true, this returns all URIs from the
-   * background analysis. Else, it returns the URIs of the files that are
+   * If includeAllWorkspaceSymbols is true, this returns all URIs from the
+   * background analysis, else, it returns the URIs of the files that are
    * linked to `uri` via sourcing.
    */
   public findAllLinkedUris(uri: string): string[] {
@@ -1010,6 +858,40 @@ export default class Analyzer {
     } else {
       return urisBasedOnSourcing
     }
+  }
+
+  /**
+   * Returns all reachable URIs from `fromUri` based on source commands in
+   * descending order starting from the top of the sourcing tree, this list
+   * includes `fromUri`. If includeAllWorkspaceSymbols is true, other URIs from
+   * the background analysis are also included after the ordered URIs in no
+   * particular order.
+   */
+  private getOrderedReachableUris({ fromUri }: { fromUri: string }): string[] {
+    let uris: Set<string> | string[] = this.findAllSourcedUris({ uri: fromUri })
+
+    for (const u1 of uris) {
+      for (const u2 of this.findAllSourcedUris({ uri: u1 })) {
+        if (uris.has(u2)) {
+          uris.delete(u2)
+          uris.add(u2)
+        }
+      }
+    }
+
+    uris = Array.from(uris)
+    uris.reverse()
+    uris.push(fromUri)
+
+    if (this.includeAllWorkspaceSymbols) {
+      uris.push(
+        ...Object.keys(this.uriToAnalyzedDocument).filter(
+          (u) => !(uris as string[]).includes(u),
+        ),
+      )
+    }
+
+    return uris
   }
 
   private getAnalyzedReachableUris({ fromUri }: { fromUri?: string } = {}): string[] {
@@ -1126,7 +1008,10 @@ export default class Analyzer {
   }
 
   /**
-   * Returns the parent subshell or function definition of the given node.
+   * Returns the parent `subshell` or `function_definition` of the given `node`.
+   * To disambiguate between regular `subshell`s and `subshell`s that serve as a
+   * `function_definition`'s body, this only returns a `function_definition` if
+   * its body is a `compound_statement`.
    */
   private parentScope(node: Parser.SyntaxNode): Parser.SyntaxNode | null {
     return TreeSitterUtil.findParent(

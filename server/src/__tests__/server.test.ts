@@ -1747,12 +1747,12 @@ describe('server', () => {
 
       it('includes incorrect number of symbols for complex scopes and nesting', async () => {
         const varRanges = await getFirstChangeRanges(getRenameRequestResult(118, 8))
-        // This should only be 2 if $var from 3 is not included.
+        // This should only be 2 if `$var` from `3` is not included.
         expect(varRanges.length).toBe(3)
 
         const localFuncRanges = await getFirstChangeRanges(getRenameRequestResult(138, 5))
-        // This should be 2 if the instance of localFunc in callerFunc is also
-        // included.
+        // This should be 2 if the instance of `localFunc` in `callerFunc` is
+        // also included.
         expect(localFuncRanges.length).toBe(1)
       })
 
