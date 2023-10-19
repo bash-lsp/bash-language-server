@@ -18,7 +18,7 @@ We strongly recommend that you install [shellcheck][shellcheck] to enable lintin
 - [x] Simple diagnostics reporting
 - [x] Documentation for flags on hover
 - [x] Workspace symbols
-- [ ] Rename symbol
+- [x] Rename symbol
 - [x] Snippets
 
 ## Configuration

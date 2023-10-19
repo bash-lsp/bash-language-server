@@ -16,10 +16,10 @@ Documentation around configuration variables can be found in the [config.ts](htt
 - Simple diagnostics reporting
 - Documentation for symbols on hover
 - Workspace symbols
+- Rename symbol
 
 To be implemented:
 
-- Rename symbol
 - Better jump to declaration and find references based on scope
 
 ## Installation
