@@ -2,8 +2,6 @@
 
 Bash language server that brings an IDE-like experience for bash scripts to most editors. This is based on the [Tree Sitter parser][tree-sitter-bash] and supports [explainshell][explainshell] and [shellcheck][shellcheck].
 
-We strongly recommend that you install [shellcheck][shellcheck] to enable linting: https://github.com/koalaman/shellcheck#installing
-
 Documentation around configuration variables can be found in the [config.ts](https://github.com/bash-lsp/bash-language-server/blob/main/server/src/config.ts) file.
 
 ## Features
@@ -24,18 +22,30 @@ To be implemented:
 
 ## Installation
 
+### Dependencies
+
+As a dependency, we recommend that you first install shellcheck [shellcheck][shellcheck] to enable linting: https://github.com/koalaman/shellcheck#installing . If shellcheck is installed, bash-language-server will automatically call it to provide linting and code analysis each time the file is updated (with debounce time or 500ms).
+
+### Bash language server
+
 Usually you want to install a client for your editor (see the section below).
 
-But if you want to install the server binary:
+But if you want to install the server binary (for examples for editors, like helix, where a generic LSP client is built in), you can install from npm registry as:
 
 ```bash
 npm i -g bash-language-server
 ```
 
-On Fedora based distros:
+Alternatively, bash-language-server may also be distributed directly by your Linux distro, for example on Fedora based distros:
 
 ```bash
 dnf install -y nodejs-bash-language-server
+```
+
+Or on Ubuntu with snap:
+
+```bash
+sudo snap install bash-language-server --classic
 ```
 
 To verify that everything is working:
