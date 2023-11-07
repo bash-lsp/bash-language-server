@@ -88,8 +88,8 @@ importers:
         version: 3.22.4
     devDependencies:
       '@types/fuzzy-search':
-        specifier: 2.1.3
-        version: 2.1.3
+        specifier: 2.1.4
+        version: 2.1.4
       '@types/node-fetch':
         specifier: 2.6.8
         version: 2.6.8
@@ -842,8 +842,8 @@ packages:
       '@babel/types': 7.22.5
     dev: true
 
-  /@types/fuzzy-search@2.1.3:
-    resolution: {integrity: sha512-+D39S5Fqni2gwIXx+92P2AqxSuH9oqYwV8tCVKXTOE3DkLHeJh+vgT5dszyejTvNAsTpPBx6NkTAJq0AHmEbSg==}
+  /@types/fuzzy-search@2.1.4:
+    resolution: {integrity: sha512-vhlnM3DHhWAFocLr+DL2mz7jdNLdggK7FzEuTYddqyqj6ogdi9/70N4dfFBeLnwT4iHSGoiNtIcrfBf41wfBEA==}
     dev: true
 
   /@types/graceful-fs@4.1.6:
