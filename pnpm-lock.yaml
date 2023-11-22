@@ -97,8 +97,8 @@ importers:
         specifier: 5.0.4
         version: 5.0.4
       '@types/urijs':
-        specifier: 1.19.24
-        version: 1.19.24
+        specifier: 1.19.25
+        version: 1.19.25
 
 packages:
 
@@ -910,8 +910,8 @@ packages:
     resolution: {integrity: sha512-28GI33lCCkU4SGH1GvjDhFgOVr+Tym4PXGBIU1buJUa6xQolniPArtUT+kv42RR2N9MsMLInkr904Aq+ESHBJg==}
     dev: true
 
-  /@types/urijs@1.19.24:
-    resolution: {integrity: sha512-tvePREkvcnwDV5R4XZpHfX3t5Q57dfpdJJ0AEnFhRf5cb8PERFkBZUZBtMnG9Vp3U5T0aEXuOH7y3QlcuqPSLw==}
+  /@types/urijs@1.19.25:
+    resolution: {integrity: sha512-XOfUup9r3Y06nFAZh3WvO0rBU4OtlfPB/vgxpjg+NRdGU6CN6djdc6OEiH+PcqHCY6eFLo9Ista73uarf4gnBg==}
     dev: true
 
   /@types/yargs-parser@21.0.0:
