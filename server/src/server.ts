@@ -405,7 +405,7 @@ export default class BashServer {
 
     const codeActions = params.context.diagnostics
       .map(({ data }) => codeActionsForUri[data?.id])
-      .filter((action): action is LSP.CodeAction => action != null)
+      .flat()
 
     logger.debug(`onCodeAction: found ${codeActions.length} code action(s)`)
 
