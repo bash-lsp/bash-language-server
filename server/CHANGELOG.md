@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 5.1.0
+
+- Support for renaming symbol! https://github.com/bash-lsp/bash-language-server/pull/915
+
 ## 5.0.0
 
 - Downgrade tree sitter to a stable version https://github.com/bash-lsp/bash-language-server/pull/911
