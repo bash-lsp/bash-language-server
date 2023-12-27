@@ -16,7 +16,7 @@ import { Logger } from '../util/logger'
 const CURRENT_URI = 'dummy-uri.sh'
 
 // if you add a .sh file to testing/fixtures, update this value
-const FIXTURE_FILES_MATCHING_GLOB = 16
+const FIXTURE_FILES_MATCHING_GLOB = 17
 
 const defaultConfig = getDefaultConfiguration()
 
@@ -459,6 +459,23 @@ describe('findDeclarationsMatchingWord', () => {
               },
             },
             "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh",
+          },
+          "name": "npm_config_loglevel",
+        },
+        {
+          "kind": 13,
+          "location": {
+            "range": {
+              "end": {
+                "character": 26,
+                "line": 97,
+              },
+              "start": {
+                "character": 0,
+                "line": 97,
+              },
+            },
+            "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh",
           },
           "name": "npm_config_loglevel",
         },
