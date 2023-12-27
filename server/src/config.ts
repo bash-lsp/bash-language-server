@@ -19,7 +19,7 @@ export const ConfigSchema = z.object({
   // Log level for the server. To set the right log level from the start please also use the environment variable 'BASH_IDE_LOG_LEVEL'.
   logLevel: z.enum(LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
 
-  // Controls how symbols (e.g. variables and functions) are included and used for completion and documentation.
+  // Controls how symbols (e.g. variables and functions) are included and used for completion, documentation, and renaming.
   // If false, then we only include symbols from sourced files (i.e. using non dynamic statements like 'source file.sh' or '. file.sh' or following ShellCheck directives).
   // If true, then all symbols from the workspace are included.
   includeAllWorkspaceSymbols: z.boolean().default(false),

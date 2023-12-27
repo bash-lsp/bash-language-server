@@ -9,6 +9,9 @@ import * as Parser from 'web-tree-sitter'
 
 import { flattenArray } from './util/array'
 import {
+  FindDeclarationParams,
+  findDeclarationUsingGlobalSemantics,
+  findDeclarationUsingLocalSemantics,
   getAllDeclarationsInTree,
   getGlobalDeclarations,
   getLocalDeclarations,
@@ -276,6 +279,102 @@ export default class Analyzer {
   }
 
   /**
+   * Find a symbol's original declaration and parent scope based on its original
+   * definition with respect to its scope.
+   */
+  public findOriginalDeclaration(params: FindDeclarationParams['symbolInfo']): {
+    declaration: LSP.Location | null
+    parent: LSP.Location | null
+  } {
+    const node = this.nodeAtPoint(
+      params.uri,
+      params.position.line,
+      params.position.character,
+    )
+
+    if (!node) {
+      return { declaration: null, parent: null }
+    }
+
+    const otherInfo: FindDeclarationParams['otherInfo'] = {
+      currentUri: params.uri,
+      boundary: params.position.line,
+    }
+    let parent = this.parentScope(node)
+    let declaration: Parser.SyntaxNode | null | undefined
+    let continueSearching = false
+
+    // Search for local declaration within parents
+    while (parent) {
+      if (
+        params.kind === LSP.SymbolKind.Variable &&
+        parent.type === 'function_definition' &&
+        parent.lastChild
+      ) {
+        ;({ declaration, continueSearching } = findDeclarationUsingLocalSemantics({
+          baseNode: parent.lastChild,
+          symbolInfo: params,
+          otherInfo,
+        }))
+      } else if (parent.type === 'subshell') {
+        ;({ declaration, continueSearching } = findDeclarationUsingGlobalSemantics({
+          baseNode: parent,
+          symbolInfo: params,
+          otherInfo,
+        }))
+      }
+
+      if (declaration && !continueSearching) {
+        break
+      }
+
+      // Update boundary since any other instance within or below the current
+      // parent can now be considered local to that parent or out of scope.
+      otherInfo.boundary = parent.startPosition.row
+      parent = this.parentScope(parent)
+    }
+
+    // Search for global declaration within files
+    if (!parent && (!declaration || continueSearching)) {
+      for (const uri of this.getOrderedReachableUris({ fromUri: params.uri })) {
+        const root = this.uriToAnalyzedDocument[uri]?.tree.rootNode
+
+        if (!root) {
+          continue
+        }
+
+        otherInfo.currentUri = uri
+        otherInfo.boundary =
+          uri === params.uri
+            ? // Reset boundary so globally defined variables within any
+              // functions already searched can be found.
+              params.position.line
+            : // Set boundary to EOF since any position taken from the original
+              // URI/file does not apply to other URIs/files.
+              root.endPosition.row
+        ;({ declaration, continueSearching } = findDeclarationUsingGlobalSemantics({
+          baseNode: root,
+          symbolInfo: params,
+          otherInfo,
+        }))
+
+        if (declaration && !continueSearching) {
+          break
+        }
+      }
+    }
+
+    return {
+      declaration: declaration
+        ? LSP.Location.create(otherInfo.currentUri, TreeSitterUtil.range(declaration))
+        : null,
+      parent: parent
+        ? LSP.Location.create(params.uri, TreeSitterUtil.range(parent))
+        : null,
+    }
+  }
+
+  /**
    * Find all the locations where the given word was defined or referenced.
    * This will include commands, functions, variables, etc.
    *
@@ -330,6 +429,139 @@ export default class Analyzer {
     })
 
     return locations
+  }
+
+  /**
+   * A more scope-aware version of findOccurrences that differentiates between
+   * functions and variables.
+   */
+  public findOccurrencesWithin({
+    uri,
+    word,
+    kind,
+    start,
+    scope,
+  }: {
+    uri: string
+    word: string
+    kind: LSP.SymbolKind
+    start?: LSP.Position
+    scope?: LSP.Range
+  }): LSP.Range[] {
+    const scopeNode = scope
+      ? this.nodeAtPoints(
+          uri,
+          { row: scope.start.line, column: scope.start.character },
+          { row: scope.end.line, column: scope.end.character },
+        )
+      : null
+    const baseNode =
+      scopeNode && (kind === LSP.SymbolKind.Variable || scopeNode.type === 'subshell')
+        ? scopeNode
+        : this.uriToAnalyzedDocument[uri]?.tree.rootNode
+
+    if (!baseNode) {
+      return []
+    }
+
+    const typeOfDescendants =
+      kind === LSP.SymbolKind.Variable
+        ? 'variable_name'
+        : ['function_definition', 'command_name']
+    const startPosition = start
+      ? { row: start.line, column: start.character }
+      : baseNode.startPosition
+
+    const ignoredRanges: LSP.Range[] = []
+    const filterVariables = (n: Parser.SyntaxNode) => {
+      if (n.text !== word) {
+        return false
+      }
+
+      const definition = TreeSitterUtil.findParentOfType(n, 'variable_assignment')
+      const definedVariable = definition?.descendantsOfType('variable_name').at(0)
+
+      // For self-assignment `var=$var` cases; this decides whether `$var` is an
+      // occurrence or not.
+      if (definedVariable?.text === word && !n.equals(definedVariable)) {
+        // `start.line` is assumed to be the same as the variable's original
+        // declaration line; handles cases where `$var` shouldn't be considered
+        // an occurrence.
+        if (definition?.startPosition.row === start?.line) {
+          return false
+        }
+
+        // Returning true here is a good enough heuristic for most cases. It
+        // breaks down when redeclaration happens in multiple nested scopes,
+        // handling those more complex situations can be done later on if use
+        // cases arise.
+        return true
+      }
+
+      const parent = this.parentScope(n)
+
+      if (!parent || baseNode.equals(parent)) {
+        return true
+      }
+
+      const includeDeclaration = !ignoredRanges.some(
+        (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
+      )
+
+      const declarationCommand = TreeSitterUtil.findParentOfType(n, 'declaration_command')
+      const isLocal =
+        (definedVariable?.text === word || !!(!definition && declarationCommand)) &&
+        (parent.type === 'subshell' ||
+          ['local', 'declare', 'typeset'].includes(
+            declarationCommand?.firstChild?.text as any,
+          ))
+      if (isLocal) {
+        if (includeDeclaration) {
+          ignoredRanges.push(TreeSitterUtil.range(parent))
+        }
+
+        return false
+      }
+
+      return includeDeclaration
+    }
+    const filterFunctions = (n: Parser.SyntaxNode) => {
+      const text = n.type === 'function_definition' ? n.firstNamedChild?.text : n.text
+      if (text !== word) {
+        return false
+      }
+
+      const parentScope = TreeSitterUtil.findParentOfType(n, 'subshell')
+
+      if (!parentScope || baseNode.equals(parentScope)) {
+        return true
+      }
+
+      const includeDeclaration = !ignoredRanges.some(
+        (r) => n.startPosition.row > r.start.line && n.endPosition.row < r.end.line,
+      )
+
+      if (n.type === 'function_definition') {
+        if (includeDeclaration) {
+          ignoredRanges.push(TreeSitterUtil.range(parentScope))
+        }
+
+        return false
+      }
+
+      return includeDeclaration
+    }
+
+    return baseNode
+      .descendantsOfType(typeOfDescendants, startPosition)
+      .filter(kind === LSP.SymbolKind.Variable ? filterVariables : filterFunctions)
+      .map((n) => {
+        if (n.type === 'function_definition' && n.firstNamedChild) {
+          return TreeSitterUtil.range(n.firstNamedChild)
+        }
+
+        return TreeSitterUtil.range(n)
+      })
   }
 
   public getAllVariables({
@@ -525,12 +757,81 @@ export default class Analyzer {
     )
   }
 
+  public symbolAtPointFromTextPosition(
+    params: LSP.TextDocumentPositionParams,
+  ): { word: string; range: LSP.Range; kind: LSP.SymbolKind } | null {
+    const node = this.nodeAtPoint(
+      params.textDocument.uri,
+      params.position.line,
+      params.position.character,
+    )
+
+    if (!node) {
+      return null
+    }
+
+    if (
+      node.type === 'variable_name' ||
+      (node.type === 'word' &&
+        ['function_definition', 'command_name'].includes(node.parent?.type as any))
+    ) {
+      return {
+        word: node.text,
+        range: TreeSitterUtil.range(node),
+        kind:
+          node.type === 'variable_name'
+            ? LSP.SymbolKind.Variable
+            : LSP.SymbolKind.Function,
+      }
+    }
+
+    return null
+  }
+
   public setEnableSourceErrorDiagnostics(enableSourceErrorDiagnostics: boolean): void {
     this.enableSourceErrorDiagnostics = enableSourceErrorDiagnostics
   }
 
   public setIncludeAllWorkspaceSymbols(includeAllWorkspaceSymbols: boolean): void {
     this.includeAllWorkspaceSymbols = includeAllWorkspaceSymbols
+  }
+
+  /**
+   * If includeAllWorkspaceSymbols is true, this returns all URIs from the
+   * background analysis, else, it returns the URIs of the files that are
+   * linked to `uri` via sourcing.
+   */
+  public findAllLinkedUris(uri: string): string[] {
+    if (this.includeAllWorkspaceSymbols) {
+      return Object.keys(this.uriToAnalyzedDocument).filter((u) => u !== uri)
+    }
+
+    const uriToAnalyzedDocument = Object.entries(this.uriToAnalyzedDocument)
+    const uris: string[] = []
+    let continueSearching = true
+
+    while (continueSearching) {
+      continueSearching = false
+
+      for (const [analyzedUri, analyzedDocument] of uriToAnalyzedDocument) {
+        if (!analyzedDocument) {
+          continue
+        }
+
+        for (const sourcedUri of analyzedDocument.sourcedUris.values()) {
+          if (
+            (sourcedUri === uri || uris.includes(sourcedUri)) &&
+            !uris.includes(analyzedUri)
+          ) {
+            uris.push(analyzedUri)
+            continueSearching = true
+            break
+          }
+        }
+      }
+    }
+
+    return uris
   }
 
   // Private methods
@@ -557,6 +858,40 @@ export default class Analyzer {
     } else {
       return urisBasedOnSourcing
     }
+  }
+
+  /**
+   * Returns all reachable URIs from `fromUri` based on source commands in
+   * descending order starting from the top of the sourcing tree, this list
+   * includes `fromUri`. If includeAllWorkspaceSymbols is true, other URIs from
+   * the background analysis are also included after the ordered URIs in no
+   * particular order.
+   */
+  private getOrderedReachableUris({ fromUri }: { fromUri: string }): string[] {
+    let uris: Set<string> | string[] = this.findAllSourcedUris({ uri: fromUri })
+
+    for (const u1 of uris) {
+      for (const u2 of this.findAllSourcedUris({ uri: u1 })) {
+        if (uris.has(u2)) {
+          uris.delete(u2)
+          uris.add(u2)
+        }
+      }
+    }
+
+    uris = Array.from(uris)
+    uris.reverse()
+    uris.push(fromUri)
+
+    if (this.includeAllWorkspaceSymbols) {
+      uris.push(
+        ...Object.keys(this.uriToAnalyzedDocument).filter(
+          (u) => !(uris as string[]).includes(u),
+        ),
+      )
+    }
+
+    return uris
   }
 
   private getAnalyzedReachableUris({ fromUri }: { fromUri?: string } = {}): string[] {
@@ -673,6 +1008,21 @@ export default class Analyzer {
   }
 
   /**
+   * Returns the parent `subshell` or `function_definition` of the given `node`.
+   * To disambiguate between regular `subshell`s and `subshell`s that serve as a
+   * `function_definition`'s body, this only returns a `function_definition` if
+   * its body is a `compound_statement`.
+   */
+  private parentScope(node: Parser.SyntaxNode): Parser.SyntaxNode | null {
+    return TreeSitterUtil.findParent(
+      node,
+      (n) =>
+        n.type === 'subshell' ||
+        (n.type === 'function_definition' && n.lastChild?.type === 'compound_statement'),
+    )
+  }
+
+  /**
    * Find the node at the given point.
    */
   private nodeAtPoint(
@@ -688,5 +1038,19 @@ export default class Analyzer {
     }
 
     return tree.rootNode.descendantForPosition({ row: line, column })
+  }
+
+  private nodeAtPoints(
+    uri: string,
+    start: Parser.Point,
+    end: Parser.Point,
+  ): Parser.SyntaxNode | null {
+    const rootNode = this.uriToAnalyzedDocument[uri]?.tree.rootNode
+
+    if (!rootNode) {
+      return null
+    }
+
+    return rootNode.descendantForPosition(start, end)
   }
 }
