@@ -17,22 +17,22 @@
     "node": ">=16"
   },
   "dependencies": {
-    "fast-glob": "3.3.1",
+    "fast-glob": "3.3.2",
     "fuzzy-search": "3.2.1",
     "node-fetch": "2.7.0",
     "turndown": "7.1.2",
     "vscode-languageserver": "8.0.2",
-    "vscode-languageserver-textdocument": "1.0.8",
+    "vscode-languageserver-textdocument": "1.0.11",
     "web-tree-sitter": "0.20.8",
-    "zod": "3.22.2"
+    "zod": "3.22.4"
   },
   "scripts": {
     "prepublishOnly": "cd ../ && pnpm compile && cp README.md server/"
   },
   "devDependencies": {
-    "@types/fuzzy-search": "2.1.2",
-    "@types/node-fetch": "2.6.6",
-    "@types/turndown": "5.0.2",
-    "@types/urijs": "1.19.20"
+    "@types/fuzzy-search": "2.1.5",
+    "@types/node-fetch": "2.6.9",
+    "@types/turndown": "5.0.4",
+    "@types/urijs": "1.19.25"
   }
 }
