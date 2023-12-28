@@ -3,7 +3,7 @@
   "description": "A language server for Bash",
   "author": "Mads Hartmann",
   "license": "MIT",
-  "version": "5.0.0",
+  "version": "5.1.1",
   "main": "./out/server.js",
   "typings": "./out/server.d.ts",
   "bin": {
@@ -30,9 +30,9 @@
     "prepublishOnly": "cd ../ && pnpm compile && cp README.md server/"
   },
   "devDependencies": {
-    "@types/fuzzy-search": "2.1.4",
-    "@types/node-fetch": "2.6.9",
+    "@types/fuzzy-search": "2.1.5",
+    "@types/node-fetch": "2.6.10",
     "@types/turndown": "5.0.4",
-    "@types/urijs": "1.19.23"
+    "@types/urijs": "1.19.25"
   }
 }

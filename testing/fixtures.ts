@@ -31,6 +31,7 @@ export const FIXTURE_URI = {
   SHELLCHECK_SOURCE: `file://${path.join(FIXTURE_FOLDER, 'shellcheck', 'source.sh')}`,
   SOURCING: `file://${path.join(FIXTURE_FOLDER, 'sourcing.sh')}`,
   SOURCING2: `file://${path.join(FIXTURE_FOLDER, 'sourcing2.sh')}`,
+  RENAMING: `file://${path.join(FIXTURE_FOLDER, 'renaming.sh')}`,
 }
 
 export const FIXTURE_DOCUMENT: Record<FIXTURE_KEY, TextDocument> = (
@@ -52,6 +53,16 @@ export function updateSnapshotUris<
     }
 
     if (typeof data === 'object') {
+      if (data.changes) {
+        for (const key in data.changes) {
+          data.changes[key.replace(REPO_ROOT_FOLDER, '__REPO_ROOT_FOLDER__')] =
+            data.changes[key]
+          delete data.changes[key]
+        }
+
+        return data
+      }
+
       if (data.uri) {
         data.uri = data.uri.replace(REPO_ROOT_FOLDER, '__REPO_ROOT_FOLDER__')
       }

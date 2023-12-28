@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   bash-language-server:
-    specifier: 5.0.0
-    version: 5.0.0
+    specifier: 5.1.1
+    version: 5.1.1
   vscode-languageclient:
     specifier: 8.1.0
     version: 8.1.0
@@ -51,19 +51,19 @@ packages:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
     dev: false
 
-  /bash-language-server@5.0.0:
-    resolution: {integrity: sha512-1S5PMQO4PwXDIiPHUE6dYd8vZF1NZqb3i4Astd7UXD4lSWnSo71MqSmTpTs/dTYcvo2/9z2IymbNPPyn/VuM2w==}
+  /bash-language-server@5.1.1:
+    resolution: {integrity: sha512-olPB+r2ewiPWeK4ZgcU2Pn9MqjHpSVROaXgFwWiVMEu3UKKhy+Wkltn0ZoIwCKTz6O+qt+lLk/oS3thTP51dZQ==}
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
-      fast-glob: 3.3.0
+      fast-glob: 3.3.2
       fuzzy-search: 3.2.1
-      node-fetch: 2.6.12
+      node-fetch: 2.7.0
       turndown: 7.1.2
       vscode-languageserver: 8.0.2
-      vscode-languageserver-textdocument: 1.0.8
+      vscode-languageserver-textdocument: 1.0.11
       web-tree-sitter: 0.20.8
-      zod: 3.21.4
+      zod: 3.22.4
     transitivePeerDependencies:
       - encoding
     dev: false
@@ -85,8 +85,8 @@ packages:
     resolution: {integrity: sha512-3VdM/SXBZX2omc9JF9nOPCtDaYQ67BGp5CoLpIQlO2KCAPETs8TcDHacF26jXadGbvUteZzRTeos2fhID5+ucQ==}
     dev: false
 
-  /fast-glob@3.3.0:
-    resolution: {integrity: sha512-ChDuvbOypPuNjO8yIDf36x7BlZX1smcUMTTcyoIjycexOxd6DFsKsg21qVBzEmr3G7fUKIRy2/psii+CIUt7FA==}
+  /fast-glob@3.3.2:
+    resolution: {integrity: sha512-oX2ruAFQwf/Orj8m737Y5adxDQO0LAB7/S5MnxCdTNDd4p6BsyIVsv9JQsATbTSq8KHRpLwIHbVlUNatxd+1Ow==}
     engines: {node: '>=8.6.0'}
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -164,8 +164,8 @@ packages:
       brace-expansion: 2.0.1
     dev: false
 
-  /node-fetch@2.6.12:
-    resolution: {integrity: sha512-C/fGU2E8ToujUivIO0H+tpQ6HWo4eEmchoPIoXtxCrVghxdKq+QOHqEZW7tuP3KlV3bC8FRMO5nMCC7Zm1VP6g==}
+  /node-fetch@2.7.0:
+    resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
     engines: {node: 4.x || >=6.0.0}
     peerDependencies:
       encoding: ^0.1.0
@@ -254,8 +254,8 @@ packages:
       vscode-languageserver-types: 3.17.3
     dev: false
 
-  /vscode-languageserver-textdocument@1.0.8:
-    resolution: {integrity: sha512-1bonkGqQs5/fxGT5UchTgjGVnfysL0O8v1AYMBjqTbWQTFn721zaPGDYFkOKtfDgFiSgXM3KwaG3FMGfW4Ed9Q==}
+  /vscode-languageserver-textdocument@1.0.11:
+    resolution: {integrity: sha512-X+8T3GoiwTVlJbicx/sIAF+yuJAqz8VvwJyoMVhwEMoEKE/fkDmrqUgDMyBECcM2A2frVZIUj5HI/ErRXCfOeA==}
     dev: false
 
   /vscode-languageserver-types@3.17.2:
@@ -292,6 +292,6 @@ packages:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
     dev: false
 
-  /zod@3.21.4:
-    resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
+  /zod@3.22.4:
+    resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
     dev: false

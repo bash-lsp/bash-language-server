@@ -4,7 +4,7 @@
   "description": "A language server for Bash",
   "author": "Mads Hartmann",
   "license": "MIT",
-  "version": "1.39.0",
+  "version": "1.40.0",
   "publisher": "mads-hartmann",
   "repository": {
     "type": "git",
@@ -55,7 +55,7 @@
         "bashIde.includeAllWorkspaceSymbols": {
           "type": "boolean",
           "default": false,
-          "description": "Controls how symbols (e.g. variables and functions) are included and used for completion and documentation. If false (default and recommended), then we only include symbols from sourced files (i.e. using non dynamic statements like 'source file.sh' or '. file.sh' or following ShellCheck directives). If true, then all symbols from the workspace are included."
+          "description": "Controls how symbols (e.g. variables and functions) are included and used for completion, documentation, and renaming. If false (default and recommended), then we only include symbols from sourced files (i.e. using non dynamic statements like 'source file.sh' or '. file.sh' or following ShellCheck directives). If true, then all symbols from the workspace are included."
         },
         "bashIde.logLevel": {
           "type": "string",
@@ -85,7 +85,7 @@
     "vscode:prepublish": "cd .. && pnpm compile"
   },
   "dependencies": {
-    "bash-language-server": "5.0.0",
+    "bash-language-server": "5.1.1",
     "vscode-languageclient": "8.1.0",
     "vscode-languageserver": "8.0.2"
   },

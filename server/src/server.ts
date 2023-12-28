@@ -129,6 +129,7 @@ export default class BashServer {
         resolveProvider: false,
         workDoneProgress: false,
       },
+      renameProvider: { prepareProvider: true },
     }
   }
 
@@ -169,6 +170,8 @@ export default class BashServer {
     connection.onHover(this.onHover.bind(this))
     connection.onReferences(this.onReferences.bind(this))
     connection.onWorkspaceSymbol(this.onWorkspaceSymbol.bind(this))
+    connection.onPrepareRename(this.onPrepareRename.bind(this))
+    connection.onRenameRequest(this.onRenameRequest.bind(this))
 
     /**
      * The initialized notification is sent from the client to the server after
@@ -387,6 +390,10 @@ export default class BashServer {
     return getMarkdownContent(
       `${hoverHeader} - *defined ${symbolLocation}*${symbolDocumentation}`,
     )
+  }
+
+  private throwResponseError(message: string, code = LSP.LSPErrorCodes.RequestFailed) {
+    throw new LSP.ResponseError(code, message)
   }
 
   // ==============================
@@ -716,6 +723,88 @@ export default class BashServer {
   private onWorkspaceSymbol(params: LSP.WorkspaceSymbolParams): LSP.SymbolInformation[] {
     logger.debug('onWorkspaceSymbol')
     return this.analyzer.findDeclarationsWithFuzzySearch(params.query)
+  }
+
+  private onPrepareRename(params: LSP.PrepareRenameParams): LSP.Range | null {
+    const symbol = this.analyzer.symbolAtPointFromTextPosition(params)
+    this.logRequest({ request: 'onPrepareRename', params, word: symbol?.word })
+
+    if (
+      !symbol ||
+      (symbol.kind === LSP.SymbolKind.Variable &&
+        (symbol.word === '_' || !/^[a-z_][\w]*$/i.test(symbol.word)))
+    ) {
+      return null
+    }
+
+    return symbol.range
+  }
+
+  private onRenameRequest(params: LSP.RenameParams): LSP.WorkspaceEdit | null {
+    const symbol = this.analyzer.symbolAtPointFromTextPosition(params)
+    this.logRequest({ request: 'onRenameRequest', params, word: symbol?.word })
+
+    if (!symbol) {
+      return null
+    }
+
+    if (
+      symbol.kind === LSP.SymbolKind.Variable &&
+      (params.newName === '_' || !/^[a-z_][\w]*$/i.test(params.newName))
+    ) {
+      this.throwResponseError('Invalid variable name given.')
+    }
+
+    if (symbol.kind === LSP.SymbolKind.Function && params.newName.includes('$')) {
+      this.throwResponseError('Invalid function name given.')
+    }
+
+    const { declaration, parent } = this.analyzer.findOriginalDeclaration({
+      position: params.position,
+      uri: params.textDocument.uri,
+      word: symbol.word,
+      kind: symbol.kind,
+    })
+
+    // File-wide rename
+    if (!declaration || parent) {
+      return <LSP.WorkspaceEdit>{
+        changes: {
+          [params.textDocument.uri]: this.analyzer
+            .findOccurrencesWithin({
+              uri: params.textDocument.uri,
+              word: symbol.word,
+              kind: symbol.kind,
+              start: declaration?.range.start,
+              scope: parent?.range,
+            })
+            .map((r) => LSP.TextEdit.replace(r, params.newName)),
+        },
+      }
+    }
+
+    // Workspace-wide rename
+    const edits: LSP.WorkspaceEdit = {}
+    edits.changes = {
+      [declaration.uri]: this.analyzer
+        .findOccurrencesWithin({
+          uri: declaration.uri,
+          word: symbol.word,
+          kind: symbol.kind,
+          start: declaration.range.start,
+        })
+        .map((r) => LSP.TextEdit.replace(r, params.newName)),
+    }
+    for (const uri of this.analyzer.findAllLinkedUris(declaration.uri)) {
+      edits.changes[uri] = this.analyzer
+        .findOccurrencesWithin({
+          uri,
+          word: symbol.word,
+          kind: symbol.kind,
+        })
+        .map((r) => LSP.TextEdit.replace(r, params.newName))
+    }
+    return edits
   }
 }
 

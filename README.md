@@ -14,10 +14,10 @@ Documentation around configuration variables can be found in the [config.ts](htt
 - Simple diagnostics reporting
 - Documentation for symbols on hover
 - Workspace symbols
+- Rename symbol
 
 To be implemented:
 
-- Rename symbol
 - Better jump to declaration and find references based on scope
 
 ## Installation
@@ -79,7 +79,7 @@ For Vim 8 or later install the plugin [prabirshrestha/vim-lsp][vim-lsp] and add 
 if executable('bash-language-server')
   au User lsp_setup call lsp#register_server({
         \ 'name': 'bash-language-server',
-        \ 'cmd': {server_info->[&shell, &shellcmdflag, 'bash-language-server start']},
+        \ 'cmd': {server_info->['bash-language-server', 'start']},
         \ 'allowlist': ['sh', 'bash'],
         \ })
 endif

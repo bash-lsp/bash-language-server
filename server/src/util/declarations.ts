@@ -245,3 +245,206 @@ function getDeclarationSymbolFromNode({
 
   return null
 }
+
+// The functions that follow search for a single declaration based on the
+// original definition NOT the latest.
+
+export type FindDeclarationParams = {
+  /**
+   * The node where the search will start.
+   */
+  baseNode: Parser.SyntaxNode
+  symbolInfo: {
+    position: LSP.Position
+    uri: string
+    word: string
+    kind: LSP.SymbolKind
+  }
+  otherInfo: {
+    /**
+     * The current URI being searched.
+     */
+    currentUri: string
+    /**
+     * The line (LSP semantics) or row (tree-sitter semantics) at which to stop
+     * searching.
+     */
+    boundary: LSP.uinteger
+  }
+}
+
+/**
+ * Searches for the original declaration of `symbol`. Global semantics here
+ * means that the symbol is not local to a function, hence, `baseNode` should
+ * either be a `subshell` or a `program` and `symbolInfo` should contain data
+ * about a variable or a function.
+ */
+export function findDeclarationUsingGlobalSemantics({
+  baseNode,
+  symbolInfo: { position, uri, word, kind },
+  otherInfo: { currentUri, boundary },
+}: FindDeclarationParams) {
+  let declaration: Parser.SyntaxNode | null | undefined
+  let continueSearching = false
+
+  TreeSitterUtil.forEach(baseNode, (n) => {
+    if (
+      (declaration && !continueSearching) ||
+      n.startPosition.row > boundary ||
+      (n.type === 'subshell' && !n.equals(baseNode))
+    ) {
+      return false
+    }
+
+    // `declaration_command`s are handled separately from `variable_assignment`s
+    // because `declaration_command`s can declare variables without defining
+    // them, while `variable_assignment`s require both declaration and
+    // definition, so, there can be `variable_name`s within
+    // `declaration_command`s that are not children of `variable_assignment`s.
+    if (kind === LSP.SymbolKind.Variable && n.type === 'declaration_command') {
+      const functionDefinition = TreeSitterUtil.findParentOfType(n, 'function_definition')
+      const isLocalDeclaration =
+        !!functionDefinition &&
+        functionDefinition.lastChild?.type === 'compound_statement' &&
+        ['local', 'declare', 'typeset'].includes(n.firstChild?.text as any) &&
+        (baseNode.type !== 'subshell' ||
+          baseNode.startPosition.row < functionDefinition.startPosition.row)
+
+      for (const v of n.descendantsOfType('variable_name')) {
+        if (
+          v.text !== word ||
+          TreeSitterUtil.findParentOfType(v, ['simple_expansion', 'expansion'])
+        ) {
+          continue
+        }
+
+        if (isLocalDeclaration) {
+          // Update boundary since any other instance below `n` can now be
+          // considered local to a function or out of scope.
+          boundary = n.startPosition.row
+          break
+        }
+
+        if (uri !== currentUri || !isDefinedVariableInExpression(n, v, position)) {
+          declaration = v
+          continueSearching = false
+          break
+        }
+      }
+
+      // This return is important as it makes sure that the next if statement
+      // only catches `variable_assignment`s outside of `declaration_command`s.
+      return false
+    }
+
+    if (
+      kind === LSP.SymbolKind.Variable &&
+      (['variable_assignment', 'for_statement'].includes(n.type) ||
+        (n.type === 'command' && n.text.includes(':=')))
+    ) {
+      const definedVariable = n.descendantsOfType('variable_name').at(0)
+      const definedVariableInExpression =
+        uri === currentUri &&
+        n.type === 'variable_assignment' &&
+        !!definedVariable &&
+        isDefinedVariableInExpression(n, definedVariable, position)
+
+      if (definedVariable?.text === word && !definedVariableInExpression) {
+        declaration = definedVariable
+        continueSearching = baseNode.type === 'subshell' && n.type === 'command'
+
+        // The original declaration could be inside a `for_statement`, so only
+        // return false when the original declaration is found.
+        return false
+      }
+
+      return true
+    }
+
+    if (
+      kind === LSP.SymbolKind.Function &&
+      n.type === 'function_definition' &&
+      n.firstNamedChild?.text === word
+    ) {
+      declaration = n.firstNamedChild
+      continueSearching = false
+      return false
+    }
+
+    return true
+  })
+
+  return { declaration, continueSearching }
+}
+
+/**
+ * Searches for the original declaration of `symbol`. Local semantics here
+ * means that the symbol is local to a function, hence, `baseNode` should
+ * be the `compound_statement` of a `function_definition` and `symbolInfo`
+ * should contain data about a variable.
+ */
+export function findDeclarationUsingLocalSemantics({
+  baseNode,
+  symbolInfo: { position, word },
+  otherInfo: { boundary },
+}: FindDeclarationParams) {
+  let declaration: Parser.SyntaxNode | null | undefined
+  let continueSearching = false
+
+  TreeSitterUtil.forEach(baseNode, (n) => {
+    if (
+      (declaration && !continueSearching) ||
+      n.startPosition.row > boundary ||
+      ['function_definition', 'subshell'].includes(n.type)
+    ) {
+      return false
+    }
+
+    if (n.type !== 'declaration_command') {
+      return true
+    }
+
+    if (!['local', 'declare', 'typeset'].includes(n.firstChild?.text as any)) {
+      return false
+    }
+
+    for (const v of n.descendantsOfType('variable_name')) {
+      if (
+        v.text !== word ||
+        TreeSitterUtil.findParentOfType(v, ['simple_expansion', 'expansion'])
+      ) {
+        continue
+      }
+
+      if (!isDefinedVariableInExpression(n, v, position)) {
+        declaration = v
+        continueSearching = false
+        break
+      }
+    }
+
+    return false
+  })
+
+  return { declaration, continueSearching }
+}
+
+/**
+ * This is used in checking self-assignment `var=$var` edge cases where
+ * `position` is within `$var`. Based on the `definition` node (should be
+ * `declaration_command` or `variable_assignment`) and `variable` node (should
+ * be `variable_name`) given, estimates if `position` is within the expressiion
+ * (after the equals sign) of an assignment. If it is, then `var` should be
+ * skipped and a higher scope should be checked for the original declaration.
+ */
+function isDefinedVariableInExpression(
+  definition: Parser.SyntaxNode,
+  variable: Parser.SyntaxNode,
+  position: LSP.Position,
+): boolean {
+  return (
+    definition.endPosition.row >= position.line &&
+    (variable.endPosition.column < position.character ||
+      variable.endPosition.row < position.line)
+  )
+}
