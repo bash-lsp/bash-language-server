@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 5.1.2
+
+- Use shellcheck's shell directive for selecting the dialect https://github.com/bash-lsp/bash-language-server/pull/1081
+
 ## 5.1.1
 
 - Add --help fallback for documentation https://github.com/bash-lsp/bash-language-server/pull/1052

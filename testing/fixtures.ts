@@ -29,6 +29,11 @@ export const FIXTURE_URI = {
   PARSE_PROBLEMS: `file://${path.join(FIXTURE_FOLDER, 'parse-problems.sh')}`,
   SCOPE: `file://${path.join(FIXTURE_FOLDER, 'scope.sh')}`,
   SHELLCHECK_SOURCE: `file://${path.join(FIXTURE_FOLDER, 'shellcheck', 'source.sh')}`,
+  SHELLCHECK_SHELL_DIRECTIVE: `file://${path.join(
+    FIXTURE_FOLDER,
+    'shellcheck',
+    'shell-directive.bash',
+  )}`,
   SOURCING: `file://${path.join(FIXTURE_FOLDER, 'sourcing.sh')}`,
   SOURCING2: `file://${path.join(FIXTURE_FOLDER, 'sourcing2.sh')}`,
   RENAMING: `file://${path.join(FIXTURE_FOLDER, 'renaming.sh')}`,
