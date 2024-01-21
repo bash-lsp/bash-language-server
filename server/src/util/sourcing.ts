@@ -9,6 +9,7 @@ import { untildify } from './fs'
 import * as TreeSitterUtil from './tree-sitter'
 
 const SOURCING_COMMANDS = ['source', '.']
+const VARIABLE_NODE_TYPES = ['expansion', 'simple_expansion']
 
 export type SourceCommand = {
   range: LSP.Range
@@ -102,30 +103,32 @@ function getSourcedPathInfoFromNode({
         }
       }
 
-      if (argumentNode.type === 'word') {
+      const strValue = resolveStaticString(argumentNode)
+      if (strValue !== null) {
         return {
-          sourcedPath: argumentNode.text,
+          sourcedPath: strValue,
         }
       }
 
-      if (argumentNode.type === 'string' || argumentNode.type === 'raw_string') {
-        const stringContents = argumentNode.text.slice(1, -1)
-        if (argumentNode.namedChildren.length === 0) {
-          return {
-            sourcedPath: stringContents,
-          }
-        } else if (argumentNode.namedChildren.length === 1) {
-          const [variableNode] = argumentNode.namedChildren
-          if (
-            variableNode.type == 'simple_expansion' ||
-            variableNode.type == 'expansion'
-          ) {
-            const variableText = `${variableNode.text}`
-            if (stringContents.startsWith(variableText + '/')) {
-              return {
-                sourcedPath: '.' + stringContents.slice(variableText.length),
-              }
+      // Strip one leading dynamic section.
+      if (argumentNode.type === 'string' && argumentNode.namedChildren.length === 1) {
+        const [variableNode] = argumentNode.namedChildren
+        if (VARIABLE_NODE_TYPES.includes(variableNode.type)) {
+          const stringContents = argumentNode.text.slice(1, -1)
+          if (stringContents.startsWith(`${variableNode.text}/`)) {
+            return {
+              sourcedPath: `.${stringContents.slice(variableNode.text.length)}`,
             }
+          }
+        }
+      }
+
+      if (argumentNode.type === 'concatenation') {
+        // Strip one leading dynamic section from a concatenation node.
+        const sourcedPath = resolveSourceFromConcatenation(argumentNode)
+        if (sourcedPath) {
+          return {
+            sourcedPath,
           }
         }
       }
@@ -179,5 +182,74 @@ function resolveSourcedUri({
     }
   }
 
+  return null
+}
+
+/*
+ * Resolves the source path from a concatenation node, stripping a leading dynamic directory segment.
+ * Returns null if the source path can't be statically determined after stripping a segment.
+ * Note: If a non-concatenation node is passed, null will be returned. This is likely a programmer error.
+ */
+function resolveSourceFromConcatenation(node: Parser.SyntaxNode): string | null {
+  if (node.type !== 'concatenation') return null
+  const stringValue = resolveStaticString(node)
+  if (stringValue !== null) return stringValue // This string is fully static.
+
+  const values: string[] = []
+  // Since the string must begin with the variable, the variable must be in the first child.
+  const [firstNode, ...rest] = node.namedChildren
+  // The first child is static, this means one of the other children is not!
+  if (resolveStaticString(firstNode) !== null) return null
+
+  // if the string is unquoted, the first child is the variable, so there's no more text in it.
+  if (!VARIABLE_NODE_TYPES.includes(firstNode.type)) {
+    if (firstNode.namedChildCount > 1) return null // Only one variable is allowed.
+    // Since the string must begin with the variable, the variable must be first child.
+    const variableNode = firstNode.namedChildren[0] // Get the variable (quoted case)
+    // This is command substitution!
+    if (!VARIABLE_NODE_TYPES.includes(variableNode.type)) return null
+    const stringContents = firstNode.text.slice(1, -1)
+    // The string doesn't start with the variable!
+    if (!stringContents.startsWith(variableNode.text)) return null
+    // Get the remaining static portion the string
+    values.push(stringContents.slice(variableNode.text.length))
+  }
+
+  for (const child of rest) {
+    const value = resolveStaticString(child)
+    // The other values weren't statically determinable!
+    if (value === null) return null
+    values.push(value)
+  }
+
+  // Join all our found static values together.
+  const staticResult = values.join('')
+  // The path starts with slash, so trim the leading variable and replace with a dot
+  if (staticResult.startsWith('/')) return `.${staticResult}`
+  // The path doesn't start with a slash, so it's invalid
+  // PERF: can we fail earlier than this?
+  return null
+}
+
+/**
+ * Resolves the full string value of a node
+ * Returns null if the value can't be statically determined (ie, it contains a variable or command substition).
+ * Supports: word, string, raw_string, and concatenation
+ */
+function resolveStaticString(node: Parser.SyntaxNode): string | null {
+  if (node.type === 'concatenation') {
+    const values = []
+    for (const child of node.namedChildren) {
+      const value = resolveStaticString(child)
+      if (value === null) return null
+      values.push(value)
+    }
+    return values.join('')
+  }
+  if (node.type === 'word') return node.text
+  if (node.type === 'string' || node.type === 'raw_string') {
+    if (node.namedChildCount === 0) return node.text.slice(1, -1)
+    return null
+  }
   return null
 }
