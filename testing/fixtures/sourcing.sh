@@ -23,3 +23,5 @@ loadlib () {
 }
 
 loadlib "issue206"
+
+source $SCRIPT_DIR/tag-release.inc with arguments

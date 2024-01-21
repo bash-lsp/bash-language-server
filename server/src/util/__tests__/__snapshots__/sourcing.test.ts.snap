@@ -87,18 +87,18 @@ exports[`getSourcedUris returns a set of sourced files (but ignores some unhandl
     "uri": null,
   },
   {
-    "error": "non-constant source not supported",
+    "error": null,
     "range": {
       "end": {
-        "character": 66,
-        "line": 16,
+        "character": 39,
+        "line": 15,
       },
       "start": {
-        "character": 49,
-        "line": 16,
+        "character": 6,
+        "line": 15,
       },
     },
-    "uri": null,
+    "uri": "file:///Users/bash/issue-926.sh",
   },
   {
     "error": "non-constant source not supported",
@@ -108,8 +108,22 @@ exports[`getSourcedUris returns a set of sourced files (but ignores some unhandl
         "line": 18,
       },
       "start": {
-        "character": 6,
+        "character": 49,
         "line": 18,
+      },
+    },
+    "uri": null,
+  },
+  {
+    "error": "non-constant source not supported",
+    "range": {
+      "end": {
+        "character": 66,
+        "line": 20,
+      },
+      "start": {
+        "character": 6,
+        "line": 20,
       },
     },
     "uri": null,
@@ -119,11 +133,11 @@ exports[`getSourcedUris returns a set of sourced files (but ignores some unhandl
     "range": {
       "end": {
         "character": 30,
-        "line": 25,
+        "line": 27,
       },
       "start": {
         "character": 8,
-        "line": 25,
+        "line": 27,
       },
     },
     "uri": "file:///Users/bash/issue206.sh",
@@ -133,53 +147,53 @@ exports[`getSourcedUris returns a set of sourced files (but ignores some unhandl
     "range": {
       "end": {
         "character": 22,
-        "line": 47,
+        "line": 49,
       },
       "start": {
         "character": 8,
-        "line": 47,
+        "line": 49,
       },
     },
     "uri": null,
   },
   {
-    "error": "non-constant source not supported",
+    "error": null,
     "range": {
       "end": {
         "character": 39,
-        "line": 59,
+        "line": 61,
       },
       "start": {
         "character": 8,
-        "line": 59,
+        "line": 61,
       },
     },
-    "uri": null,
+    "uri": "file:///Users/bash/staging.sh",
   },
   {
-    "error": "non-constant source not supported",
+    "error": null,
     "range": {
       "end": {
         "character": 42,
-        "line": 62,
+        "line": 64,
       },
       "start": {
         "character": 8,
-        "line": 62,
+        "line": 64,
       },
     },
-    "uri": null,
+    "uri": "file:///Users/bash/production.sh",
   },
   {
     "error": "non-constant source not supported",
     "range": {
       "end": {
         "character": 67,
-        "line": 89,
+        "line": 91,
       },
       "start": {
         "character": 10,
-        "line": 89,
+        "line": 91,
       },
     },
     "uri": null,
