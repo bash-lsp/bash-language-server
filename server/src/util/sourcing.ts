@@ -9,7 +9,6 @@ import { untildify } from './fs'
 import * as TreeSitterUtil from './tree-sitter'
 
 const SOURCING_COMMANDS = ['source', '.']
-const VARIABLE_NODE_TYPES = ['expansion', 'simple_expansion']
 
 export type SourceCommand = {
   range: LSP.Range
@@ -103,7 +102,7 @@ function getSourcedPathInfoFromNode({
         }
       }
 
-      const strValue = resolveStaticString(argumentNode)
+      const strValue = TreeSitterUtil.resolveStaticString(argumentNode)
       if (strValue !== null) {
         return {
           sourcedPath: strValue,
@@ -113,7 +112,7 @@ function getSourcedPathInfoFromNode({
       // Strip one leading dynamic section.
       if (argumentNode.type === 'string' && argumentNode.namedChildren.length === 1) {
         const [variableNode] = argumentNode.namedChildren
-        if (VARIABLE_NODE_TYPES.includes(variableNode.type)) {
+        if (TreeSitterUtil.isExpansion(variableNode)) {
           const stringContents = argumentNode.text.slice(1, -1)
           if (stringContents.startsWith(`${variableNode.text}/`)) {
             return {
@@ -192,22 +191,22 @@ function resolveSourcedUri({
  */
 function resolveSourceFromConcatenation(node: Parser.SyntaxNode): string | null {
   if (node.type !== 'concatenation') return null
-  const stringValue = resolveStaticString(node)
+  const stringValue = TreeSitterUtil.resolveStaticString(node)
   if (stringValue !== null) return stringValue // This string is fully static.
 
   const values: string[] = []
   // Since the string must begin with the variable, the variable must be in the first child.
   const [firstNode, ...rest] = node.namedChildren
   // The first child is static, this means one of the other children is not!
-  if (resolveStaticString(firstNode) !== null) return null
+  if (TreeSitterUtil.resolveStaticString(firstNode) !== null) return null
 
   // if the string is unquoted, the first child is the variable, so there's no more text in it.
-  if (!VARIABLE_NODE_TYPES.includes(firstNode.type)) {
+  if (!TreeSitterUtil.isExpansion(firstNode)) {
     if (firstNode.namedChildCount > 1) return null // Only one variable is allowed.
     // Since the string must begin with the variable, the variable must be first child.
     const variableNode = firstNode.namedChildren[0] // Get the variable (quoted case)
     // This is command substitution!
-    if (!VARIABLE_NODE_TYPES.includes(variableNode.type)) return null
+    if (!TreeSitterUtil.isExpansion(variableNode)) return null
     const stringContents = firstNode.text.slice(1, -1)
     // The string doesn't start with the variable!
     if (!stringContents.startsWith(variableNode.text)) return null
@@ -216,7 +215,7 @@ function resolveSourceFromConcatenation(node: Parser.SyntaxNode): string | null 
   }
 
   for (const child of rest) {
-    const value = resolveStaticString(child)
+    const value = TreeSitterUtil.resolveStaticString(child)
     // The other values weren't statically determinable!
     if (value === null) return null
     values.push(value)
@@ -228,28 +227,5 @@ function resolveSourceFromConcatenation(node: Parser.SyntaxNode): string | null 
   if (staticResult.startsWith('/')) return `.${staticResult}`
   // The path doesn't start with a slash, so it's invalid
   // PERF: can we fail earlier than this?
-  return null
-}
-
-/**
- * Resolves the full string value of a node
- * Returns null if the value can't be statically determined (ie, it contains a variable or command substition).
- * Supports: word, string, raw_string, and concatenation
- */
-function resolveStaticString(node: Parser.SyntaxNode): string | null {
-  if (node.type === 'concatenation') {
-    const values = []
-    for (const child of node.namedChildren) {
-      const value = resolveStaticString(child)
-      if (value === null) return null
-      values.push(value)
-    }
-    return values.join('')
-  }
-  if (node.type === 'word') return node.text
-  if (node.type === 'string' || node.type === 'raw_string') {
-    if (node.namedChildCount === 0) return node.text.slice(1, -1)
-    return null
-  }
   return null
 }
