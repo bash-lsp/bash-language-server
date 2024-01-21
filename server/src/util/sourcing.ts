@@ -109,9 +109,23 @@ function getSourcedPathInfoFromNode({
       }
 
       if (argumentNode.type === 'string' || argumentNode.type === 'raw_string') {
+        const stringContents = argumentNode.text.slice(1, -1)
         if (argumentNode.namedChildren.length === 0) {
           return {
-            sourcedPath: argumentNode.text.slice(1, -1),
+            sourcedPath: stringContents,
+          }
+        } else if (argumentNode.namedChildren.length === 1) {
+          const [variableNode] = argumentNode.namedChildren
+          if (
+            variableNode.type == 'simple_expansion' ||
+            variableNode.type == 'expansion'
+          ) {
+            const variableText = `${variableNode.text}`
+            if (stringContents.startsWith(variableText + '/')) {
+              return {
+                sourcedPath: '.' + stringContents.slice(variableText.length),
+              }
+            }
           }
         }
       }
