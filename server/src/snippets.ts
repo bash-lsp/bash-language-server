@@ -459,7 +459,7 @@ export const SNIPPETS: BashCompletionItem[] = [
       '\t*)',
       '\t\t${4:command ...}',
       '\t\t;;',
-      'end',
+      'esac',
     ].join('\n'),
   },
   {
