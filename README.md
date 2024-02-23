@@ -168,6 +168,18 @@ Add the configuration to your `.emacs.d/init.el`
   (sh-mode . lsp))
 ```
 
+Using the built-in `eglot` lsp mode:
+
+```emacs-lisp
+(use-package eglot
+  :config
+  (add-to-list 'eglot-server-programs '((sh-mode bash-ts-mode) . ("bash-language-server" "start")))
+
+  :hook
+  (sh-mode . eglot-ensure)
+  (bash-ts-mode . eglot-ensure))
+```
+
 ## Logging
 
 The minimum logging level for the server can be adjusted using the `BASH_IDE_LOG_LEVEL` environment variable
