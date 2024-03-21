@@ -81,8 +81,8 @@ importers:
         specifier: 1.0.11
         version: 1.0.11
       web-tree-sitter:
-        specifier: 0.20.8
-        version: 0.20.8
+        specifier: 0.22.2
+        version: 0.22.2
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -3256,8 +3256,8 @@ packages:
       makeerror: 1.0.12
     dev: true
 
-  /web-tree-sitter@0.20.8:
-    resolution: {integrity: sha512-weOVgZ3aAARgdnb220GqYuh7+rZU0Ka9k9yfKtGAzEYMa6GgiCzW9JjQRJyCJakvibQW+dfjJdihjInKuuCAUQ==}
+  /web-tree-sitter@0.22.2:
+    resolution: {integrity: sha512-gY/aw1wNQbTU0m7U5PojDOftsKMbBIpusJ9Ia/y7sfIN4jk9xXLHwQs+eQ3QP772IdjxVqje0hRTCh5CzrWeGg==}
     dev: false
 
   /webidl-conversions@3.0.1:
