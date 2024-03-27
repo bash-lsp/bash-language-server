@@ -40,6 +40,9 @@ export const ConfigSchema = z.object({
 
   // Controls the executable used for ShellCheck linting information. An empty string will disable linting.
   shellcheckPath: z.string().trim().default('shellcheck'),
+
+  // Controls the executable used for Shfmt formatting. An empty string will disable formatting
+  shfmtPath: z.string().trim().default('shfmt'),
 })
 
 export type Config = z.infer<typeof ConfigSchema>
@@ -57,6 +60,7 @@ export function getConfigFromEnvironmentVariables(): {
     logLevel: process.env[LOG_LEVEL_ENV_VAR],
     shellcheckArguments: process.env.SHELLCHECK_ARGUMENTS,
     shellcheckPath: process.env.SHELLCHECK_PATH,
+    shfmtPath: process.env.SHFMT_PATH,
   }
 
   const environmentVariablesUsed = Object.entries(rawConfig)

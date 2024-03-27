@@ -77,6 +77,11 @@
           "type": "string",
           "default": "",
           "description": "Additional ShellCheck arguments. Note that we already add the following arguments: --shell, --format, --external-sources."
+        },
+        "bashIde.shfmtPath": {
+          "type": "string",
+          "default": "shfmt",
+          "description": "Controls the executable used for Shfmt formatting. An empty string will disable formatting."
         }
       }
     }
