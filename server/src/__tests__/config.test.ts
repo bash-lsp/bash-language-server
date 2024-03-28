@@ -13,6 +13,7 @@ describe('ConfigSchema', () => {
         "logLevel": "info",
         "shellcheckArguments": [],
         "shellcheckPath": "shellcheck",
+        "shfmtPath": "shfmt",
       }
     `)
   })
@@ -25,6 +26,7 @@ describe('ConfigSchema', () => {
         includeAllWorkspaceSymbols: true,
         shellcheckArguments: ' -e SC2001  -e SC2002 ',
         shellcheckPath: '',
+        shfmtPath: 'myshfmt',
       }),
     ).toMatchInlineSnapshot(`
       {
@@ -41,6 +43,7 @@ describe('ConfigSchema', () => {
           "SC2002",
         ],
         "shellcheckPath": "",
+        "shfmtPath": "myshfmt",
       }
     `)
   })
@@ -67,12 +70,14 @@ describe('getConfigFromEnvironmentVariables', () => {
         "logLevel": "info",
         "shellcheckArguments": [],
         "shellcheckPath": "shellcheck",
+        "shfmtPath": "shfmt",
       }
     `)
   })
   it('preserves an empty string', () => {
     process.env = {
       SHELLCHECK_PATH: '',
+      SHFMT_PATH: '',
       EXPLAINSHELL_ENDPOINT: '',
     }
     const { config } = getConfigFromEnvironmentVariables()
@@ -86,6 +91,7 @@ describe('getConfigFromEnvironmentVariables', () => {
         "logLevel": "info",
         "shellcheckArguments": [],
         "shellcheckPath": "",
+        "shfmtPath": "",
       }
     `)
   })
@@ -94,6 +100,7 @@ describe('getConfigFromEnvironmentVariables', () => {
     process.env = {
       SHELLCHECK_PATH: '/path/to/shellcheck',
       SHELLCHECK_ARGUMENTS: '-e SC2001',
+      SHFMT_PATH: '/path/to/shfmt',
       EXPLAINSHELL_ENDPOINT: 'localhost:8080',
       GLOB_PATTERN: '*.*',
       BACKGROUND_ANALYSIS_MAX_FILES: '1',
@@ -113,6 +120,7 @@ describe('getConfigFromEnvironmentVariables', () => {
           "SC2001",
         ],
         "shellcheckPath": "/path/to/shellcheck",
+        "shfmtPath": "/path/to/shfmt",
       }
     `)
   })

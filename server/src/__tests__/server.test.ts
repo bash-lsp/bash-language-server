@@ -85,6 +85,7 @@ describe('server', () => {
           ],
         },
         "definitionProvider": true,
+        "documentFormattingProvider": true,
         "documentHighlightProvider": true,
         "documentSymbolProvider": true,
         "hoverProvider": true,
