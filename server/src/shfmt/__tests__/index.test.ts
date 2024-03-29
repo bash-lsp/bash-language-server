@@ -1,3 +1,4 @@
+import { FormattingOptions } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../../testing/fixtures'
@@ -17,14 +18,16 @@ function textToDoc(txt: string) {
 async function getFormattingResult({
   document,
   executablePath = 'shfmt',
+  formatOptions,
 }: {
   document: TextDocument
   executablePath?: string
+  formatOptions?: FormattingOptions
 }): Promise<[Awaited<ReturnType<Formatter['format']>>, Formatter]> {
   const formatter = new Formatter({
     executablePath,
   })
-  const result = await formatter.format(document)
+  const result = await formatter.format(document, formatOptions)
   return [result, formatter]
 }
 
@@ -74,6 +77,96 @@ describe('formatter', () => {
 
       function next() {
       	echo line
+      }
+      ",
+          "range": {
+            "end": {
+              "character": 2147483647,
+              "line": 2147483647,
+            },
+            "start": {
+              "character": 0,
+              "line": 0,
+            },
+          },
+        },
+      ]
+    `)
+  })
+
+  it('should format using tabs when insertSpaces is false', async () => {
+    const [result] = await getFormattingResult({
+      document: FIXTURE_DOCUMENT.SHFMT,
+      formatOptions: { tabSize: 4, insertSpaces: false },
+    })
+    expect(result).toMatchInlineSnapshot(`
+      [
+        {
+          "newText": "#!/bin/bash
+      set -ueo pipefail
+
+      if [ -z "$arg" ]; then
+      	echo indent
+      fi
+
+      echo binary &&
+      	echo next line
+
+      case "$arg" in
+      a)
+      	echo case indent
+      	;;
+      esac
+
+      echo space redirects >/dev/null
+
+      function next() {
+      	echo line
+      }
+      ",
+          "range": {
+            "end": {
+              "character": 2147483647,
+              "line": 2147483647,
+            },
+            "start": {
+              "character": 0,
+              "line": 0,
+            },
+          },
+        },
+      ]
+    `)
+  })
+
+  it('should format using spaces when insertSpaces is true', async () => {
+    const [result] = await getFormattingResult({
+      document: FIXTURE_DOCUMENT.SHFMT,
+      formatOptions: { tabSize: 3, insertSpaces: true },
+    })
+    expect(result).toMatchInlineSnapshot(`
+      [
+        {
+          "newText": "#!/bin/bash
+      set -ueo pipefail
+
+      if [ -z "$arg" ]; then
+         echo indent
+      fi
+
+      echo binary &&
+         echo next line
+
+      case "$arg" in
+      a)
+         echo case indent
+         ;;
+      esac
+
+      echo space redirects >/dev/null
+
+      function next() {
+         echo line
       }
       ",
           "range": {

@@ -24,18 +24,24 @@ export class Formatter {
     return this._canFormat
   }
 
-  public async format(document: TextDocument): Promise<TextEdit[]> {
+  public async format(
+    document: TextDocument,
+    formatOptions?: LSP.FormattingOptions | null,
+  ): Promise<TextEdit[]> {
     if (!this._canFormat) {
       return []
     }
 
-    return this.executeFormat(document)
+    return this.executeFormat(document, formatOptions)
   }
 
-  private async executeFormat(document: TextDocument): Promise<TextEdit[]> {
+  private async executeFormat(
+    document: TextDocument,
+    formatOptions?: LSP.FormattingOptions | null,
+  ): Promise<TextEdit[]> {
     const documentText = document.getText()
 
-    const result = await this.runShfmt(documentText)
+    const result = await this.runShfmt(documentText, formatOptions)
 
     if (!this._canFormat) {
       return []
@@ -52,8 +58,12 @@ export class Formatter {
     ]
   }
 
-  private async runShfmt(documentText: string): Promise<string> {
-    const args: string[] = []
+  private async runShfmt(
+    documentText: string,
+    formatOptions?: LSP.FormattingOptions | null,
+  ): Promise<string> {
+    const indentation: number = formatOptions?.insertSpaces ? formatOptions.tabSize : 0
+    const args: string[] = [`--indent=${indentation}`]
 
     logger.debug(`Shfmt: running "${this.executablePath} ${args.join(' ')}"`)
 
