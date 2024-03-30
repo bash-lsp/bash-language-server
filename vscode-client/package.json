@@ -85,22 +85,22 @@
         },
         "bashIde.shfmt.binaryNextLine": {
           "type": "boolean",
-          "default": "false",
+          "default": false,
           "description": "Allow boolean operators (like && and ||) to start a line."
         },
         "bashIde.shfmt.caseIndent": {
           "type": "boolean",
-          "default": "false",
+          "default": false,
           "description": "Indent patterns in case statements."
         },
         "bashIde.shfmt.funcNextLine": {
           "type": "boolean",
-          "default": "false",
+          "default": false,
           "description": "Place function opening braces on a separate line."
         },
         "bashIde.shfmt.spaceRedirects": {
           "type": "boolean",
-          "default": "false",
+          "default": false,
           "description": "Follow redirection operators with a space."
         }
       }
