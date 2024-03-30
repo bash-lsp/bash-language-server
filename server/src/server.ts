@@ -157,6 +157,7 @@ export default class BashServer {
     })
 
     this.documents.onDidClose((event) => {
+      connection.sendDiagnostics({ uri: event.document.uri, diagnostics: [] })
       delete this.uriToCodeActions[event.document.uri]
     })
 
