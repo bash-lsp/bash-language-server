@@ -78,10 +78,30 @@
           "default": "",
           "description": "Additional ShellCheck arguments. Note that we already add the following arguments: --shell, --format, --external-sources."
         },
-        "bashIde.shfmtPath": {
+        "bashIde.shfmt.path": {
           "type": "string",
           "default": "shfmt",
           "description": "Controls the executable used for Shfmt formatting. An empty string will disable formatting."
+        },
+        "bashIde.shfmt.binaryNextLine": {
+          "type": "boolean",
+          "default": "false",
+          "description": "Allow boolean operators (like && and ||) to start a line."
+        },
+        "bashIde.shfmt.caseIndent": {
+          "type": "boolean",
+          "default": "false",
+          "description": "Indent patterns in case statements."
+        },
+        "bashIde.shfmt.funcNextLine": {
+          "type": "boolean",
+          "default": "false",
+          "description": "Place function opening braces on a separate line."
+        },
+        "bashIde.shfmt.spaceRedirects": {
+          "type": "boolean",
+          "default": "false",
+          "description": "Follow redirection operators with a space."
         }
       }
     }

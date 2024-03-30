@@ -279,9 +279,9 @@ export default class BashServer {
             this.linter = new Linter({ executablePath: shellcheckPath })
           }
 
-          const { shfmtPath } = this.config
+          const shfmtPath = this.config.shfmt?.path
           if (!shfmtPath) {
-            logger.info('Shfmt formatting is disabled as "shfmtPath" was not set')
+            logger.info('Shfmt formatting is disabled as "shfmt.path" was not set')
             this.formatter = undefined
           } else {
             this.formatter = new Formatter({ executablePath: shfmtPath })

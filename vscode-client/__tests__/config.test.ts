@@ -4,6 +4,18 @@ import { LOG_LEVELS } from '../../server/src/util/logger'
 
 const defaultConfig = getDefaultConfiguration()
 
+function flattenObjectKeys(obj: Record<string, any>, prefix = '') {
+  return Object.keys(obj).reduce((flattenedKeys: string[], key) => {
+    const pre = prefix.length ? `${prefix}.` : ''
+    if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+      flattenedKeys.push(...flattenObjectKeys(obj[key], pre + key))
+    } else {
+      flattenedKeys.push(pre + key)
+    }
+    return flattenedKeys
+  }, [])
+}
+
 describe('config', () => {
   const configProperties = packageJson.contributes.configuration.properties
 
@@ -18,7 +30,7 @@ describe('config', () => {
       .map((key) => key.replace(/^bashIde\./, ''))
       .sort()
 
-    const defaultConfigKeys = Object.keys(defaultConfig).sort()
+    const defaultConfigKeys = flattenObjectKeys(defaultConfig).sort()
     expect(configKeys).toEqual(defaultConfigKeys)
   })
 

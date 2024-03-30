@@ -41,8 +41,24 @@ export const ConfigSchema = z.object({
   // Controls the executable used for ShellCheck linting information. An empty string will disable linting.
   shellcheckPath: z.string().trim().default('shellcheck'),
 
-  // Controls the executable used for Shfmt formatting. An empty string will disable formatting
-  shfmtPath: z.string().trim().default('shfmt'),
+  shfmt: z
+    .object({
+      // Controls the executable used for Shfmt formatting. An empty string will disable formatting
+      path: z.string().trim().default('shfmt'),
+
+      // Allow boolean operators (like && and ||) to start a line.
+      binaryNextLine: z.boolean().default(false),
+
+      // Indent patterns in case statements.
+      caseIndent: z.boolean().default(false),
+
+      // Place function opening braces on a separate line.
+      funcNextLine: z.boolean().default(false),
+
+      // Follow redirection operators with a space.
+      spaceRedirects: z.boolean().default(false),
+    })
+    .default({}),
 })
 
 export type Config = z.infer<typeof ConfigSchema>
@@ -60,7 +76,13 @@ export function getConfigFromEnvironmentVariables(): {
     logLevel: process.env[LOG_LEVEL_ENV_VAR],
     shellcheckArguments: process.env.SHELLCHECK_ARGUMENTS,
     shellcheckPath: process.env.SHELLCHECK_PATH,
-    shfmtPath: process.env.SHFMT_PATH,
+    shfmt: {
+      path: process.env.SHFMT_PATH,
+      binaryNextLine: toBoolean(process.env.SHFMT_BINARY_NEXT_LINE),
+      caseIndent: toBoolean(process.env.SHFMT_CASE_INDENT),
+      funcNextLine: toBoolean(process.env.SHFMT_FUNC_NEXT_LINE),
+      spaceRedirects: toBoolean(process.env.SHFMT_SPACE_REDIRECTS),
+    },
   }
 
   const environmentVariablesUsed = Object.entries(rawConfig)
