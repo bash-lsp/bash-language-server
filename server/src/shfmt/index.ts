@@ -27,21 +27,23 @@ export class Formatter {
   public async format(
     document: TextDocument,
     formatOptions?: LSP.FormattingOptions | null,
+    shfmtConfig?: Record<string, string | boolean> | null,
   ): Promise<TextEdit[]> {
     if (!this._canFormat) {
       return []
     }
 
-    return this.executeFormat(document, formatOptions)
+    return this.executeFormat(document, formatOptions, shfmtConfig)
   }
 
   private async executeFormat(
     document: TextDocument,
     formatOptions?: LSP.FormattingOptions | null,
+    shfmtConfig?: Record<string, string | boolean> | null,
   ): Promise<TextEdit[]> {
     const documentText = document.getText()
 
-    const result = await this.runShfmt(documentText, formatOptions)
+    const result = await this.runShfmt(documentText, formatOptions, shfmtConfig)
 
     if (!this._canFormat) {
       return []
@@ -61,9 +63,14 @@ export class Formatter {
   private async runShfmt(
     documentText: string,
     formatOptions?: LSP.FormattingOptions | null,
+    shfmtConfig?: Record<string, string | boolean> | null,
   ): Promise<string> {
     const indentation: number = formatOptions?.insertSpaces ? formatOptions.tabSize : 0
     const args: string[] = [`--indent=${indentation}`]
+    if (shfmtConfig?.binaryNextLine) args.push('--binary-next-line')
+    if (shfmtConfig?.caseIndent) args.push('--case-indent')
+    if (shfmtConfig?.funcNextLine) args.push('--func-next-line')
+    if (shfmtConfig?.spaceRedirects) args.push('--space-redirects')
 
     logger.debug(`Shfmt: running "${this.executablePath} ${args.join(' ')}"`)
 

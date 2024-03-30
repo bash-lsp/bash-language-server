@@ -833,7 +833,7 @@ export default class BashServer {
           return null
         }
 
-        return await this.formatter.format(document, params.options)
+        return await this.formatter.format(document, params.options, this.config.shfmt)
       } catch (err) {
         logger.error(`Error while formatting: ${err}`)
       }
