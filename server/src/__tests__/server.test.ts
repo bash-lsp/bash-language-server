@@ -1431,7 +1431,6 @@ describe('server', () => {
       ['variable in let expression', 110, 4],
       ['variable in binary expression', 111, 9],
       ['variable in postfix expression', 111, 17],
-      ['variable in arithmetic expansion', 112, 14],
     ])('returns null for non-renamable symbol: %s', async (_, line, character) => {
       expect(await getPrepareRenameResult(line, character)).toBeNull()
     })
@@ -1741,9 +1740,9 @@ describe('server', () => {
     describe('Edge or not covered cases', () => {
       it('only includes variables typed as variable_name', async () => {
         const iRanges = await getFirstChangeRanges(getRenameRequestResult(106, 4))
-        // This should be 6 if all instances within let and arithmetic
+        // This should be 6 if all instances within let, postfix, and binary
         // expressions are included.
-        expect(iRanges.length).toBe(2)
+        expect(iRanges.length).toBe(3)
 
         const lineRanges = await getFirstChangeRanges(getRenameRequestResult(118, 10))
         // This should be 2 if the declaration of `line` is included.
