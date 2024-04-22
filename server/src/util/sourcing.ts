@@ -109,7 +109,11 @@ function getSourcedPathInfoFromNode({
       }
 
       if (argumentNode.type === 'string' || argumentNode.type === 'raw_string') {
-        if (argumentNode.namedChildren.length === 0) {
+        const children = argumentNode.namedChildren
+        if (
+          children.length === 0 ||
+          (children.length === 1 && children[0].type === 'string_content')
+        ) {
           return {
             sourcedPath: argumentNode.text.slice(1, -1),
           }
