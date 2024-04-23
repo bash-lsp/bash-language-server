@@ -1,5 +1,8 @@
 # Bash IDE
 
+## 1.41.0
+- Upgrade language server to 5.2.0
+
 ## 1.40.0
 - Upgrade language server to 5.1.1 (rename capability).
 
