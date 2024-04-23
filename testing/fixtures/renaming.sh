@@ -121,13 +121,13 @@ done < somefile.txt
 
 # Complex nesting affects self-assignment handling
 
-1() {
+f1() {
 	local var="var"
 
-	2() (
+	f2() (
 		var=$var
 
-		3() {
+		f3() {
 			declare var="$var"
 		}
 	)
