@@ -13,5 +13,5 @@ pnpm verify:bail
 
 cd vscode-client
 
-# NOTE: it would be much nicer if we could detect which version was deployed...
-npx vsce@1.103.1 publish -p $VSCE_TOKEN && tagRelease $tag || echo 'Deploy failed, probably there was no changes'
+npx @vscode/vsce@2.26.0 publish --skip-duplicate -p $VSCE_TOKEN 
+tagRelease $tag || echo "Tag update failed, likely already exists"
