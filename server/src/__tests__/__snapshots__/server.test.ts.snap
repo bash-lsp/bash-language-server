@@ -653,11 +653,11 @@ exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceE
         "newText": "newName",
         "range": {
           "end": {
-            "character": 53,
+            "character": 10,
             "line": 16,
           },
           "start": {
-            "character": 43,
+            "character": 0,
             "line": 16,
           },
         },
