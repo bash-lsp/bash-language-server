@@ -1,5 +1,11 @@
 # Bash Language Server
 
+## 5.2.0
+
+- Upgrade tree-sitter-bash from 0.20.7 to 0.22.5 https://github.com/bash-lsp/bash-language-server/pull/1148
+- Dependency upgrades
+
+
 ## 5.1.2
 
 - Use shellcheck's shell directive for selecting the dialect https://github.com/bash-lsp/bash-language-server/pull/1081

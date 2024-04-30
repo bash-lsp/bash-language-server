@@ -128,7 +128,7 @@ export default class Analyzer {
         })
     }
 
-    if (tree.rootNode.hasError()) {
+    if (tree.rootNode.hasError) {
       logger.warn(`Error while parsing ${uri}: syntax error`)
     }
 
