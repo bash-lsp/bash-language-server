@@ -66,11 +66,11 @@ export class Formatter {
     shfmtConfig?: Record<string, string | boolean> | null,
   ): Promise<string> {
     const indentation: number = formatOptions?.insertSpaces ? formatOptions.tabSize : 0
-    const args: string[] = [`--indent=${indentation}`]
-    if (shfmtConfig?.binaryNextLine) args.push('--binary-next-line')
-    if (shfmtConfig?.caseIndent) args.push('--case-indent')
-    if (shfmtConfig?.funcNextLine) args.push('--func-next-line')
-    if (shfmtConfig?.spaceRedirects) args.push('--space-redirects')
+    const args: string[] = [`-i=${indentation}`] // --indent
+    if (shfmtConfig?.binaryNextLine) args.push('-bn') // --binary-next-line
+    if (shfmtConfig?.caseIndent) args.push('-ci') // --case-indent
+    if (shfmtConfig?.funcNextLine) args.push('-fn') // --func-next-line
+    if (shfmtConfig?.spaceRedirects) args.push('-sr') // --space-redirects
 
     logger.debug(`Shfmt: running "${this.executablePath} ${args.join(' ')}"`)
 
