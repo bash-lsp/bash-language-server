@@ -14,8 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install shellcheck (used for testing)
-        run: sudo apt-get install -y shellcheck
+      - name: Install shellcheck and shfmt (used for testing)
+        run: sudo apt-get install -y shellcheck shfmt
 
       - uses: pnpm/action-setup@v2
         with:

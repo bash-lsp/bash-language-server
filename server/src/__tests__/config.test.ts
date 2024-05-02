@@ -13,6 +13,13 @@ describe('ConfigSchema', () => {
         "logLevel": "info",
         "shellcheckArguments": [],
         "shellcheckPath": "shellcheck",
+        "shfmt": {
+          "binaryNextLine": false,
+          "caseIndent": false,
+          "funcNextLine": false,
+          "path": "shfmt",
+          "spaceRedirects": false,
+        },
       }
     `)
   })
@@ -25,6 +32,13 @@ describe('ConfigSchema', () => {
         includeAllWorkspaceSymbols: true,
         shellcheckArguments: ' -e SC2001  -e SC2002 ',
         shellcheckPath: '',
+        shfmt: {
+          binaryNextLine: true,
+          caseIndent: true,
+          funcNextLine: true,
+          path: 'myshfmt',
+          spaceRedirects: true,
+        },
       }),
     ).toMatchInlineSnapshot(`
       {
@@ -41,6 +55,13 @@ describe('ConfigSchema', () => {
           "SC2002",
         ],
         "shellcheckPath": "",
+        "shfmt": {
+          "binaryNextLine": true,
+          "caseIndent": true,
+          "funcNextLine": true,
+          "path": "myshfmt",
+          "spaceRedirects": true,
+        },
       }
     `)
   })
@@ -67,12 +88,20 @@ describe('getConfigFromEnvironmentVariables', () => {
         "logLevel": "info",
         "shellcheckArguments": [],
         "shellcheckPath": "shellcheck",
+        "shfmt": {
+          "binaryNextLine": false,
+          "caseIndent": false,
+          "funcNextLine": false,
+          "path": "shfmt",
+          "spaceRedirects": false,
+        },
       }
     `)
   })
   it('preserves an empty string', () => {
     process.env = {
       SHELLCHECK_PATH: '',
+      SHFMT_PATH: '',
       EXPLAINSHELL_ENDPOINT: '',
     }
     const { config } = getConfigFromEnvironmentVariables()
@@ -86,6 +115,13 @@ describe('getConfigFromEnvironmentVariables', () => {
         "logLevel": "info",
         "shellcheckArguments": [],
         "shellcheckPath": "",
+        "shfmt": {
+          "binaryNextLine": false,
+          "caseIndent": false,
+          "funcNextLine": false,
+          "path": "",
+          "spaceRedirects": false,
+        },
       }
     `)
   })
@@ -94,6 +130,8 @@ describe('getConfigFromEnvironmentVariables', () => {
     process.env = {
       SHELLCHECK_PATH: '/path/to/shellcheck',
       SHELLCHECK_ARGUMENTS: '-e SC2001',
+      SHFMT_PATH: '/path/to/shfmt',
+      SHFMT_CASE_INDENT: 'true',
       EXPLAINSHELL_ENDPOINT: 'localhost:8080',
       GLOB_PATTERN: '*.*',
       BACKGROUND_ANALYSIS_MAX_FILES: '1',
@@ -113,6 +151,13 @@ describe('getConfigFromEnvironmentVariables', () => {
           "SC2001",
         ],
         "shellcheckPath": "/path/to/shellcheck",
+        "shfmt": {
+          "binaryNextLine": false,
+          "caseIndent": true,
+          "funcNextLine": false,
+          "path": "/path/to/shfmt",
+          "spaceRedirects": false,
+        },
       }
     `)
   })
