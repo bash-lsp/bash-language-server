@@ -3,7 +3,7 @@
   "description": "A language server for Bash",
   "author": "Mads Hartmann",
   "license": "MIT",
-  "version": "5.3.0",
+  "version": "5.3.1",
   "main": "./out/server.js",
   "typings": "./out/server.d.ts",
   "bin": {

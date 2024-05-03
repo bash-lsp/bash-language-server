@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 5.3.1
+
+- Clear diagnostics when closing document https://github.com/bash-lsp/bash-language-server/pull/1135
+
 ## 5.3.0
 
 - Add support for formatting using shfmt (if installed). https://github.com/bash-lsp/bash-language-server/pull/1136
