@@ -653,11 +653,11 @@ exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceE
         "newText": "newName",
         "range": {
           "end": {
-            "character": 53,
+            "character": 10,
             "line": 16,
           },
           "start": {
-            "character": 43,
+            "character": 0,
             "line": 16,
           },
         },
@@ -909,6 +909,7 @@ exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceE
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/shellcheck/shell-directive.bash": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/shellcheck/source.sh": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/shellcheck/sourced.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/shfmt.sh": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/sourcing.sh": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/sourcing2.sh": [],
   },
@@ -1001,6 +1002,7 @@ exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceE
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/shellcheck/shell-directive.bash": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/shellcheck/source.sh": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/shellcheck/sourced.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/shfmt.sh": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/sourcing.sh": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/sourcing2.sh": [],
   },

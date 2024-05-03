@@ -14,8 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install shellcheck (used for testing)
-        run: sudo apt-get install -y shellcheck
+      - name: Install shellcheck and shfmt (used for testing)
+        run: sudo apt-get install -y shellcheck shfmt
 
       - uses: pnpm/action-setup@v2
         with:
@@ -34,7 +34,7 @@ jobs:
         run: pnpm verify:bail
 
       - name: Publish coverage to codecov.io
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         if: success() && matrix.node-version == '20.x'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
