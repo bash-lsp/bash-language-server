@@ -91,14 +91,10 @@ export class Formatter {
       proc.stdin.end(documentText)
     })
 
-    // NOTE: do we care about exit code? 0 means "ok", 1 possibly means "errors",
-    // but the presence of parseable errors in the output is also sufficient to
-    // distinguish.
     let exit
     try {
       exit = await proc
     } catch (e) {
-      // TODO: we could do this up front?
       if ((e as any).code === 'ENOENT') {
         // shfmt path wasn't found, don't try to format any more:
         logger.warn(
@@ -107,7 +103,11 @@ export class Formatter {
         this._canFormat = false
         return ''
       }
-      throw new Error(`Shfmt: failed with code ${exit}: ${e}\nout:\n${out}\nerr:\n${err}`)
+      throw new Error(`Shfmt: child process error: ${e}`)
+    }
+
+    if (exit != 0) {
+      throw new Error(`Shfmt: exited with status ${exit}: ${err}`)
     }
 
     return out
