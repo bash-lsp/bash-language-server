@@ -1,3 +1,6 @@
+import { basename, relative } from 'node:path'
+import { format } from 'node:util'
+
 import { spawn } from 'child_process'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument, TextEdit } from 'vscode-languageserver-textdocument'
@@ -41,9 +44,7 @@ export class Formatter {
     formatOptions?: LSP.FormattingOptions | null,
     shfmtConfig?: Record<string, string | boolean> | null,
   ): Promise<TextEdit[]> {
-    const documentText = document.getText()
-
-    const result = await this.runShfmt(documentText, formatOptions, shfmtConfig)
+    const result = await this.runShfmt(document, formatOptions, shfmtConfig)
 
     if (!this._canFormat) {
       return []
@@ -61,16 +62,21 @@ export class Formatter {
   }
 
   private async runShfmt(
-    documentText: string,
+    document: TextDocument,
     formatOptions?: LSP.FormattingOptions | null,
     shfmtConfig?: Record<string, string | boolean> | null,
   ): Promise<string> {
-    const indentation: number = formatOptions?.insertSpaces ? formatOptions.tabSize : 0
-    const args: string[] = [`-i=${indentation}`] // --indent
-    if (shfmtConfig?.binaryNextLine) args.push('-bn') // --binary-next-line
-    if (shfmtConfig?.caseIndent) args.push('-ci') // --case-indent
-    if (shfmtConfig?.funcNextLine) args.push('-fn') // --func-next-line
-    if (shfmtConfig?.spaceRedirects) args.push('-sr') // --space-redirects
+    // documentText: string,
+    const documentText = document.getText()
+    const documentUri = document.uri
+    let filepath = documentUri.substring(7) // trim "files://"
+    filepath = relative(this.cwd, filepath)
+
+    // Do not pass any Parser and Printer options like -i/-p/-bn/-l. It will cause the .editorconfig not to be loaded.
+    // See https://github.com/mvdan/sh/blob/23633a432f903599a4ce46c30c4337e413a26ef1/cmd/shfmt/main.go#L186-L196
+    const args: string[] = [
+      `--filename=${filepath}`, // Must set filename for matching the rules in .editorconfig.
+    ]
 
     logger.debug(`Shfmt: running "${this.executablePath} ${args.join(' ')}"`)
 
