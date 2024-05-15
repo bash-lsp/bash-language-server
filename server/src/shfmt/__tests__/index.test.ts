@@ -38,7 +38,7 @@ describe('formatter', () => {
     expect(new Formatter({ executablePath: 'foo' }).canFormat).toBe(true)
   })
 
-  it('should set canFormat to false when formatting fails', async () => {
+  it('should set canFormat to false when the executable cannot be found', async () => {
     const [result, formatter] = await getFormattingResult({
       document: textToDoc(''),
       executablePath: 'foo',
@@ -51,6 +51,14 @@ describe('formatter', () => {
       expect.stringContaining(
         'Shfmt: disabling formatting as no executable was found at path',
       ),
+    )
+  })
+
+  it('should throw when formatting fails', async () => {
+    expect(async () => {
+      await getFormattingResult({ document: FIXTURE_DOCUMENT.PARSE_PROBLEMS })
+    }).rejects.toThrow(
+      'Shfmt: exited with status 1: <standard input>:10:1: > must be followed by a word',
     )
   })
 
