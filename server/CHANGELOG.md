@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 5.3.3
+
+- Revert "Add --help fallback for documentation" https://github.com/bash-lsp/bash-language-server/pull/1052
+
 ## 5.3.2
 
 - Handle non-zero exit status when formatting using shfmt https://github.com/bash-lsp/bash-language-server/pull/1163
