@@ -55,6 +55,9 @@ export const ConfigSchema = z.object({
       // Place function opening braces on a separate line.
       funcNextLine: z.boolean().default(false),
 
+      // (Deprecated) Keep column alignment padding.
+      keepPadding: z.boolean().default(false),
+
       // Follow redirection operators with a space.
       spaceRedirects: z.boolean().default(false),
     })
@@ -81,6 +84,7 @@ export function getConfigFromEnvironmentVariables(): {
       binaryNextLine: toBoolean(process.env.SHFMT_BINARY_NEXT_LINE),
       caseIndent: toBoolean(process.env.SHFMT_CASE_INDENT),
       funcNextLine: toBoolean(process.env.SHFMT_FUNC_NEXT_LINE),
+      keepPadding: toBoolean(process.env.SHFMT_KEEP_PADDING),
       spaceRedirects: toBoolean(process.env.SHFMT_SPACE_REDIRECTS),
     },
   }

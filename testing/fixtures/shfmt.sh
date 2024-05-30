@@ -14,6 +14,10 @@ echo case indent
 ;;
 esac
 
+echo one   two   three
+echo four  five  six
+echo seven eight nine
+
 echo space redirects>  /dev/null
 
 function next(){

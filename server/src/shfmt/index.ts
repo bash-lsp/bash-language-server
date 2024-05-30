@@ -70,6 +70,7 @@ export class Formatter {
     if (shfmtConfig?.binaryNextLine) args.push('-bn') // --binary-next-line
     if (shfmtConfig?.caseIndent) args.push('-ci') // --case-indent
     if (shfmtConfig?.funcNextLine) args.push('-fn') // --func-next-line
+    if (shfmtConfig?.keepPadding) args.push('-kp') // --keep-padding
     if (shfmtConfig?.spaceRedirects) args.push('-sr') // --space-redirects
 
     logger.debug(`Shfmt: running "${this.executablePath} ${args.join(' ')}"`)

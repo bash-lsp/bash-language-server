@@ -83,6 +83,10 @@ describe('formatter', () => {
       	;;
       esac
 
+      echo one two three
+      echo four five six
+      echo seven eight nine
+
       echo space redirects >/dev/null
 
       function next() {
@@ -128,6 +132,10 @@ describe('formatter', () => {
       	;;
       esac
 
+      echo one two three
+      echo four five six
+      echo seven eight nine
+
       echo space redirects >/dev/null
 
       function next() {
@@ -172,6 +180,10 @@ describe('formatter', () => {
          echo case indent
          ;;
       esac
+
+      echo one two three
+      echo four five six
+      echo seven eight nine
 
       echo space redirects >/dev/null
 
@@ -219,6 +231,10 @@ describe('formatter', () => {
         ;;
       esac
 
+      echo one two three
+      echo four five six
+      echo seven eight nine
+
       echo space redirects >/dev/null
 
       function next() {
@@ -264,6 +280,10 @@ describe('formatter', () => {
           echo case indent
           ;;
       esac
+
+      echo one two three
+      echo four five six
+      echo seven eight nine
 
       echo space redirects >/dev/null
 
@@ -311,10 +331,64 @@ describe('formatter', () => {
         ;;
       esac
 
+      echo one two three
+      echo four five six
+      echo seven eight nine
+
       echo space redirects >/dev/null
 
       function next()
       {
+        echo line
+      }
+      ",
+          "range": {
+            "end": {
+              "character": 2147483647,
+              "line": 2147483647,
+            },
+            "start": {
+              "character": 0,
+              "line": 0,
+            },
+          },
+        },
+      ]
+    `)
+  })
+
+  it('should format with padding kept as-is when keepPadding is true', async () => {
+    const [result] = await getFormattingResult({
+      document: FIXTURE_DOCUMENT.SHFMT,
+      formatOptions: { tabSize: 2, insertSpaces: true },
+      shfmtConfig: { keepPadding: true },
+    })
+    expect(result).toMatchInlineSnapshot(`
+      [
+        {
+          "newText": "#!/bin/bash
+      set -ueo pipefail
+
+      if [ -z "$arg" ]; then
+        echo indent
+      fi
+
+      echo binary &&
+        echo next line
+
+      case "$arg" in
+      a)
+        echo case indent
+        ;;
+      esac
+
+      echo one   two   three
+      echo four  five  six
+      echo seven eight nine
+
+      echo space redirects >/dev/null
+
+      function next() {
         echo line
       }
       ",
@@ -358,6 +432,10 @@ describe('formatter', () => {
         ;;
       esac
 
+      echo one two three
+      echo four five six
+      echo seven eight nine
+
       echo space redirects > /dev/null
 
       function next() {
@@ -387,6 +465,7 @@ describe('formatter', () => {
         binaryNextLine: true,
         caseIndent: true,
         funcNextLine: true,
+        keepPadding: true,
         spaceRedirects: true,
       },
     })
@@ -401,7 +480,7 @@ describe('formatter', () => {
       fi
 
       echo binary \\
-        && echo next line
+                 && echo next line
 
       case "$arg" in
         a)
@@ -409,10 +488,14 @@ describe('formatter', () => {
           ;;
       esac
 
+      echo one   two   three
+      echo four  five  six
+      echo seven eight nine
+
       echo space redirects > /dev/null
 
       function next()
-      {
+                     {
         echo line
       }
       ",
