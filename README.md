@@ -25,7 +25,10 @@ To be implemented:
 
 ### Dependencies
 
-As a dependency, we recommend that you first install shellcheck [shellcheck][shellcheck] to enable linting: https://github.com/koalaman/shellcheck#installing . If shellcheck is installed, bash-language-server will automatically call it to provide linting and code analysis each time the file is updated (with debounce time of 500ms).
+As a dependency, we recommend that you first install [shellcheck][shellcheck] to enable linting:
+https://github.com/koalaman/shellcheck#installing . If `shellcheck` is installed,
+bash-language-server will automatically call it to provide linting and code analysis each time the
+file is updated (with debounce time of 500ms).
 
 If you want your shell scripts to be formatted consistently, you can install [shfmt][shfmt]. If
 `shfmt` is installed then your documents will be formatted whenever you take the 'format document'
@@ -184,6 +187,13 @@ Using the built-in `eglot` lsp mode:
   (sh-mode . eglot-ensure)
   (bash-ts-mode . eglot-ensure))
 ```
+
+## `shfmt` integration
+
+The indentation used by `shfmt` is whatever has been configured for the current editor session, so
+there is no `shfmt`-specific configuration variable for this. If your editor is configured for
+two-space indents then that's what it will use. If you're using tabs for indentation then `shfmt`
+will use that.
 
 ## Logging
 
