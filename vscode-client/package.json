@@ -101,7 +101,8 @@
         "bashIde.shfmt.keepPadding": {
           "type": "boolean",
           "default": false,
-          "description": "(Deprecated) Keep column alignment padding."
+          "description": "(Deprecated) Keep column alignment padding.",
+          "markdownDescription": "**([Deprecated](https://github.com/mvdan/sh/issues/658))** Keep column alignment padding."
         },
         "bashIde.shfmt.spaceRedirects": {
           "type": "boolean",
