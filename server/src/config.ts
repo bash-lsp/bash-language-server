@@ -58,6 +58,9 @@ export const ConfigSchema = z.object({
       // (Deprecated) Keep column alignment padding.
       keepPadding: z.boolean().default(false),
 
+      // Simplify code before formatting.
+      simplifyCode: z.boolean().default(false),
+
       // Follow redirection operators with a space.
       spaceRedirects: z.boolean().default(false),
     })
@@ -85,6 +88,7 @@ export function getConfigFromEnvironmentVariables(): {
       caseIndent: toBoolean(process.env.SHFMT_CASE_INDENT),
       funcNextLine: toBoolean(process.env.SHFMT_FUNC_NEXT_LINE),
       keepPadding: toBoolean(process.env.SHFMT_KEEP_PADDING),
+      simplifyCode: toBoolean(process.env.SHFMT_SIMPLIFY_CODE),
       spaceRedirects: toBoolean(process.env.SHFMT_SPACE_REDIRECTS),
     },
   }

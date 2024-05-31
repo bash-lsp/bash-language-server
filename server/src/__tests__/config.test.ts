@@ -19,6 +19,7 @@ describe('ConfigSchema', () => {
           "funcNextLine": false,
           "keepPadding": false,
           "path": "shfmt",
+          "simplifyCode": false,
           "spaceRedirects": false,
         },
       }
@@ -39,6 +40,7 @@ describe('ConfigSchema', () => {
           funcNextLine: true,
           keepPadding: true,
           path: 'myshfmt',
+          simplifyCode: true,
           spaceRedirects: true,
         },
       }),
@@ -63,6 +65,7 @@ describe('ConfigSchema', () => {
           "funcNextLine": true,
           "keepPadding": true,
           "path": "myshfmt",
+          "simplifyCode": true,
           "spaceRedirects": true,
         },
       }
@@ -97,6 +100,7 @@ describe('getConfigFromEnvironmentVariables', () => {
           "funcNextLine": false,
           "keepPadding": false,
           "path": "shfmt",
+          "simplifyCode": false,
           "spaceRedirects": false,
         },
       }
@@ -125,6 +129,7 @@ describe('getConfigFromEnvironmentVariables', () => {
           "funcNextLine": false,
           "keepPadding": false,
           "path": "",
+          "simplifyCode": false,
           "spaceRedirects": false,
         },
       }
@@ -162,6 +167,7 @@ describe('getConfigFromEnvironmentVariables', () => {
           "funcNextLine": false,
           "keepPadding": false,
           "path": "/path/to/shfmt",
+          "simplifyCode": false,
           "spaceRedirects": false,
         },
       }

@@ -87,6 +87,8 @@ describe('formatter', () => {
       echo four five six
       echo seven eight nine
 
+      [[ "$simplify" == "simplify" ]]
+
       echo space redirects >/dev/null
 
       function next() {
@@ -136,6 +138,8 @@ describe('formatter', () => {
       echo four five six
       echo seven eight nine
 
+      [[ "$simplify" == "simplify" ]]
+
       echo space redirects >/dev/null
 
       function next() {
@@ -184,6 +188,8 @@ describe('formatter', () => {
       echo one two three
       echo four five six
       echo seven eight nine
+
+      [[ "$simplify" == "simplify" ]]
 
       echo space redirects >/dev/null
 
@@ -235,6 +241,8 @@ describe('formatter', () => {
       echo four five six
       echo seven eight nine
 
+      [[ "$simplify" == "simplify" ]]
+
       echo space redirects >/dev/null
 
       function next() {
@@ -285,6 +293,8 @@ describe('formatter', () => {
       echo four five six
       echo seven eight nine
 
+      [[ "$simplify" == "simplify" ]]
+
       echo space redirects >/dev/null
 
       function next() {
@@ -334,6 +344,8 @@ describe('formatter', () => {
       echo one two three
       echo four five six
       echo seven eight nine
+
+      [[ "$simplify" == "simplify" ]]
 
       echo space redirects >/dev/null
 
@@ -386,6 +398,60 @@ describe('formatter', () => {
       echo four  five  six
       echo seven eight nine
 
+      [[ "$simplify" == "simplify" ]]
+
+      echo space redirects >/dev/null
+
+      function next() {
+        echo line
+      }
+      ",
+          "range": {
+            "end": {
+              "character": 2147483647,
+              "line": 2147483647,
+            },
+            "start": {
+              "character": 0,
+              "line": 0,
+            },
+          },
+        },
+      ]
+    `)
+  })
+
+  it('should format after simplifying the code when simplifyCode is true', async () => {
+    const [result] = await getFormattingResult({
+      document: FIXTURE_DOCUMENT.SHFMT,
+      formatOptions: { tabSize: 2, insertSpaces: true },
+      shfmtConfig: { simplifyCode: true },
+    })
+    expect(result).toMatchInlineSnapshot(`
+      [
+        {
+          "newText": "#!/bin/bash
+      set -ueo pipefail
+
+      if [ -z "$arg" ]; then
+        echo indent
+      fi
+
+      echo binary &&
+        echo next line
+
+      case "$arg" in
+      a)
+        echo case indent
+        ;;
+      esac
+
+      echo one two three
+      echo four five six
+      echo seven eight nine
+
+      [[ $simplify == "simplify" ]]
+
       echo space redirects >/dev/null
 
       function next() {
@@ -436,6 +502,8 @@ describe('formatter', () => {
       echo four five six
       echo seven eight nine
 
+      [[ "$simplify" == "simplify" ]]
+
       echo space redirects > /dev/null
 
       function next() {
@@ -466,6 +534,7 @@ describe('formatter', () => {
         caseIndent: true,
         funcNextLine: true,
         keepPadding: true,
+        simplifyCode: true,
         spaceRedirects: true,
       },
     })
@@ -491,6 +560,8 @@ describe('formatter', () => {
       echo one   two   three
       echo four  five  six
       echo seven eight nine
+
+      [[ $simplify == "simplify"   ]]
 
       echo space redirects > /dev/null
 

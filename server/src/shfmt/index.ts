@@ -71,6 +71,7 @@ export class Formatter {
     if (shfmtConfig?.caseIndent) args.push('-ci') // --case-indent
     if (shfmtConfig?.funcNextLine) args.push('-fn') // --func-next-line
     if (shfmtConfig?.keepPadding) args.push('-kp') // --keep-padding
+    if (shfmtConfig?.simplifyCode) args.push('-s') // --simplify
     if (shfmtConfig?.spaceRedirects) args.push('-sr') // --space-redirects
 
     logger.debug(`Shfmt: running "${this.executablePath} ${args.join(' ')}"`)
