@@ -58,7 +58,7 @@ describe('formatter', () => {
     expect(async () => {
       await getFormattingResult({ document: FIXTURE_DOCUMENT.PARSE_PROBLEMS })
     }).rejects.toThrow(
-      'Shfmt: exited with status 1: <standard input>:10:1: > must be followed by a word',
+      /Shfmt: exited with status 1: .*\/testing\/fixtures\/parse-problems.sh:10:1: > must be followed by a word/,
     )
   })
 
@@ -583,5 +583,23 @@ describe('formatter', () => {
         },
       ]
     `)
+  })
+
+  it('should omit filename from the shfmt comment when it cannot be determined', async () => {
+    // There's no easy way to see what filename has been passed to shfmt without inspecting the
+    // contents of the logs. As a workaround, we set a non-file:// URI on a dodgy document to
+    // trigger an exception and inspect the error message.
+    const testDocument = TextDocument.create(
+      'http://localhost/',
+      'shellscript',
+      0,
+      FIXTURE_DOCUMENT.PARSE_PROBLEMS.getText(),
+    )
+
+    expect(async () => {
+      await getFormattingResult({ document: testDocument })
+    }).rejects.toThrow(
+      /Shfmt: exited with status 1: <standard input>:10:1: > must be followed by a word/,
+    )
   })
 })

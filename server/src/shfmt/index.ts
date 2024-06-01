@@ -41,9 +41,7 @@ export class Formatter {
     formatOptions?: LSP.FormattingOptions | null,
     shfmtConfig?: Record<string, string | boolean> | null,
   ): Promise<TextEdit[]> {
-    const documentText = document.getText()
-
-    const result = await this.runShfmt(documentText, formatOptions, shfmtConfig)
+    const result = await this.runShfmt(document, formatOptions, shfmtConfig)
 
     if (!this._canFormat) {
       return []
@@ -61,7 +59,7 @@ export class Formatter {
   }
 
   private async runShfmt(
-    documentText: string,
+    document: TextDocument,
     formatOptions?: LSP.FormattingOptions | null,
     shfmtConfig?: Record<string, string | boolean> | null,
   ): Promise<string> {
@@ -73,6 +71,12 @@ export class Formatter {
     if (shfmtConfig?.keepPadding) args.push('-kp') // --keep-padding
     if (shfmtConfig?.simplifyCode) args.push('-s') // --simplify
     if (shfmtConfig?.spaceRedirects) args.push('-sr') // --space-redirects
+
+    // If we can determine a local filename, pass that to shfmt to aid language dialect detection
+    const filePathMatch = document.uri.match(/^file:\/\/(.*)$/)
+    if (filePathMatch) {
+      args.push(`--filename=${filePathMatch[1]}`)
+    }
 
     logger.debug(`Shfmt: running "${this.executablePath} ${args.join(' ')}"`)
 
@@ -90,7 +94,7 @@ export class Formatter {
         // This is solved in Node >= 15.1 by the "on('spawn', ...)" event, but we need to
         // support earlier versions.
       })
-      proc.stdin.end(documentText)
+      proc.stdin.end(document.getText())
     })
 
     let exit
