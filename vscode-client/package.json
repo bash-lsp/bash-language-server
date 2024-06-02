@@ -98,6 +98,17 @@
           "default": false,
           "description": "Place function opening braces on a separate line."
         },
+        "bashIde.shfmt.keepPadding": {
+          "type": "boolean",
+          "default": false,
+          "description": "(Deprecated) Keep column alignment padding.",
+          "markdownDescription": "**([Deprecated](https://github.com/mvdan/sh/issues/658))** Keep column alignment padding."
+        },
+        "bashIde.shfmt.simplifyCode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Simplify code before formatting."
+        },
         "bashIde.shfmt.spaceRedirects": {
           "type": "boolean",
           "default": false,

@@ -58,7 +58,7 @@ describe('formatter', () => {
     expect(async () => {
       await getFormattingResult({ document: FIXTURE_DOCUMENT.PARSE_PROBLEMS })
     }).rejects.toThrow(
-      'Shfmt: exited with status 1: <standard input>:10:1: > must be followed by a word',
+      /Shfmt: exited with status 1: .*\/testing\/fixtures\/parse-problems.sh:10:1: > must be followed by a word/,
     )
   })
 
@@ -82,6 +82,12 @@ describe('formatter', () => {
       	echo case indent
       	;;
       esac
+
+      echo one two three
+      echo four five six
+      echo seven eight nine
+
+      [[ "$simplify" == "simplify" ]]
 
       echo space redirects >/dev/null
 
@@ -128,6 +134,12 @@ describe('formatter', () => {
       	;;
       esac
 
+      echo one two three
+      echo four five six
+      echo seven eight nine
+
+      [[ "$simplify" == "simplify" ]]
+
       echo space redirects >/dev/null
 
       function next() {
@@ -172,6 +184,12 @@ describe('formatter', () => {
          echo case indent
          ;;
       esac
+
+      echo one two three
+      echo four five six
+      echo seven eight nine
+
+      [[ "$simplify" == "simplify" ]]
 
       echo space redirects >/dev/null
 
@@ -219,6 +237,12 @@ describe('formatter', () => {
         ;;
       esac
 
+      echo one two three
+      echo four five six
+      echo seven eight nine
+
+      [[ "$simplify" == "simplify" ]]
+
       echo space redirects >/dev/null
 
       function next() {
@@ -264,6 +288,12 @@ describe('formatter', () => {
           echo case indent
           ;;
       esac
+
+      echo one two three
+      echo four five six
+      echo seven eight nine
+
+      [[ "$simplify" == "simplify" ]]
 
       echo space redirects >/dev/null
 
@@ -311,10 +341,120 @@ describe('formatter', () => {
         ;;
       esac
 
+      echo one two three
+      echo four five six
+      echo seven eight nine
+
+      [[ "$simplify" == "simplify" ]]
+
       echo space redirects >/dev/null
 
       function next()
       {
+        echo line
+      }
+      ",
+          "range": {
+            "end": {
+              "character": 2147483647,
+              "line": 2147483647,
+            },
+            "start": {
+              "character": 0,
+              "line": 0,
+            },
+          },
+        },
+      ]
+    `)
+  })
+
+  it('should format with padding kept as-is when keepPadding is true', async () => {
+    const [result] = await getFormattingResult({
+      document: FIXTURE_DOCUMENT.SHFMT,
+      formatOptions: { tabSize: 2, insertSpaces: true },
+      shfmtConfig: { keepPadding: true },
+    })
+    expect(result).toMatchInlineSnapshot(`
+      [
+        {
+          "newText": "#!/bin/bash
+      set -ueo pipefail
+
+      if [ -z "$arg" ]; then
+        echo indent
+      fi
+
+      echo binary &&
+        echo next line
+
+      case "$arg" in
+      a)
+        echo case indent
+        ;;
+      esac
+
+      echo one   two   three
+      echo four  five  six
+      echo seven eight nine
+
+      [[ "$simplify" == "simplify" ]]
+
+      echo space redirects >/dev/null
+
+      function next() {
+        echo line
+      }
+      ",
+          "range": {
+            "end": {
+              "character": 2147483647,
+              "line": 2147483647,
+            },
+            "start": {
+              "character": 0,
+              "line": 0,
+            },
+          },
+        },
+      ]
+    `)
+  })
+
+  it('should format after simplifying the code when simplifyCode is true', async () => {
+    const [result] = await getFormattingResult({
+      document: FIXTURE_DOCUMENT.SHFMT,
+      formatOptions: { tabSize: 2, insertSpaces: true },
+      shfmtConfig: { simplifyCode: true },
+    })
+    expect(result).toMatchInlineSnapshot(`
+      [
+        {
+          "newText": "#!/bin/bash
+      set -ueo pipefail
+
+      if [ -z "$arg" ]; then
+        echo indent
+      fi
+
+      echo binary &&
+        echo next line
+
+      case "$arg" in
+      a)
+        echo case indent
+        ;;
+      esac
+
+      echo one two three
+      echo four five six
+      echo seven eight nine
+
+      [[ $simplify == "simplify" ]]
+
+      echo space redirects >/dev/null
+
+      function next() {
         echo line
       }
       ",
@@ -358,6 +498,12 @@ describe('formatter', () => {
         ;;
       esac
 
+      echo one two three
+      echo four five six
+      echo seven eight nine
+
+      [[ "$simplify" == "simplify" ]]
+
       echo space redirects > /dev/null
 
       function next() {
@@ -387,6 +533,8 @@ describe('formatter', () => {
         binaryNextLine: true,
         caseIndent: true,
         funcNextLine: true,
+        keepPadding: true,
+        simplifyCode: true,
         spaceRedirects: true,
       },
     })
@@ -401,7 +549,7 @@ describe('formatter', () => {
       fi
 
       echo binary \\
-        && echo next line
+                 && echo next line
 
       case "$arg" in
         a)
@@ -409,10 +557,16 @@ describe('formatter', () => {
           ;;
       esac
 
+      echo one   two   three
+      echo four  five  six
+      echo seven eight nine
+
+      [[ $simplify == "simplify"   ]]
+
       echo space redirects > /dev/null
 
       function next()
-      {
+                     {
         echo line
       }
       ",
@@ -429,5 +583,23 @@ describe('formatter', () => {
         },
       ]
     `)
+  })
+
+  it('should omit filename from the shfmt comment when it cannot be determined', async () => {
+    // There's no easy way to see what filename has been passed to shfmt without inspecting the
+    // contents of the logs. As a workaround, we set a non-file:// URI on a dodgy document to
+    // trigger an exception and inspect the error message.
+    const testDocument = TextDocument.create(
+      'http://localhost/',
+      'shellscript',
+      0,
+      FIXTURE_DOCUMENT.PARSE_PROBLEMS.getText(),
+    )
+
+    expect(async () => {
+      await getFormattingResult({ document: testDocument })
+    }).rejects.toThrow(
+      /Shfmt: exited with status 1: <standard input>:10:1: > must be followed by a word/,
+    )
   })
 })

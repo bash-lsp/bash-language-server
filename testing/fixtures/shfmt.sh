@@ -14,6 +14,12 @@ echo case indent
 ;;
 esac
 
+echo one   two   three
+echo four  five  six
+echo seven eight nine
+
+[[ "$simplify" == "simplify" ]]
+
 echo space redirects>  /dev/null
 
 function next(){

@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 5.3.4
+
+- Add additonal shfmt formatting config options https://github.com/bash-lsp/bash-language-server/pull/1168
+
 ## 5.3.3
 
 - Revert "Add --help fallback for documentation" https://github.com/bash-lsp/bash-language-server/pull/1052
