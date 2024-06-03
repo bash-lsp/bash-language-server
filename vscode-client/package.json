@@ -83,6 +83,11 @@
           "default": "shfmt",
           "description": "Controls the executable used for Shfmt formatting. An empty string will disable formatting."
         },
+        "bashIde.shfmt.languageDialect": {
+          "type": "string",
+          "default": "auto",
+          "description": "Language dialect to use when parsing (bash/posix/mksh/bats)."
+        },
         "bashIde.shfmt.binaryNextLine": {
           "type": "boolean",
           "default": false,

@@ -71,6 +71,7 @@ export class Formatter {
     if (shfmtConfig?.keepPadding) args.push('-kp') // --keep-padding
     if (shfmtConfig?.simplifyCode) args.push('-s') // --simplify
     if (shfmtConfig?.spaceRedirects) args.push('-sr') // --space-redirects
+    if (shfmtConfig?.languageDialect) args.push(`-ln=${shfmtConfig.languageDialect}`) // --language-dialect
 
     // If we can determine a local filename, pass that to shfmt to aid language dialect detection
     const filePathMatch = document.uri.match(/^file:\/\/(.*)$/)

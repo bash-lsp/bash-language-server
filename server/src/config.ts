@@ -58,6 +58,9 @@ export const ConfigSchema = z.object({
       // (Deprecated) Keep column alignment padding.
       keepPadding: z.boolean().default(false),
 
+      // Language dialect to use when parsing (bash/posix/mksh/bats).
+      languageDialect: z.string().trim().default('auto'),
+
       // Simplify code before formatting.
       simplifyCode: z.boolean().default(false),
 
@@ -84,6 +87,7 @@ export function getConfigFromEnvironmentVariables(): {
     shellcheckPath: process.env.SHELLCHECK_PATH,
     shfmt: {
       path: process.env.SHFMT_PATH,
+      languageDialect: process.env.SHFMT_LANGUAGE_DIALECT,
       binaryNextLine: toBoolean(process.env.SHFMT_BINARY_NEXT_LINE),
       caseIndent: toBoolean(process.env.SHFMT_CASE_INDENT),
       funcNextLine: toBoolean(process.env.SHFMT_FUNC_NEXT_LINE),

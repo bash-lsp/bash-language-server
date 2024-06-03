@@ -62,6 +62,17 @@ describe('formatter', () => {
     )
   })
 
+  it('should throw when parsing using the wrong language dialect', async () => {
+    expect(async () => {
+      await getFormattingResult({
+        document: FIXTURE_DOCUMENT.SHFMT,
+        shfmtConfig: { languageDialect: 'posix' },
+      })
+    }).rejects.toThrow(
+      /Shfmt: exited with status 1: .*\/testing\/fixtures\/shfmt.sh:25:14: the "function" builtin exists in bash; tried parsing as posix/,
+    )
+  })
+
   it('should format when shfmt is present', async () => {
     const [result] = await getFormattingResult({ document: FIXTURE_DOCUMENT.SHFMT })
     expect(result).toMatchInlineSnapshot(`
