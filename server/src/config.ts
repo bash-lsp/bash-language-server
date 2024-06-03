@@ -46,6 +46,9 @@ export const ConfigSchema = z.object({
       // Controls the executable used for Shfmt formatting. An empty string will disable formatting
       path: z.string().trim().default('shfmt'),
 
+      // Language dialect to use when parsing (bash/posix/mksh/bats).
+      languageDialect: z.enum(['auto', 'bash', 'posix', 'mksh', 'bats']).default('auto'),
+
       // Allow boolean operators (like && and ||) to start a line.
       binaryNextLine: z.boolean().default(false),
 
@@ -57,9 +60,6 @@ export const ConfigSchema = z.object({
 
       // (Deprecated) Keep column alignment padding.
       keepPadding: z.boolean().default(false),
-
-      // Language dialect to use when parsing (bash/posix/mksh/bats).
-      languageDialect: z.string().trim().default('auto'),
 
       // Simplify code before formatting.
       simplifyCode: z.boolean().default(false),
