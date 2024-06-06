@@ -1,0 +1,7 @@
+[*]
+indent_style = space
+indent_size = 3
+
+switch_case_indent = true
+space_redirects = true
+shell_variant = 'mksh'
