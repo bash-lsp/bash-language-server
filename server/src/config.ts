@@ -46,6 +46,9 @@ export const ConfigSchema = z.object({
       // Controls the executable used for Shfmt formatting. An empty string will disable formatting
       path: z.string().trim().default('shfmt'),
 
+      // Ignore shfmt config options in .editorconfig (always use language server config)
+      ignoreEditorconfig: z.boolean().default(false),
+
       // Language dialect to use when parsing (bash/posix/mksh/bats).
       languageDialect: z.enum(['auto', 'bash', 'posix', 'mksh', 'bats']).default('auto'),
 
@@ -87,6 +90,7 @@ export function getConfigFromEnvironmentVariables(): {
     shellcheckPath: process.env.SHELLCHECK_PATH,
     shfmt: {
       path: process.env.SHFMT_PATH,
+      ignoreEditorconfig: toBoolean(process.env.SHFMT_IGNORE_EDITORCONFIG),
       languageDialect: process.env.SHFMT_LANGUAGE_DIALECT,
       binaryNextLine: toBoolean(process.env.SHFMT_BINARY_NEXT_LINE),
       caseIndent: toBoolean(process.env.SHFMT_CASE_INDENT),

@@ -760,5 +760,32 @@ describe('formatter', () => {
         expect(shfmtArgs).toContain(`--filename=${filepath}`)
       })
     })
+
+    describe('when an .editorconfig exists but ignoreEditorconfig is set', () => {
+      let shfmtArgs: string[]
+      const filepath = `${FIXTURE_FOLDER}/shfmt-editorconfig/shfmt-properties/foo.sh`
+
+      beforeAll(async () => {
+        // @ts-expect-error Testing a private method
+        shfmtArgs = await formatter.getShfmtArguments(
+          `file://${filepath}`,
+          formatOptions,
+          { ...lspShfmtConfig, ignoreEditorconfig: true },
+        )
+      })
+
+      it('should use language server config', () => {
+        expect(shfmtArgs).toEqual(expect.arrayContaining(lspShfmtArgs))
+        expect(shfmtArgs.length).toEqual(5) // indentation + filename
+      })
+
+      it('should use indentation config from the editor', () => {
+        expect(shfmtArgs).toContain('-i=2')
+      })
+
+      it('should include the filename argument', () => {
+        expect(shfmtArgs).toContain(`--filename=${filepath}`)
+      })
+    })
   })
 })

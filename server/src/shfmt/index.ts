@@ -75,40 +75,46 @@ export class Formatter {
       const filepath = filepathMatch[1]
       args.push(`--filename=${filepathMatch[1]}`)
 
-      const editorconfigProperties = await editorconfig.parse(filepath)
-      logger.debug(
-        `Shfmt: found .editorconfig properties: ${JSON.stringify(
-          editorconfigProperties,
-        )}`,
-      )
-
-      const editorconfigShfmtConfig: Record<string, any> = {}
-      editorconfigShfmtConfig.binaryNextLine = editorconfigProperties.binary_next_line
-      editorconfigShfmtConfig.caseIndent = editorconfigProperties.switch_case_indent
-      editorconfigShfmtConfig.funcNextLine = editorconfigProperties.function_next_line
-      editorconfigShfmtConfig.keepPadding = editorconfigProperties.keep_padding
-      // --simplify is not supported via .editorconfig
-      editorconfigShfmtConfig.spaceRedirects = editorconfigProperties.space_redirects
-      editorconfigShfmtConfig.languageDialect = editorconfigProperties.shell_variant
-
-      // if we have any shfmt-specific options in .editorconfig, use the config in .editorconfig and
-      // ignore the language server config (this is similar to shfmt's approach of using either
-      // .editorconfig or command line flags, but not both)
-      if (
-        editorconfigShfmtConfig.binaryNextLine !== undefined ||
-        editorconfigShfmtConfig.caseIndent !== undefined ||
-        editorconfigShfmtConfig.funcNextLine !== undefined ||
-        editorconfigShfmtConfig.keepPadding !== undefined ||
-        editorconfigShfmtConfig.spaceRedirects !== undefined ||
-        editorconfigShfmtConfig.languageDialect !== undefined
-      ) {
+      if (!lspShfmtConfig?.ignoreEditorconfig) {
+        const editorconfigProperties = await editorconfig.parse(filepath)
         logger.debug(
-          'Shfmt: detected shfmt properties in .editorconfig - ignoring language server shfmt config',
+          `Shfmt: found .editorconfig properties: ${JSON.stringify(
+            editorconfigProperties,
+          )}`,
         )
-        activeShfmtConfig = { ...editorconfigShfmtConfig }
+
+        const editorconfigShfmtConfig: Record<string, any> = {}
+        editorconfigShfmtConfig.binaryNextLine = editorconfigProperties.binary_next_line
+        editorconfigShfmtConfig.caseIndent = editorconfigProperties.switch_case_indent
+        editorconfigShfmtConfig.funcNextLine = editorconfigProperties.function_next_line
+        editorconfigShfmtConfig.keepPadding = editorconfigProperties.keep_padding
+        // --simplify is not supported via .editorconfig
+        editorconfigShfmtConfig.spaceRedirects = editorconfigProperties.space_redirects
+        editorconfigShfmtConfig.languageDialect = editorconfigProperties.shell_variant
+
+        // if we have any shfmt-specific options in .editorconfig, use the config in .editorconfig and
+        // ignore the language server config (this is similar to shfmt's approach of using either
+        // .editorconfig or command line flags, but not both)
+        if (
+          editorconfigShfmtConfig.binaryNextLine !== undefined ||
+          editorconfigShfmtConfig.caseIndent !== undefined ||
+          editorconfigShfmtConfig.funcNextLine !== undefined ||
+          editorconfigShfmtConfig.keepPadding !== undefined ||
+          editorconfigShfmtConfig.spaceRedirects !== undefined ||
+          editorconfigShfmtConfig.languageDialect !== undefined
+        ) {
+          logger.debug(
+            'Shfmt: detected shfmt properties in .editorconfig - ignoring language server shfmt config',
+          )
+          activeShfmtConfig = { ...editorconfigShfmtConfig }
+        } else {
+          logger.debug(
+            'Shfmt: no shfmt properties found in .editorconfig - using language server shfmt config',
+          )
+        }
       } else {
         logger.debug(
-          'Shfmt: no shfmt properties found in .editorconfig - using language server shfmt config',
+          'Shfmt: configured to ignore .editorconfig - using language server shfmt config',
         )
       }
     }
@@ -124,7 +130,8 @@ export class Formatter {
     if (activeShfmtConfig?.keepPadding) args.push('-kp') // --keep-padding
     if (activeShfmtConfig?.simplifyCode) args.push('-s') // --simplify
     if (activeShfmtConfig?.spaceRedirects) args.push('-sr') // --space-redirects
-    if (activeShfmtConfig?.languageDialect) args.push(`-ln=${activeShfmtConfig.languageDialect}`) // --language-dialect
+    if (activeShfmtConfig?.languageDialect)
+      args.push(`-ln=${activeShfmtConfig.languageDialect}`) // --language-dialect
 
     return args
   }
