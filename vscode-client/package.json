@@ -83,6 +83,23 @@
           "default": "shfmt",
           "description": "Controls the executable used for Shfmt formatting. An empty string will disable formatting."
         },
+        "bashIde.shfmt.ignoreEditorconfig": {
+          "type": "boolean",
+          "default": false,
+          "description": "Ignore shfmt config options in .editorconfig (always use language server config)"
+        },
+        "bashIde.shfmt.languageDialect": {
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "auto",
+            "bash",
+            "posix",
+            "mksh",
+            "bats"
+          ],
+          "description": "Language dialect to use when parsing (bash/posix/mksh/bats)."
+        },
         "bashIde.shfmt.binaryNextLine": {
           "type": "boolean",
           "default": false,

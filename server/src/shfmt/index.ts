@@ -1,6 +1,7 @@
 import { spawn } from 'child_process'
+import * as editorconfig from 'editorconfig'
 import * as LSP from 'vscode-languageserver/node'
-import { TextDocument, TextEdit } from 'vscode-languageserver-textdocument'
+import { DocumentUri, TextDocument, TextEdit } from 'vscode-languageserver-textdocument'
 
 import { logger } from '../util/logger'
 
@@ -58,25 +59,89 @@ export class Formatter {
     ]
   }
 
+  private async getShfmtArguments(
+    documentUri: DocumentUri,
+    formatOptions?: LSP.FormattingOptions | null,
+    lspShfmtConfig?: Record<string, string | boolean> | null,
+  ): Promise<string[]> {
+    const args: string[] = []
+
+    // this is the config that we'll use to build args - default to language server config
+    let activeShfmtConfig = { ...lspShfmtConfig }
+
+    // do we have a document stored on the local filesystem?
+    const filepathMatch = documentUri.match(/^file:\/\/(.*)$/)
+    if (filepathMatch) {
+      const filepath = filepathMatch[1]
+      args.push(`--filename=${filepathMatch[1]}`)
+
+      if (!lspShfmtConfig?.ignoreEditorconfig) {
+        const editorconfigProperties = await editorconfig.parse(filepath)
+        logger.debug(
+          `Shfmt: found .editorconfig properties: ${JSON.stringify(
+            editorconfigProperties,
+          )}`,
+        )
+
+        const editorconfigShfmtConfig: Record<string, any> = {}
+        editorconfigShfmtConfig.binaryNextLine = editorconfigProperties.binary_next_line
+        editorconfigShfmtConfig.caseIndent = editorconfigProperties.switch_case_indent
+        editorconfigShfmtConfig.funcNextLine = editorconfigProperties.function_next_line
+        editorconfigShfmtConfig.keepPadding = editorconfigProperties.keep_padding
+        // --simplify is not supported via .editorconfig
+        editorconfigShfmtConfig.spaceRedirects = editorconfigProperties.space_redirects
+        editorconfigShfmtConfig.languageDialect = editorconfigProperties.shell_variant
+
+        // if we have any shfmt-specific options in .editorconfig, use the config in .editorconfig and
+        // ignore the language server config (this is similar to shfmt's approach of using either
+        // .editorconfig or command line flags, but not both)
+        if (
+          editorconfigShfmtConfig.binaryNextLine !== undefined ||
+          editorconfigShfmtConfig.caseIndent !== undefined ||
+          editorconfigShfmtConfig.funcNextLine !== undefined ||
+          editorconfigShfmtConfig.keepPadding !== undefined ||
+          editorconfigShfmtConfig.spaceRedirects !== undefined ||
+          editorconfigShfmtConfig.languageDialect !== undefined
+        ) {
+          logger.debug(
+            'Shfmt: detected shfmt properties in .editorconfig - ignoring language server shfmt config',
+          )
+          activeShfmtConfig = { ...editorconfigShfmtConfig }
+        } else {
+          logger.debug(
+            'Shfmt: no shfmt properties found in .editorconfig - using language server shfmt config',
+          )
+        }
+      } else {
+        logger.debug(
+          'Shfmt: configured to ignore .editorconfig - using language server shfmt config',
+        )
+      }
+    }
+
+    // indentation always comes via the editor - if someone is using .editorconfig then the
+    // expectation is that they will have configured their editor's indentation in this way too
+    const indentation: number = formatOptions?.insertSpaces ? formatOptions.tabSize : 0
+    args.push(`-i=${indentation}`) // --indent
+
+    if (activeShfmtConfig?.binaryNextLine) args.push('-bn') // --binary-next-line
+    if (activeShfmtConfig?.caseIndent) args.push('-ci') // --case-indent
+    if (activeShfmtConfig?.funcNextLine) args.push('-fn') // --func-next-line
+    if (activeShfmtConfig?.keepPadding) args.push('-kp') // --keep-padding
+    if (activeShfmtConfig?.simplifyCode) args.push('-s') // --simplify
+    if (activeShfmtConfig?.spaceRedirects) args.push('-sr') // --space-redirects
+    if (activeShfmtConfig?.languageDialect)
+      args.push(`-ln=${activeShfmtConfig.languageDialect}`) // --language-dialect
+
+    return args
+  }
+
   private async runShfmt(
     document: TextDocument,
     formatOptions?: LSP.FormattingOptions | null,
     shfmtConfig?: Record<string, string | boolean> | null,
   ): Promise<string> {
-    const indentation: number = formatOptions?.insertSpaces ? formatOptions.tabSize : 0
-    const args: string[] = [`-i=${indentation}`] // --indent
-    if (shfmtConfig?.binaryNextLine) args.push('-bn') // --binary-next-line
-    if (shfmtConfig?.caseIndent) args.push('-ci') // --case-indent
-    if (shfmtConfig?.funcNextLine) args.push('-fn') // --func-next-line
-    if (shfmtConfig?.keepPadding) args.push('-kp') // --keep-padding
-    if (shfmtConfig?.simplifyCode) args.push('-s') // --simplify
-    if (shfmtConfig?.spaceRedirects) args.push('-sr') // --space-redirects
-
-    // If we can determine a local filename, pass that to shfmt to aid language dialect detection
-    const filePathMatch = document.uri.match(/^file:\/\/(.*)$/)
-    if (filePathMatch) {
-      args.push(`--filename=${filePathMatch[1]}`)
-    }
+    const args = await this.getShfmtArguments(document.uri, formatOptions, shfmtConfig)
 
     logger.debug(`Shfmt: running "${this.executablePath} ${args.join(' ')}"`)
 

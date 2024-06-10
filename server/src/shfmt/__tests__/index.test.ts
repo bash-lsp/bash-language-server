@@ -62,6 +62,17 @@ describe('formatter', () => {
     )
   })
 
+  it('should throw when parsing using the wrong language dialect', async () => {
+    expect(async () => {
+      await getFormattingResult({
+        document: FIXTURE_DOCUMENT.SHFMT,
+        shfmtConfig: { languageDialect: 'posix' },
+      })
+    }).rejects.toThrow(
+      /Shfmt: exited with status 1: .*\/testing\/fixtures\/shfmt\.sh:25:14: (the "function" builtin exists in bash; tried parsing as posix|a command can only contain words and redirects; encountered \()/,
+    )
+  })
+
   it('should format when shfmt is present', async () => {
     const [result] = await getFormattingResult({ document: FIXTURE_DOCUMENT.SHFMT })
     expect(result).toMatchInlineSnapshot(`
@@ -585,7 +596,7 @@ describe('formatter', () => {
     `)
   })
 
-  it('should omit filename from the shfmt comment when it cannot be determined', async () => {
+  it('should omit filename from the shfmt command when it cannot be determined', async () => {
     // There's no easy way to see what filename has been passed to shfmt without inspecting the
     // contents of the logs. As a workaround, we set a non-file:// URI on a dodgy document to
     // trigger an exception and inspect the error message.
@@ -601,5 +612,180 @@ describe('formatter', () => {
     }).rejects.toThrow(
       /Shfmt: exited with status 1: <standard input>:10:1: > must be followed by a word/,
     )
+  })
+
+  describe('getShfmtArguments()', () => {
+    const lspShfmtConfig = {
+      binaryNextLine: true,
+      funcNextLine: true,
+      simplifyCode: true,
+    }
+    const lspShfmtArgs = ['-bn', '-fn', '-s']
+    const formatOptions = { tabSize: 2, insertSpaces: true }
+
+    const formatter = new Formatter({
+      executablePath: 'shfmt',
+    })
+
+    describe('when the document URI is not a filepath', () => {
+      let shfmtArgs: string[]
+      const filepath = `${FIXTURE_FOLDER}/shfmt.sh`
+
+      beforeAll(async () => {
+        // @ts-expect-error Testing a private method
+        shfmtArgs = await formatter.getShfmtArguments(
+          `test://${filepath}`,
+          formatOptions,
+          lspShfmtConfig,
+        )
+      })
+
+      it('should use language server config', async () => {
+        expect(shfmtArgs).toEqual(expect.arrayContaining(lspShfmtArgs))
+        expect(shfmtArgs.length).toEqual(4) // indentation
+      })
+
+      it('should use indentation config from the editor', () => {
+        expect(shfmtArgs).toContain('-i=2')
+      })
+
+      it('should not include the filename argument', async () => {
+        expect(shfmtArgs).not.toContain(`--filename=${filepath}`)
+      })
+    })
+
+    describe('when no .editorconfig exists', () => {
+      let shfmtArgs: string[]
+      const filepath = `${FIXTURE_FOLDER}/shfmt.sh`
+
+      beforeAll(async () => {
+        // @ts-expect-error Testing a private method
+        shfmtArgs = await formatter.getShfmtArguments(
+          `file://${filepath}`,
+          formatOptions,
+          lspShfmtConfig,
+        )
+      })
+
+      it('should use language server config', () => {
+        expect(shfmtArgs).toEqual(expect.arrayContaining(lspShfmtArgs))
+        expect(shfmtArgs.length).toEqual(5) // indentation + filename
+      })
+
+      it('should use indentation config from the editor', () => {
+        expect(shfmtArgs).toContain('-i=2')
+      })
+
+      it('should include the filename argument', () => {
+        expect(shfmtArgs).toContain(`--filename=${filepath}`)
+      })
+    })
+
+    describe('when an .editorconfig exists without shfmt options', () => {
+      let shfmtArgs: string[]
+      const filepath = `${FIXTURE_FOLDER}/shfmt-editorconfig/no-shfmt-properties/foo.sh`
+
+      beforeAll(async () => {
+        // @ts-expect-error Testing a private method
+        shfmtArgs = await formatter.getShfmtArguments(
+          `file://${filepath}`,
+          formatOptions,
+          lspShfmtConfig,
+        )
+      })
+
+      it('should use language server config', () => {
+        expect(shfmtArgs).toEqual(expect.arrayContaining(lspShfmtArgs))
+        expect(shfmtArgs.length).toEqual(5) // indentation + filename
+      })
+
+      it('should use indentation config from the editor', () => {
+        expect(shfmtArgs).toContain('-i=2')
+      })
+
+      it('should include the filename argument', () => {
+        expect(shfmtArgs).toContain(`--filename=${filepath}`)
+      })
+    })
+
+    describe('when an .editorconfig exists and contains only false shfmt options', () => {
+      let shfmtArgs: string[]
+      const filepath = `${FIXTURE_FOLDER}/shfmt-editorconfig/shfmt-properties-false/foo.sh`
+
+      beforeAll(async () => {
+        // @ts-expect-error Testing a private method
+        shfmtArgs = await formatter.getShfmtArguments(
+          `file://${filepath}`,
+          formatOptions,
+          lspShfmtConfig,
+        )
+      })
+
+      it('should use .editorconfig config (even though no options are enabled)', () => {
+        expect(shfmtArgs.length).toEqual(2) // indentation + filename
+      })
+
+      it('should use indentation config from the editor', () => {
+        expect(shfmtArgs).toContain('-i=2')
+      })
+
+      it('should include the filename argument', () => {
+        expect(shfmtArgs).toContain(`--filename=${filepath}`)
+      })
+    })
+
+    describe('when an .editorconfig exists and contains one or more shfmt options', () => {
+      let shfmtArgs: string[]
+      const filepath = `${FIXTURE_FOLDER}/shfmt-editorconfig/shfmt-properties/foo.sh`
+
+      beforeAll(async () => {
+        // @ts-expect-error Testing a private method
+        shfmtArgs = await formatter.getShfmtArguments(
+          `file://${filepath}`,
+          formatOptions,
+          lspShfmtConfig,
+        )
+      })
+
+      it('should use .editorconfig config', () => {
+        expect(shfmtArgs).toEqual(expect.arrayContaining(['-ci', '-sr', "-ln='mksh'"]))
+        expect(shfmtArgs.length).toEqual(5) // indentation + filename
+      })
+
+      it('should use indentation config from the editor', () => {
+        expect(shfmtArgs).toContain('-i=2')
+      })
+
+      it('should include the filename argument', () => {
+        expect(shfmtArgs).toContain(`--filename=${filepath}`)
+      })
+    })
+
+    describe('when an .editorconfig exists but ignoreEditorconfig is set', () => {
+      let shfmtArgs: string[]
+      const filepath = `${FIXTURE_FOLDER}/shfmt-editorconfig/shfmt-properties/foo.sh`
+
+      beforeAll(async () => {
+        // @ts-expect-error Testing a private method
+        shfmtArgs = await formatter.getShfmtArguments(
+          `file://${filepath}`,
+          formatOptions,
+          { ...lspShfmtConfig, ignoreEditorconfig: true },
+        )
+      })
+
+      it('should use language server config', () => {
+        expect(shfmtArgs).toEqual(expect.arrayContaining(lspShfmtArgs))
+        expect(shfmtArgs.length).toEqual(5) // indentation + filename
+      })
+
+      it('should use indentation config from the editor', () => {
+        expect(shfmtArgs).toContain('-i=2')
+      })
+
+      it('should include the filename argument', () => {
+        expect(shfmtArgs).toContain(`--filename=${filepath}`)
+      })
+    })
   })
 })

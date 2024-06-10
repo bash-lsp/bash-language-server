@@ -195,6 +195,15 @@ there is no `shfmt`-specific configuration variable for this. If your editor is 
 two-space indents then that's what it will use. If you're using tabs for indentation then `shfmt`
 will use that.
 
+The `shfmt` integration also supports configuration via `.editorconfig`. If any `shfmt`-specific
+configuration properties are found in `.editorconfig` then the config in `.editorconfig` will be
+used and the language server config will be ignored. This follows `shfmt`'s approach of using either
+`.editorconfig` or command line flags, but not both. Note that only `shfmt`-specific configuration
+properties are read from `.editorconfig` - indentation preferences are still provided by the editor,
+so to format using the indentation specified in `.editorconfig` make sure your editor is also
+configured to read `.editorconfig`. It is possible to disable `.editorconfig` support and always use
+the language server config by setting the "Ignore Editorconfig" configuration variable.
+
 ## Logging
 
 The minimum logging level for the server can be adjusted using the `BASH_IDE_LOG_LEVEL` environment variable
