@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 5.4.0
+
+- Add .editorconfig support for shfmt https://github.com/bash-lsp/bash-language-server/pull/1171
+
 ## 5.3.4
 
 - Add additonal shfmt formatting config options https://github.com/bash-lsp/bash-language-server/pull/1168
