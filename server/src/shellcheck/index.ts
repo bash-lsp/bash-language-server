@@ -7,7 +7,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { debounce } from '../util/async'
 import { logger } from '../util/logger'
-import { analyzeShebang } from '../util/shebang'
+import { analyzeShebang, getShebang } from '../util/shebang'
 import { CODE_TO_TAGS, LEVEL_TO_SEVERITY } from './config'
 import {
   ShellCheckComment,
@@ -25,7 +25,7 @@ type LinterOptions = {
 
 export type LintingResult = {
   diagnostics: LSP.Diagnostic[]
-  codeActions: Record<string, LSP.CodeAction | undefined>
+  codeActions: Record<string, LSP.CodeAction[]>
 }
 
 export class Linter {
@@ -105,7 +105,7 @@ export class Linter {
     // Clean up the debounced function
     delete this.uriToDebouncedExecuteLint[document.uri]
 
-    return mapShellCheckResult({ uri: document.uri, result })
+    return mapShellCheckResult({ document, uri: document.uri, result })
   }
 
   private async runShellCheck(
@@ -180,7 +180,15 @@ export class Linter {
   }
 }
 
-function mapShellCheckResult({ uri, result }: { uri: string; result: ShellCheckResult }) {
+function mapShellCheckResult({
+  document,
+  uri,
+  result,
+}: {
+  document: TextDocument
+  uri: string
+  result: ShellCheckResult
+}) {
   const diagnostics: LintingResult['diagnostics'] = []
   const codeActions: LintingResult['codeActions'] = {}
 
@@ -215,6 +223,8 @@ function mapShellCheckResult({ uri, result }: { uri: string; result: ShellCheckR
 
     diagnostics.push(diagnostic)
 
+    codeActions[id] = []
+
     const codeAction = CodeActionProvider.getCodeAction({
       comment,
       diagnostics: [diagnostic],
@@ -222,13 +232,33 @@ function mapShellCheckResult({ uri, result }: { uri: string; result: ShellCheckR
     })
 
     if (codeAction) {
-      codeActions[id] = codeAction
+      codeActions[id].push(codeAction)
     }
+
+    codeActions[id].push(
+      CodeActionProvider.getDisableLineCodeAction({
+        document,
+        comment,
+        diagnostics: [diagnostic],
+        uri,
+      }),
+    )
+    codeActions[id].push(
+      CodeActionProvider.getDisableFileCodeAction({
+        document,
+        comment,
+        diagnostics: [diagnostic],
+        uri,
+      }),
+    )
   }
 
   return { diagnostics, codeActions }
 }
 
+const DISABLE_REGEX = /disable=(SC\d{4}(?:,SC\d{4})*)/
+const DIRECTIVE_REGEX = /^\s*# shellcheck(?: [^=]+=[^\s]*)+/
+const MULTILINE_REGEX = /\\\s*(?:#.*)?$/m
 /**
  * Code has been adopted from https://github.com/vscode-shellcheck/vscode-shellcheck/
  * and modified to fit the needs of this project.
@@ -237,6 +267,242 @@ function mapShellCheckResult({ uri, result }: { uri: string; result: ShellCheckR
  * Copyright (c) Timon Wong
  */
 class CodeActionProvider {
+  private static getLine({
+    document,
+    lineNb,
+  }: {
+    document: TextDocument
+    lineNb: number
+  }): string {
+    return document.getText(
+      LSP.Range.create(
+        LSP.Position.create(lineNb, 0),
+        LSP.Position.create(lineNb + 1, 0),
+      ),
+    )
+  }
+
+  private static getInsertLineTextEdit({
+    lineNb,
+    newText,
+  }: {
+    lineNb: number
+    newText: string
+  }): LSP.TextEdit {
+    return {
+      range: LSP.Range.create(
+        LSP.Position.create(lineNb, 0),
+        LSP.Position.create(lineNb, 0),
+      ),
+      newText,
+    }
+  }
+
+  private static getReplaceLineTextEdit({
+    lineNb,
+    newText,
+  }: {
+    lineNb: number
+    newText: string
+  }): LSP.TextEdit {
+    return {
+      range: LSP.Range.create(
+        LSP.Position.create(lineNb, 0),
+        LSP.Position.create(lineNb + 1, 0),
+      ),
+      newText,
+    }
+  }
+
+  private static getDisableTextEdit({
+    document,
+    directiveLineNb,
+    code,
+    indentation,
+    insertBefore,
+  }: {
+    document: TextDocument
+    directiveLineNb: number
+    code: number
+    indentation: string
+    insertBefore: boolean
+  }): LSP.TextEdit {
+    const directiveLine = this.getLine({ document, lineNb: directiveLineNb })
+
+    const directives = directiveLine.match(DIRECTIVE_REGEX)
+    if (!directives) {
+      // insert new directive line
+      const offset = insertBefore ? 0 : 1
+      return this.getInsertLineTextEdit({
+        lineNb: directiveLineNb + offset,
+        newText: `${indentation}# shellcheck disable=SC${code}\n`,
+      })
+    }
+
+    // TODO: use directives module
+    const disables = directiveLine.match(DISABLE_REGEX)
+    if (!disables) {
+      // No 'disable' directive yet. Append it to the rest
+      return this.getReplaceLineTextEdit({
+        lineNb: directiveLineNb,
+        newText: `${directives[0]} disable=SC${code}\n`,
+      })
+    }
+
+    // replace existing disables by new list
+    // extract codes as numbers to be able to sort
+    const codes = disables[1].split(',').map((c) => Number(c.slice(2)))
+    codes.push(code)
+    codes.sort()
+    return this.getReplaceLineTextEdit({
+      lineNb: directiveLineNb,
+      newText: directiveLine.replace(
+        DISABLE_REGEX,
+        `disable=${codes.map((code) => `SC${code}`).join(',')}`,
+      ),
+    })
+  }
+
+  private static getIndentation(line: string): string {
+    const match = line.match(/^([\s]*)/)
+    if (match && match[1]) {
+      return match[1]
+    }
+    return ''
+  }
+
+  private static getMultiLineNb({
+    document,
+    lineNb,
+  }: {
+    document: TextDocument
+    lineNb: number
+  }): number {
+    // Check previous lines for a lack of backslash
+    while (lineNb > 0) {
+      const prevLine = this.getLine({ document, lineNb: lineNb - 1 })
+      if (!MULTILINE_REGEX.test(prevLine)) {
+        break
+      }
+      lineNb--
+    }
+    return lineNb
+  }
+
+  private static getDisableLineTextEdit({
+    document,
+    lineNb,
+    code,
+  }: {
+    document: TextDocument
+    lineNb: number
+    code: number
+  }): LSP.TextEdit {
+    // directive line must be placed above the top of a multiline command
+    const multiLineNb = this.getMultiLineNb({
+      document,
+      lineNb,
+    })
+    const multiLine = this.getLine({ document, lineNb: multiLineNb })
+    const indentation = this.getIndentation(multiLine)
+
+    /*
+     * When first line: must be inserted in the same line as the error, therefore:
+     *  * ensure directiveLineNb is positive
+     *  * insert before
+     */
+    return this.getDisableTextEdit({
+      document,
+      directiveLineNb: multiLineNb == 0 ? 0 : multiLineNb - 1,
+      code,
+      indentation,
+      insertBefore: multiLineNb == 0,
+    })
+  }
+
+  private static getDisableFileTextEdit({
+    document,
+    lineNb,
+    code,
+  }: {
+    document: TextDocument
+    lineNb: number
+    code: number
+  }): LSP.TextEdit {
+    // shebang must be on the first line
+    const firstNonShebangLine = getShebang(this.getLine({ document, lineNb: 0 })) ? 1 : 0
+
+    /*
+     * Must be before anything on line after shebang (if any) to avoid breaking
+     * beginning of the script (multiline, comments, ...)
+     */
+    return this.getDisableTextEdit({
+      document,
+      directiveLineNb: firstNonShebangLine,
+      code,
+      indentation: '',
+      insertBefore: true,
+    })
+  }
+
+  public static getDisableLineCodeAction({
+    document,
+    comment,
+    diagnostics,
+    uri,
+  }: {
+    document: TextDocument
+    comment: ShellCheckComment
+    diagnostics: LSP.Diagnostic[]
+    uri: string
+  }): LSP.CodeAction {
+    return {
+      title: `Disable ShellCheck rule SC${comment.code} for this line`,
+      diagnostics,
+      edit: {
+        changes: {
+          [uri]: [
+            this.getDisableLineTextEdit({
+              document,
+              lineNb: comment.line - 1,
+              code: comment.code,
+            }),
+          ],
+        },
+      },
+      kind: LSP.CodeActionKind.QuickFix,
+    }
+  }
+
+  public static getDisableFileCodeAction({
+    document,
+    comment,
+    diagnostics,
+    uri,
+  }: {
+    document: TextDocument
+    comment: ShellCheckComment
+    diagnostics: LSP.Diagnostic[]
+    uri: string
+  }): LSP.CodeAction {
+    return {
+      title: `Disable ShellCheck rule SC${comment.code} for the entire file`,
+      diagnostics,
+      edit: {
+        changes: {
+          [uri]: [
+            this.getDisableFileTextEdit({
+              document,
+              lineNb: comment.line - 1,
+              code: comment.code,
+            }),
+          ],
+        },
+      },
+      kind: LSP.CodeActionKind.QuickFix,
+    }
+  }
+
   public static getCodeAction({
     comment,
     diagnostics,
