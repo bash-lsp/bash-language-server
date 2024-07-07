@@ -9,13 +9,13 @@ jobs:
   upgrade_tree_sitter:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v2
         with:
           version: 8
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
@@ -27,7 +27,7 @@ jobs:
         run: bash scripts/upgrade-tree-sitter.sh
 
       - name: Verify file changes
-        uses: tj-actions/verify-changed-files@v16
+        uses: tj-actions/verify-changed-files@v17
         id: verify-changed-files
         with:
           files: |
@@ -36,7 +36,7 @@ jobs:
 
       - name: Create pull request
         if: steps.verify-changed-files.outputs.files_changed == 'true'
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           add-paths: server
           title: Auto upgrade tree-sitter-bash parser

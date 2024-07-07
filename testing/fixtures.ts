@@ -29,8 +29,15 @@ export const FIXTURE_URI = {
   PARSE_PROBLEMS: `file://${path.join(FIXTURE_FOLDER, 'parse-problems.sh')}`,
   SCOPE: `file://${path.join(FIXTURE_FOLDER, 'scope.sh')}`,
   SHELLCHECK_SOURCE: `file://${path.join(FIXTURE_FOLDER, 'shellcheck', 'source.sh')}`,
+  SHELLCHECK_SHELL_DIRECTIVE: `file://${path.join(
+    FIXTURE_FOLDER,
+    'shellcheck',
+    'shell-directive.bash',
+  )}`,
+  SHFMT: `file://${path.join(FIXTURE_FOLDER, 'shfmt.sh')}`,
   SOURCING: `file://${path.join(FIXTURE_FOLDER, 'sourcing.sh')}`,
   SOURCING2: `file://${path.join(FIXTURE_FOLDER, 'sourcing2.sh')}`,
+  RENAMING: `file://${path.join(FIXTURE_FOLDER, 'renaming.sh')}`,
 }
 
 export const FIXTURE_DOCUMENT: Record<FIXTURE_KEY, TextDocument> = (
@@ -52,6 +59,16 @@ export function updateSnapshotUris<
     }
 
     if (typeof data === 'object') {
+      if (data.changes) {
+        for (const key in data.changes) {
+          data.changes[key.replace(REPO_ROOT_FOLDER, '__REPO_ROOT_FOLDER__')] =
+            data.changes[key]
+          delete data.changes[key]
+        }
+
+        return data
+      }
+
       if (data.uri) {
         data.uri = data.uri.replace(REPO_ROOT_FOLDER, '__REPO_ROOT_FOLDER__')
       }

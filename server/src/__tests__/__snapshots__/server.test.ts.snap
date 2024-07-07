@@ -1,0 +1,1010 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for function-scoped declarations 1`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 16,
+            "line": 43,
+          },
+          "start": {
+            "character": 9,
+            "line": 43,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 9,
+            "line": 47,
+          },
+          "start": {
+            "character": 2,
+            "line": 47,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 19,
+            "line": 52,
+          },
+          "start": {
+            "character": 12,
+            "line": 52,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 16,
+            "line": 58,
+          },
+          "start": {
+            "character": 9,
+            "line": 58,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for function-scoped declarations 2`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 22,
+            "line": 53,
+          },
+          "start": {
+            "character": 15,
+            "line": 53,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 16,
+            "line": 54,
+          },
+          "start": {
+            "character": 9,
+            "line": 54,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for globally scoped declarations 1`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 8,
+            "line": 28,
+          },
+          "start": {
+            "character": 0,
+            "line": 28,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 16,
+            "line": 32,
+          },
+          "start": {
+            "character": 8,
+            "line": 32,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 9,
+            "line": 46,
+          },
+          "start": {
+            "character": 1,
+            "line": 46,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 9,
+            "line": 49,
+          },
+          "start": {
+            "character": 1,
+            "line": 49,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for globally scoped declarations 2`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 29,
+          },
+          "start": {
+            "character": 0,
+            "line": 29,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 15,
+            "line": 33,
+          },
+          "start": {
+            "character": 8,
+            "line": 33,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 16,
+            "line": 40,
+          },
+          "start": {
+            "character": 9,
+            "line": 40,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 8,
+            "line": 41,
+          },
+          "start": {
+            "character": 1,
+            "line": 41,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 27,
+            "line": 43,
+          },
+          "start": {
+            "character": 20,
+            "line": 43,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 10,
+            "line": 44,
+          },
+          "start": {
+            "character": 3,
+            "line": 44,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 16,
+            "line": 64,
+          },
+          "start": {
+            "character": 9,
+            "line": 64,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 19,
+            "line": 65,
+          },
+          "start": {
+            "character": 12,
+            "line": 65,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 10,
+            "line": 66,
+          },
+          "start": {
+            "character": 3,
+            "line": 66,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for globally scoped declarations 3`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 13,
+            "line": 30,
+          },
+          "start": {
+            "character": 5,
+            "line": 30,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 16,
+            "line": 34,
+          },
+          "start": {
+            "character": 8,
+            "line": 34,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for subshell-scoped declarations 1`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 8,
+            "line": 65,
+          },
+          "start": {
+            "character": 1,
+            "line": 65,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 14,
+            "line": 68,
+          },
+          "start": {
+            "character": 7,
+            "line": 68,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 19,
+            "line": 76,
+          },
+          "start": {
+            "character": 12,
+            "line": 76,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 14,
+            "line": 83,
+          },
+          "start": {
+            "character": 7,
+            "line": 83,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for subshell-scoped declarations 2`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 9,
+            "line": 71,
+          },
+          "start": {
+            "character": 2,
+            "line": 71,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 16,
+            "line": 72,
+          },
+          "start": {
+            "character": 9,
+            "line": 72,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for subshell-scoped declarations 3`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 18,
+            "line": 75,
+          },
+          "start": {
+            "character": 10,
+            "line": 75,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 9,
+            "line": 81,
+          },
+          "start": {
+            "character": 1,
+            "line": 81,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for subshell-scoped declarations 4`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 18,
+            "line": 77,
+          },
+          "start": {
+            "character": 11,
+            "line": 77,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 18,
+            "line": 78,
+          },
+          "start": {
+            "character": 11,
+            "line": 78,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for undeclared symbols 1`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 11,
+            "line": 23,
+          },
+          "start": {
+            "character": 7,
+            "line": 23,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 9,
+            "line": 24,
+          },
+          "start": {
+            "character": 5,
+            "line": 24,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for undeclared symbols 2`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 2,
+            "line": 24,
+          },
+          "start": {
+            "character": 0,
+            "line": 24,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 13,
+            "line": 29,
+          },
+          "start": {
+            "character": 11,
+            "line": 29,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 20,
+            "line": 30,
+          },
+          "start": {
+            "character": 18,
+            "line": 30,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceEdits for sourced symbols 1`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 3,
+            "line": 4,
+          },
+          "start": {
+            "character": 0,
+            "line": 4,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 5,
+            "line": 22,
+          },
+          "start": {
+            "character": 2,
+            "line": 22,
+          },
+        },
+      },
+    ],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 3,
+            "line": 90,
+          },
+          "start": {
+            "character": 0,
+            "line": 90,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 9,
+            "line": 91,
+          },
+          "start": {
+            "character": 6,
+            "line": 91,
+          },
+        },
+      },
+    ],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/sourcing.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 9,
+            "line": 4,
+          },
+          "start": {
+            "character": 6,
+            "line": 4,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceEdits for sourced symbols 2`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/scripts/release-client.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 10,
+            "line": 16,
+          },
+          "start": {
+            "character": 0,
+            "line": 16,
+          },
+        },
+      },
+    ],
+    "file://__REPO_ROOT_FOLDER__/scripts/release-server.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 10,
+            "line": 23,
+          },
+          "start": {
+            "character": 0,
+            "line": 23,
+          },
+        },
+      },
+    ],
+    "file://__REPO_ROOT_FOLDER__/scripts/tag-release.inc": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 19,
+            "line": 4,
+          },
+          "start": {
+            "character": 9,
+            "line": 4,
+          },
+        },
+      },
+    ],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 10,
+            "line": 93,
+          },
+          "start": {
+            "character": 0,
+            "line": 93,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 10,
+            "line": 94,
+          },
+          "start": {
+            "character": 0,
+            "line": 94,
+          },
+        },
+      },
+    ],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/sourcing.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 10,
+            "line": 18,
+          },
+          "start": {
+            "character": 0,
+            "line": 18,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceEdits for unsourced symbols when includeAllWorkspaceSymbols is false 1`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 19,
+            "line": 97,
+          },
+          "start": {
+            "character": 0,
+            "line": 97,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 25,
+            "line": 98,
+          },
+          "start": {
+            "character": 6,
+            "line": 98,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceEdits for unsourced symbols when includeAllWorkspaceSymbols is false 2`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 1,
+            "line": 101,
+          },
+          "start": {
+            "character": 0,
+            "line": 101,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 1,
+            "line": 102,
+          },
+          "start": {
+            "character": 0,
+            "line": 102,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceEdits for unsourced symbols when includeAllWorkspaceSymbols is true 1`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/comment-doc-on-hover.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 19,
+            "line": 40,
+          },
+          "start": {
+            "character": 0,
+            "line": 40,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 21,
+            "line": 48,
+          },
+          "start": {
+            "character": 2,
+            "line": 48,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 26,
+            "line": 50,
+          },
+          "start": {
+            "character": 7,
+            "line": 50,
+          },
+        },
+      },
+    ],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/issue101.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/issue206.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/missing-node.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/not-a-shell-script.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/options.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/override-executable-symbol.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/parse-problems.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 19,
+            "line": 97,
+          },
+          "start": {
+            "character": 0,
+            "line": 97,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 25,
+            "line": 98,
+          },
+          "start": {
+            "character": 6,
+            "line": 98,
+          },
+        },
+      },
+    ],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/scope.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 26,
+            "line": 42,
+          },
+          "start": {
+            "character": 7,
+            "line": 42,
+          },
+        },
+      },
+    ],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/shellcheck/shell-directive.bash": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/shellcheck/source.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/shellcheck/sourced.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/shfmt.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/sourcing.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/sourcing2.sh": [],
+  },
+}
+`;
+
+exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceEdits for unsourced symbols when includeAllWorkspaceSymbols is true 2`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/comment-doc-on-hover.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/issue101.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/issue206.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/missing-node.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 1,
+            "line": 9,
+          },
+          "start": {
+            "character": 0,
+            "line": 9,
+          },
+        },
+      },
+    ],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/not-a-shell-script.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/options.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/override-executable-symbol.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/parse-problems.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 1,
+            "line": 101,
+          },
+          "start": {
+            "character": 0,
+            "line": 101,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 1,
+            "line": 102,
+          },
+          "start": {
+            "character": 0,
+            "line": 102,
+          },
+        },
+      },
+    ],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/scope.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 1,
+            "line": 7,
+          },
+          "start": {
+            "character": 0,
+            "line": 7,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 1,
+            "line": 33,
+          },
+          "start": {
+            "character": 0,
+            "line": 33,
+          },
+        },
+      },
+    ],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/shellcheck/shell-directive.bash": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/shellcheck/source.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/shellcheck/sourced.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/shfmt.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/sourcing.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/sourcing2.sh": [],
+  },
+}
+`;

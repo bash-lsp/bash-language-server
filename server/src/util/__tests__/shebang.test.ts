@@ -1,3 +1,4 @@
+import { FIXTURE_DOCUMENT } from '../../../../testing/fixtures'
 import { analyzeShebang } from '../shebang'
 
 describe('analyzeShebang', () => {
@@ -34,5 +35,29 @@ describe('analyzeShebang', () => {
   ])('returns a bash dialect for %p', (command, expectedDialect) => {
     expect(analyzeShebang(command).shellDialect).toBe(expectedDialect)
     expect(analyzeShebang(`${command} `).shellDialect).toBe(expectedDialect)
+  })
+
+  it('returns shell dialect from shell directive', () => {
+    expect(analyzeShebang('# shellcheck shell=dash')).toEqual({
+      shellDialect: 'dash',
+      shebang: null,
+    })
+  })
+
+  it('returns shell dialect when multiple directives are passed', () => {
+    expect(
+      analyzeShebang(
+        '# shellcheck enable=require-variable-braces shell=dash disable=SC1000',
+      ),
+    ).toEqual({
+      shellDialect: 'dash',
+      shebang: null,
+    })
+  })
+
+  it('shell directive overrides file extension and shebang', () => {
+    expect(
+      analyzeShebang(FIXTURE_DOCUMENT.SHELLCHECK_SHELL_DIRECTIVE.getText()),
+    ).toHaveProperty('shellDialect', 'sh')
   })
 })
