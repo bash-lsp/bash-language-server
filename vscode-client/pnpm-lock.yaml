@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   bash-language-server:
-    specifier: 5.2.0
-    version: 5.2.0
+    specifier: 5.4.0
+    version: 5.4.0
   vscode-languageclient:
     specifier: 8.1.0
     version: 8.1.0
@@ -43,6 +43,10 @@ packages:
       fastq: 1.15.0
     dev: false
 
+  /@one-ini/wasm@0.1.1:
+    resolution: {integrity: sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==}
+    dev: false
+
   /@types/vscode@1.44.0:
     resolution: {integrity: sha512-WJZtZlinE3meRdH+I7wTsIhpz/GLhqEQwmPGeh4s1irWLwMzCeTV8WZ+pgPTwrDXoafVUWwo1LiZ9HJVHFlJSQ==}
     dev: true
@@ -51,11 +55,12 @@ packages:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
     dev: false
 
-  /bash-language-server@5.2.0:
-    resolution: {integrity: sha512-hELDWc5WkdvNat/dv/pnbrebMxc8UtSmjsY1/ER5K7+LKE6BczC1HZQZ/rMTNOeFgaGSeykL63kDTUFRImxXWA==}
+  /bash-language-server@5.4.0:
+    resolution: {integrity: sha512-YLCIBjnwdxvlwlurTA4Be7UfPXDzaWCJKzJwzO8rVjJH0QlbhPvo3FXkYOBXPLg81G4hb0ZbhSAi4+yrs7j5cQ==}
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
+      editorconfig: 2.0.0
       fast-glob: 3.3.2
       fuzzy-search: 3.2.1
       node-fetch: 2.7.0
@@ -81,8 +86,24 @@ packages:
       fill-range: 7.0.1
     dev: false
 
+  /commander@11.1.0:
+    resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
+    engines: {node: '>=16'}
+    dev: false
+
   /domino@2.1.6:
     resolution: {integrity: sha512-3VdM/SXBZX2omc9JF9nOPCtDaYQ67BGp5CoLpIQlO2KCAPETs8TcDHacF26jXadGbvUteZzRTeos2fhID5+ucQ==}
+    dev: false
+
+  /editorconfig@2.0.0:
+    resolution: {integrity: sha512-s1NQ63WQ7RNXH6Efb2cwuyRlfpbtdZubvfNe4vCuoyGPewNPY7vah8JUSOFBiJ+jr99Qh8t0xKv0oITc1dclgw==}
+    engines: {node: '>=16'}
+    hasBin: true
+    dependencies:
+      '@one-ini/wasm': 0.1.1
+      commander: 11.1.0
+      minimatch: 9.0.2
+      semver: 7.5.4
     dev: false
 
   /fast-glob@3.3.2:
@@ -160,6 +181,13 @@ packages:
   /minimatch@5.1.6:
     resolution: {integrity: sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g==}
     engines: {node: '>=10'}
+    dependencies:
+      brace-expansion: 2.0.1
+    dev: false
+
+  /minimatch@9.0.2:
+    resolution: {integrity: sha512-PZOT9g5v2ojiTL7r1xF6plNHLtOeTpSlDI007As2NlA2aYBMfVom17yqa6QzhmDP8QOhn7LjHTg7DFCVSSa6yg==}
+    engines: {node: '>=16 || 14 >=14.17'}
     dependencies:
       brace-expansion: 2.0.1
     dev: false
