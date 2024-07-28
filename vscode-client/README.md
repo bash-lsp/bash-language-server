@@ -6,7 +6,7 @@
 
 Visual Studio Code extension utilizing the [Bash Language Server](bash-lsp) and integrating with [explainshell][explainshell], [shellcheck][shellcheck] and [shfmt][shfmt].
 
-We strongly recommend that you [install shellcheck](https://github.com/koalaman/shellcheck#installing) to enable linting and [install shfmt](https://github.com/mvdan/sh?tab=readme-ov-file#shfmt) to enable formatting.
+We recommend that you [install shellcheck](https://github.com/koalaman/shellcheck#installing) to enable linting and [install shfmt](https://github.com/mvdan/sh?tab=readme-ov-file#shfmt) to enable formatting.
 
 ## Features
 
