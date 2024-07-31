@@ -34,6 +34,7 @@ export const FIXTURE_URI = {
     'shellcheck',
     'shell-directive.bash',
   )}`,
+  SHFMT: `file://${path.join(FIXTURE_FOLDER, 'shfmt.sh')}`,
   SOURCING: `file://${path.join(FIXTURE_FOLDER, 'sourcing.sh')}`,
   SOURCING2: `file://${path.join(FIXTURE_FOLDER, 'sourcing2.sh')}`,
   RENAMING: `file://${path.join(FIXTURE_FOLDER, 'renaming.sh')}`,

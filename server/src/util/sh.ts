@@ -74,7 +74,6 @@ export async function getShellDocumentationWithoutCache({
     // The default line width of the terminal works fine for hover, but could be better
     // for completions.
     { type: 'man', command: `man -P cat ${word} | col -bx` },
-    { type: 'help flag', command: `${word} --help | col -bx` },
   ]
 
   for (const { type, command } of DOCUMENTATION_COMMANDS) {

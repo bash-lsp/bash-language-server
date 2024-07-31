@@ -1,0 +1,6 @@
+[*]
+indent_style = space
+indent_size = 3
+
+switch_case_indent = false
+space_redirects = false

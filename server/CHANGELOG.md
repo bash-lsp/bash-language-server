@@ -1,5 +1,35 @@
 # Bash Language Server
 
+## 5.4.0
+
+- Add .editorconfig support for shfmt https://github.com/bash-lsp/bash-language-server/pull/1171
+
+## 5.3.4
+
+- Add additonal shfmt formatting config options https://github.com/bash-lsp/bash-language-server/pull/1168
+
+## 5.3.3
+
+- Revert "Add --help fallback for documentation" https://github.com/bash-lsp/bash-language-server/pull/1052
+
+## 5.3.2
+
+- Handle non-zero exit status when formatting using shfmt https://github.com/bash-lsp/bash-language-server/pull/1163
+
+## 5.3.1
+
+- Clear diagnostics when closing document https://github.com/bash-lsp/bash-language-server/pull/1135
+
+## 5.3.0
+
+- Add support for formatting using shfmt (if installed). https://github.com/bash-lsp/bash-language-server/pull/1136
+
+## 5.2.0
+
+- Upgrade tree-sitter-bash from 0.20.7 to 0.22.5 https://github.com/bash-lsp/bash-language-server/pull/1148
+- Dependency upgrades
+
+
 ## 5.1.2
 
 - Use shellcheck's shell directive for selecting the dialect https://github.com/bash-lsp/bash-language-server/pull/1081

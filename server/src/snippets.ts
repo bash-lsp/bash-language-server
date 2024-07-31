@@ -153,16 +153,20 @@ export const SNIPPETS: BashCompletionItem[] = [
   {
     label: 'if-defined',
     documentation: 'if with variable existence check',
-    insertText: ['if [[ -n "${${1:variable}+x}" ]]', '\t${2:command ...}', 'fi'].join(
-      '\n',
-    ),
+    insertText: [
+      'if [[ -n "${${1:variable}+x}" ]]; then',
+      '\t${2:command ...}',
+      'fi',
+    ].join('\n'),
   },
   {
     label: 'if-not-defined',
     documentation: 'if with variable existence check',
-    insertText: ['if [[ -z "${${1:variable}+x}" ]]', '\t${2:command ...}', 'fi'].join(
-      '\n',
-    ),
+    insertText: [
+      'if [[ -z "${${1:variable}+x}" ]]; then',
+      '\t${2:command ...}',
+      'fi',
+    ].join('\n'),
   },
   {
     label: 'while',

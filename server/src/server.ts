@@ -13,6 +13,7 @@ import Executables from './executables'
 import { initializeParser } from './parser'
 import * as ReservedWords from './reserved-words'
 import { Linter, LintingResult } from './shellcheck'
+import { Formatter } from './shfmt'
 import { SNIPPETS } from './snippets'
 import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
@@ -35,6 +36,7 @@ export default class BashServer {
   private documents: LSP.TextDocuments<TextDocument> = new LSP.TextDocuments(TextDocument)
   private executables: Executables
   private linter?: Linter
+  private formatter?: Formatter
   private workspaceFolder: string | null
   private uriToCodeActions: {
     [uri: string]: LintingResult['codeActions'] | undefined
@@ -46,6 +48,7 @@ export default class BashServer {
     connection,
     executables,
     linter,
+    formatter,
     workspaceFolder,
   }: {
     analyzer: Analyzer
@@ -53,6 +56,7 @@ export default class BashServer {
     connection: LSP.Connection
     executables: Executables
     linter?: Linter
+    formatter?: Formatter
     workspaceFolder: string | null
   }) {
     this.analyzer = analyzer
@@ -60,6 +64,7 @@ export default class BashServer {
     this.connection = connection
     this.executables = executables
     this.linter = linter
+    this.formatter = formatter
     this.workspaceFolder = workspaceFolder
     this.config = {} as any // NOTE: configured in updateConfiguration
     this.updateConfiguration(config.getDefaultConfiguration(), true)
@@ -130,6 +135,7 @@ export default class BashServer {
         workDoneProgress: false,
       },
       renameProvider: { prepareProvider: true },
+      documentFormattingProvider: true,
     }
   }
 
@@ -157,6 +163,7 @@ export default class BashServer {
     })
 
     this.documents.onDidClose((event) => {
+      connection.sendDiagnostics({ uri: event.document.uri, diagnostics: [] })
       delete this.uriToCodeActions[event.document.uri]
     })
 
@@ -172,6 +179,7 @@ export default class BashServer {
     connection.onWorkspaceSymbol(this.onWorkspaceSymbol.bind(this))
     connection.onPrepareRename(this.onPrepareRename.bind(this))
     connection.onRenameRequest(this.onRenameRequest.bind(this))
+    connection.onDocumentFormatting(this.onDocumentFormatting.bind(this))
 
     /**
      * The initialized notification is sent from the client to the server after
@@ -270,6 +278,14 @@ export default class BashServer {
             this.linter = undefined
           } else {
             this.linter = new Linter({ executablePath: shellcheckPath })
+          }
+
+          const shfmtPath = this.config.shfmt?.path
+          if (!shfmtPath) {
+            logger.info('Shfmt formatting is disabled as "shfmt.path" was not set')
+            this.formatter = undefined
+          } else {
+            this.formatter = new Formatter({ executablePath: shfmtPath })
           }
 
           this.analyzer.setEnableSourceErrorDiagnostics(
@@ -805,6 +821,26 @@ export default class BashServer {
         .map((r) => LSP.TextEdit.replace(r, params.newName))
     }
     return edits
+  }
+
+  private async onDocumentFormatting(
+    params: LSP.DocumentFormattingParams,
+  ): Promise<LSP.TextEdit[] | null> {
+    if (this.formatter) {
+      try {
+        const document = this.documents.get(params.textDocument.uri)
+        if (!document) {
+          logger.error(`Error getting document: ${params.textDocument.uri}`)
+          return null
+        }
+
+        return await this.formatter.format(document, params.options, this.config.shfmt)
+      } catch (err) {
+        logger.error(`Error while formatting: ${err}`)
+      }
+    }
+
+    return null
   }
 }
 

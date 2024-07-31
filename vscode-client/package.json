@@ -4,7 +4,7 @@
   "description": "A language server for Bash",
   "author": "Mads Hartmann",
   "license": "MIT",
-  "version": "1.40.0",
+  "version": "1.42.0",
   "publisher": "mads-hartmann",
   "repository": {
     "type": "git",
@@ -77,6 +77,59 @@
           "type": "string",
           "default": "",
           "description": "Additional ShellCheck arguments. Note that we already add the following arguments: --shell, --format, --external-sources."
+        },
+        "bashIde.shfmt.path": {
+          "type": "string",
+          "default": "shfmt",
+          "description": "Controls the executable used for Shfmt formatting. An empty string will disable formatting."
+        },
+        "bashIde.shfmt.ignoreEditorconfig": {
+          "type": "boolean",
+          "default": false,
+          "description": "Ignore shfmt config options in .editorconfig (always use language server config)"
+        },
+        "bashIde.shfmt.languageDialect": {
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "auto",
+            "bash",
+            "posix",
+            "mksh",
+            "bats"
+          ],
+          "description": "Language dialect to use when parsing (bash/posix/mksh/bats)."
+        },
+        "bashIde.shfmt.binaryNextLine": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow boolean operators (like && and ||) to start a line."
+        },
+        "bashIde.shfmt.caseIndent": {
+          "type": "boolean",
+          "default": false,
+          "description": "Indent patterns in case statements."
+        },
+        "bashIde.shfmt.funcNextLine": {
+          "type": "boolean",
+          "default": false,
+          "description": "Place function opening braces on a separate line."
+        },
+        "bashIde.shfmt.keepPadding": {
+          "type": "boolean",
+          "default": false,
+          "description": "(Deprecated) Keep column alignment padding.",
+          "markdownDescription": "**([Deprecated](https://github.com/mvdan/sh/issues/658))** Keep column alignment padding."
+        },
+        "bashIde.shfmt.simplifyCode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Simplify code before formatting."
+        },
+        "bashIde.shfmt.spaceRedirects": {
+          "type": "boolean",
+          "default": false,
+          "description": "Follow redirection operators with a space."
         }
       }
     }
@@ -85,7 +138,7 @@
     "vscode:prepublish": "cd .. && pnpm compile"
   },
   "dependencies": {
-    "bash-language-server": "5.1.1",
+    "bash-language-server": "5.4.0",
     "vscode-languageclient": "8.1.0",
     "vscode-languageserver": "8.0.2"
   },

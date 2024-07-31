@@ -4,9 +4,9 @@
 [![VS Marketplace downloads](https://badgen.net/vs-marketplace/d/mads-hartmann.bash-ide-vscode?label=VS%20Marketplace%20downloads)](https://marketplace.visualstudio.com/items?itemName=mads-hartmann.bash-ide-vscode)
 [![Open VSX downloads](https://badgen.net/open-vsx/d/mads-hartmann/bash-ide-vscode?color=purple&label=Open%20VSX%20downloads)](https://open-vsx.org/extension/mads-hartmann/bash-ide-vscode)
 
-Visual Studio Code extension utilizing the [Bash Language Server](bash-lsp) and integrates with [explainshell][explainshell] and [shellcheck][shellcheck].
+Visual Studio Code extension utilizing the [Bash Language Server](bash-lsp) and integrating with [explainshell][explainshell], [shellcheck][shellcheck] and [shfmt][shfmt].
 
-We strongly recommend that you install [shellcheck][shellcheck] to enable linting: https://github.com/koalaman/shellcheck#installing
+We recommend that you [install shellcheck](https://github.com/koalaman/shellcheck#installing) to enable linting and [install shfmt](https://github.com/mvdan/sh?tab=readme-ov-file#shfmt) to enable formatting.
 
 ## Features
 
@@ -19,6 +19,7 @@ We strongly recommend that you install [shellcheck][shellcheck] to enable lintin
 - [x] Documentation for flags on hover
 - [x] Workspace symbols
 - [x] Rename symbol
+- [x] Format document
 - [x] Snippets
 
 ## Configuration
@@ -36,3 +37,4 @@ For security reasons, it defaults to `""`, which disables explainshell integrati
 [tree-sitter-bash]: https://github.com/tree-sitter/tree-sitter-bash
 [explainshell]: https://explainshell.com/
 [shellcheck]: https://www.shellcheck.net/
+[shfmt]: https://github.com/mvdan/sh

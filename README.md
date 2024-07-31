@@ -1,6 +1,6 @@
 # Bash Language Server
 
-Bash language server that brings an IDE-like experience for bash scripts to most editors. This is based on the [Tree Sitter parser][tree-sitter-bash] and supports [explainshell][explainshell] and [shellcheck][shellcheck].
+Bash language server that brings an IDE-like experience for bash scripts to most editors. This is based on the [Tree Sitter parser][tree-sitter-bash] and supports [explainshell][explainshell], [shellcheck][shellcheck] and [shfmt][shfmt].
 
 Documentation around configuration variables can be found in the [config.ts](https://github.com/bash-lsp/bash-language-server/blob/main/server/src/config.ts) file.
 
@@ -15,6 +15,7 @@ Documentation around configuration variables can be found in the [config.ts](htt
 - Documentation for symbols on hover
 - Workspace symbols
 - Rename symbol
+- Format document
 
 To be implemented:
 
@@ -24,7 +25,14 @@ To be implemented:
 
 ### Dependencies
 
-As a dependency, we recommend that you first install shellcheck [shellcheck][shellcheck] to enable linting: https://github.com/koalaman/shellcheck#installing . If shellcheck is installed, bash-language-server will automatically call it to provide linting and code analysis each time the file is updated (with debounce time or 500ms).
+As a dependency, we recommend that you first install [shellcheck][shellcheck] to enable linting:
+https://github.com/koalaman/shellcheck#installing . If `shellcheck` is installed,
+bash-language-server will automatically call it to provide linting and code analysis each time the
+file is updated (with debounce time of 500ms).
+
+If you want your shell scripts to be formatted consistently, you can install [shfmt][shfmt]. If
+`shfmt` is installed then your documents will be formatted whenever you take the 'format document'
+action. In most editors this can be configured to happen automatically when files are saved.
 
 ### Bash language server
 
@@ -180,6 +188,22 @@ Using the built-in `eglot` lsp mode:
   (bash-ts-mode . eglot-ensure))
 ```
 
+## `shfmt` integration
+
+The indentation used by `shfmt` is whatever has been configured for the current editor session, so
+there is no `shfmt`-specific configuration variable for this. If your editor is configured for
+two-space indents then that's what it will use. If you're using tabs for indentation then `shfmt`
+will use that.
+
+The `shfmt` integration also supports configuration via `.editorconfig`. If any `shfmt`-specific
+configuration properties are found in `.editorconfig` then the config in `.editorconfig` will be
+used and the language server config will be ignored. This follows `shfmt`'s approach of using either
+`.editorconfig` or command line flags, but not both. Note that only `shfmt`-specific configuration
+properties are read from `.editorconfig` - indentation preferences are still provided by the editor,
+so to format using the indentation specified in `.editorconfig` make sure your editor is also
+configured to read `.editorconfig`. It is possible to disable `.editorconfig` support and always use
+the language server config by setting the "Ignore Editorconfig" configuration variable.
+
 ## Logging
 
 The minimum logging level for the server can be adjusted using the `BASH_IDE_LOG_LEVEL` environment variable
@@ -197,6 +221,7 @@ Please see [docs/development-guide][dev-guide] for more information.
 [sublime-text-lsp]: https://packagecontrol.io/packages/LSP-bash
 [explainshell]: https://explainshell.com/
 [shellcheck]: https://www.shellcheck.net/
+[shfmt]: https://github.com/mvdan/sh#shfmt
 [languageclient-neovim]: https://github.com/autozimu/LanguageClient-neovim
 [nvim-lspconfig]: https://github.com/neovim/nvim-lspconfig
 [vim-lsp]: https://github.com/prabirshrestha/vim-lsp
