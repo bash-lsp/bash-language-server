@@ -120,12 +120,18 @@ export class Linter {
       .map((folderName) => `--source-path=${folderName}`)
 
     const args = [
-      `--shell=${shellName}`,
       '--format=json1',
       '--external-sources',
       ...sourcePathsArgs,
       ...additionalArgs,
     ]
+
+    // only add `--shell` argument if non is provided by the user in their
+    // config. This allows to the user to override the shell. See #1064.
+    const userArgs = additionalArgs.join(' ')
+    if (!(userArgs.includes('--shell') || userArgs.includes('-s '))) {
+      args.unshift(`--shell=${shellName}`)
+    }
 
     logger.debug(`ShellCheck: running "${this.executablePath} ${args.join(' ')}"`)
 
