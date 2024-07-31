@@ -429,7 +429,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     label: 'for-range',
     documentation: 'for with range',
     insertText: [
-      'for ${1:item} in $(seq ${2:from} ${3:to}); do',
+      'for ${1:item} in \\$(seq ${2:from} ${3:to}); do',
       '\t${4:command ...}',
       'done',
     ].join('\n'),
@@ -438,7 +438,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     label: 'for-stepped-range',
     documentation: 'for with stepped range',
     insertText: [
-      'for ${1:item} in $(seq ${2:from} ${3:step} ${4:to}); do',
+      'for ${1:item} in \\$(seq ${2:from} ${3:step} ${4:to}); do',
       '\t${5:command ...}',
       'done',
     ].join('\n'),
