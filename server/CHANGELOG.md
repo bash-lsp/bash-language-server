@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 5.4.2
+
+- Fix wrong pnpm engine version
+
 ## 5.4.1
 
 - Bump treesitter to latest version

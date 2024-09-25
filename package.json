@@ -39,7 +39,7 @@
   },
   "engines": {
     "node": ">=16",
-    "pnpm": ">=8.x"
+    "pnpm": ">=9.x"
   },
   "jest": {
     "preset": "ts-jest",
