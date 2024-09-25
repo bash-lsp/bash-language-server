@@ -14,14 +14,15 @@ jobs:
       - name: Install shellcheck and shfmt (used for testing)
         run: sudo apt-get install -y shellcheck shfmt
 
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org/
+          cache: "pnpm"
 
       - run: |
           git config --local user.email "kenneth.skovhus@gmail.com"

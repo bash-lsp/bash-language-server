@@ -661,7 +661,9 @@ describe('server', () => {
         ...item,
         documentation: {
           kind: 'markdown',
-          value: expect.stringContaining('Write arguments to the standard output'),
+          value: expect.stringMatching(
+            /Write arguments to the standard output|Output the ARGs/,
+          ),
         },
       })
     })
