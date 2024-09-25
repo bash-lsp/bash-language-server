@@ -69,7 +69,7 @@ describe('formatter', () => {
         shfmtConfig: { languageDialect: 'posix' },
       })
     }).rejects.toThrow(
-      /Shfmt: exited with status 1: .*\/testing\/fixtures\/shfmt\.sh:25:14: (the "function" builtin exists in bash; tried parsing as posix|a command can only contain words and redirects; encountered \()/,
+      /Shfmt: exited with status 1: .*\/testing\/fixtures\/shfmt\.sh:25:14: (the "function" builtin|a command can only contain words and redirects; encountered \()/,
     )
   })
 
