@@ -35,7 +35,7 @@
     "vscode-languageserver-textdocument": "1.0.12"
   },
   "resolutions": {
-    "@types/vscode": "1.93.0"
+    "@types/vscode": "1.94.0"
   },
   "engines": {
     "node": ">=16",
