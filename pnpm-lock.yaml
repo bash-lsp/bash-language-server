@@ -84,8 +84,8 @@ importers:
         specifier: 1.0.12
         version: 1.0.12
       web-tree-sitter:
-        specifier: 0.24.1
-        version: 0.24.1
+        specifier: 0.24.2
+        version: 0.24.2
       zod:
         specifier: 3.23.8
         version: 3.23.8
@@ -947,6 +947,7 @@ packages:
   eslint@8.57.1:
     resolution: {integrity: sha512-ypowyDxpVSYpkXr9WPv2PAZCtNip1Mv5KTW0SCurXv/9iOpcrH9PaqUElksqEB6pChqHGDRCFTyrZlGhnLNGiA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
 
   espree@9.6.1:
@@ -1832,8 +1833,8 @@ packages:
   walker@1.0.8:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
 
-  web-tree-sitter@0.24.1:
-    resolution: {integrity: sha512-PtZ2BVhNlOW/naLRU9hNeebYYC0KXwAEDSSOe9nIHswdb/92D2CKB71Nw14yx538K3vXvttJV2RkxDaCOdsKWA==}
+  web-tree-sitter@0.24.2:
+    resolution: {integrity: sha512-RZHPs5khCUZAHCjbx1g1WNQf6UK+nzvKiKGXvAo11XN6tErNvo37+bew18WcfIEomLWESD8uG189KM4M3Q2nhg==}
 
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
@@ -3907,7 +3908,7 @@ snapshots:
     dependencies:
       makeerror: 1.0.12
 
-  web-tree-sitter@0.24.1: {}
+  web-tree-sitter@0.24.2: {}
 
   webidl-conversions@3.0.1: {}
 
