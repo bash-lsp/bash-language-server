@@ -39,8 +39,8 @@ importers:
         specifier: 12.0.0
         version: 12.0.0(eslint@8.57.1)
       eslint-plugin-sort-class-members:
-        specifier: 1.20.0
-        version: 1.20.0(eslint@8.57.1)
+        specifier: 1.21.0
+        version: 1.21.0(eslint@8.57.1)
       jest:
         specifier: 29.7.0
         version: 29.7.0(@types/node@18.19.30)
@@ -926,8 +926,8 @@ packages:
     peerDependencies:
       eslint: '>=5.0.0'
 
-  eslint-plugin-sort-class-members@1.20.0:
-    resolution: {integrity: sha512-xNaik4GQ/pRwd1soIVI28HEXZbrWoLR5krau2+E8YcHj7N09UviPg5mYhf/rELG29bIFJdXDOFJazN90+luMOw==}
+  eslint-plugin-sort-class-members@1.21.0:
+    resolution: {integrity: sha512-QKV4jvGMu/ge1l4s1TUBC6rqqV/fbABWY7q2EeNpV3FRikoX6KuLhiNvS8UuMi+EERe0hKGrNU9e6ukFDxNnZQ==}
     engines: {node: '>=4.0.0'}
     peerDependencies:
       eslint: '>=0.8.0'
@@ -2877,7 +2877,7 @@ snapshots:
     dependencies:
       eslint: 8.57.1
 
-  eslint-plugin-sort-class-members@1.20.0(eslint@8.57.1):
+  eslint-plugin-sort-class-members@1.21.0(eslint@8.57.1):
     dependencies:
       eslint: 8.57.1
 
