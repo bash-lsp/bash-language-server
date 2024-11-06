@@ -785,6 +785,20 @@ export default class Analyzer {
       }
     }
 
+    if (
+      node.type === 'word' &&
+      node.parent?.type === 'command' &&
+      node.parent.firstChild?.text === 'read' &&
+      !node.text.startsWith('-') &&
+      !/^-.*[dinNptu]$/.test(node.previousSibling?.text ?? '')
+    ) {
+      return {
+        word: node.text,
+        range: TreeSitterUtil.range(node),
+        kind: LSP.SymbolKind.Variable,
+      }
+    }
+
     return null
   }
 
