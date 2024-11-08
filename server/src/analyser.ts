@@ -785,13 +785,7 @@ export default class Analyzer {
       }
     }
 
-    if (
-      node.type === 'word' &&
-      node.parent?.type === 'command' &&
-      node.parent.firstChild?.text === 'read' &&
-      !node.text.startsWith('-') &&
-      !/^-.*[dinNptu]$/.test(node.previousSibling?.text ?? '')
-    ) {
+    if (TreeSitterUtil.isVariableInReadCommand(node)) {
       return {
         word: node.text,
         range: TreeSitterUtil.range(node),
