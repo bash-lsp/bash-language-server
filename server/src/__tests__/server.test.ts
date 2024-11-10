@@ -1741,23 +1741,19 @@ describe('server', () => {
     // These may fail in the future when tree-sitter-bash's parsing gets better
     // or when the rename symbol implementation is improved.
     describe('Edge or not covered cases', () => {
-      it('only includes variables typed as variable_name', async () => {
+      it('does not include some variables typed as word', async () => {
         const iRanges = await getFirstChangeRanges(getRenameRequestResult(106, 4))
         // This should be 6 if all instances within let, postfix, and binary
         // expressions are included.
         expect(iRanges.length).toBe(3)
-
-        const lineRanges = await getFirstChangeRanges(getRenameRequestResult(118, 10))
-        // This should be 2 if the declaration of `line` is included.
-        expect(lineRanges.length).toBe(1)
       })
 
       it('includes incorrect number of symbols for complex scopes and nesting', async () => {
-        const varRanges = await getFirstChangeRanges(getRenameRequestResult(124, 8))
+        const varRanges = await getFirstChangeRanges(getRenameRequestResult(118, 8))
         // This should only be 2 if `$var` from `3` is not included.
         expect(varRanges.length).toBe(3)
 
-        const localFuncRanges = await getFirstChangeRanges(getRenameRequestResult(144, 5))
+        const localFuncRanges = await getFirstChangeRanges(getRenameRequestResult(138, 5))
         // This should be 2 if the instance of `localFunc` in `callerFunc` is
         // also included.
         expect(localFuncRanges.length).toBe(1)
@@ -1765,23 +1761,23 @@ describe('server', () => {
 
       it('only takes into account subshells created with ( and )', async () => {
         const pipelinevarRanges = await getFirstChangeRanges(
-          getRenameRequestResult(150, 7),
+          getRenameRequestResult(144, 7),
         )
         // This should only be 1 if pipeline subshell scoping is recognized.
         expect(pipelinevarRanges.length).toBe(2)
       })
 
       it('does not take into account sourcing location and scope', async () => {
-        const FOOUris = await getChangeUris(getRenameRequestResult(154, 8))
+        const FOOUris = await getChangeUris(getRenameRequestResult(148, 8))
         // This should only be 1 if sourcing after a symbol does not affect it.
         expect(FOOUris.length).toBe(2)
 
-        const hello_worldUris = await getChangeUris(getRenameRequestResult(160, 6))
+        const hello_worldUris = await getChangeUris(getRenameRequestResult(154, 6))
         // This should only be 1 if sourcing inside an uncalled function does
         // not affect symbols outside of it.
         expect(hello_worldUris.length).toBe(2)
 
-        const PATH_INPUTUris = await getChangeUris(getRenameRequestResult(163, 9))
+        const PATH_INPUTUris = await getChangeUris(getRenameRequestResult(157, 9))
         // This should only be 1 if sourcing inside a subshell does not affect
         // symbols outside of it.
         expect(PATH_INPUTUris.length).toBe(2)
