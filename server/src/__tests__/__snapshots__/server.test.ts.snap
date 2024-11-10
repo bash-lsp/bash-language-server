@@ -567,6 +567,441 @@ exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits 
 }
 `;
 
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for variables within read commands 1`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming-read.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 12,
+            "line": 2,
+          },
+          "start": {
+            "character": 5,
+            "line": 2,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 20,
+            "line": 2,
+          },
+          "start": {
+            "character": 13,
+            "line": 2,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 28,
+            "line": 2,
+          },
+          "start": {
+            "character": 21,
+            "line": 2,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 15,
+            "line": 3,
+          },
+          "start": {
+            "character": 8,
+            "line": 3,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 23,
+            "line": 3,
+          },
+          "start": {
+            "character": 16,
+            "line": 3,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 16,
+            "line": 6,
+          },
+          "start": {
+            "character": 9,
+            "line": 6,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 18,
+            "line": 7,
+          },
+          "start": {
+            "character": 11,
+            "line": 7,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 35,
+            "line": 8,
+          },
+          "start": {
+            "character": 28,
+            "line": 8,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 13,
+            "line": 9,
+          },
+          "start": {
+            "character": 6,
+            "line": 9,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 26,
+            "line": 11,
+          },
+          "start": {
+            "character": 19,
+            "line": 11,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 31,
+            "line": 12,
+          },
+          "start": {
+            "character": 24,
+            "line": 12,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 15,
+            "line": 13,
+          },
+          "start": {
+            "character": 8,
+            "line": 13,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 12,
+            "line": 15,
+          },
+          "start": {
+            "character": 5,
+            "line": 15,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 32,
+            "line": 15,
+          },
+          "start": {
+            "character": 25,
+            "line": 15,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 15,
+            "line": 16,
+          },
+          "start": {
+            "character": 8,
+            "line": 16,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 34,
+            "line": 16,
+          },
+          "start": {
+            "character": 27,
+            "line": 16,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 27,
+            "line": 17,
+          },
+          "start": {
+            "character": 20,
+            "line": 17,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 35,
+            "line": 17,
+          },
+          "start": {
+            "character": 28,
+            "line": 17,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for variables within read commands 2`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming-read.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 22,
+            "line": 21,
+          },
+          "start": {
+            "character": 14,
+            "line": 21,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 16,
+            "line": 23,
+          },
+          "start": {
+            "character": 8,
+            "line": 23,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for variables within read commands 3`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming-read.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 14,
+            "line": 28,
+          },
+          "start": {
+            "character": 5,
+            "line": 28,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 15,
+            "line": 30,
+          },
+          "start": {
+            "character": 6,
+            "line": 30,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 16,
+            "line": 31,
+          },
+          "start": {
+            "character": 7,
+            "line": 31,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 16,
+            "line": 38,
+          },
+          "start": {
+            "character": 7,
+            "line": 38,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 15,
+            "line": 43,
+          },
+          "start": {
+            "character": 6,
+            "line": 43,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for variables within read commands 4`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming-read.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 16,
+            "line": 33,
+          },
+          "start": {
+            "character": 7,
+            "line": 33,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 15,
+            "line": 34,
+          },
+          "start": {
+            "character": 6,
+            "line": 34,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 16,
+            "line": 35,
+          },
+          "start": {
+            "character": 7,
+            "line": 35,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for variables within read commands 5`] = `
+{
+  "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming-read.sh": [
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 15,
+            "line": 40,
+          },
+          "start": {
+            "character": 6,
+            "line": 40,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
+            "character": 16,
+            "line": 41,
+          },
+          "start": {
+            "character": 7,
+            "line": 41,
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
 exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceEdits for sourced symbols 1`] = `
 {
   "changes": {
@@ -863,6 +1298,7 @@ exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceE
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/options.sh": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/override-executable-symbol.sh": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/parse-problems.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming-read.sh": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
       {
         "newText": "newName",
@@ -943,6 +1379,7 @@ exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceE
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/options.sh": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/override-executable-symbol.sh": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/parse-problems.sh": [],
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming-read.sh": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/renaming.sh": [
       {
         "newText": "newName",
