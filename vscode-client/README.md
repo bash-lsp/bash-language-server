@@ -4,7 +4,7 @@
 [![VS Marketplace downloads](https://badgen.net/vs-marketplace/d/mads-hartmann.bash-ide-vscode?label=VS%20Marketplace%20downloads)](https://marketplace.visualstudio.com/items?itemName=mads-hartmann.bash-ide-vscode)
 [![Open VSX downloads](https://badgen.net/open-vsx/d/mads-hartmann/bash-ide-vscode?color=purple&label=Open%20VSX%20downloads)](https://open-vsx.org/extension/mads-hartmann/bash-ide-vscode)
 
-Visual Studio Code extension utilizing the [Bash Language Server](bash-lsp) and integrating with [explainshell][explainshell], [shellcheck][shellcheck] and [shfmt][shfmt].
+Visual Studio Code extension utilizing the [Bash Language Server][bash-lsp] and integrating with [explainshell][explainshell], [shellcheck][shellcheck] and [shfmt][shfmt].
 
 We recommend that you [install shellcheck](https://github.com/koalaman/shellcheck#installing) to enable linting and [install shfmt](https://github.com/mvdan/sh?tab=readme-ov-file#shfmt) to enable formatting.
 
