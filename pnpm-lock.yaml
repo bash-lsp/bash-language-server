@@ -84,8 +84,8 @@ importers:
         specifier: 1.0.12
         version: 1.0.12
       web-tree-sitter:
-        specifier: 0.24.4
-        version: 0.24.4
+        specifier: 0.24.5
+        version: 0.24.5
       zod:
         specifier: 3.24.1
         version: 3.24.1
@@ -1825,8 +1825,8 @@ packages:
   walker@1.0.8:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
 
-  web-tree-sitter@0.24.4:
-    resolution: {integrity: sha512-sETP1Sf9OTd4LusrKBNznNgTt3fWoWhJnAFaKPiGSeVKXJbZ72qoMpxddKMdVI5BgXv32OI7tkKQre5PmF9reA==}
+  web-tree-sitter@0.24.5:
+    resolution: {integrity: sha512-+J/2VSHN8J47gQUAvF8KDadrfz6uFYVjxoxbKWDoXVsH2u7yLdarCnIURnrMA6uSRkgX3SdmqM5BOoQjPdSh5w==}
 
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
@@ -3890,7 +3890,7 @@ snapshots:
     dependencies:
       makeerror: 1.0.12
 
-  web-tree-sitter@0.24.4: {}
+  web-tree-sitter@0.24.5: {}
 
   webidl-conversions@3.0.1: {}
 
