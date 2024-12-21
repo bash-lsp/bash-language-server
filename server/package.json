@@ -33,7 +33,7 @@
   "devDependencies": {
     "@types/fuzzy-search": "2.1.5",
     "@types/node-fetch": "2.6.12",
-    "@types/turndown": "5.0.4",
+    "@types/turndown": "5.0.5",
     "@types/urijs": "1.19.25"
   }
 }
