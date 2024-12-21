@@ -101,10 +101,20 @@ export function getConfigFromEnvironmentVariables(): {
     },
   }
 
-  const environmentVariablesUsed = Object.entries(rawConfig)
-    .map(([key, value]) => (typeof value !== 'undefined' ? key : null))
-    .filter((key): key is string => key !== null)
-    .filter((key) => key !== 'logLevel') // logLevel is a special case that we ignore
+  const getUsedEnvvars = (rawConfigComponent: {[key: string]: any}): string[] => {
+    return Object.entries(rawConfigComponent)
+      .map(([key, value]) => (typeof value !== 'undefined' ? key : null))
+      .filter((key): key is string => key !== null)
+      .filter((key) => key !== 'logLevel') // logLevel is a special case that we ignore
+  };
+
+  // Since shfmt is structurally _always_ defined, we need to be careful to not
+  // incorrectly alert the user that they are doing something that needs to be
+  // changed.
+  //
+  // If other objects are added to rawConfig, please treat them similarly below.
+  const {shfmt, ... rest } = rawConfig;
+  const environmentVariablesUsed = getUsedEnvvars(rest).concat(getUsedEnvvars(shfmt));
 
   const config = ConfigSchema.parse(rawConfig)
 
