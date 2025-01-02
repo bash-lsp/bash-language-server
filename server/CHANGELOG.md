@@ -1,5 +1,9 @@
 # Bash Language Server
 
+## 5.4.3
+
+- Do not overwrite user-provided shellcheck `--shell` argument https://github.com/bash-lsp/bash-language-server/pull/1133
+
 ## 5.4.2
 
 - Fix wrong pnpm engine version
