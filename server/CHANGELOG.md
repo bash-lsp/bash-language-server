@@ -1,5 +1,13 @@
 # Bash Language Server
 
+## 5.4.2
+
+- Fix wrong pnpm engine version
+
+## 5.4.1
+
+- Bump treesitter to latest version
+
 ## 5.4.0
 
 - Add .editorconfig support for shfmt https://github.com/bash-lsp/bash-language-server/pull/1171
