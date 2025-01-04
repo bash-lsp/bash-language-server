@@ -362,6 +362,16 @@ export function findDeclarationUsingGlobalSemantics({
     }
 
     if (
+      kind === LSP.SymbolKind.Variable &&
+      TreeSitterUtil.isVariableInReadCommand(n) &&
+      n.text === word
+    ) {
+      declaration = n
+      continueSearching = false
+      return false
+    }
+
+    if (
       kind === LSP.SymbolKind.Function &&
       n.type === 'function_definition' &&
       n.firstNamedChild?.text === word
