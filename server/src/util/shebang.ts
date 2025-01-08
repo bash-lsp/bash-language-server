@@ -25,6 +25,7 @@ export const BASH_DIALECTS = [
   'zsh',
   'csh',
   'ash',
+  'busybox',
 ] as const
 type BashDialect = (typeof BASH_DIALECTS)[number]
 

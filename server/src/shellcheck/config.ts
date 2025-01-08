@@ -10,6 +10,7 @@ export const SHELLCHECK_DIALECTS = [
   'bash',
   'dash',
   'ksh',
+  'busybox',
 ]
 
 // https://github.com/koalaman/shellcheck/wiki
