@@ -20,7 +20,7 @@ import {
 import { getFilePaths } from './util/fs'
 import { logger } from './util/logger'
 import { isPositionIncludedInRange } from './util/lsp'
-import { analyzeShebang } from './util/shebang'
+import { analyzeFile } from './util/shebang'
 import * as sourcing from './util/sourcing'
 import * as TreeSitterUtil from './util/tree-sitter'
 
@@ -192,10 +192,13 @@ export default class Analyzer {
 
       try {
         const fileContent = await fs.promises.readFile(filePath, 'utf8')
-        const { shebang, shellDialect } = analyzeShebang(fileContent)
-        if (shebang && !shellDialect) {
+        const fileDialect = analyzeFile(uri, fileContent)
+        // Bail if the dialect is unsupported
+        if (!fileDialect.dialect) {
           logger.info(
-            `BackgroundAnalysis: Skipping file ${uri} with shebang "${shebang}"`,
+            `BackgroundAnalysis: Skipping file ${uri} with dialect "${JSON.stringify(
+              fileDialect,
+            )}"`,
           )
           continue
         }
