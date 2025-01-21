@@ -33,6 +33,7 @@ jobs:
         name: Deploy VS Code extension
         env:
           VSCE_TOKEN: ${{ secrets.VSCE_PERSONAL_ACCESS_TOKEN }}
+          OVSX_TOKEN: ${{ secrets.OVSX_PERSONAL_ACCESS_TOKEN }}
 
       - run: bash scripts/release-server.sh
         name: Deploy server
