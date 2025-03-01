@@ -102,9 +102,12 @@ export function getConfigFromEnvironmentVariables(): {
   }
 
   const environmentVariablesUsed = Object.entries(rawConfig)
-    .map(([key, value]) => (typeof value !== 'undefined' ? key : null))
-    .filter((key): key is string => key !== null)
-    .filter((key) => key !== 'logLevel') // logLevel is a special case that we ignore
+    .filter(
+      ([key, value]) =>
+        !['undefined', 'object'].includes(typeof value) &&
+        ![null, 'logLevel'].includes(key),
+    )
+    .map(([key]) => key)
 
   const config = ConfigSchema.parse(rawConfig)
 
