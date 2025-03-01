@@ -633,7 +633,7 @@ export default class Analyzer {
     }
 
     const searchParams = new URLSearchParams({ cmd: interestingNode.text }).toString()
-    const url = `${endpoint}/api/explain?${searchParams}`
+    const url = `${endpoint}/explain?${searchParams}`
 
     const explainshellRawResponse = await fetch(url)
     const explainshellResponse =
