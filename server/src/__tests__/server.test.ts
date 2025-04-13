@@ -1408,11 +1408,15 @@ describe('server', () => {
   })
 
   describe('onPrepareRename', () => {
-    async function getPrepareRenameResult(line: LSP.uinteger, character: LSP.uinteger) {
+    async function getPrepareRenameResult(
+      line: LSP.uinteger,
+      character: LSP.uinteger,
+      { uri = FIXTURE_URI.RENAMING } = {},
+    ) {
       const { connection } = await initializeServer()
 
       return connection.onPrepareRename.mock.calls[0][0](
-        { textDocument: { uri: FIXTURE_URI.RENAMING }, position: { line, character } },
+        { textDocument: { uri }, position: { line, character } },
         {} as any,
       )
     }
@@ -1477,6 +1481,22 @@ describe('server', () => {
           "start": {
             "character": 0,
             "line": 28,
+          },
+        }
+      `)
+
+      const readvar = await getPrepareRenameResult(2, 18, {
+        uri: FIXTURE_URI.RENAMING_READ,
+      })
+      expect(readvar).toMatchInlineSnapshot(`
+        {
+          "end": {
+            "character": 20,
+            "line": 2,
+          },
+          "start": {
+            "character": 13,
+            "line": 2,
           },
         }
       `)
@@ -1660,6 +1680,75 @@ describe('server', () => {
           expect(somevarInsideSomefunc).toStrictEqual(s)
         }
       })
+
+      it('returns correct WorkspaceEdits for variables within read commands', async () => {
+        const [readvar, ...readvars] = await getRenameRequestResults(
+          [2, 8, { uri: FIXTURE_URI.RENAMING_READ }],
+          [2, 19, { uri: FIXTURE_URI.RENAMING_READ }],
+          [2, 21, { uri: FIXTURE_URI.RENAMING_READ }],
+          [3, 10, { uri: FIXTURE_URI.RENAMING_READ }],
+          [3, 19, { uri: FIXTURE_URI.RENAMING_READ }],
+          [6, 14, { uri: FIXTURE_URI.RENAMING_READ }],
+          [7, 15, { uri: FIXTURE_URI.RENAMING_READ }],
+          [8, 32, { uri: FIXTURE_URI.RENAMING_READ }],
+          [9, 7, { uri: FIXTURE_URI.RENAMING_READ }],
+          [11, 23, { uri: FIXTURE_URI.RENAMING_READ }],
+          [12, 30, { uri: FIXTURE_URI.RENAMING_READ }],
+          [13, 10, { uri: FIXTURE_URI.RENAMING_READ }],
+          [15, 10, { uri: FIXTURE_URI.RENAMING_READ }],
+          [15, 31, { uri: FIXTURE_URI.RENAMING_READ }],
+          [16, 11, { uri: FIXTURE_URI.RENAMING_READ }],
+          [16, 30, { uri: FIXTURE_URI.RENAMING_READ }],
+          [17, 23, { uri: FIXTURE_URI.RENAMING_READ }],
+          [17, 33, { uri: FIXTURE_URI.RENAMING_READ }],
+        )
+        expect(readvar).toMatchSnapshot()
+        for (const r of readvars) {
+          expect(readvar).toStrictEqual(r)
+        }
+
+        const [readloop, ...readloops] = await getRenameRequestResults(
+          [21, 21, { uri: FIXTURE_URI.RENAMING_READ }],
+          [23, 12, { uri: FIXTURE_URI.RENAMING_READ }],
+        )
+        expect(readloop).toMatchSnapshot()
+        for (const r of readloops) {
+          expect(readloop).toStrictEqual(r)
+        }
+
+        const [readscope, ...readscopes] = await getRenameRequestResults(
+          [28, 8, { uri: FIXTURE_URI.RENAMING_READ }],
+          [30, 11, { uri: FIXTURE_URI.RENAMING_READ }],
+          [31, 12, { uri: FIXTURE_URI.RENAMING_READ }],
+          [38, 15, { uri: FIXTURE_URI.RENAMING_READ }],
+          [43, 9, { uri: FIXTURE_URI.RENAMING_READ }],
+        )
+        expect(readscope).toMatchSnapshot()
+        for (const r of readscopes) {
+          expect(readscope).toStrictEqual(r)
+        }
+
+        const [readscopeInsideFunction, ...readscopesInsideFunction] =
+          await getRenameRequestResults(
+            [33, 11, { uri: FIXTURE_URI.RENAMING_READ }],
+            [34, 14, { uri: FIXTURE_URI.RENAMING_READ }],
+            [35, 8, { uri: FIXTURE_URI.RENAMING_READ }],
+          )
+        expect(readscopeInsideFunction).toMatchSnapshot()
+        for (const r of readscopesInsideFunction) {
+          expect(readscopeInsideFunction).toStrictEqual(r)
+        }
+
+        const [readscopeInsideSubshell, ...readscopesInsideSubshell] =
+          await getRenameRequestResults(
+            [40, 14, { uri: FIXTURE_URI.RENAMING_READ }],
+            [41, 10, { uri: FIXTURE_URI.RENAMING_READ }],
+          )
+        expect(readscopeInsideSubshell).toMatchSnapshot()
+        for (const r of readscopesInsideSubshell) {
+          expect(readscopeInsideSubshell).toStrictEqual(r)
+        }
+      })
     })
 
     describe('Workspace-wide rename', () => {
@@ -1741,23 +1830,19 @@ describe('server', () => {
     // These may fail in the future when tree-sitter-bash's parsing gets better
     // or when the rename symbol implementation is improved.
     describe('Edge or not covered cases', () => {
-      it('only includes variables typed as variable_name', async () => {
+      it('does not include some variables typed as word', async () => {
         const iRanges = await getFirstChangeRanges(getRenameRequestResult(106, 4))
         // This should be 6 if all instances within let, postfix, and binary
         // expressions are included.
         expect(iRanges.length).toBe(3)
-
-        const lineRanges = await getFirstChangeRanges(getRenameRequestResult(118, 10))
-        // This should be 2 if the declaration of `line` is included.
-        expect(lineRanges.length).toBe(1)
       })
 
       it('includes incorrect number of symbols for complex scopes and nesting', async () => {
-        const varRanges = await getFirstChangeRanges(getRenameRequestResult(124, 8))
+        const varRanges = await getFirstChangeRanges(getRenameRequestResult(118, 8))
         // This should only be 2 if `$var` from `3` is not included.
         expect(varRanges.length).toBe(3)
 
-        const localFuncRanges = await getFirstChangeRanges(getRenameRequestResult(144, 5))
+        const localFuncRanges = await getFirstChangeRanges(getRenameRequestResult(138, 5))
         // This should be 2 if the instance of `localFunc` in `callerFunc` is
         // also included.
         expect(localFuncRanges.length).toBe(1)
@@ -1765,23 +1850,23 @@ describe('server', () => {
 
       it('only takes into account subshells created with ( and )', async () => {
         const pipelinevarRanges = await getFirstChangeRanges(
-          getRenameRequestResult(150, 7),
+          getRenameRequestResult(144, 7),
         )
         // This should only be 1 if pipeline subshell scoping is recognized.
         expect(pipelinevarRanges.length).toBe(2)
       })
 
       it('does not take into account sourcing location and scope', async () => {
-        const FOOUris = await getChangeUris(getRenameRequestResult(154, 8))
+        const FOOUris = await getChangeUris(getRenameRequestResult(148, 8))
         // This should only be 1 if sourcing after a symbol does not affect it.
         expect(FOOUris.length).toBe(2)
 
-        const hello_worldUris = await getChangeUris(getRenameRequestResult(160, 6))
+        const hello_worldUris = await getChangeUris(getRenameRequestResult(154, 6))
         // This should only be 1 if sourcing inside an uncalled function does
         // not affect symbols outside of it.
         expect(hello_worldUris.length).toBe(2)
 
-        const PATH_INPUTUris = await getChangeUris(getRenameRequestResult(163, 9))
+        const PATH_INPUTUris = await getChangeUris(getRenameRequestResult(157, 9))
         // This should only be 1 if sourcing inside a subshell does not affect
         // symbols outside of it.
         expect(PATH_INPUTUris.length).toBe(2)

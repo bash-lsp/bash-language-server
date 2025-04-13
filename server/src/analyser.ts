@@ -466,7 +466,7 @@ export default class Analyzer {
 
     const typeOfDescendants =
       kind === LSP.SymbolKind.Variable
-        ? 'variable_name'
+        ? ['variable_name', 'word']
         : ['function_definition', 'command_name']
     const startPosition = start
       ? { row: start.line, column: start.character }
@@ -474,7 +474,10 @@ export default class Analyzer {
 
     const ignoredRanges: LSP.Range[] = []
     const filterVariables = (n: Parser.SyntaxNode) => {
-      if (n.text !== word) {
+      if (
+        n.text !== word ||
+        (n.type === 'word' && !TreeSitterUtil.isVariableInReadCommand(n))
+      ) {
         return false
       }
 
@@ -510,11 +513,14 @@ export default class Analyzer {
 
       const declarationCommand = TreeSitterUtil.findParentOfType(n, 'declaration_command')
       const isLocal =
-        (definedVariable?.text === word || !!(!definition && declarationCommand)) &&
-        (parent.type === 'subshell' ||
-          ['local', 'declare', 'typeset'].includes(
-            declarationCommand?.firstChild?.text as any,
-          ))
+        // Local `variable_name`s
+        ((definedVariable?.text === word || !!(!definition && declarationCommand)) &&
+          (parent.type === 'subshell' ||
+            ['local', 'declare', 'typeset'].includes(
+              declarationCommand?.firstChild?.text as any,
+            ))) ||
+        // Local variables within `read` command that are typed as `word`
+        (parent.type === 'subshell' && n.type === 'word')
       if (isLocal) {
         if (includeDeclaration) {
           ignoredRanges.push(TreeSitterUtil.range(parent))
@@ -782,6 +788,14 @@ export default class Analyzer {
           node.type === 'variable_name'
             ? LSP.SymbolKind.Variable
             : LSP.SymbolKind.Function,
+      }
+    }
+
+    if (TreeSitterUtil.isVariableInReadCommand(node)) {
+      return {
+        word: node.text,
+        range: TreeSitterUtil.range(node),
+        kind: LSP.SymbolKind.Variable,
       }
     }
 
