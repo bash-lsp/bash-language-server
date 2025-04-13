@@ -46,6 +46,8 @@ describe('getSourcedUris', () => {
 
       source "$LIBPATH" # dynamic imports not supported
 
+      source "$SCRIPT_DIR"/issue-926.sh # remove leading dynamic segment
+
       # conditional is currently not supported
       if [[ -z $__COMPLETION_LIB_LOADED ]]; then source "$LIBPATH" ; fi
 
@@ -144,7 +146,10 @@ describe('getSourcedUris', () => {
         "file:///Users/bash/x",
         "file:///Users/scripts/release-client.sh",
         "file:///Users/bash-user/myscript",
+        "file:///Users/bash/issue-926.sh",
         "file:///Users/bash/issue206.sh",
+        "file:///Users/bash/staging.sh",
+        "file:///Users/bash/production.sh",
       }
     `)
 
