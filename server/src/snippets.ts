@@ -154,7 +154,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     label: 'if-defined',
     documentation: 'if with variable existence check',
     insertText: [
-      'if [[ -n "${${1:variable}+x}" ]]; then',
+      'if [[ -n "\\${${1:variable}+x}" ]]; then',
       '\t${2:command ...}',
       'fi',
     ].join('\n'),
@@ -163,7 +163,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     label: 'if-not-defined',
     documentation: 'if with variable existence check',
     insertText: [
-      'if [[ -z "${${1:variable}+x}" ]]; then',
+      'if [[ -z "\\${${1:variable}+x}" ]]; then',
       '\t${2:command ...}',
       'fi',
     ].join('\n'),
@@ -278,7 +278,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     label: 'while-defined',
     documentation: 'while with variable existence check',
     insertText: [
-      'while [[ -n "${${1:variable}+x}" ]]',
+      'while [[ -n "\\${${1:variable}+x}" ]]',
       '\t${2:command ...}',
       'done',
     ].join('\n'),
@@ -287,7 +287,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     label: 'while-not-defined',
     documentation: 'while with variable existence check',
     insertText: [
-      'while [[ -z "${${1:variable}+x}" ]]',
+      'while [[ -z "\\${${1:variable}+x}" ]]',
       '\t${2:command ...}',
       'done',
     ].join('\n'),
@@ -402,7 +402,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     label: 'until-defined',
     documentation: 'until with variable existence check',
     insertText: [
-      'until [[ -n "${${1:variable}+x}" ]]',
+      'until [[ -n "\\${${1:variable}+x}" ]]',
       '\t${2:command ...}',
       'done',
     ].join('\n'),
@@ -411,7 +411,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     label: 'until-not-defined',
     documentation: 'until with variable existence check',
     insertText: [
-      'until [[ -z "${${1:variable}+x}" ]]',
+      'until [[ -z "\\${${1:variable}+x}" ]]',
       '\t${2:command ...}',
       'done',
     ].join('\n'),
@@ -429,7 +429,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     label: 'for-range',
     documentation: 'for with range',
     insertText: [
-      'for ${1:item} in $(seq ${2:from} ${3:to}); do',
+      'for ${1:item} in \\$(seq ${2:from} ${3:to}); do',
       '\t${4:command ...}',
       'done',
     ].join('\n'),
@@ -438,7 +438,7 @@ export const SNIPPETS: BashCompletionItem[] = [
     label: 'for-stepped-range',
     documentation: 'for with stepped range',
     insertText: [
-      'for ${1:item} in $(seq ${2:from} ${3:step} ${4:to}); do',
+      'for ${1:item} in \\$(seq ${2:from} ${3:step} ${4:to}); do',
       '\t${5:command ...}',
       'done',
     ].join('\n'),
