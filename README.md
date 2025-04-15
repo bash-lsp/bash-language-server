@@ -128,32 +128,29 @@ let g:ale_linters = {
     \ }
 ```
 
+For Vim8/NeoVim v0.5 using [jayli/vim-easycomplete](https://github.com/jayli/vim-easycomplete). Execute `:InstallLspServer sh` and config nothing. Maybe it's the easiest way to use bash-language-server in vim/nvim.
+
 #### Neovim
 
-For Neovim v0.8:
+For Neovim 0.11+ with [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig)
 
 ```lua
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = 'sh',
-  callback = function()
-    vim.lsp.start({
-      name = 'bash-language-server',
-      cmd = { 'bash-language-server', 'start' },
-    })
-  end,
-})
+vim.lsp.enable 'bashls'
+```
+For Neovim 0.11+ without plugins
+
+```lua
+vim.lsp.config.bashls = {
+  cmd = { 'bash-language-server', 'start' },
+  filetypes = { 'bash', 'sh' }
+}
+vim.lsp.enable 'bashls'
 ```
 
-For NeoVim using [autozimu/LanguageClient-neovim][languageclient-neovim], add the following configuration to
-`init.vim`:
-
-```vim
-let g:LanguageClient_serverCommands = {
-    \ 'sh': ['bash-language-server', 'start']
-    \ }
+For Neovim 0.10 or lower with [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig)
+```lua
+require 'lspconfig'.bashls.setup {}
 ```
-
-For Vim8/NeoVim v0.5 using [jayli/vim-easycomplete](https://github.com/jayli/vim-easycomplete). Execute `:InstallLspServer sh` and config nothing. Maybe it's the easiest way to use bash-language-server in vim/nvim.
 
 #### Oni
 
