@@ -90,8 +90,8 @@ importers:
         specifier: 0.24.5
         version: 0.24.5
       zod:
-        specifier: 3.24.3
-        version: 3.24.3
+        specifier: 3.24.4
+        version: 3.24.4
     devDependencies:
       '@types/fuzzy-search':
         specifier: 2.1.5
@@ -1829,8 +1829,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zod@3.24.3:
-    resolution: {integrity: sha512-HhY1oqzWCQWuUqvBFnsyrtZRhyPeR7SUGv+C4+MsisMuVfSPx8HpwWqH8tRahSlt6M3PiFAcoeFhZAqIXTxoSg==}
+  zod@3.24.4:
+    resolution: {integrity: sha512-OdqJE9UDRPwWsrHjLN2F8bPxvwJBK22EHLWtanu0LSYr5YqzsaaW3RMgmjwr8Rypg5k+meEJdSPXJZXE/yqOMg==}
 
 snapshots:
 
@@ -3831,4 +3831,4 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod@3.24.3: {}
+  zod@3.24.4: {}
