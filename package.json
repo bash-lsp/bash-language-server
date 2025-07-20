@@ -23,7 +23,7 @@
     "@typescript-eslint/parser": "7.18.0",
     "cross-spawn": ">=7.0.5",
     "eslint": "8.57.1",
-    "eslint-config-prettier": "9.1.0",
+    "eslint-config-prettier": "9.1.2",
     "eslint-plugin-jest": "28.14.0",
     "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-simple-import-sort": "12.1.1",
