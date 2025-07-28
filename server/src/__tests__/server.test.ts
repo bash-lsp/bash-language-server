@@ -82,6 +82,7 @@ describe('server', () => {
           "triggerCharacters": [
             "$",
             "{",
+            "-",
           ],
         },
         "definitionProvider": true,
