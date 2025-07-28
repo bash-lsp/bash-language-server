@@ -121,7 +121,7 @@ export default class BashServer {
       textDocumentSync: LSP.TextDocumentSyncKind.Full,
       completionProvider: {
         resolveProvider: true,
-        triggerCharacters: ['$', '{'],
+        triggerCharacters: ['$', '{', '-'],
       },
       hoverProvider: true,
       documentHighlightProvider: true,
@@ -950,7 +950,7 @@ function getMarkdownContent(documentation: string, language?: string): LSP.Marku
 }
 
 export function getCommandOptions(name: string, word: string): string[] {
-  const options = spawnSync(path.join(__dirname, '../src/get-options.sh'), [name, word])
+  const options = spawnSync(path.join(__dirname, './get-options.sh'), [name, word])
 
   if (options.status !== 0) {
     return []

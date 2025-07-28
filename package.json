@@ -3,7 +3,7 @@
   "scripts": {
     "clean": "rm -rf *.log */*.log */out node_modules vscode-client/node_modules server/node_modules",
     "preinstall": "npx only-allow pnpm",
-    "compile": "tsc -b",
+    "compile": "tsc -b && cp server/src/get-options.sh server/out/",
     "watch": "tsc -b -w",
     "lint": "pnpm lint:bail --fix",
     "lint:bail": "eslint . --ext js,ts,tsx --cache",
