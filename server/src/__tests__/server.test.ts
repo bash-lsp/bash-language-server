@@ -224,7 +224,7 @@ describe('server', () => {
         {} as any,
       )
 
-      expect(result).toHaveLength(1)
+      expect(result).toHaveLength(3)
       const codeAction = (result as CodeAction[])[0]
       expect(codeAction.diagnostics).toEqual([fixableDiagnostic])
       expect(codeAction.diagnostics).toEqual([fixableDiagnostic])
