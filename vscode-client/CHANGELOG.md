@@ -1,5 +1,8 @@
 # Bash IDE
 
+## 1.43.1
+- Properly dispose client.
+
 ## 1.43.0
 - Upgrade language server to 5.4.2 (treesitter upgrade).
 
