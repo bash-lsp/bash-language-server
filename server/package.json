@@ -34,6 +34,6 @@
     "@types/fuzzy-search": "2.1.5",
     "@types/node-fetch": "2.6.13",
     "@types/turndown": "5.0.6",
-    "@types/urijs": "1.19.25"
+    "@types/urijs": "1.19.26"
   }
 }

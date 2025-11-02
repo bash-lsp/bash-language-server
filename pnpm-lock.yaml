@@ -103,8 +103,8 @@ importers:
         specifier: 5.0.6
         version: 5.0.6
       '@types/urijs':
-        specifier: 1.19.25
-        version: 1.19.25
+        specifier: 1.19.26
+        version: 1.19.26
 
 packages:
 
@@ -514,8 +514,8 @@ packages:
   '@types/turndown@5.0.6':
     resolution: {integrity: sha512-ru00MoyeeouE5BX4gRL+6m/BsDfbRayOskWqUvh7CLGW+UXxHQItqALa38kKnOiZPqJrtzJUgAC2+F0rL1S4Pg==}
 
-  '@types/urijs@1.19.25':
-    resolution: {integrity: sha512-XOfUup9r3Y06nFAZh3WvO0rBU4OtlfPB/vgxpjg+NRdGU6CN6djdc6OEiH+PcqHCY6eFLo9Ista73uarf4gnBg==}
+  '@types/urijs@1.19.26':
+    resolution: {integrity: sha512-wkXrVzX5yoqLnndOwFsieJA7oKM8cNkOKJtf/3vVGSUFkWDKZvFHpIl9Pvqb/T9UsawBBFMTTD8xu7sK5MWuvg==}
 
   '@types/yargs-parser@21.0.0':
     resolution: {integrity: sha512-iO9ZQHkZxHn4mSakYV0vFHAVDyEOIJQrV2uZ06HxEPcx+mt8swXoZHIbaaJ2crJYFfErySgktuTZ3BeLz+XmFA==}
@@ -2449,7 +2449,7 @@ snapshots:
 
   '@types/turndown@5.0.6': {}
 
-  '@types/urijs@1.19.25': {}
+  '@types/urijs@1.19.26': {}
 
   '@types/yargs-parser@21.0.0': {}
 
