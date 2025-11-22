@@ -77,67 +77,267 @@ describe('linter', () => {
     expect(result).toMatchInlineSnapshot(`
       {
         "codeActions": {
-          "shellcheck|2086|1:5-1:9": {
-            "diagnostics": [
-              {
-                "code": "SC2086",
-                "codeDescription": {
-                  "href": "https://www.shellcheck.net/wiki/SC2086",
-                },
-                "data": {
-                  "id": "shellcheck|2086|1:5-1:9",
-                },
-                "message": "Double quote to prevent globbing and word splitting.",
-                "range": {
-                  "end": {
-                    "character": 9,
-                    "line": 1,
+          "shellcheck|2086|1:5-1:9": [
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2086",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2086",
                   },
-                  "start": {
-                    "character": 5,
-                    "line": 1,
+                  "data": {
+                    "id": "shellcheck|2086|1:5-1:9",
                   },
-                },
-                "severity": 3,
-                "source": "shellcheck",
-                "tags": undefined,
-              },
-            ],
-            "edit": {
-              "changes": {
-                "${FIXTURE_DOCUMENT_URI}": [
-                  {
-                    "newText": """,
-                    "range": {
-                      "end": {
-                        "character": 9,
-                        "line": 1,
-                      },
-                      "start": {
-                        "character": 9,
-                        "line": 1,
-                      },
+                  "message": "Double quote to prevent globbing and word splitting.",
+                  "range": {
+                    "end": {
+                      "character": 9,
+                      "line": 1,
+                    },
+                    "start": {
+                      "character": 5,
+                      "line": 1,
                     },
                   },
-                  {
-                    "newText": """,
-                    "range": {
-                      "end": {
-                        "character": 5,
-                        "line": 1,
-                      },
-                      "start": {
-                        "character": 5,
-                        "line": 1,
+                  "severity": 3,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": """,
+                      "range": {
+                        "end": {
+                          "character": 9,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 9,
+                          "line": 1,
+                        },
                       },
                     },
-                  },
-                ],
+                    {
+                      "newText": """,
+                      "range": {
+                        "end": {
+                          "character": 5,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 5,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
               },
+              "kind": "quickfix",
+              "title": "Apply fix for SC2086",
             },
-            "kind": "quickfix",
-            "title": "Apply fix for SC2086",
-          },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2086",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2086",
+                  },
+                  "data": {
+                    "id": "shellcheck|2086|1:5-1:9",
+                  },
+                  "message": "Double quote to prevent globbing and word splitting.",
+                  "range": {
+                    "end": {
+                      "character": 9,
+                      "line": 1,
+                    },
+                    "start": {
+                      "character": 5,
+                      "line": 1,
+                    },
+                  },
+                  "severity": 3,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2086
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2086 for this line",
+            },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2086",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2086",
+                  },
+                  "data": {
+                    "id": "shellcheck|2086|1:5-1:9",
+                  },
+                  "message": "Double quote to prevent globbing and word splitting.",
+                  "range": {
+                    "end": {
+                      "character": 9,
+                      "line": 1,
+                    },
+                    "start": {
+                      "character": 5,
+                      "line": 1,
+                    },
+                  },
+                  "severity": 3,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2086
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2086 for the entire file",
+            },
+          ],
+          "shellcheck|2154|1:5-1:9": [
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|1:5-1:9",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 9,
+                      "line": 1,
+                    },
+                    "start": {
+                      "character": 5,
+                      "line": 1,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for this line",
+            },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|1:5-1:9",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 9,
+                      "line": 1,
+                    },
+                    "start": {
+                      "character": 5,
+                      "line": 1,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for the entire file",
+            },
+          ],
         },
         "diagnostics": [
           {
@@ -211,6 +411,1544 @@ describe('linter', () => {
     })
   })
 
+  it('should handle indentation in disable directive', async () => {
+    // prettier-ignore
+    const shell = [
+      '#!/bin/bash',
+      '',
+      'if true; then',
+      '    echo "$foo"',
+      'fi',
+    ].join('\n')
+
+    const [result] = await getLintingResult({ document: textToDoc(shell) })
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "codeActions": {
+          "shellcheck|2154|3:10-3:14": [
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|3:10-3:14",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 14,
+                      "line": 3,
+                    },
+                    "start": {
+                      "character": 10,
+                      "line": 3,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "    # shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 3,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 3,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for this line",
+            },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|3:10-3:14",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 14,
+                      "line": 3,
+                    },
+                    "start": {
+                      "character": 10,
+                      "line": 3,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for the entire file",
+            },
+          ],
+        },
+        "diagnostics": [
+          {
+            "code": "SC2154",
+            "codeDescription": {
+              "href": "https://www.shellcheck.net/wiki/SC2154",
+            },
+            "data": {
+              "id": "shellcheck|2154|3:10-3:14",
+            },
+            "message": "foo is referenced but not assigned.",
+            "range": {
+              "end": {
+                "character": 14,
+                "line": 3,
+              },
+              "start": {
+                "character": 10,
+                "line": 3,
+              },
+            },
+            "severity": 2,
+            "source": "shellcheck",
+            "tags": undefined,
+          },
+        ],
+      }
+    `)
+  })
+
+  it('should add disable directive to existing ones', async () => {
+    // prettier-ignore
+    const shell = [
+      '#!/bin/bash',
+      '# shellcheck disable=SC1001',
+      '',
+      '# shellcheck disable=SC1002',
+      'echo "$foo"',
+    ].join('\n')
+
+    const [result] = await getLintingResult({ document: textToDoc(shell) })
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "codeActions": {
+          "shellcheck|2154|4:6-4:10": [
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|4:6-4:10",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 10,
+                      "line": 4,
+                    },
+                    "start": {
+                      "character": 6,
+                      "line": 4,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC1002,SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 4,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 3,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for this line",
+            },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|4:6-4:10",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 10,
+                      "line": 4,
+                    },
+                    "start": {
+                      "character": 6,
+                      "line": 4,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC1001,SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 2,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for the entire file",
+            },
+          ],
+        },
+        "diagnostics": [
+          {
+            "code": "SC2154",
+            "codeDescription": {
+              "href": "https://www.shellcheck.net/wiki/SC2154",
+            },
+            "data": {
+              "id": "shellcheck|2154|4:6-4:10",
+            },
+            "message": "foo is referenced but not assigned.",
+            "range": {
+              "end": {
+                "character": 10,
+                "line": 4,
+              },
+              "start": {
+                "character": 6,
+                "line": 4,
+              },
+            },
+            "severity": 2,
+            "source": "shellcheck",
+            "tags": undefined,
+          },
+        ],
+      }
+    `)
+  })
+
+  it('should add indented disable directive to existing ones', async () => {
+    // prettier-ignore
+    const shell = [
+      '#!/bin/bash',
+      '# shellcheck disable=SC1001',
+      '',
+      'if true; then',
+      '    # shellcheck disable=SC1002',
+      '    echo "$foo"',
+      'fi',
+    ].join('\n')
+
+    const [result] = await getLintingResult({ document: textToDoc(shell) })
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "codeActions": {
+          "shellcheck|2154|5:10-5:14": [
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|5:10-5:14",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 14,
+                      "line": 5,
+                    },
+                    "start": {
+                      "character": 10,
+                      "line": 5,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "    # shellcheck disable=SC1002,SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 5,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 4,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for this line",
+            },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|5:10-5:14",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 14,
+                      "line": 5,
+                    },
+                    "start": {
+                      "character": 10,
+                      "line": 5,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC1001,SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 2,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for the entire file",
+            },
+          ],
+        },
+        "diagnostics": [
+          {
+            "code": "SC2154",
+            "codeDescription": {
+              "href": "https://www.shellcheck.net/wiki/SC2154",
+            },
+            "data": {
+              "id": "shellcheck|2154|5:10-5:14",
+            },
+            "message": "foo is referenced but not assigned.",
+            "range": {
+              "end": {
+                "character": 14,
+                "line": 5,
+              },
+              "start": {
+                "character": 10,
+                "line": 5,
+              },
+            },
+            "severity": 2,
+            "source": "shellcheck",
+            "tags": undefined,
+          },
+        ],
+      }
+    `)
+  })
+
+  it('should add disable directive to existing ones (sorted)', async () => {
+    // prettier-ignore
+    const shell = [
+      '#!/bin/bash',
+      '# shellcheck disable=SC9001,SC1001',
+      '',
+      '# shellcheck disable=SC1002,SC9002',
+      'echo "$foo"',
+    ].join('\n')
+
+    const [result] = await getLintingResult({ document: textToDoc(shell) })
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "codeActions": {
+          "shellcheck|2154|4:6-4:10": [
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|4:6-4:10",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 10,
+                      "line": 4,
+                    },
+                    "start": {
+                      "character": 6,
+                      "line": 4,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC1002,SC2154,SC9002
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 4,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 3,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for this line",
+            },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|4:6-4:10",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 10,
+                      "line": 4,
+                    },
+                    "start": {
+                      "character": 6,
+                      "line": 4,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC1001,SC2154,SC9001
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 2,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for the entire file",
+            },
+          ],
+        },
+        "diagnostics": [
+          {
+            "code": "SC2154",
+            "codeDescription": {
+              "href": "https://www.shellcheck.net/wiki/SC2154",
+            },
+            "data": {
+              "id": "shellcheck|2154|4:6-4:10",
+            },
+            "message": "foo is referenced but not assigned.",
+            "range": {
+              "end": {
+                "character": 10,
+                "line": 4,
+              },
+              "start": {
+                "character": 6,
+                "line": 4,
+              },
+            },
+            "severity": 2,
+            "source": "shellcheck",
+            "tags": undefined,
+          },
+        ],
+      }
+    `)
+  })
+
+  it('should handle multiline in disable directive', async () => {
+    // prettier-ignore
+    const shell = [
+      '#!/bin/bash',
+      '',
+      'echo \\',
+      '    "$foo" \\',
+      '    "bar" \\',
+      '    "$baz"',
+    ].join('\n')
+
+    const [result] = await getLintingResult({ document: textToDoc(shell) })
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "codeActions": {
+          "shellcheck|2154|3:5-3:9": [
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|3:5-3:9",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 9,
+                      "line": 3,
+                    },
+                    "start": {
+                      "character": 5,
+                      "line": 3,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 2,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 2,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for this line",
+            },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|3:5-3:9",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 9,
+                      "line": 3,
+                    },
+                    "start": {
+                      "character": 5,
+                      "line": 3,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for the entire file",
+            },
+          ],
+          "shellcheck|2154|5:5-5:9": [
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|5:5-5:9",
+                  },
+                  "message": "baz is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 9,
+                      "line": 5,
+                    },
+                    "start": {
+                      "character": 5,
+                      "line": 5,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 2,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 2,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for this line",
+            },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|5:5-5:9",
+                  },
+                  "message": "baz is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 9,
+                      "line": 5,
+                    },
+                    "start": {
+                      "character": 5,
+                      "line": 5,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for the entire file",
+            },
+          ],
+        },
+        "diagnostics": [
+          {
+            "code": "SC2154",
+            "codeDescription": {
+              "href": "https://www.shellcheck.net/wiki/SC2154",
+            },
+            "data": {
+              "id": "shellcheck|2154|3:5-3:9",
+            },
+            "message": "foo is referenced but not assigned.",
+            "range": {
+              "end": {
+                "character": 9,
+                "line": 3,
+              },
+              "start": {
+                "character": 5,
+                "line": 3,
+              },
+            },
+            "severity": 2,
+            "source": "shellcheck",
+            "tags": undefined,
+          },
+          {
+            "code": "SC2154",
+            "codeDescription": {
+              "href": "https://www.shellcheck.net/wiki/SC2154",
+            },
+            "data": {
+              "id": "shellcheck|2154|5:5-5:9",
+            },
+            "message": "baz is referenced but not assigned.",
+            "range": {
+              "end": {
+                "character": 9,
+                "line": 5,
+              },
+              "start": {
+                "character": 5,
+                "line": 5,
+              },
+            },
+            "severity": 2,
+            "source": "shellcheck",
+            "tags": undefined,
+          },
+        ],
+      }
+    `)
+  })
+
+  it('should append indented multiline in disable directive', async () => {
+    // prettier-ignore
+    const shell = [
+      '#!/bin/bash',
+      '',
+      'if true; then',
+      '    echo \\',
+      '        "$foo" \\',
+      '        "bar" \\',
+      '        "$baz"',
+      'fi',
+    ].join('\n')
+
+    const [result] = await getLintingResult({ document: textToDoc(shell) })
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "codeActions": {
+          "shellcheck|2154|4:9-4:13": [
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|4:9-4:13",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 13,
+                      "line": 4,
+                    },
+                    "start": {
+                      "character": 9,
+                      "line": 4,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "    # shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 3,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 3,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for this line",
+            },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|4:9-4:13",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 13,
+                      "line": 4,
+                    },
+                    "start": {
+                      "character": 9,
+                      "line": 4,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for the entire file",
+            },
+          ],
+          "shellcheck|2154|6:9-6:13": [
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|6:9-6:13",
+                  },
+                  "message": "baz is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 13,
+                      "line": 6,
+                    },
+                    "start": {
+                      "character": 9,
+                      "line": 6,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "    # shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 3,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 3,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for this line",
+            },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|6:9-6:13",
+                  },
+                  "message": "baz is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 13,
+                      "line": 6,
+                    },
+                    "start": {
+                      "character": 9,
+                      "line": 6,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for the entire file",
+            },
+          ],
+        },
+        "diagnostics": [
+          {
+            "code": "SC2154",
+            "codeDescription": {
+              "href": "https://www.shellcheck.net/wiki/SC2154",
+            },
+            "data": {
+              "id": "shellcheck|2154|4:9-4:13",
+            },
+            "message": "foo is referenced but not assigned.",
+            "range": {
+              "end": {
+                "character": 13,
+                "line": 4,
+              },
+              "start": {
+                "character": 9,
+                "line": 4,
+              },
+            },
+            "severity": 2,
+            "source": "shellcheck",
+            "tags": undefined,
+          },
+          {
+            "code": "SC2154",
+            "codeDescription": {
+              "href": "https://www.shellcheck.net/wiki/SC2154",
+            },
+            "data": {
+              "id": "shellcheck|2154|6:9-6:13",
+            },
+            "message": "baz is referenced but not assigned.",
+            "range": {
+              "end": {
+                "character": 13,
+                "line": 6,
+              },
+              "start": {
+                "character": 9,
+                "line": 6,
+              },
+            },
+            "severity": 2,
+            "source": "shellcheck",
+            "tags": undefined,
+          },
+        ],
+      }
+    `)
+  })
+
+  it('should handle absence of shebang', async () => {
+    // prettier-ignore
+    const shell = [
+      '',
+      'echo "$foo"',
+    ].join('\n')
+
+    const [result] = await getLintingResult({ document: textToDoc(shell) })
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "codeActions": {
+          "shellcheck|2154|1:6-1:10": [
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|1:6-1:10",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 10,
+                      "line": 1,
+                    },
+                    "start": {
+                      "character": 6,
+                      "line": 1,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for this line",
+            },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|1:6-1:10",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 10,
+                      "line": 1,
+                    },
+                    "start": {
+                      "character": 6,
+                      "line": 1,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 0,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 0,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for the entire file",
+            },
+          ],
+        },
+        "diagnostics": [
+          {
+            "code": "SC2154",
+            "codeDescription": {
+              "href": "https://www.shellcheck.net/wiki/SC2154",
+            },
+            "data": {
+              "id": "shellcheck|2154|1:6-1:10",
+            },
+            "message": "foo is referenced but not assigned.",
+            "range": {
+              "end": {
+                "character": 10,
+                "line": 1,
+              },
+              "start": {
+                "character": 6,
+                "line": 1,
+              },
+            },
+            "severity": 2,
+            "source": "shellcheck",
+            "tags": undefined,
+          },
+        ],
+      }
+    `)
+  })
+
+  it('should handle error on first line', async () => {
+    // prettier-ignore
+    const shell = [
+      'echo "$foo"',
+    ].join('\n')
+
+    const [result] = await getLintingResult({ document: textToDoc(shell) })
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "codeActions": {
+          "shellcheck|2154|0:6-0:10": [
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|0:6-0:10",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 10,
+                      "line": 0,
+                    },
+                    "start": {
+                      "character": 6,
+                      "line": 0,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 0,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 0,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for this line",
+            },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|0:6-0:10",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 10,
+                      "line": 0,
+                    },
+                    "start": {
+                      "character": 6,
+                      "line": 0,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 0,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 0,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for the entire file",
+            },
+          ],
+        },
+        "diagnostics": [
+          {
+            "code": "SC2154",
+            "codeDescription": {
+              "href": "https://www.shellcheck.net/wiki/SC2154",
+            },
+            "data": {
+              "id": "shellcheck|2154|0:6-0:10",
+            },
+            "message": "foo is referenced but not assigned.",
+            "range": {
+              "end": {
+                "character": 10,
+                "line": 0,
+              },
+              "start": {
+                "character": 6,
+                "line": 0,
+              },
+            },
+            "severity": 2,
+            "source": "shellcheck",
+            "tags": undefined,
+          },
+        ],
+      }
+    `)
+  })
+
+  it('should handle existing directive', async () => {
+    // prettier-ignore
+    const shell = [
+      '# shellcheck enable=bar',
+      'echo "$foo"',
+    ].join('\n')
+
+    const [result] = await getLintingResult({ document: textToDoc(shell) })
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "codeActions": {
+          "shellcheck|2154|1:6-1:10": [
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|1:6-1:10",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 10,
+                      "line": 1,
+                    },
+                    "start": {
+                      "character": 6,
+                      "line": 1,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck enable=bar disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 0,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for this line",
+            },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|1:6-1:10",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 10,
+                      "line": 1,
+                    },
+                    "start": {
+                      "character": 6,
+                      "line": 1,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures//foo.sh": [
+                    {
+                      "newText": "# shellcheck enable=bar disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 0,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for the entire file",
+            },
+          ],
+        },
+        "diagnostics": [
+          {
+            "code": "SC2154",
+            "codeDescription": {
+              "href": "https://www.shellcheck.net/wiki/SC2154",
+            },
+            "data": {
+              "id": "shellcheck|2154|1:6-1:10",
+            },
+            "message": "foo is referenced but not assigned.",
+            "range": {
+              "end": {
+                "character": 10,
+                "line": 1,
+              },
+              "start": {
+                "character": 6,
+                "line": 1,
+              },
+            },
+            "severity": 2,
+            "source": "shellcheck",
+            "tags": undefined,
+          },
+        ],
+      }
+    `)
+  })
+
   it('should correctly follow sources with correct cwd', async () => {
     const [result] = await getLintingResult({
       cwd: FIXTURE_FOLDER,
@@ -231,7 +1969,208 @@ describe('linter', () => {
 
     expect(result).toMatchInlineSnapshot(`
       {
-        "codeActions": {},
+        "codeActions": {
+          "shellcheck|1091|3:7-3:19": [
+            {
+              "diagnostics": [
+                {
+                  "code": "SC1091",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC1091",
+                  },
+                  "data": {
+                    "id": "shellcheck|1091|3:7-3:19",
+                  },
+                  "message": "Not following: shellcheck/sourced.sh: openBinaryFile: does not exist (No such file or directory)",
+                  "range": {
+                    "end": {
+                      "character": 19,
+                      "line": 3,
+                    },
+                    "start": {
+                      "character": 7,
+                      "line": 3,
+                    },
+                  },
+                  "severity": 3,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures/shellcheck/source.sh": [
+                    {
+                      "newText": "# shellcheck source=shellcheck/sourced.sh disable=SC1091
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 3,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 2,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC1091 for this line",
+            },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC1091",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC1091",
+                  },
+                  "data": {
+                    "id": "shellcheck|1091|3:7-3:19",
+                  },
+                  "message": "Not following: shellcheck/sourced.sh: openBinaryFile: does not exist (No such file or directory)",
+                  "range": {
+                    "end": {
+                      "character": 19,
+                      "line": 3,
+                    },
+                    "start": {
+                      "character": 7,
+                      "line": 3,
+                    },
+                  },
+                  "severity": 3,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures/shellcheck/source.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC1091
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC1091 for the entire file",
+            },
+          ],
+          "shellcheck|2154|5:6-5:10": [
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|5:6-5:10",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 10,
+                      "line": 5,
+                    },
+                    "start": {
+                      "character": 6,
+                      "line": 5,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures/shellcheck/source.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 5,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 5,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for this line",
+            },
+            {
+              "diagnostics": [
+                {
+                  "code": "SC2154",
+                  "codeDescription": {
+                    "href": "https://www.shellcheck.net/wiki/SC2154",
+                  },
+                  "data": {
+                    "id": "shellcheck|2154|5:6-5:10",
+                  },
+                  "message": "foo is referenced but not assigned.",
+                  "range": {
+                    "end": {
+                      "character": 10,
+                      "line": 5,
+                    },
+                    "start": {
+                      "character": 6,
+                      "line": 5,
+                    },
+                  },
+                  "severity": 2,
+                  "source": "shellcheck",
+                  "tags": undefined,
+                },
+              ],
+              "edit": {
+                "changes": {
+                  "file:///home/faivre/dev/pub/lsp/bash-language-server/testing/fixtures/shellcheck/source.sh": [
+                    {
+                      "newText": "# shellcheck disable=SC2154
+      ",
+                      "range": {
+                        "end": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                        "start": {
+                          "character": 0,
+                          "line": 1,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              "kind": "quickfix",
+              "title": "Disable ShellCheck rule SC2154 for the entire file",
+            },
+          ],
+        },
         "diagnostics": [
           {
             "code": "SC1091",
