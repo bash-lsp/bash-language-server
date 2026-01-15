@@ -7,8 +7,8 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { debounce } from '../util/async'
 import { logger } from '../util/logger'
-import { analyzeShebang } from '../util/shebang'
-import { CODE_TO_TAGS, LEVEL_TO_SEVERITY } from './config'
+import { analyzeFile } from '../util/shebang'
+import { CODE_TO_TAGS, LEVEL_TO_SEVERITY, SHELLCHECK_DIALECTS } from './config'
 import {
   ShellCheckComment,
   ShellCheckReplacement,
@@ -16,7 +16,6 @@ import {
   ShellCheckResultSchema,
 } from './types'
 
-const SUPPORTED_BASH_DIALECTS = ['sh', 'bash', 'dash', 'ksh']
 const DEBOUNCE_MS = 500
 type LinterOptions = {
   executablePath: string
@@ -73,23 +72,24 @@ export class Linter {
   ): Promise<LintingResult> {
     const documentText = document.getText()
 
-    const shellDialect = guessShellDialect({
-      documentText,
-      uri: document.uri,
-    })
-
-    if (shellDialect && !SUPPORTED_BASH_DIALECTS.includes(shellDialect)) {
-      // We found a dialect that isn't supported by ShellCheck.
+    const dialect = analyzeFile(document.uri, documentText)
+    let shellName: string | null
+    // NOTE: ShellCheck performs shebang parsing and shell detection itself.
+    // Do not interfere with that in any way because it is smarter than us.
+    //
+    // We perform tentative shell detection manually in order to fall back to
+    // bash for files without a shebang or a shell type directive, so only pass
+    // an override if the file _does not_ have a shebang or a shell type directive.
+    if (dialect.shebang || dialect.directive) {
+      shellName = null
+    } else if (dialect.dialect && SHELLCHECK_DIALECTS.includes(dialect.dialect)) {
+      shellName = dialect.dialect
+    } else {
+      // Bail if the dialect isn't supported by ShellCheck, but only if it's our
+      // override. Never bail if the file has an (unsupported) shebang or a shell
+      // type directive, because ShellCheck is better than us at reporting this.
       return { diagnostics: [], codeActions: {} }
     }
-
-    // NOTE: that ShellCheck actually does shebang parsing, but we manually
-    // do it here in order to fallback to bash for files without a shebang.
-    // This enables parsing files with a bash syntax, but could yield false positives.
-    const shellName =
-      shellDialect && SUPPORTED_BASH_DIALECTS.includes(shellDialect)
-        ? shellDialect
-        : 'bash'
 
     const result = await this.runShellCheck(
       documentText,
@@ -110,7 +110,7 @@ export class Linter {
 
   private async runShellCheck(
     documentText: string,
-    shellName: string,
+    shellName: string | null,
     sourcePaths: string[],
     additionalArgs: string[] = [],
   ): Promise<ShellCheckResult> {
@@ -126,10 +126,10 @@ export class Linter {
       ...additionalArgs,
     ]
 
-    // only add `--shell` argument if non is provided by the user in their
-    // config. This allows to the user to override the shell. See #1064.
+    // only pass a `--shell` argument if we have an override AND none is provided
+    // by the user in their config. See #1064.
     const userArgs = additionalArgs.join(' ')
-    if (!(userArgs.includes('--shell') || userArgs.includes('-s '))) {
+    if (shellName && !(userArgs.includes('--shell') || userArgs.includes('-s '))) {
       args.unshift(`--shell=${shellName}`)
     }
 
@@ -297,8 +297,4 @@ class CodeActionProvider {
       newText: replacement.replacement,
     }
   }
-}
-
-function guessShellDialect({ documentText, uri }: { documentText: string; uri: string }) {
-  return uri.endsWith('.zsh') ? 'zsh' : analyzeShebang(documentText).shellDialect
 }

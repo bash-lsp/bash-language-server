@@ -2,7 +2,16 @@ import * as LSP from 'vscode-languageserver/node'
 
 import { ShellCheckCommentLevel } from './types'
 
-export const SUPPORTED_BASH_DIALECTS = ['sh', 'bash', 'dash', 'ksh']
+// List of shell dialects that ShellCheck supports for linting
+// (compare and contrast with BASH_DIALECTS from ../util/shebang)
+// prettier-ignore
+export const SHELLCHECK_DIALECTS = [
+  'sh',
+  'bash',
+  'dash',
+  'ksh',
+  'busybox',
+]
 
 // https://github.com/koalaman/shellcheck/wiki
 export const CODE_TO_TAGS: Record<number, LSP.DiagnosticTag[] | undefined> = {
