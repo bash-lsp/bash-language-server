@@ -62,7 +62,7 @@ To verify that everything is working:
 bash-language-server --help
 ```
 
-If you encounter installation errors, ensure you have node version 16 or newer (`node --version`).
+If you encounter installation errors, ensure you have node version 20 or newer (`node --version`).
 
 ### Clients
 

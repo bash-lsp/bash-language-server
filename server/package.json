@@ -14,7 +14,7 @@
     "url": "https://github.com/bash-lsp/bash-language-server"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=20"
   },
   "dependencies": {
     "editorconfig": "2.0.1",
