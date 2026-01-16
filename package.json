@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@types/jest": "29.5.14",
-    "@types/node": "18.19.130",
+    "@types/node": "22.15.29",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
     "cross-spawn": ">=7.0.5",
@@ -39,8 +39,8 @@
     "@types/vscode": "1.106.1"
   },
   "engines": {
-    "node": ">=16",
-    "pnpm": ">=9.x"
+    "node": ">=20",
+    "pnpm": ">=10"
   },
   "jest": {
     "preset": "ts-jest",

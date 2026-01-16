@@ -16,7 +16,7 @@ convenience - it proxies to the `package.json` files in the `vscode-client` and
 This guide presumes you have the following dependencies installed:
 
 - [`pnpm`][pnpm].
-- [`node`][node] (v16 or newer)
+- [`node`][node] (v20 or newer)
 
 ## Initial setup
 

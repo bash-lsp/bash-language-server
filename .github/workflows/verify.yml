@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [20.x, 22.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -19,7 +19,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -34,7 +34,7 @@ jobs:
 
       - name: Publish coverage to codecov.io
         uses: codecov/codecov-action@v5
-        if: success() && matrix.node-version == '20.x'
+        if: success() && matrix.node-version == '22.x'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./codecov.yml
