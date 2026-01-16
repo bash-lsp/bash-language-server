@@ -7,11 +7,11 @@
   "main": "./out/server.js",
   "typings": "./out/server.d.ts",
   "bin": {
-    "bash-language-server": "./out/cli.js"
+    "bash-language-server": "out/cli.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bash-lsp/bash-language-server"
+    "url": "git+https://github.com/bash-lsp/bash-language-server.git"
   },
   "engines": {
     "node": ">=20"
