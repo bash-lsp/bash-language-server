@@ -29,12 +29,12 @@ jobs:
           git config --local user.name "skovhus"
         name: Configure for pushing git tags
 
-      - run: bash scripts/release-client.sh
-        name: Deploy VS Code extension
-        env:
-          VSCE_TOKEN: ${{ secrets.VSCE_PERSONAL_ACCESS_TOKEN }}
-
       - run: bash scripts/release-server.sh
         name: Deploy server
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+      - run: bash scripts/release-client.sh
+        name: Deploy VS Code extension
+        env:
+          VSCE_TOKEN: ${{ secrets.VSCE_PERSONAL_ACCESS_TOKEN }}
