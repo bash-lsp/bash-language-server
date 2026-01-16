@@ -1,5 +1,7 @@
 # Bash Language Server
 
+See releases on GitHub, this is not kept up to date anymore:
+
 ## 5.4.3
 
 - Do not overwrite user-provided shellcheck `--shell` argument https://github.com/bash-lsp/bash-language-server/pull/1133
