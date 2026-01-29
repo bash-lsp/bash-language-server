@@ -1,5 +1,5 @@
 import { dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, URL } from 'node:url'
 
 import { spawn } from 'child_process'
 import * as LSP from 'vscode-languageserver/node'
@@ -17,6 +17,19 @@ import {
 } from './types'
 
 const DEBOUNCE_MS = 500
+
+function safeFileURLToPath(uri: string): string | null {
+  try {
+    const url = new URL(uri)
+    if (url.protocol !== 'file:') {
+      return null
+    }
+    return fileURLToPath(uri)
+  } catch {
+    return null
+  }
+}
+
 type LinterOptions = {
   executablePath: string
   cwd?: string
@@ -91,10 +104,15 @@ export class Linter {
       return { diagnostics: [], codeActions: {} }
     }
 
+    const documentPath = safeFileURLToPath(document.uri)
+    const effectiveSourcePaths = documentPath
+      ? [...sourcePaths, dirname(documentPath)]
+      : sourcePaths
+
     const result = await this.runShellCheck(
       documentText,
       shellName,
-      [...sourcePaths, dirname(fileURLToPath(document.uri))],
+      effectiveSourcePaths,
       additionalShellCheckArguments,
     )
 
