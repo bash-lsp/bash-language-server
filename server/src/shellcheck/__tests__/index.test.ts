@@ -295,4 +295,19 @@ describe('linter', () => {
       diagnostics: [],
     })
   })
+
+  it('should handle non-file URI schemes gracefully', async () => {
+    const shell = ['#!/bin/bash', 'echo "hello"'].join('\n')
+
+    const nonFileUri = 'webdav://example.com/path/to/script.sh'
+    const document = TextDocument.create(nonFileUri, 'bash', 0, shell)
+
+    const [result] = await getLintingResult({
+      document,
+      sourcePaths: [],
+    })
+
+    expect(result.diagnostics).toEqual([])
+    expect(result.codeActions).toEqual({})
+  })
 })
