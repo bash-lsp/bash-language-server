@@ -140,7 +140,7 @@
   "dependencies": {
     "bash-language-server": "5.4.2",
     "vscode-languageclient": "8.1.0",
-    "vscode-languageserver": "8.0.2"
+    "vscode-languageserver": "8.1.0"
   },
   "devDependencies": {
     "@types/vscode": "^1.44.0"
