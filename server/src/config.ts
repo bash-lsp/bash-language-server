@@ -24,7 +24,12 @@ export const ConfigSchema = z.object({
   // If true, then all symbols from the workspace are included.
   includeAllWorkspaceSymbols: z.boolean().default(false),
 
-  // Additional ShellCheck arguments. Note that we already add the following arguments: --shell, --format, --external-sources."
+  // Controls whether ShellCheck is invoked with --external-sources. When enabled (default),
+  // ShellCheck follows source directives to lint referenced files. On projects with many
+  // cross-sourcing scripts this can cause unbounded memory growth. Set to false to disable.
+  shellcheckExternalSources: z.boolean().default(true),
+
+  // Additional ShellCheck arguments. Note that we already add the following arguments: --shell, --format, and --external-sources (if shellcheckExternalSources is true).
   shellcheckArguments: z
     .preprocess((arg) => {
       let argsList: string[] = []
@@ -87,6 +92,7 @@ export function getConfigFromEnvironmentVariables(): {
     includeAllWorkspaceSymbols: toBoolean(process.env.INCLUDE_ALL_WORKSPACE_SYMBOLS),
     logLevel: process.env[LOG_LEVEL_ENV_VAR],
     shellcheckArguments: process.env.SHELLCHECK_ARGUMENTS,
+    shellcheckExternalSources: toBoolean(process.env.SHELLCHECK_EXTERNAL_SOURCES),
     shellcheckPath: process.env.SHELLCHECK_PATH,
     shfmt: {
       path: process.env.SHFMT_PATH,

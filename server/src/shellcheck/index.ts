@@ -33,6 +33,7 @@ function safeFileURLToPath(uri: string): string | null {
 type LinterOptions = {
   executablePath: string
   cwd?: string
+  externalSources?: boolean
 }
 
 export type LintingResult = {
@@ -43,15 +44,17 @@ export type LintingResult = {
 export class Linter {
   private cwd: string
   public executablePath: string
+  private externalSources: boolean
   private uriToDebouncedExecuteLint: {
     [uri: string]: InstanceType<typeof Linter>['executeLint']
   }
   private _canLint: boolean
 
-  constructor({ cwd, executablePath }: LinterOptions) {
+  constructor({ cwd, executablePath, externalSources = true }: LinterOptions) {
     this._canLint = true
     this.cwd = cwd || process.cwd()
     this.executablePath = executablePath
+    this.externalSources = externalSources
     this.uriToDebouncedExecuteLint = Object.create(null)
   }
 
@@ -139,7 +142,7 @@ export class Linter {
 
     const args = [
       '--format=json1',
-      '--external-sources',
+      ...(this.externalSources ? ['--external-sources'] : []),
       ...sourcePathsArgs,
       ...additionalArgs,
     ]
