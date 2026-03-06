@@ -277,7 +277,10 @@ export default class BashServer {
             logger.info('ShellCheck linting is disabled as "shellcheckPath" was not set')
             this.linter = undefined
           } else {
-            this.linter = new Linter({ executablePath: shellcheckPath })
+            this.linter = new Linter({
+              executablePath: shellcheckPath,
+              externalSources: this.config.shellcheckExternalSources,
+            })
           }
 
           const shfmtPath = this.config.shfmt?.path
