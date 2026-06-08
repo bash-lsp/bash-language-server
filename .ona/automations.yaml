@@ -1,0 +1,36 @@
+tasks:
+  install:
+    name: Install dependencies
+    description: Install workspace dependencies with pnpm (also installs the vscode-client deps via postinstall).
+    command: |
+      pnpm install --frozen-lockfile
+    triggeredBy:
+      - postDevcontainerStart
+
+  compile:
+    name: Compile
+    description: Build the TypeScript projects.
+    command: |
+      pnpm compile
+    triggeredBy:
+      - manual
+    dependsOn:
+      - install
+
+  test:
+    name: Test
+    description: Run the Jest test suite (requires shellcheck and shfmt, provided by the dev container).
+    command: |
+      pnpm test
+    triggeredBy:
+      - manual
+    dependsOn:
+      - install
+
+services:
+  watch:
+    name: Watch
+    description: Rebuild the TypeScript projects on change.
+    commands:
+      start: |
+        pnpm watch
