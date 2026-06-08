@@ -1,0 +1,38 @@
+tasks:
+  install:
+    name: Install dependencies
+    description: Install workspace dependencies with pnpm (frozen lockfile).
+    command: |
+      pnpm install --frozen-lockfile
+    triggeredBy:
+      - postDevcontainerStart
+
+  compile:
+    name: Compile
+    description: Build the TypeScript sources for the server and client.
+    command: |
+      pnpm compile
+    triggeredBy:
+      - postDevcontainerStart
+    dependsOn:
+      - install
+
+  test:
+    name: Test
+    description: Run the Jest test suite (requires shellcheck and shfmt).
+    command: |
+      pnpm test
+    triggeredBy:
+      - manual
+    dependsOn:
+      - install
+
+  lint:
+    name: Lint
+    description: Run ESLint and Prettier checks.
+    command: |
+      pnpm lint:bail
+    triggeredBy:
+      - manual
+    dependsOn:
+      - install
