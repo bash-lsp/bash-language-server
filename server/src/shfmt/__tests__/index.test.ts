@@ -24,7 +24,7 @@ function makeShfmtConfig(cfg: Partial<ShfmtConfig>): ShfmtConfig {
     ignoreEditorconfig: cfg.ignoreEditorconfig ?? false,
     languageDialect: cfg.languageDialect ?? 'auto',
     binaryNextLine: cfg.binaryNextLine ?? false,
-    caseIndent: cfg.binaryNextLine ?? false,
+    caseIndent: cfg.caseIndent ?? false,
     funcNextLine: cfg.funcNextLine ?? false,
     keepPadding: cfg.keepPadding ?? false,
     simplifyCode: cfg.simplifyCode ?? false,
@@ -613,6 +613,65 @@ describe('formatter', () => {
     `)
   })
 
+  it('should format with a combination of options and additionalArguments', async () => {
+    const [result] = await getFormattingResult({
+      document: FIXTURE_DOCUMENT.SHFMT,
+      formatOptions: { tabSize: 2, insertSpaces: true },
+      shfmtConfig: makeShfmtConfig({
+        caseIndent: true,
+        keepPadding: true,
+        simplifyCode: true,
+        spaceRedirects: true,
+        additionalArguments: ['--binary-next-line', '--func-next-line'],
+      }),
+    })
+    expect(result).toMatchInlineSnapshot(`
+      [
+        {
+          "newText": "#!/bin/bash
+      set -ueo pipefail
+
+      if [ -z "$arg" ]; then
+        echo indent
+      fi
+
+      echo binary \\
+                 && echo next line
+
+      case "$arg" in
+        a)
+          echo case indent
+          ;;
+      esac
+
+      echo one   two   three
+      echo four  five  six
+      echo seven eight nine
+
+      [[ $simplify == "simplify"   ]]
+
+      echo space redirects > /dev/null
+
+      function next()
+                     {
+        echo line
+      }
+      ",
+          "range": {
+            "end": {
+              "character": 2147483647,
+              "line": 2147483647,
+            },
+            "start": {
+              "character": 0,
+              "line": 0,
+            },
+          },
+        },
+      ]
+    `)
+  })
+
   it('should omit filename from the shfmt command when it cannot be determined', async () => {
     // There's no easy way to see what filename has been passed to shfmt without inspecting the
     // contents of the logs. As a workaround, we set a non-file:// URI on a dodgy document to
@@ -635,7 +694,7 @@ describe('formatter', () => {
     const lspShfmtConfig = makeShfmtConfig({
       binaryNextLine: true,
       funcNextLine: true,
-      simplifyCode: true,
+      additionalArguments: ['-s'],
     })
     const lspShfmtArgs = ['-bn', '-fn', '-s']
     const formatOptions = { tabSize: 2, insertSpaces: true }
@@ -659,7 +718,13 @@ describe('formatter', () => {
 
       it('should use language server config', async () => {
         expect(shfmtArgs).toEqual(expect.arrayContaining(lspShfmtArgs))
-        expect(shfmtArgs.length).toEqual(4) // indentation
+        expect(shfmtArgs.length).toEqual(5) // indentation
+      })
+
+      it('should contain additionalArguments', async () => {
+        expect(shfmtArgs).toEqual(
+          expect.arrayContaining(lspShfmtConfig.additionalArguments),
+        )
       })
 
       it('should use indentation config from the editor', () => {
@@ -686,7 +751,13 @@ describe('formatter', () => {
 
       it('should use language server config', () => {
         expect(shfmtArgs).toEqual(expect.arrayContaining(lspShfmtArgs))
-        expect(shfmtArgs.length).toEqual(5) // indentation + filename
+        expect(shfmtArgs.length).toEqual(6) // indentation + filename
+      })
+
+      it('should contain additionalArguments', async () => {
+        expect(shfmtArgs).toEqual(
+          expect.arrayContaining(lspShfmtConfig.additionalArguments),
+        )
       })
 
       it('should use indentation config from the editor', () => {
@@ -713,7 +784,13 @@ describe('formatter', () => {
 
       it('should use language server config', () => {
         expect(shfmtArgs).toEqual(expect.arrayContaining(lspShfmtArgs))
-        expect(shfmtArgs.length).toEqual(5) // indentation + filename
+        expect(shfmtArgs.length).toEqual(6) // indentation + filename
+      })
+
+      it('should contain additionalArguments', async () => {
+        expect(shfmtArgs).toEqual(
+          expect.arrayContaining(lspShfmtConfig.additionalArguments),
+        )
       })
 
       it('should use indentation config from the editor', () => {
@@ -793,7 +870,7 @@ describe('formatter', () => {
 
       it('should use language server config', () => {
         expect(shfmtArgs).toEqual(expect.arrayContaining(lspShfmtArgs))
-        expect(shfmtArgs.length).toEqual(5) // indentation + filename
+        expect(shfmtArgs.length).toEqual(6) // indentation + filename
       })
 
       it('should use indentation config from the editor', () => {

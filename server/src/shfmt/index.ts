@@ -65,7 +65,8 @@ export class Formatter {
     formatOptions?: LSP.FormattingOptions | null,
     lspShfmtConfig?: ShfmtConfig | null,
   ): Promise<string[]> {
-    const args: string[] = []
+    // User-provided additionalArguments should be added before any other arguments
+    const args: string[] = lspShfmtConfig?.additionalArguments ?? []
 
     // this is the config that we'll use to build args - default to language server config
     let activeShfmtConfig = { ...lspShfmtConfig }
@@ -119,9 +120,6 @@ export class Formatter {
         )
       }
     }
-
-    // User-provided additionalArguments should be added before any other arguments
-    args.push(...(activeShfmtConfig?.additionalArguments ?? []))
 
     // indentation always comes via the editor - if someone is using .editorconfig then the
     // expectation is that they will have configured their editor's indentation in this way too
