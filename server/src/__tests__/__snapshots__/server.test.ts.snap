@@ -1248,6 +1248,7 @@ exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceE
 exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceEdits for unsourced symbols when includeAllWorkspaceSymbols is true 1`] = `
 {
   "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/bats/test_helper.bash": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/comment-doc-on-hover.sh": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh": [
@@ -1355,6 +1356,7 @@ exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceE
 exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceEdits for unsourced symbols when includeAllWorkspaceSymbols is true 2`] = `
 {
   "changes": {
+    "file://__REPO_ROOT_FOLDER__/testing/fixtures/bats/test_helper.bash": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/comment-doc-on-hover.sh": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/extension.inc": [],
     "file://__REPO_ROOT_FOLDER__/testing/fixtures/install.sh": [],
