@@ -68,3 +68,10 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./codecov.yml
+
+  all-done:
+    needs:
+      - verify
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo "All jobs completed"
