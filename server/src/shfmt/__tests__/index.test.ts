@@ -55,21 +55,21 @@ describe('formatter', () => {
   })
 
   it('should throw when formatting fails', async () => {
-    expect(async () => {
+    await expect(async () => {
       await getFormattingResult({ document: FIXTURE_DOCUMENT.PARSE_PROBLEMS })
     }).rejects.toThrow(
-      /Shfmt: exited with status 1: .*\/testing\/fixtures\/parse-problems.sh:10:1: > must be followed by a word/,
+      /Shfmt: exited with status 1: .*\/testing\/fixtures\/parse-problems.sh:10:1: [`"']?>[`"']? must be followed by a word/,
     )
   })
 
   it('should throw when parsing using the wrong language dialect', async () => {
-    expect(async () => {
+    await expect(async () => {
       await getFormattingResult({
         document: FIXTURE_DOCUMENT.SHFMT,
         shfmtConfig: { languageDialect: 'posix' },
       })
     }).rejects.toThrow(
-      /Shfmt: exited with status 1: .*\/testing\/fixtures\/shfmt\.sh:25:14: (the "function" builtin|a command can only contain words and redirects; encountered \()/,
+      /Shfmt: exited with status 1: .*\/testing\/fixtures\/shfmt\.sh:25:14: (the [`"']?function[`"']? builtin|a command can only contain words and redirects; encountered \()/,
     )
   })
 
@@ -607,10 +607,10 @@ describe('formatter', () => {
       FIXTURE_DOCUMENT.PARSE_PROBLEMS.getText(),
     )
 
-    expect(async () => {
+    await expect(async () => {
       await getFormattingResult({ document: testDocument })
     }).rejects.toThrow(
-      /Shfmt: exited with status 1: <standard input>:10:1: > must be followed by a word/,
+      /Shfmt: exited with status 1: <standard input>:10:1: [`"']?>[`"']? must be followed by a word/,
     )
   })
 
