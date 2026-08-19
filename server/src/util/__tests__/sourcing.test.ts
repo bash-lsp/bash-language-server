@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as os from 'os'
 import * as Parser from 'web-tree-sitter'
 
-import { REPO_ROOT_FOLDER } from '../../../../testing/fixtures'
+import { FIXTURE_FOLDER, REPO_ROOT_FOLDER } from '../../../../testing/fixtures'
 import { initializeParser } from '../../parser'
 import { getSourceCommands } from '../sourcing'
 
@@ -219,5 +219,75 @@ describe('getSourcedUris', () => {
         },
       ]
     `)
+  })
+  it('resolves bats `load` commands in .bats files', () => {
+    jest.restoreAllMocks()
+
+    const fileContent = `
+      load test_helper # bats appends the .bash extension
+
+      load ./test_helper.bash # explicit extension
+
+      load "${FIXTURE_FOLDER}bats/test_helper" # absolute path
+
+      load ../issue101.sh # relative to the test file
+
+      load "$SOME_VARIABLE" # dynamic loads are not supported
+
+      load # not finished
+      `
+
+    const sourceCommands = getSourceCommands({
+      fileUri: `${FIXTURE_FOLDER}bats/sourcing.bats`,
+      rootPath: REPO_ROOT_FOLDER,
+      tree: parser.parse(fileContent),
+    })
+
+    const sourcedUris = new Set(
+      sourceCommands
+        .map((sourceCommand) => sourceCommand.uri)
+        .filter((uri) => uri !== null),
+    )
+
+    expect(sourcedUris).toEqual(
+      new Set([
+        `file://${FIXTURE_FOLDER}bats/test_helper.bash`,
+        `file://${FIXTURE_FOLDER}issue101.sh`,
+      ]),
+    )
+
+    expect(
+      sourceCommands
+        .filter((command) => command.error)
+        .map(({ error, range }) => ({
+          error,
+          line: range.start.line,
+        })),
+    ).toMatchInlineSnapshot(`
+      [
+        {
+          "error": "non-constant source not supported",
+          "line": 9,
+        },
+      ]
+    `)
+  })
+
+  it('does not treat `load` as a sourcing command outside of .bats files', () => {
+    jest.restoreAllMocks()
+
+    const fileContent = `
+      load test_helper
+
+      load ../issue101.sh
+      `
+
+    const sourceCommands = getSourceCommands({
+      fileUri: `${FIXTURE_FOLDER}bats/not-a-bats-file.sh`,
+      rootPath: REPO_ROOT_FOLDER,
+      tree: parser.parse(fileContent),
+    })
+
+    expect(sourceCommands).toEqual([])
   })
 })
