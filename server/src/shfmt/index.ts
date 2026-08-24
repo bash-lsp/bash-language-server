@@ -3,6 +3,7 @@ import * as editorconfig from 'editorconfig'
 import * as LSP from 'vscode-languageserver/node'
 import { DocumentUri, TextDocument, TextEdit } from 'vscode-languageserver-textdocument'
 
+import { ShfmtConfig } from '../config'
 import { logger } from '../util/logger'
 
 type FormatterOptions = {
@@ -28,7 +29,7 @@ export class Formatter {
   public async format(
     document: TextDocument,
     formatOptions?: LSP.FormattingOptions | null,
-    shfmtConfig?: Record<string, string | boolean> | null,
+    shfmtConfig?: ShfmtConfig | null,
   ): Promise<TextEdit[]> {
     if (!this._canFormat) {
       return []
@@ -40,7 +41,7 @@ export class Formatter {
   private async executeFormat(
     document: TextDocument,
     formatOptions?: LSP.FormattingOptions | null,
-    shfmtConfig?: Record<string, string | boolean> | null,
+    shfmtConfig?: ShfmtConfig | null,
   ): Promise<TextEdit[]> {
     const result = await this.runShfmt(document, formatOptions, shfmtConfig)
 
@@ -62,9 +63,10 @@ export class Formatter {
   private async getShfmtArguments(
     documentUri: DocumentUri,
     formatOptions?: LSP.FormattingOptions | null,
-    lspShfmtConfig?: Record<string, string | boolean> | null,
+    lspShfmtConfig?: ShfmtConfig | null,
   ): Promise<string[]> {
-    const args: string[] = []
+    // User-provided additionalArguments should be added before any other arguments
+    const args: string[] = lspShfmtConfig?.additionalArguments ?? []
 
     // this is the config that we'll use to build args - default to language server config
     let activeShfmtConfig = { ...lspShfmtConfig }
@@ -139,7 +141,7 @@ export class Formatter {
   private async runShfmt(
     document: TextDocument,
     formatOptions?: LSP.FormattingOptions | null,
-    shfmtConfig?: Record<string, string | boolean> | null,
+    shfmtConfig?: ShfmtConfig | null,
   ): Promise<string> {
     const args = await this.getShfmtArguments(document.uri, formatOptions, shfmtConfig)
 
