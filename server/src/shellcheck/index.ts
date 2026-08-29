@@ -115,6 +115,7 @@ export class Linter {
     const result = await this.runShellCheck(
       documentText,
       shellName,
+      document.uri,
       effectiveSourcePaths,
       additionalShellCheckArguments,
     )
@@ -132,6 +133,7 @@ export class Linter {
   private async runShellCheck(
     documentText: string,
     shellName: string | null,
+    uri: string,
     sourcePaths: string[],
     additionalArgs: string[] = [],
   ): Promise<ShellCheckResult> {
@@ -142,6 +144,7 @@ export class Linter {
 
     const args = [
       '--format=json1',
+      `--file-name=${uri}`,
       ...(this.externalSources ? ['--external-sources'] : []),
       ...sourcePathsArgs,
       ...additionalArgs,
