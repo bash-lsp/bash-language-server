@@ -58,6 +58,31 @@ describe('getFilePaths', () => {
     }
   })
 
+  it('follows several symbolic links to the same directory', async () => {
+    const targetPath = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'bash-language-server-fs-target-'),
+    )
+
+    try {
+      fs.writeFileSync(path.join(targetPath, 'shared.sh'), '')
+      fs.symlinkSync(targetPath, path.join(rootPath, 'a'), symlinkType)
+      fs.symlinkSync(targetPath, path.join(rootPath, 'b'), symlinkType)
+
+      const filePaths = await getFilePaths({
+        globPattern: '{a,b}/**/*.sh',
+        rootPath,
+        maxItems: 100,
+      })
+
+      expect(relativePaths(filePaths, rootPath).sort()).toEqual([
+        'a/shared.sh',
+        'b/shared.sh',
+      ])
+    } finally {
+      fs.rmSync(targetPath, { recursive: true, force: true })
+    }
+  })
+
   it('does not follow cyclic symbolic links', async () => {
     fs.writeFileSync(path.join(rootPath, 'script.sh'), '')
 
@@ -72,6 +97,26 @@ describe('getFilePaths', () => {
       })
 
       expect(relativePaths(filePaths, rootPath)).toEqual(['script.sh'])
+    } finally {
+      fs.unlinkSync(loopPath)
+    }
+  })
+
+  it('does not follow cyclic symbolic links to an ancestor', async () => {
+    fs.mkdirSync(path.join(rootPath, 'nested'))
+    fs.writeFileSync(path.join(rootPath, 'nested', 'nested.sh'), '')
+
+    const loopPath = path.join(rootPath, 'nested', 'loop')
+    fs.symlinkSync(rootPath, loopPath, symlinkType)
+
+    try {
+      const filePaths = await getFilePaths({
+        globPattern: '**/*.sh',
+        rootPath,
+        maxItems: 100,
+      })
+
+      expect(relativePaths(filePaths, rootPath)).toEqual(['nested/nested.sh'])
     } finally {
       fs.unlinkSync(loopPath)
     }
