@@ -17,8 +17,12 @@ export function untildify(pathWithTilde: string): string {
  * Create a file system adapter for `fast-glob` that stops walking a directory
  * when it links back to one of its own ancestors.
  *
- * `fast-glob` follows symbolic links, so a cyclic symbolic link makes it walk
- * the same directory over and over again until the process runs out of memory.
+ * `fast-glob` follows symbolic links by default and, like `node-glob`, walks a
+ * cyclic symbolic link forever until the process runs out of memory. Upstream
+ * tracks this as a known limitation with no fix, and the suggested workarounds
+ * (`followSymbolicLinks: false` or a `deep` limit) either drop symlink support
+ * or truncate deep trees — see https://github.com/mrmlnc/fast-glob/issues/74.
+ *
  * A directory is only skipped when its real path is the real path of one of
  * its ancestors, so symbolic links in general, including several links to the
  * same directory, keep working.
