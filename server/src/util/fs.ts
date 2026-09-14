@@ -23,35 +23,83 @@ export function untildify(pathWithTilde: string): string {
  * (`followSymbolicLinks: false` or a `deep` limit) either drop symlink support
  * or truncate deep trees — see https://github.com/mrmlnc/fast-glob/issues/74.
  *
- * A directory is only skipped when its real path is the real path of one of
- * its ancestors, so symbolic links in general, including several links to the
- * same directory, keep working.
+ * Only the directories that are symbolic links are checked: the walk can only
+ * descend, so every cycle has to be entered through a symbolic link, and a
+ * plain directory can never link back to an ancestor. Directories are listed
+ * with `withFileTypes`, which is what `fast-glob` does on supported Node
+ * versions, so the common case does not pay for a `realpath` call at all.
  */
-function createCycleSafeFileSystemAdapter(
-  realPaths: Map<string, string>,
-): Partial<fastGlob.FileSystemAdapter> {
-  const isAncestorCycle = (directoryPath: string, realPath: string): boolean => {
-    let currentPath = directoryPath
-    let parentPath = path.dirname(currentPath)
+function createCycleSafeFileSystemAdapter(): Partial<fastGlob.FileSystemAdapter> {
+  // Symbolic links to directories, by normalized path.
+  const symlinkedDirectories = new Set<string>()
+  // Real paths of the directories that had to be checked, by normalized path.
+  const realPaths = new Map<string, string>()
+  // `readdir` without `withFileTypes` cannot report symbolic links, and from
+  // that point on every directory has to be checked.
+  let canDetectSymlinks = true
 
-    while (parentPath !== currentPath) {
-      if (realPaths.get(parentPath) === realPath) {
+  const realPathOf = (directoryPath: string): string => {
+    let realPath = realPaths.get(directoryPath)
+
+    if (realPath === undefined) {
+      try {
+        // The native implementation resolves paths in a single system call,
+        // which is considerably cheaper than the JavaScript fallback.
+        realPath = fs.realpathSync.native(directoryPath)
+      } catch {
+        realPath = directoryPath
+      }
+
+      realPaths.set(directoryPath, realPath)
+    }
+
+    return realPath
+  }
+
+  const linksBackToAncestor = (directoryPath: string): boolean => {
+    const realPath = realPathOf(directoryPath)
+    let parentPath = path.dirname(directoryPath)
+
+    while (parentPath !== directoryPath) {
+      if (realPathOf(parentPath) === realPath) {
         return true
       }
 
-      currentPath = parentPath
-      parentPath = path.dirname(currentPath)
+      directoryPath = parentPath
+      parentPath = path.dirname(directoryPath)
     }
 
     return false
   }
 
-  const readDirectory = (directoryPath: string, realPath: string): boolean => {
-    const isCycle = isAncestorCycle(directoryPath, realPath)
+  const isCycle = (directoryPath: string): boolean => {
+    const normalizedPath = path.normalize(directoryPath)
 
-    realPaths.set(directoryPath, realPath)
+    if (canDetectSymlinks && !symlinkedDirectories.has(normalizedPath)) {
+      return false
+    }
 
-    return !isCycle
+    return linksBackToAncestor(normalizedPath)
+  }
+
+  const recordEntries = (directoryPath: string, entries: unknown): void => {
+    if (!Array.isArray(entries)) {
+      canDetectSymlinks = false
+      return
+    }
+
+    for (const entry of entries) {
+      if (typeof entry === 'string') {
+        canDetectSymlinks = false
+        return
+      }
+
+      const dirent = entry as fs.Dirent
+
+      if (typeof dirent?.isSymbolicLink === 'function' && dirent.isSymbolicLink()) {
+        symlinkedDirectories.add(path.normalize(path.join(directoryPath, dirent.name)))
+      }
+    }
   }
 
   return {
@@ -60,31 +108,40 @@ function createCycleSafeFileSystemAdapter(
         typeof optionsOrCallback === 'function' ? undefined : optionsOrCallback
       const done = typeof optionsOrCallback === 'function' ? optionsOrCallback : callback
 
-      fs.realpath(directoryPath, (realPathError, realPath) => {
-        if (realPathError == null && !readDirectory(directoryPath, realPath)) {
-          done(null, [])
+      if (isCycle(directoryPath)) {
+        done(null, [])
+        return
+      }
+
+      const onRead = (error: NodeJS.ErrnoException | null, entries: unknown) => {
+        if (error != null) {
+          done(error)
           return
         }
 
-        if (options == null) {
-          fs.readdir(directoryPath, done)
-        } else {
-          fs.readdir(directoryPath, options, done)
-        }
-      })
-    },
-    readdirSync: (directoryPath: string, options?: any) => {
-      try {
-        if (!readDirectory(directoryPath, fs.realpathSync(directoryPath))) {
-          return []
-        }
-      } catch {
-        // fall through and let `readdirSync` report the error
+        recordEntries(directoryPath, entries)
+        done(null, entries)
       }
 
-      return options == null
-        ? fs.readdirSync(directoryPath)
-        : fs.readdirSync(directoryPath, options)
+      if (options == null) {
+        fs.readdir(directoryPath, onRead)
+      } else {
+        fs.readdir(directoryPath, options, onRead)
+      }
+    },
+    readdirSync: (directoryPath: string, options?: any) => {
+      if (isCycle(directoryPath)) {
+        return []
+      }
+
+      const entries =
+        options == null
+          ? fs.readdirSync(directoryPath)
+          : fs.readdirSync(directoryPath, options)
+
+      recordEntries(directoryPath, entries)
+
+      return entries
     },
   } as Partial<fastGlob.FileSystemAdapter>
 }
@@ -107,7 +164,7 @@ export async function getFilePaths({
     onlyFiles: true,
     cwd: rootPath,
     followSymbolicLinks: true,
-    fs: createCycleSafeFileSystemAdapter(new Map<string, string>()),
+    fs: createCycleSafeFileSystemAdapter(),
     suppressErrors: true,
   })
 
