@@ -33,7 +33,7 @@ jobs:
         run: pnpm verify:bail
 
       - name: Publish coverage to codecov.io
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         if: success() && matrix.node-version == '22.x'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
