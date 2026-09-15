@@ -88,6 +88,11 @@
           "default": "shfmt",
           "description": "Controls the executable used for Shfmt formatting. An empty string will disable formatting."
         },
+        "bashIde.shfmt.additionalArguments": {
+          "type": "string[]",
+          "default": "[]",
+          "description": "Additional Shfmt arguments. Note that common arguments can be configured via the other settings."
+        },
         "bashIde.shfmt.ignoreEditorconfig": {
           "type": "boolean",
           "default": false,
