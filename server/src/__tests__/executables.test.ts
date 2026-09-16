@@ -117,3 +117,58 @@ describe('absolute executable access', () => {
     }
   })
 })
+
+describe('Windows absolute executable access', () => {
+  it.each([
+    '//server/share/command',
+    String.raw`\\server\share\command`,
+    String.raw`/\server\share\command`,
+    String.raw`\\?\UNC\server\share\command`,
+    String.raw`\\?\C:\command`,
+    String.raw`\\.\C:\command`,
+    String.raw`\??\UNC\server\share\command`,
+  ])('does not probe network or device paths: %s', async (command) => {
+    const platform = Object.getOwnPropertyDescriptor(process, 'platform')!
+    Object.defineProperty(process, 'platform', { value: 'win32' })
+    const isAbsolute = jest
+      .spyOn(path, 'isAbsolute')
+      .mockImplementation(path.win32.isAbsolute)
+    const stat = jest.spyOn(fs.promises, 'stat').mockResolvedValue({
+      isFile: () => true,
+    } as fs.Stats)
+    const access = jest.spyOn(fs.promises, 'access').mockResolvedValue(undefined)
+    try {
+      expect(await executables.isExecutable(command)).toBe(false)
+      expect(stat).not.toHaveBeenCalled()
+      expect(access).not.toHaveBeenCalled()
+    } finally {
+      Object.defineProperty(process, 'platform', platform)
+      isAbsolute.mockRestore()
+      stat.mockRestore()
+      access.mockRestore()
+    }
+  })
+
+  it('still checks ordinary local Windows paths', async () => {
+    const platform = Object.getOwnPropertyDescriptor(process, 'platform')!
+    Object.defineProperty(process, 'platform', { value: 'win32' })
+    const isAbsolute = jest
+      .spyOn(path, 'isAbsolute')
+      .mockImplementation(path.win32.isAbsolute)
+    const stat = jest.spyOn(fs.promises, 'stat').mockResolvedValue({
+      isFile: () => true,
+    } as fs.Stats)
+    const access = jest.spyOn(fs.promises, 'access').mockResolvedValue(undefined)
+    const command = String.raw`C:\tools\command`
+    try {
+      expect(await executables.isExecutable(command)).toBe(true)
+      expect(stat).toHaveBeenCalledWith(command)
+      expect(access).toHaveBeenCalledWith(command, fs.constants.X_OK)
+    } finally {
+      Object.defineProperty(process, 'platform', platform)
+      isAbsolute.mockRestore()
+      stat.mockRestore()
+      access.mockRestore()
+    }
+  })
+})

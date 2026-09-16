@@ -44,6 +44,11 @@ export default class Executables {
    * Recognize commands invoked by their absolute path as well as names on PATH.
    */
   public async isExecutable(executable: string): Promise<boolean> {
+    // Probing UNC or device paths can trigger network authentication on Windows.
+    if (process.platform === 'win32' && /^(?:[\\/]{2}|[\\/]\?\?[\\/])/.test(executable)) {
+      return false
+    }
+
     if (!isAbsolute(executable)) {
       return this.isExecutableOnPATH(executable)
     }
