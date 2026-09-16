@@ -25,7 +25,7 @@
     "cross-spawn": ">=7.0.5",
     "eslint": "8.57.1",
     "eslint-config-prettier": "10.1.8",
-    "eslint-plugin-jest": "28.14.0",
+    "eslint-plugin-jest": "29.16.6",
     "eslint-plugin-prettier": "4.2.5",
     "eslint-plugin-simple-import-sort": "14.0.0",
     "eslint-plugin-sort-class-members": "1.22.1",
