@@ -157,23 +157,6 @@ exports[`getDeclarationsForUri returns a list of SymbolInformation if uri is fou
     "location": {
       "range": {
         "end": {
-          "character": 8,
-          "line": 30,
-        },
-        "start": {
-          "character": 2,
-          "line": 30,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
           "character": 68,
           "line": 38,
         },
@@ -208,23 +191,6 @@ exports[`getDeclarationsForUri returns a list of SymbolInformation if uri is fou
     "location": {
       "range": {
         "end": {
-          "character": 31,
-          "line": 48,
-        },
-        "start": {
-          "character": 2,
-          "line": 48,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "npm_config_loglevel",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
           "character": 22,
           "line": 53,
         },
@@ -242,63 +208,12 @@ exports[`getDeclarationsForUri returns a list of SymbolInformation if uri is fou
     "location": {
       "range": {
         "end": {
-          "character": 6,
-          "line": 54,
-        },
-        "start": {
-          "character": 0,
-          "line": 54,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
           "character": 15,
           "line": 69,
         },
         "start": {
           "character": 0,
           "line": 69,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "TMP",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 12,
-          "line": 71,
-        },
-        "start": {
-          "character": 2,
-          "line": 71,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "TMP",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 19,
-          "line": 73,
-        },
-        "start": {
-          "character": 0,
-          "line": 73,
         },
       },
       "uri": "dummy-uri.sh",
@@ -327,23 +242,6 @@ exports[`getDeclarationsForUri returns a list of SymbolInformation if uri is fou
     "location": {
       "range": {
         "end": {
-          "character": 5,
-          "line": 83,
-        },
-        "start": {
-          "character": 0,
-          "line": 83,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
           "character": 12,
           "line": 84,
         },
@@ -355,74 +253,6 @@ exports[`getDeclarationsForUri returns a list of SymbolInformation if uri is fou
       "uri": "dummy-uri.sh",
     },
     "name": "tar",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 25,
-          "line": 86,
-        },
-        "start": {
-          "character": 2,
-          "line": 86,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "tar",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 22,
-          "line": 89,
-        },
-        "start": {
-          "character": 2,
-          "line": 89,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "tar",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 8,
-          "line": 90,
-        },
-        "start": {
-          "character": 2,
-          "line": 90,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 8,
-          "line": 97,
-        },
-        "start": {
-          "character": 2,
-          "line": 97,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
   },
   {
     "kind": 13,
@@ -452,74 +282,6 @@ exports[`getDeclarationsForUri returns a list of SymbolInformation if uri is fou
         "start": {
           "character": 2,
           "line": 119,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "make",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 26,
-          "line": 123,
-        },
-        "start": {
-          "character": 4,
-          "line": 123,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "make",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 17,
-          "line": 127,
-        },
-        "start": {
-          "character": 6,
-          "line": 127,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "make",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 14,
-          "line": 131,
-        },
-        "start": {
-          "character": 2,
-          "line": 131,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "make",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 13,
-          "line": 138,
-        },
-        "start": {
-          "character": 2,
-          "line": 138,
         },
       },
       "uri": "dummy-uri.sh",
@@ -565,46 +327,12 @@ exports[`getDeclarationsForUri returns a list of SymbolInformation if uri is fou
     "location": {
       "range": {
         "end": {
-          "character": 6,
-          "line": 149,
-        },
-        "start": {
-          "character": 0,
-          "line": 149,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
           "character": 18,
           "line": 158,
         },
         "start": {
           "character": 0,
           "line": 158,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "t",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 16,
-          "line": 170,
-        },
-        "start": {
-          "character": 6,
-          "line": 170,
         },
       },
       "uri": "dummy-uri.sh",
@@ -627,91 +355,6 @@ exports[`getDeclarationsForUri returns a list of SymbolInformation if uri is fou
       "uri": "dummy-uri.sh",
     },
     "name": "url",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 6,
-          "line": 181,
-        },
-        "start": {
-          "character": 0,
-          "line": 181,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 9,
-          "line": 183,
-        },
-        "start": {
-          "character": 2,
-          "line": 183,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 24,
-          "line": 187,
-        },
-        "start": {
-          "character": 2,
-          "line": 185,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "url",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 8,
-          "line": 188,
-        },
-        "start": {
-          "character": 2,
-          "line": 188,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 11,
-          "line": 190,
-        },
-        "start": {
-          "character": 4,
-          "line": 190,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
   },
   {
     "kind": 13,
@@ -752,91 +395,6 @@ exports[`getDeclarationsForUri returns a list of SymbolInformation if uri is fou
     "location": {
       "range": {
         "end": {
-          "character": 21,
-          "line": 211,
-        },
-        "start": {
-          "character": 12,
-          "line": 211,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "isnpm10",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 21,
-          "line": 215,
-        },
-        "start": {
-          "character": 12,
-          "line": 215,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "isnpm10",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 11,
-          "line": 220,
-        },
-        "start": {
-          "character": 6,
-          "line": 220,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 18,
-          "line": 225,
-        },
-        "start": {
-          "character": 10,
-          "line": 225,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "clean",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 15,
-          "line": 230,
-        },
-        "start": {
-          "character": 10,
-          "line": 230,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
           "character": 22,
           "line": 232,
         },
@@ -848,91 +406,6 @@ exports[`getDeclarationsForUri returns a list of SymbolInformation if uri is fou
       "uri": "dummy-uri.sh",
     },
     "name": "NODE",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 16,
-          "line": 233,
-        },
-        "start": {
-          "character": 10,
-          "line": 233,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 22,
-          "line": 235,
-        },
-        "start": {
-          "character": 10,
-          "line": 235,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "NODE",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 16,
-          "line": 236,
-        },
-        "start": {
-          "character": 10,
-          "line": 236,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 21,
-          "line": 255,
-        },
-        "start": {
-          "character": 8,
-          "line": 255,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "make",
-  },
-  {
-    "kind": 13,
-    "location": {
-      "range": {
-        "end": {
-          "character": 6,
-          "line": 265,
-        },
-        "start": {
-          "character": 0,
-          "line": 265,
-        },
-      },
-      "uri": "dummy-uri.sh",
-    },
-    "name": "ret",
   },
   {
     "kind": 13,
