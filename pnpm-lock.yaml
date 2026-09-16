@@ -87,8 +87,8 @@ importers:
         specifier: 1.0.14
         version: 1.0.14
       web-tree-sitter:
-        specifier: 0.24.5
-        version: 0.24.5
+        specifier: 0.27.0
+        version: 0.27.0
       zod:
         specifier: 3.25.76
         version: 3.25.76
@@ -2125,8 +2125,8 @@ packages:
     resolution: {integrity: sha512-eUt8f1z2N2IEUDBsKaNapkz7jl5QpskN2Y0G01T/ItMxBxw1fJwvtySGB9QMecatne8jFIWJGWI61dWjyTLQsw==}
     hasBin: true
 
-  web-tree-sitter@0.24.5:
-    resolution: {integrity: sha512-+J/2VSHN8J47gQUAvF8KDadrfz6uFYVjxoxbKWDoXVsH2u7yLdarCnIURnrMA6uSRkgX3SdmqM5BOoQjPdSh5w==}
+  web-tree-sitter@0.27.0:
+    resolution: {integrity: sha512-XK08gj6RwTMQatAG7uVRP8MunqotL/XC19vHgkSPKmELgbGPBj4ECvB8haHOUnyj6ls2B8t42UTro14zxGgAHg==}
 
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
@@ -4424,7 +4424,7 @@ snapshots:
     dependencies:
       vscode-languageserver-protocol: 3.17.3
 
-  web-tree-sitter@0.24.5: {}
+  web-tree-sitter@0.27.0: {}
 
   webidl-conversions@3.0.1: {}
 

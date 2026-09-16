@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import * as os from 'os'
-import * as Parser from 'web-tree-sitter'
+import { Parser } from 'web-tree-sitter'
 
 import { FIXTURE_FOLDER, REPO_ROOT_FOLDER } from '../../../../testing/fixtures'
 import { initializeParser } from '../../parser'
@@ -23,7 +23,7 @@ describe('getSourcedUris', () => {
     const sourceCommands = getSourceCommands({
       fileUri,
       rootPath: null,
-      tree: parser.parse(fileContent),
+      tree: parser.parse(fileContent)!,
     })
     expect(sourceCommands).toEqual([])
   })
@@ -130,7 +130,7 @@ describe('getSourcedUris', () => {
     const sourceCommands = getSourceCommands({
       fileUri,
       rootPath: null,
-      tree: parser.parse(fileContent),
+      tree: parser.parse(fileContent)!,
     })
 
     const sourcedUris = new Set(
@@ -185,7 +185,7 @@ describe('getSourcedUris', () => {
     const sourceCommands = getSourceCommands({
       fileUri,
       rootPath: REPO_ROOT_FOLDER,
-      tree: parser.parse(fileContent),
+      tree: parser.parse(fileContent)!,
     })
 
     const sourcedUris = new Set(
@@ -240,7 +240,7 @@ describe('getSourcedUris', () => {
     const sourceCommands = getSourceCommands({
       fileUri: `${FIXTURE_FOLDER}bats/sourcing.bats`,
       rootPath: REPO_ROOT_FOLDER,
-      tree: parser.parse(fileContent),
+      tree: parser.parse(fileContent)!,
     })
 
     const sourcedUris = new Set(
@@ -285,7 +285,7 @@ describe('getSourcedUris', () => {
     const sourceCommands = getSourceCommands({
       fileUri: `${FIXTURE_FOLDER}bats/not-a-bats-file.sh`,
       rootPath: REPO_ROOT_FOLDER,
-      tree: parser.parse(fileContent),
+      tree: parser.parse(fileContent)!,
     })
 
     expect(sourceCommands).toEqual([])
