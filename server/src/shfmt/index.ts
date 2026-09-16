@@ -66,7 +66,7 @@ export class Formatter {
     lspShfmtConfig?: ShfmtConfig | null,
   ): Promise<string[]> {
     // User-provided additionalArguments should be added before any other arguments
-    const args: string[] = lspShfmtConfig?.additionalArguments ?? []
+    const args: string[] = [...(lspShfmtConfig?.additionalArguments ?? [])]
 
     // this is the config that we'll use to build args - default to language server config
     let activeShfmtConfig = { ...lspShfmtConfig }

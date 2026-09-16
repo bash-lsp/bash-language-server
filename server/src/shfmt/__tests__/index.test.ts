@@ -703,6 +703,29 @@ describe('formatter', () => {
       executablePath: 'shfmt',
     })
 
+    it('preserves additionalArguments across formatting requests', async () => {
+      const shfmtConfig = makeShfmtConfig({ additionalArguments: ['-s'] })
+      const uri = `file://${FIXTURE_FOLDER}/shfmt.sh`
+
+      // @ts-expect-error Testing a private method
+      const firstArgs = await formatter.getShfmtArguments(uri, formatOptions, shfmtConfig)
+      // @ts-expect-error Testing a private method
+      const secondArgs = await formatter.getShfmtArguments(
+        uri,
+        formatOptions,
+        shfmtConfig,
+      )
+
+      expect(shfmtConfig.additionalArguments).toEqual(['-s'])
+      expect(firstArgs).toEqual([
+        '-s',
+        `--filename=${FIXTURE_FOLDER}/shfmt.sh`,
+        '-i=2',
+        '-ln=auto',
+      ])
+      expect(secondArgs).toEqual(firstArgs)
+    })
+
     describe('when the document URI is not a filepath', () => {
       let shfmtArgs: string[]
       const filepath = `${FIXTURE_FOLDER}/shfmt.sh`
@@ -816,7 +839,8 @@ describe('formatter', () => {
       })
 
       it('should use .editorconfig config (even though no options are enabled)', () => {
-        expect(shfmtArgs.length).toEqual(2) // indentation + filename
+        expect(shfmtArgs).toContain('-s') // additionalArguments still apply
+        expect(shfmtArgs.length).toEqual(3) // additionalArguments + indentation + filename
       })
 
       it('should use indentation config from the editor', () => {
@@ -842,8 +866,10 @@ describe('formatter', () => {
       })
 
       it('should use .editorconfig config', () => {
-        expect(shfmtArgs).toEqual(expect.arrayContaining(['-ci', '-sr', "-ln='mksh'"]))
-        expect(shfmtArgs.length).toEqual(5) // indentation + filename
+        expect(shfmtArgs).toEqual(
+          expect.arrayContaining(['-s', '-ci', '-sr', "-ln='mksh'"]),
+        )
+        expect(shfmtArgs.length).toEqual(6) // additionalArguments + indentation + filename
       })
 
       it('should use indentation config from the editor', () => {
