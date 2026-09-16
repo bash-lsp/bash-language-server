@@ -640,7 +640,13 @@ export default class Analyzer {
     }
 
     type ExplainshellResponse = {
-      matches?: Array<{ helpHTML: string; start: number; end: number }>
+      matches?: Array<{
+        helpHTML?: string
+        helpclass?: string
+        start: number
+        end: number
+      }>
+      helptext?: Array<[html: string, helpclass: string]>
     }
 
     const searchParams = new URLSearchParams({ cmd: interestingNode.text }).toString()
@@ -664,7 +670,13 @@ export default class Analyzer {
           offsetOfMousePointerInCommand < helpItem.end,
       )
 
-      return { helpHTML: match && match.helpHTML }
+      const helpHTML =
+        match?.helpHTML ??
+        (match?.helpclass
+          ? explainshellResponse.helptext?.find(([, id]) => id === match.helpclass)?.[0]
+          : undefined)
+
+      return { helpHTML }
     }
   }
 

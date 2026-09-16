@@ -24,11 +24,22 @@ We recommend that you [install shellcheck](https://github.com/koalaman/shellchec
 
 ## Configuration
 
-To get documentation for flags on hover (thanks to explainshell), run a explainshell server and update your VS Code settings:
+To get documentation for flags on hover (thanks to explainshell), run a compatible explainshell JSON API server and update your VS Code settings:
 
 ```
     "bashIde.explainshellEndpoint": "http://localhost:5000",
 ```
+
+The server requests `<endpoint>/explain?cmd=...` and expects JSON, not the HTML returned by the standard explainshell website. Each entry in `matches` must include `start` and `end` offsets and either inline `helpHTML` or a `helpclass` referencing a `[html, helpclass]` pair in `helptext`. For example:
+
+```json
+{
+    "matches": [{ "start": 0, "end": 2, "helpclass": "help-0" }],
+    "helptext": [["list directory contents", "help-0"]]
+}
+```
+
+If your API serves `/api/explain`, include `/api` in `bashIde.explainshellEndpoint`.
 
 For security reasons, it defaults to `""`, which disables explainshell integration. When set, this extension will send requests to the endpoint and displays documentation for flags. We recommend using a local Docker image (see https://github.com/bash-lsp/bash-language-server/issues/180).
 
