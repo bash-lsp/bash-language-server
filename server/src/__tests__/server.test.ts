@@ -270,7 +270,7 @@ describe('server', () => {
 
       const onCompletion = connection.onCompletion.mock.calls[0][0]
 
-      const result = await onCompletion(
+      const result = (await onCompletion(
         {
           textDocument: {
             uri: FIXTURE_URI.INSTALL,
@@ -283,10 +283,12 @@ describe('server', () => {
         },
         {} as any,
         {} as any,
-      )
+      )) as LSP.CompletionItem[]
 
-      // Limited set (not using snapshot due to different executables on CI and locally)
-      expect(result && 'length' in result && result.length < 8).toBe(true)
+      // The number of matching executables depends on the user's PATH.
+      for (const item of result) {
+        expect(item.label).toMatch(/^rm/)
+      }
       expect(result).toEqual(
         expect.arrayContaining([
           {
