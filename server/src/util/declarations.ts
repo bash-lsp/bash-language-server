@@ -1,5 +1,5 @@
 import * as LSP from 'vscode-languageserver/node'
-import * as Parser from 'web-tree-sitter'
+import { Node as SyntaxNode, Tree } from 'web-tree-sitter'
 
 import * as TreeSitterUtil from './tree-sitter'
 
@@ -35,7 +35,7 @@ export function getGlobalDeclarations({
   tree,
   uri,
 }: {
-  tree: Parser.Tree
+  tree: Tree
   uri: string
 }): GlobalDeclarations {
   const globalDeclarations: GlobalDeclarations = {}
@@ -63,7 +63,7 @@ export function getAllDeclarationsInTree({
   tree,
   uri,
 }: {
-  tree: Parser.Tree
+  tree: Tree
   uri: string
 }): LSP.SymbolInformation[] {
   const symbols: LSP.SymbolInformation[] = []
@@ -90,14 +90,14 @@ export function getLocalDeclarations({
   rootNode,
   uri,
 }: {
-  node: Parser.SyntaxNode | null
-  rootNode: Parser.SyntaxNode
+  node: SyntaxNode | null
+  rootNode: SyntaxNode
   uri: string
 }): Declarations {
   const declarations: Declarations = {}
 
   // Bottom up traversal to capture all local and scoped declarations
-  const walk = (node: Parser.SyntaxNode | null) => {
+  const walk = (node: SyntaxNode | null) => {
     // NOTE: there is also node.walk
     if (node) {
       for (const childNode of node.children) {
@@ -163,7 +163,7 @@ function getAllGlobalVariableDeclarations({
   rootNode,
 }: {
   uri: string
-  rootNode: Parser.SyntaxNode
+  rootNode: SyntaxNode
 }) {
   const declarations: Declarations = {}
 
@@ -192,7 +192,7 @@ function nodeToSymbolInformation({
   node,
   uri,
 }: {
-  node: Parser.SyntaxNode
+  node: SyntaxNode
   uri: string
 }): LSP.SymbolInformation | null {
   const named = node.firstNamedChild
@@ -220,7 +220,7 @@ function getDeclarationSymbolFromNode({
   node,
   uri,
 }: {
-  node: Parser.SyntaxNode
+  node: SyntaxNode
   uri: string
 }): LSP.SymbolInformation | null {
   if (TreeSitterUtil.isDefinition(node)) {
@@ -253,7 +253,7 @@ export type FindDeclarationParams = {
   /**
    * The node where the search will start.
    */
-  baseNode: Parser.SyntaxNode
+  baseNode: SyntaxNode
   symbolInfo: {
     position: LSP.Position
     uri: string
@@ -284,7 +284,7 @@ export function findDeclarationUsingGlobalSemantics({
   symbolInfo: { position, uri, word, kind },
   otherInfo: { currentUri, boundary },
 }: FindDeclarationParams) {
-  let declaration: Parser.SyntaxNode | null | undefined
+  let declaration: SyntaxNode | null | undefined
   let continueSearching = false
 
   TreeSitterUtil.forEach(baseNode, (n) => {
@@ -398,7 +398,7 @@ export function findDeclarationUsingLocalSemantics({
   symbolInfo: { position, word },
   otherInfo: { boundary },
 }: FindDeclarationParams) {
-  let declaration: Parser.SyntaxNode | null | undefined
+  let declaration: SyntaxNode | null | undefined
   let continueSearching = false
 
   TreeSitterUtil.forEach(baseNode, (n) => {
@@ -448,8 +448,8 @@ export function findDeclarationUsingLocalSemantics({
  * skipped and a higher scope should be checked for the original declaration.
  */
 function isDefinedVariableInExpression(
-  definition: Parser.SyntaxNode,
-  variable: Parser.SyntaxNode,
+  definition: SyntaxNode,
+  variable: SyntaxNode,
   position: LSP.Position,
 ): boolean {
   return (

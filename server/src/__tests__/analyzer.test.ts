@@ -1,5 +1,7 @@
 import { pathToFileURL } from 'node:url'
 
+import { Parser } from 'web-tree-sitter'
+
 import {
   FIXTURE_DOCUMENT,
   FIXTURE_FOLDER,
@@ -55,6 +57,21 @@ async function getAnalyzer({
 }
 
 describe('analyze', () => {
+  it('reports a failed parse before analyzing a missing tree', async () => {
+    const analyzer = await getAnalyzer({})
+    const parse = jest.spyOn(Parser.prototype, 'parse').mockReturnValueOnce(null)
+    try {
+      expect(() =>
+        analyzer.analyze({
+          uri: CURRENT_URI,
+          document: FIXTURE_DOCUMENT.INSTALL,
+        }),
+      ).toThrow(`Failed to parse ${CURRENT_URI}: no syntax tree returned`)
+    } finally {
+      parse.mockRestore()
+    }
+  })
+
   it('returns an empty list of diagnostics for a file with no parsing errors', async () => {
     const analyzer = await getAnalyzer({})
     const diagnostics = analyzer.analyze({
