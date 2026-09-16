@@ -15,6 +15,7 @@ describe('ConfigSchema', () => {
         "shellcheckExternalSources": true,
         "shellcheckPath": "shellcheck",
         "shfmt": {
+          "additionalArguments": [],
           "binaryNextLine": false,
           "caseIndent": false,
           "funcNextLine": false,
@@ -66,6 +67,7 @@ describe('ConfigSchema', () => {
         "shellcheckExternalSources": true,
         "shellcheckPath": "",
         "shfmt": {
+          "additionalArguments": [],
           "binaryNextLine": true,
           "caseIndent": true,
           "funcNextLine": true,
@@ -104,6 +106,7 @@ describe('getConfigFromEnvironmentVariables', () => {
         "shellcheckExternalSources": true,
         "shellcheckPath": "shellcheck",
         "shfmt": {
+          "additionalArguments": [],
           "binaryNextLine": false,
           "caseIndent": false,
           "funcNextLine": false,
@@ -136,6 +139,7 @@ describe('getConfigFromEnvironmentVariables', () => {
         "shellcheckExternalSources": true,
         "shellcheckPath": "",
         "shfmt": {
+          "additionalArguments": [],
           "binaryNextLine": false,
           "caseIndent": false,
           "funcNextLine": false,
@@ -177,6 +181,7 @@ describe('getConfigFromEnvironmentVariables', () => {
         "shellcheckExternalSources": true,
         "shellcheckPath": "/path/to/shellcheck",
         "shfmt": {
+          "additionalArguments": [],
           "binaryNextLine": false,
           "caseIndent": true,
           "funcNextLine": false,
