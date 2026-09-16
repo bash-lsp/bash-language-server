@@ -563,13 +563,17 @@ export default class BashServer {
       }
     }
 
+    const supportsSnippets =
+      this.clientCapabilities.textDocument?.completion?.completionItem?.snippetSupport ===
+      true
+
     const allCompletions = [
       ...reservedWordsCompletions,
       ...symbolCompletions,
       ...programCompletions,
       ...builtinsCompletions,
       ...optionsCompletions,
-      ...SNIPPETS,
+      ...(supportsSnippets ? SNIPPETS : []),
     ]
 
     if (word) {
