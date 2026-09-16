@@ -675,8 +675,12 @@ export default class BashServer {
       return null
     }
 
+    const isVariable =
+      this.analyzer.symbolAtPointFromTextPosition(params)?.kind ===
+      LSP.SymbolKind.Variable
+
     const { explainshellEndpoint } = this.config
-    if (explainshellEndpoint) {
+    if (explainshellEndpoint && !isVariable) {
       try {
         const { helpHTML } = await this.analyzer.getExplainshellDocumentation({
           params,
@@ -704,9 +708,10 @@ export default class BashServer {
       position: params.position,
     })
     if (
-      ReservedWords.isReservedWord(word) ||
-      Builtins.isBuiltin(word) ||
-      (this.executables.isExecutableOnPATH(word) && symbolsMatchingWord.length == 0)
+      !isVariable &&
+      (ReservedWords.isReservedWord(word) ||
+        Builtins.isBuiltin(word) ||
+        (this.executables.isExecutableOnPATH(word) && symbolsMatchingWord.length == 0))
     ) {
       logger.debug(
         `onHover: getting shell documentation for reserved word or builtin or executable`,
