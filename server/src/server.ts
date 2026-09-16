@@ -208,17 +208,19 @@ export default class BashServer {
         )
       }
 
-      const { initializationOptions } = this
-      if (typeof initializationOptions === 'object' && initializationOptions !== null) {
+      const initializationOptions = config.InitializationOptionsSchema.safeParse(
+        this.initializationOptions ?? {},
+      )
+      if (initializationOptions.success) {
         this.updateConfiguration({
           ...this.config,
-          ...initializationOptions,
-          ...('shfmt' in initializationOptions &&
-          typeof initializationOptions.shfmt === 'object' &&
-          initializationOptions.shfmt !== null
-            ? { shfmt: { ...this.config.shfmt, ...initializationOptions.shfmt } }
-            : {}),
+          ...initializationOptions.data,
+          shfmt: { ...this.config.shfmt, ...initializationOptions.data.shfmt },
         })
+      } else {
+        logger.warn(
+          `Failed to parse initialization options: ${initializationOptions.error}`,
+        )
       }
 
       if (hasConfigurationCapability) {

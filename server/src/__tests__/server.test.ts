@@ -180,13 +180,24 @@ describe('server', () => {
     }
   })
 
-  it('ignores invalid initialization options', async () => {
-    await initializeServer({ initializationOptions: { backgroundAnalysisMaxFiles: -1 } })
+  it.each([
+    { initializationOptions: [] },
+    { initializationOptions: 'invalid' },
+    { initializationOptions: { backgroundAnalysisMaxFiles: -1 } },
+    { initializationOptions: { shfmt: [] } },
+    { initializationOptions: { shfmt: { languageDialect: 'invalid' } } },
+    { initializationOptions: { shellcheckArguments: [1] } },
+    { initializationOptions: { shfmt: { additionalArguments: [null] } } },
+  ])(
+    'ignores invalid initialization options: $initializationOptions',
+    async ({ initializationOptions }) => {
+      await initializeServer({ initializationOptions })
 
-    expect(Logger.prototype.log).toHaveBeenCalledWith(expect.any(Number), [
-      expect.stringContaining('updateConfiguration: failed'),
-    ])
-  })
+      expect(Logger.prototype.log).toHaveBeenCalledWith(expect.any(Number), [
+        expect.stringContaining('Failed to parse initialization options'),
+      ])
+    },
+  )
 
   it('retains initialization options when workspace configuration is unavailable', async () => {
     const backgroundAnalysis = jest.spyOn(

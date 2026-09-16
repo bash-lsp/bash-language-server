@@ -9,14 +9,16 @@ export const ShfmtConfigSchema = z.object({
   // Additional Shfmt arguments. Note that common arguments can be configured via the other settings.
   additionalArguments: z
     .preprocess((arg) => {
-      let argsList: string[] = []
+      let argsList: unknown[] = []
       if (typeof arg === 'string') {
         argsList = arg.split(' ')
       } else if (Array.isArray(arg)) {
-        argsList = arg as string[]
+        argsList = arg
       }
 
-      return argsList.map((s) => s.trim()).filter((s) => s.length > 0)
+      return argsList
+        .map((s) => (typeof s === 'string' ? s.trim() : s))
+        .filter((s) => s !== '')
     }, z.array(z.string()))
     .default([]),
 
@@ -75,14 +77,16 @@ export const ConfigSchema = z.object({
   // Additional ShellCheck arguments. Note that we already add the following arguments: --shell, --format, and --external-sources (if shellcheckExternalSources is true).
   shellcheckArguments: z
     .preprocess((arg) => {
-      let argsList: string[] = []
+      let argsList: unknown[] = []
       if (typeof arg === 'string') {
         argsList = arg.split(' ')
       } else if (Array.isArray(arg)) {
-        argsList = arg as string[]
+        argsList = arg
       }
 
-      return argsList.map((s) => s.trim()).filter((s) => s.length > 0)
+      return argsList
+        .map((s) => (typeof s === 'string' ? s.trim() : s))
+        .filter((s) => s !== '')
     }, z.array(z.string()))
     .default([]),
 
@@ -90,6 +94,11 @@ export const ConfigSchema = z.object({
   shellcheckPath: z.string().trim().default('shellcheck'),
 
   shfmt: ShfmtConfigSchema.default({}),
+})
+
+// Initialization options override only supplied settings, preserving environment defaults.
+export const InitializationOptionsSchema = ConfigSchema.partial().extend({
+  shfmt: ShfmtConfigSchema.partial().optional(),
 })
 
 export type ShfmtConfig = z.infer<typeof ShfmtConfigSchema>
