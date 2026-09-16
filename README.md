@@ -201,6 +201,32 @@ so to format using the indentation specified in `.editorconfig` make sure your e
 configured to read `.editorconfig`. It is possible to disable `.editorconfig` support and always use
 the language server config by setting the "Ignore Editorconfig" configuration variable.
 
+## ShellCheck resource limits
+
+The server runs at most `shellcheckMaxConcurrent` ShellCheck processes at once
+(default 2), shared across documents. Additional checks wait, and a new edit
+replaces any waiting or running check for that document. Each running check has a
+`shellcheckTimeout` deadline in milliseconds (default 10,000), excluding time spent
+waiting or debouncing. On cancellation or timeout, the server sends SIGTERM,
+followed by SIGKILL after one second if the checker has not exited. A process keeps
+its slot until it exits. Timed-out checks log a warning and do not publish stale
+or partial diagnostics. Increase the deadline if legitimate checks need more time.
+
+On Unix, cancellation also terminates child processes in the checker's process
+group; remaining group members are killed when the canceled wrapper exits.
+Custom wrappers must keep their children in that group (or use `exec` to
+replace the wrapper with ShellCheck). On Windows, configure the ShellCheck
+executable directly: descendant processes launched by wrappers cannot be
+terminated this way. After the grace period, inherited output pipes are closed
+once the direct process exits so they cannot block the queue indefinitely.
+
+These limits bound runtime and concurrency, not the memory used by a single
+check. For expensive source trees, `shellcheckExternalSources: false` disables
+following external sources. Alternatively, `shellcheckArguments:
+["--extended-analysis=false"]` keeps source following while disabling ShellCheck's
+more expensive data-flow analysis. In VS Code, prefix these settings with
+`bashIde.`.
+
 ## Logging
 
 The minimum logging level for the server can be adjusted using the `BASH_IDE_LOG_LEVEL` environment variable

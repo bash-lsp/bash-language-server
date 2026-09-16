@@ -79,6 +79,19 @@
           "default": true,
           "description": "Controls whether ShellCheck is invoked with --external-sources. When enabled (default), ShellCheck follows source directives to lint referenced files. On projects with many cross-sourcing scripts this can cause unbounded memory growth. Set to false to disable."
         },
+        "bashIde.shellcheckTimeout": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647,
+          "default": 10000,
+          "description": "Maximum milliseconds for each running ShellCheck job, excluding debounce and queue time. Timed-out jobs are terminated and do not publish diagnostics."
+        },
+        "bashIde.shellcheckMaxConcurrent": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 2,
+          "description": "Maximum simultaneously running ShellCheck processes across documents. Additional checks wait; newer edits replace queued checks for the same document."
+        },
         "bashIde.shellcheckArguments": {
           "type": "string",
           "default": "",

@@ -76,6 +76,12 @@ export const ConfigSchema = z.object({
   // cross-sourcing scripts this can cause unbounded memory growth. Set to false to disable.
   shellcheckExternalSources: z.boolean().default(true),
 
+  // Maximum elapsed milliseconds for each running ShellCheck job, excluding queue/debounce time.
+  shellcheckTimeout: z.number().int().min(1).max(2147483647).default(10000),
+
+  // Maximum simultaneously running ShellCheck processes across documents.
+  shellcheckMaxConcurrent: z.number().int().min(1).default(2),
+
   // Additional ShellCheck arguments. Note that we already add the following arguments: --shell, --format, and --external-sources (if shellcheckExternalSources is true).
   shellcheckArguments: z
     .preprocess((arg) => {
