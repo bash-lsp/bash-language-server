@@ -50,13 +50,15 @@ To support a good develop workflow we set up [eslint][eslint], [Prettier][pretti
 
 ## Working on the client
 
-The client installs independently from the workspace. Its `package.json` has
-matching npm and pnpm overrides to patch the `minimatch` version pinned by
-`editorconfig@2.0.0` and align the bundled server's `vscode-languageserver` with
-the client's version. Keep both sets of overrides aligned: pnpm uses them for
-installation, and VSCE uses npm to inspect dependencies when packaging. Remove
-each override when the bundled server includes the corresponding dependency
-update.
+The extension requires VS Code 1.90 or newer, whose bundled Node.js runtime meets
+the server's Node.js 20 requirement.
+
+The client installs independently from the workspace. When updating its bundled
+server, update both `vscode-client/package.json` and `vscode-client/pnpm-lock.yaml`.
+If dependency overrides are needed, keep npm and pnpm overrides aligned: pnpm
+uses them for installation, and VSCE uses npm to inspect dependencies when
+packaging. Remove each override when the bundled server includes the
+corresponding dependency update.
 
 ### Visual Studio Code
 
