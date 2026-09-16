@@ -5,35 +5,39 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install shellcheck and shfmt (used for testing)
         run: sudo apt-get install -y shellcheck shfmt
 
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 10
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 22
           registry-url: https://registry.npmjs.org/
+          cache: "pnpm"
 
-      - run: |
+      - name: Configure for pushing git tags
+        run: |
           git config --local user.email "kenneth.skovhus@gmail.com"
           git config --local user.name "skovhus"
-        name: Configure for pushing git tags
 
-      - run: bash scripts/release-client.sh
-        name: Deploy VS Code extension
+      - name: Deploy server
+        run: bash scripts/release-server.sh
+
+
+      - name: Deploy VS Code extension
+        run: bash scripts/release-client.sh
         env:
           VSCE_TOKEN: ${{ secrets.VSCE_PERSONAL_ACCESS_TOKEN }}
-
-      - run: bash scripts/release-server.sh
-        name: Deploy server
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

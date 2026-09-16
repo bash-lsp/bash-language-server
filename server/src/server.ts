@@ -121,7 +121,7 @@ export default class BashServer {
       textDocumentSync: LSP.TextDocumentSyncKind.Full,
       completionProvider: {
         resolveProvider: true,
-        triggerCharacters: ['$', '{'],
+        triggerCharacters: ['$', '{', '-'],
       },
       hoverProvider: true,
       documentHighlightProvider: true,
@@ -277,7 +277,10 @@ export default class BashServer {
             logger.info('ShellCheck linting is disabled as "shellcheckPath" was not set')
             this.linter = undefined
           } else {
-            this.linter = new Linter({ executablePath: shellcheckPath })
+            this.linter = new Linter({
+              executablePath: shellcheckPath,
+              externalSources: this.config.shellcheckExternalSources,
+            })
           }
 
           const shfmtPath = this.config.shfmt?.path
@@ -950,7 +953,7 @@ function getMarkdownContent(documentation: string, language?: string): LSP.Marku
 }
 
 export function getCommandOptions(name: string, word: string): string[] {
-  const options = spawnSync(path.join(__dirname, '../src/get-options.sh'), [name, word])
+  const options = spawnSync(path.join(__dirname, './get-options.sh'), [name, word])
 
   if (options.status !== 0) {
     return []

@@ -113,12 +113,6 @@ for (( ; i < 10; i++)); do
 	echo "$((2 * i))"
 done
 
-# tree-sitter-bash's parsing limitations with while read loops
-
-while read -r line; do
-	echo "$line"
-done < somefile.txt
-
 # Complex nesting affects self-assignment handling
 
 f1() {

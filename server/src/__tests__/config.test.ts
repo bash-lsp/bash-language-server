@@ -12,6 +12,7 @@ describe('ConfigSchema', () => {
         "includeAllWorkspaceSymbols": false,
         "logLevel": "info",
         "shellcheckArguments": [],
+        "shellcheckExternalSources": true,
         "shellcheckPath": "shellcheck",
         "shfmt": {
           "binaryNextLine": false,
@@ -62,6 +63,7 @@ describe('ConfigSchema', () => {
           "-e",
           "SC2002",
         ],
+        "shellcheckExternalSources": true,
         "shellcheckPath": "",
         "shfmt": {
           "binaryNextLine": true,
@@ -99,6 +101,7 @@ describe('getConfigFromEnvironmentVariables', () => {
         "includeAllWorkspaceSymbols": false,
         "logLevel": "info",
         "shellcheckArguments": [],
+        "shellcheckExternalSources": true,
         "shellcheckPath": "shellcheck",
         "shfmt": {
           "binaryNextLine": false,
@@ -130,6 +133,7 @@ describe('getConfigFromEnvironmentVariables', () => {
         "includeAllWorkspaceSymbols": false,
         "logLevel": "info",
         "shellcheckArguments": [],
+        "shellcheckExternalSources": true,
         "shellcheckPath": "",
         "shfmt": {
           "binaryNextLine": false,
@@ -170,6 +174,7 @@ describe('getConfigFromEnvironmentVariables', () => {
           "-e",
           "SC2001",
         ],
+        "shellcheckExternalSources": true,
         "shellcheckPath": "/path/to/shellcheck",
         "shfmt": {
           "binaryNextLine": false,

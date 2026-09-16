@@ -9,7 +9,7 @@ import {
   TransportKind,
 } from 'vscode-languageclient/node'
 
-let client: LanguageClient
+let client: LanguageClient | undefined
 
 export const CONFIGURATION_SECTION = 'bashIde' // matching the package.json configuration section
 
@@ -60,7 +60,7 @@ export async function activate(context: ExtensionContext) {
     },
   }
 
-  const client = new LanguageClient('Bash IDE', 'Bash IDE', serverOptions, clientOptions)
+  client = new LanguageClient('Bash IDE', 'Bash IDE', serverOptions, clientOptions)
   client.registerProposedFeatures()
 
   try {
@@ -71,8 +71,5 @@ export async function activate(context: ExtensionContext) {
 }
 
 export function deactivate(): Thenable<void> | undefined {
-  if (!client) {
-    return undefined
-  }
-  return client.stop()
+  return client?.stop()
 }

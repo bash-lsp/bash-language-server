@@ -20,7 +20,7 @@ import {
 import { getFilePaths } from './util/fs'
 import { logger } from './util/logger'
 import { isPositionIncludedInRange } from './util/lsp'
-import { analyzeShebang } from './util/shebang'
+import { analyzeFile } from './util/shebang'
 import * as sourcing from './util/sourcing'
 import * as TreeSitterUtil from './util/tree-sitter'
 
@@ -192,10 +192,13 @@ export default class Analyzer {
 
       try {
         const fileContent = await fs.promises.readFile(filePath, 'utf8')
-        const { shebang, shellDialect } = analyzeShebang(fileContent)
-        if (shebang && !shellDialect) {
+        const fileDialect = analyzeFile(uri, fileContent)
+        // Bail if the dialect is unsupported
+        if (!fileDialect.dialect) {
           logger.info(
-            `BackgroundAnalysis: Skipping file ${uri} with shebang "${shebang}"`,
+            `BackgroundAnalysis: Skipping file ${uri} with dialect "${JSON.stringify(
+              fileDialect,
+            )}"`,
           )
           continue
         }
@@ -466,7 +469,7 @@ export default class Analyzer {
 
     const typeOfDescendants =
       kind === LSP.SymbolKind.Variable
-        ? 'variable_name'
+        ? ['variable_name', 'word']
         : ['function_definition', 'command_name']
     const startPosition = start
       ? { row: start.line, column: start.character }
@@ -474,7 +477,10 @@ export default class Analyzer {
 
     const ignoredRanges: LSP.Range[] = []
     const filterVariables = (n: Parser.SyntaxNode) => {
-      if (n.text !== word) {
+      if (
+        n.text !== word ||
+        (n.type === 'word' && !TreeSitterUtil.isVariableInReadCommand(n))
+      ) {
         return false
       }
 
@@ -510,11 +516,14 @@ export default class Analyzer {
 
       const declarationCommand = TreeSitterUtil.findParentOfType(n, 'declaration_command')
       const isLocal =
-        (definedVariable?.text === word || !!(!definition && declarationCommand)) &&
-        (parent.type === 'subshell' ||
-          ['local', 'declare', 'typeset'].includes(
-            declarationCommand?.firstChild?.text as any,
-          ))
+        // Local `variable_name`s
+        ((definedVariable?.text === word || !!(!definition && declarationCommand)) &&
+          (parent.type === 'subshell' ||
+            ['local', 'declare', 'typeset'].includes(
+              declarationCommand?.firstChild?.text as any,
+            ))) ||
+        // Local variables within `read` command that are typed as `word`
+        (parent.type === 'subshell' && n.type === 'word')
       if (isLocal) {
         if (includeDeclaration) {
           ignoredRanges.push(TreeSitterUtil.range(parent))
@@ -633,7 +642,7 @@ export default class Analyzer {
     }
 
     const searchParams = new URLSearchParams({ cmd: interestingNode.text }).toString()
-    const url = `${endpoint}/api/explain?${searchParams}`
+    const url = `${endpoint}/explain?${searchParams}`
 
     const explainshellRawResponse = await fetch(url)
     const explainshellResponse =
@@ -782,6 +791,14 @@ export default class Analyzer {
           node.type === 'variable_name'
             ? LSP.SymbolKind.Variable
             : LSP.SymbolKind.Function,
+      }
+    }
+
+    if (TreeSitterUtil.isVariableInReadCommand(node)) {
+      return {
+        word: node.text,
+        range: TreeSitterUtil.range(node),
+        kind: LSP.SymbolKind.Variable,
       }
     }
 

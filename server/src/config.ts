@@ -24,7 +24,12 @@ export const ConfigSchema = z.object({
   // If true, then all symbols from the workspace are included.
   includeAllWorkspaceSymbols: z.boolean().default(false),
 
-  // Additional ShellCheck arguments. Note that we already add the following arguments: --shell, --format, --external-sources."
+  // Controls whether ShellCheck is invoked with --external-sources. When enabled (default),
+  // ShellCheck follows source directives to lint referenced files. On projects with many
+  // cross-sourcing scripts this can cause unbounded memory growth. Set to false to disable.
+  shellcheckExternalSources: z.boolean().default(true),
+
+  // Additional ShellCheck arguments. Note that we already add the following arguments: --shell, --format, and --external-sources (if shellcheckExternalSources is true).
   shellcheckArguments: z
     .preprocess((arg) => {
       let argsList: string[] = []
@@ -87,6 +92,7 @@ export function getConfigFromEnvironmentVariables(): {
     includeAllWorkspaceSymbols: toBoolean(process.env.INCLUDE_ALL_WORKSPACE_SYMBOLS),
     logLevel: process.env[LOG_LEVEL_ENV_VAR],
     shellcheckArguments: process.env.SHELLCHECK_ARGUMENTS,
+    shellcheckExternalSources: toBoolean(process.env.SHELLCHECK_EXTERNAL_SOURCES),
     shellcheckPath: process.env.SHELLCHECK_PATH,
     shfmt: {
       path: process.env.SHFMT_PATH,
@@ -101,20 +107,13 @@ export function getConfigFromEnvironmentVariables(): {
     },
   }
 
-  const getUsedEnvvars = (rawConfigComponent: {[key: string]: any}): string[] => {
-    return Object.entries(rawConfigComponent)
-      .map(([key, value]) => (typeof value !== 'undefined' ? key : null))
-      .filter((key): key is string => key !== null)
-      .filter((key) => key !== 'logLevel') // logLevel is a special case that we ignore
-  };
-
-  // Since shfmt is structurally _always_ defined, we need to be careful to not
-  // incorrectly alert the user that they are doing something that needs to be
-  // changed.
-  //
-  // If other objects are added to rawConfig, please treat them similarly below.
-  const {shfmt, ... rest } = rawConfig;
-  const environmentVariablesUsed = getUsedEnvvars(rest).concat(getUsedEnvvars(shfmt));
+  const environmentVariablesUsed = Object.entries(rawConfig)
+    .filter(
+      ([key, value]) =>
+        !['undefined', 'object'].includes(typeof value) &&
+        ![null, 'logLevel'].includes(key),
+    )
+    .map(([key]) => key)
 
   const config = ConfigSchema.parse(rawConfig)
 

@@ -1,5 +1,19 @@
 # Bash Language Server
 
+See releases on GitHub, this is not kept up to date anymore:
+
+## 5.4.3
+
+- Do not overwrite user-provided shellcheck `--shell` argument https://github.com/bash-lsp/bash-language-server/pull/1133
+
+## 5.4.2
+
+- Fix wrong pnpm engine version
+
+## 5.4.1
+
+- Bump treesitter to latest version
+
 ## 5.4.0
 
 - Add .editorconfig support for shfmt https://github.com/bash-lsp/bash-language-server/pull/1171

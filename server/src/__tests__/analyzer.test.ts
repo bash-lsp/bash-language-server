@@ -16,7 +16,7 @@ import { Logger } from '../util/logger'
 const CURRENT_URI = 'dummy-uri.sh'
 
 // if you add a .sh file to testing/fixtures, update this value
-const FIXTURE_FILES_MATCHING_GLOB = 19
+const FIXTURE_FILES_MATCHING_GLOB = 21
 
 const defaultConfig = getDefaultConfiguration()
 
@@ -123,6 +123,28 @@ describe('analyze', () => {
           "severity": 3,
           "source": "bash-language-server",
         },
+        {
+          "message": "Source command could not be analyzed: failed to resolve path.
+
+      Consider adding a ShellCheck directive above this line to fix or ignore this:
+      # shellcheck source=/my-file.sh # specify the file to source
+      # shellcheck source-path=my_script_folder # specify the folder to search in
+      # shellcheck source=/dev/null # to ignore the error
+
+      Disable this message by changing the configuration option "enableSourceErrorDiagnostics"",
+          "range": {
+            "end": {
+              "character": 49,
+              "line": 26,
+            },
+            "start": {
+              "character": 0,
+              "line": 26,
+            },
+          },
+          "severity": 3,
+          "source": "bash-language-server",
+        },
       ]
     `)
 
@@ -216,6 +238,38 @@ describe('findDeclarationLocations', () => {
             },
           },
           "uri": "file://__REPO_ROOT_FOLDER__/scripts/tag-release.inc",
+        },
+      ]
+    `)
+  })
+
+  it('returns a location in a bats helper file pulled in with `load`', async () => {
+    const analyzer = await getAnalyzer({
+      runBackgroundAnalysis: true,
+      workspaceFolder: FIXTURE_FOLDER,
+    })
+    const document = FIXTURE_DOCUMENT.BATS_SOURCING
+    const { uri } = document
+    analyzer.analyze({ uri, document })
+    const result = analyzer.findDeclarationLocations({
+      uri,
+      word: 'setup_test_env',
+      position: { character: 4, line: 5 },
+    })
+    expect(updateSnapshotUris(result)).toMatchInlineSnapshot(`
+      [
+        {
+          "range": {
+            "end": {
+              "character": 1,
+              "line": 4,
+            },
+            "start": {
+              "character": 0,
+              "line": 2,
+            },
+          },
+          "uri": "file://__REPO_ROOT_FOLDER__/testing/fixtures/bats/test_helper.bash",
         },
       ]
     `)
@@ -847,6 +901,7 @@ describe('initiateBackgroundAnalysis', () => {
       [expect.stringContaining('parse-problems.sh: syntax error')],
       [expect.stringContaining('sourcing.sh line 16: failed to resolve path')],
       [expect.stringContaining('sourcing.sh line 21: non-constant source not supported')],
+      [expect.stringContaining('sourcing.sh line 26: failed to resolve path')],
     ])
 
     // Intro, stats on glob, one file skipped due to shebang, and outro
