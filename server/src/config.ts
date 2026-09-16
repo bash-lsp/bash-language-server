@@ -53,6 +53,17 @@ export const ConfigSchema = z.object({
   // Maximum number of files to analyze in the background. Set to 0 to disable background analysis.
   backgroundAnalysisMaxFiles: z.number().int().min(0).default(500),
 
+  // Maximum directories visited when discovering background files, including directories without shell files.
+  backgroundAnalysisMaxDirectories: z.number().int().min(1).default(10000),
+
+  // Maximum time in milliseconds spent discovering background files.
+  backgroundAnalysisTimeout: z.number().int().min(1).max(2147483647).default(10000),
+
+  // Glob patterns excluded from background file discovery. Sourced/open files remain available on demand.
+  backgroundAnalysisIgnore: z
+    .array(z.string())
+    .default(['**/node_modules/**', '**/.git/**']),
+
   // Enable diagnostics for source errors. Ignored if includeAllWorkspaceSymbols is true.
   enableSourceErrorDiagnostics: z.boolean().default(false),
 

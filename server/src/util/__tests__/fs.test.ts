@@ -178,4 +178,138 @@ describe('getFilePaths', () => {
       readdir.mockRestore()
     }
   })
+  it('bounds directory reads when there are no matching files', async () => {
+    for (let i = 0; i < 40; i++) {
+      fs.mkdirSync(path.join(rootPath, `directory-${i}`, 'nested'), { recursive: true })
+    }
+    const readdir = jest.spyOn(fs, 'readdir')
+    const onLimit = jest.fn()
+    try {
+      const files = await getFilePaths({
+        rootPath,
+        globPattern: '**/*.sh',
+        maxItems: 500,
+        maxDirectories: 5,
+        onLimit,
+      })
+      expect(files).toEqual([])
+      expect(readdir).toHaveBeenCalledTimes(5)
+      expect(onLimit.mock.calls).toEqual([['directories']])
+    } finally {
+      readdir.mockRestore()
+    }
+  })
+
+  it('skips excluded directories while preserving other nested scripts', async () => {
+    for (const folder of ['build', 'src']) {
+      fs.mkdirSync(path.join(rootPath, folder))
+      fs.writeFileSync(path.join(rootPath, folder, 'script.sh'), '')
+    }
+    const readdir = jest.spyOn(fs, 'readdir')
+    try {
+      const files = await getFilePaths({
+        rootPath,
+        globPattern: '**/*.sh',
+        maxItems: 500,
+        ignore: ['**/build/**'],
+      })
+      expect(relativePaths(files, rootPath)).toEqual(['src/script.sh'])
+      expect(readdir.mock.calls.map(([directory]) => directory)).not.toContain(
+        path.join(rootPath, 'build'),
+      )
+    } finally {
+      readdir.mockRestore()
+    }
+  })
+
+  it('does no filesystem work when already canceled', async () => {
+    const controller = new AbortController()
+    controller.abort()
+    const readdir = jest.spyOn(fs, 'readdir')
+    try {
+      await expect(
+        getFilePaths({
+          rootPath,
+          globPattern: '**/*.sh',
+          maxItems: 500,
+          signal: controller.signal,
+        }),
+      ).resolves.toEqual([])
+      expect(readdir).not.toHaveBeenCalled()
+    } finally {
+      readdir.mockRestore()
+    }
+  })
+
+  it.each(['abort', 'timeout'] as const)(
+    'settles a scan with a pending directory read on %s',
+    async (reason) => {
+      let readStarted: () => void = () => undefined
+      const started = new Promise<void>((resolve) => {
+        readStarted = resolve
+      })
+      let completeRead: (() => void) | undefined
+      const readdir = jest.spyOn(fs, 'readdir').mockImplementation((...args: any[]) => {
+        const callback = args[args.length - 1]
+        completeRead = () => callback(null, [])
+        readStarted()
+      })
+      const controller = new AbortController()
+      const onLimit = jest.fn()
+      try {
+        const pending = getFilePaths({
+          rootPath,
+          globPattern: '**/*.sh',
+          maxItems: 500,
+          timeoutMs: 100,
+          signal: controller.signal,
+          onLimit,
+        })
+        await started
+        expect(completeRead).toBeDefined()
+        if (reason === 'abort') controller.abort()
+        await expect(pending).resolves.toEqual([])
+        expect(onLimit.mock.calls).toEqual(reason === 'timeout' ? [['time']] : [])
+      } finally {
+        controller.abort()
+        completeRead?.()
+        readdir.mockRestore()
+      }
+    },
+  )
+  it('does not process late directory entries after cancellation', async () => {
+    for (let i = 0; i < 20; i++) {
+      fs.symlinkSync(rootPath, path.join(rootPath, `link-${i}`), symlinkType)
+    }
+    const entries = fs.readdirSync(rootPath, { withFileTypes: true })
+    let releaseRead: () => void = () => undefined
+    let readStarted: () => void = () => undefined
+    const started = new Promise<void>((resolve) => {
+      readStarted = resolve
+    })
+    const readdir = jest.spyOn(fs, 'readdir').mockImplementation((...args: any[]) => {
+      releaseRead = () => args[args.length - 1](null, entries)
+      readStarted()
+    })
+    const inspectEntries = entries.map((entry) => jest.spyOn(entry, 'isSymbolicLink'))
+    const controller = new AbortController()
+    try {
+      const pending = getFilePaths({
+        rootPath,
+        globPattern: '**/*.sh',
+        maxItems: 500,
+        signal: controller.signal,
+      })
+      await started
+      controller.abort()
+      await pending
+      await new Promise((resolve) => setImmediate(resolve))
+      releaseRead()
+      await new Promise((resolve) => setImmediate(resolve))
+      for (const inspect of inspectEntries) expect(inspect).not.toHaveBeenCalled()
+    } finally {
+      readdir.mockRestore()
+      for (const inspect of inspectEntries) inspect.mockRestore()
+    }
+  })
 })

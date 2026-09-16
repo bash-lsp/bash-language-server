@@ -48,6 +48,30 @@
           "default": "",
           "description": "Configure explainshell server endpoint in order to get hover documentation on flags and options."
         },
+        "bashIde.backgroundAnalysisMaxDirectories": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 10000,
+          "description": "Maximum directories visited during background discovery, including directories without shell files. Reaching this limit leaves workspace symbols incomplete."
+        },
+        "bashIde.backgroundAnalysisTimeout": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647,
+          "default": 10000,
+          "description": "Maximum time in milliseconds spent discovering background files. Reaching this limit leaves workspace symbols incomplete."
+        },
+        "bashIde.backgroundAnalysisIgnore": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/node_modules/**",
+            "**/.git/**"
+          ],
+          "description": "Glob patterns excluded from background file discovery. Open files and sourced files can still be analyzed on demand."
+        },
         "bashIde.globPattern": {
           "type": "string",
           "default": "**/*@(.sh|.inc|.bash|.command)",

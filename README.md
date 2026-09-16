@@ -185,6 +185,23 @@ Using the built-in `eglot` lsp mode:
   (bash-ts-mode . eglot-ensure))
 ```
 
+## Background analysis limits
+
+Background discovery stops after `backgroundAnalysisMaxFiles` matches (default 500),
+`backgroundAnalysisMaxDirectories` directory reads (default 10,000), or
+`backgroundAnalysisTimeout` milliseconds (default 10,000). The directory and time
+limits also apply when a workspace contains few or no shell files. A warning in
+Bash IDE's output reports when discovery stops at either limit; workspace symbols
+may then be incomplete. Opening a file or following a source command still allows
+that file to be analyzed.
+
+`backgroundAnalysisIgnore` is an array of glob patterns, defaulting to
+`["**/node_modules/**", "**/.git/**"]`. Add patterns such as `"**/build/**"` to skip
+large generated directories. These exclusions do not read `.gitignore`.
+Set `backgroundAnalysisMaxFiles` to `0` to disable background discovery entirely.
+In VS Code, prefix each setting with `bashIde.`. Configuration changes cancel the
+previous scan, and server shutdown stops pending discovery and file analysis.
+
 ## `shfmt` integration
 
 The indentation used by `shfmt` is whatever has been configured for the current editor session, so

@@ -1,6 +1,7 @@
 import * as fs from 'node:fs'
 import * as os from 'node:os'
 import * as path from 'node:path'
+import { Readable } from 'node:stream'
 import { fileURLToPath } from 'node:url'
 
 import * as fastGlob from 'fast-glob'
@@ -29,7 +30,10 @@ export function untildify(pathWithTilde: string): string {
  * with `withFileTypes`, which is what `fast-glob` does on supported Node
  * versions, so the common case does not pay for a `realpath` call at all.
  */
-function createCycleSafeFileSystemAdapter(): Partial<fastGlob.FileSystemAdapter> {
+function createCycleSafeFileSystemAdapter(
+  canReadDirectory: () => boolean,
+  isStopped: () => boolean,
+): Partial<fastGlob.FileSystemAdapter> {
   // Symbolic links to directories, by normalized path.
   const symlinkedDirectories = new Set<string>()
   // Real paths of the directories that had to be checked, by normalized path.
@@ -108,12 +112,18 @@ function createCycleSafeFileSystemAdapter(): Partial<fastGlob.FileSystemAdapter>
         typeof optionsOrCallback === 'function' ? undefined : optionsOrCallback
       const done = typeof optionsOrCallback === 'function' ? optionsOrCallback : callback
 
-      if (isCycle(directoryPath)) {
+      if (!canReadDirectory() || isCycle(directoryPath)) {
         done(null, [])
         return
       }
 
       const onRead = (error: NodeJS.ErrnoException | null, entries: unknown) => {
+        // A pending readdir may finish after the walker is destroyed. Do not
+        // pass its entries on: fs.scandir would still stat every symbolic link.
+        if (isStopped()) {
+          done(null, [])
+          return
+        }
         if (error != null) {
           done(error)
           return
@@ -130,7 +140,7 @@ function createCycleSafeFileSystemAdapter(): Partial<fastGlob.FileSystemAdapter>
       }
     },
     readdirSync: (directoryPath: string, options?: any) => {
-      if (isCycle(directoryPath)) {
+      if (!canReadDirectory() || isCycle(directoryPath)) {
         return []
       }
 
@@ -150,12 +160,22 @@ export async function getFilePaths({
   globPattern,
   rootPath,
   maxItems,
+  maxDirectories = 10000,
+  timeoutMs = 10000,
+  ignore = [],
+  signal,
+  onLimit,
 }: {
   globPattern: string
   rootPath: string
   maxItems: number
+  maxDirectories?: number
+  timeoutMs?: number
+  ignore?: string[]
+  signal?: AbortSignal
+  onLimit?: (reason: 'directories' | 'time') => void
 }): Promise<string[]> {
-  if (maxItems <= 0) {
+  if (maxItems <= 0 || signal?.aborted) {
     return []
   }
 
@@ -163,27 +183,65 @@ export async function getFilePaths({
     rootPath = fileURLToPath(rootPath)
   }
 
-  const stream = fastGlob.stream([globPattern], {
-    absolute: true,
-    onlyFiles: true,
-    cwd: rootPath,
-    followSymbolicLinks: true,
-    fs: createCycleSafeFileSystemAdapter(),
-    suppressErrors: true,
-  })
+  return new Promise((resolve, reject) => {
+    const files: string[] = []
+    let directoriesRead = 0
+    let finished = false
+    let stream: Readable | undefined
+    const deadline = Date.now() + timeoutMs
 
-  // NOTE: we use a stream here to not block the event loop
-  // and ensure that we stop reading files if the glob returns
-  // too many files.
-  const files = []
-  for await (const fileEntry of stream) {
-    files.push(fileEntry.toString())
-    if (files.length >= maxItems) {
-      // NOTE: Close the stream to stop reading files paths.
-      stream.emit('close')
-      break
+    const finish = (error?: Error, limit?: 'directories' | 'time') => {
+      if (finished) return
+      finished = true
+      clearTimeout(timer)
+      signal?.removeEventListener('abort', abort)
+      // Destroying the merged stream closes fast-glob's underlying walkers.
+      stream?.destroy()
+      if (limit) onLimit?.(limit)
+      if (error) reject(error)
+      else resolve(files)
     }
-  }
+    const abort = () => finish()
+    const timer = setTimeout(() => finish(undefined, 'time'), timeoutMs)
+    signal?.addEventListener('abort', abort, { once: true })
 
-  return files
+    const canReadDirectory = () => {
+      if (finished) return false
+      if (Date.now() >= deadline) {
+        finish(undefined, 'time')
+        return false
+      }
+      if (directoriesRead >= maxDirectories) {
+        finish(undefined, 'directories')
+        return false
+      }
+      directoriesRead++
+      return true
+    }
+
+    try {
+      stream = fastGlob.stream([globPattern], {
+        absolute: true,
+        onlyFiles: true,
+        cwd: rootPath,
+        followSymbolicLinks: true,
+        fs: createCycleSafeFileSystemAdapter(canReadDirectory, () => finished),
+        suppressErrors: true,
+        ignore,
+        concurrency: 16,
+      }) as Readable
+      stream.on('error', (error) => finish(error))
+      stream.on('end', () => finish())
+      stream.on('data', (fileEntry) => {
+        if (finished) return
+        files.push(fileEntry.toString())
+        if (files.length >= maxItems) finish()
+      })
+      // A synchronous adapter callback may have reached a budget while the
+      // stream was being constructed.
+      if (finished) stream.destroy()
+    } catch (error) {
+      finish(error as Error)
+    }
+  })
 }

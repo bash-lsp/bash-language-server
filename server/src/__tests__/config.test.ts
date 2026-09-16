@@ -9,7 +9,13 @@ describe('ConfigSchema', () => {
   it('returns a default', () => {
     expect(ConfigSchema.parse({})).toMatchInlineSnapshot(`
       {
+        "backgroundAnalysisIgnore": [
+          "**/node_modules/**",
+          "**/.git/**",
+        ],
+        "backgroundAnalysisMaxDirectories": 10000,
         "backgroundAnalysisMaxFiles": 500,
+        "backgroundAnalysisTimeout": 10000,
         "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
@@ -56,7 +62,13 @@ describe('ConfigSchema', () => {
       }),
     ).toMatchInlineSnapshot(`
       {
+        "backgroundAnalysisIgnore": [
+          "**/node_modules/**",
+          "**/.git/**",
+        ],
+        "backgroundAnalysisMaxDirectories": 10000,
         "backgroundAnalysisMaxFiles": 1,
+        "backgroundAnalysisTimeout": 10000,
         "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "localhost:8080",
         "globPattern": "**/*@(.sh)",
@@ -124,7 +136,13 @@ describe('getConfigFromEnvironmentVariables', () => {
     const { config } = getConfigFromEnvironmentVariables()
     expect(config).toMatchInlineSnapshot(`
       {
+        "backgroundAnalysisIgnore": [
+          "**/node_modules/**",
+          "**/.git/**",
+        ],
+        "backgroundAnalysisMaxDirectories": 10000,
         "backgroundAnalysisMaxFiles": 500,
+        "backgroundAnalysisTimeout": 10000,
         "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
@@ -157,7 +175,13 @@ describe('getConfigFromEnvironmentVariables', () => {
     const { config } = getConfigFromEnvironmentVariables()
     expect(config).toMatchInlineSnapshot(`
       {
+        "backgroundAnalysisIgnore": [
+          "**/node_modules/**",
+          "**/.git/**",
+        ],
+        "backgroundAnalysisMaxDirectories": 10000,
         "backgroundAnalysisMaxFiles": 500,
+        "backgroundAnalysisTimeout": 10000,
         "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
@@ -196,7 +220,13 @@ describe('getConfigFromEnvironmentVariables', () => {
     const { config } = getConfigFromEnvironmentVariables()
     expect(config).toMatchInlineSnapshot(`
       {
+        "backgroundAnalysisIgnore": [
+          "**/node_modules/**",
+          "**/.git/**",
+        ],
+        "backgroundAnalysisMaxDirectories": 10000,
         "backgroundAnalysisMaxFiles": 1,
+        "backgroundAnalysisTimeout": 10000,
         "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "localhost:8080",
         "globPattern": "*.*",
@@ -256,4 +286,18 @@ describe('getConfigFromEnvironmentVariables', () => {
     result = getConfigFromEnvironmentVariables().config.includeAllWorkspaceSymbols
     expect(result).toEqual(false)
   })
+})
+
+it('validates discovery budgets and accepts custom exclusions', () => {
+  expect(ConfigSchema.safeParse({ backgroundAnalysisMaxDirectories: 0 }).success).toBe(
+    false,
+  )
+  expect(ConfigSchema.safeParse({ backgroundAnalysisTimeout: 0 }).success).toBe(false)
+  expect(ConfigSchema.safeParse({ backgroundAnalysisTimeout: 2147483648 }).success).toBe(
+    false,
+  )
+  expect(
+    ConfigSchema.parse({ backgroundAnalysisIgnore: ['**/build/**'] })
+      .backgroundAnalysisIgnore,
+  ).toEqual(['**/build/**'])
 })

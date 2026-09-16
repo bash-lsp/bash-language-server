@@ -6,6 +6,7 @@ import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Node as SyntaxNode, Parser, Point, Tree } from 'web-tree-sitter'
 
+import { getDefaultConfiguration } from './config'
 import { flattenArray } from './util/array'
 import {
   FindDeclarationParams,
@@ -36,6 +37,7 @@ type AnalyzedDocument = {
  * tree-sitter to find definitions, reference, etc.
  */
 export default class Analyzer {
+  private backgroundAnalysisController?: AbortController
   private enableSourceErrorDiagnostics: boolean
   private includeAllWorkspaceSymbols: boolean
   private parser: Parser
@@ -153,13 +155,28 @@ export default class Analyzer {
    * NOTE that when the source aware feature is enabled files are also parsed
    * when they are found.
    */
+  public cancelBackgroundAnalysis(): void {
+    this.backgroundAnalysisController?.abort()
+  }
+
   public async initiateBackgroundAnalysis({
     backgroundAnalysisMaxFiles,
+    backgroundAnalysisMaxDirectories = getDefaultConfiguration()
+      .backgroundAnalysisMaxDirectories,
+    backgroundAnalysisTimeout = getDefaultConfiguration().backgroundAnalysisTimeout,
+    backgroundAnalysisIgnore = getDefaultConfiguration().backgroundAnalysisIgnore,
     globPattern,
   }: {
     backgroundAnalysisMaxFiles: number
+    backgroundAnalysisMaxDirectories?: number
+    backgroundAnalysisTimeout?: number
+    backgroundAnalysisIgnore?: string[]
     globPattern: string
   }): Promise<{ filesParsed: number }> {
+    this.cancelBackgroundAnalysis()
+    const controller = new AbortController()
+    this.backgroundAnalysisController = controller
+    const { signal } = controller
     const rootPath = this.workspaceFolder
     if (!rootPath) {
       return { filesParsed: 0 }
@@ -183,6 +200,15 @@ export default class Analyzer {
         globPattern,
         rootPath,
         maxItems: backgroundAnalysisMaxFiles,
+        maxDirectories: backgroundAnalysisMaxDirectories,
+        timeoutMs: backgroundAnalysisTimeout,
+        ignore: backgroundAnalysisIgnore,
+        signal,
+        onLimit: (reason) => {
+          logger.warn(
+            `BackgroundAnalysis: stopped discovery at the ${reason} limit; workspace symbols may be incomplete. Adjust backgroundAnalysisMaxDirectories, backgroundAnalysisTimeout, or backgroundAnalysisIgnore.`,
+          )
+        },
       })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : error
@@ -198,11 +224,17 @@ export default class Analyzer {
       } files after ${getTimePassed()}`,
     )
 
+    let filesParsed = 0
     for (const filePath of filePaths) {
+      if (signal.aborted) break
       const uri = url.pathToFileURL(filePath).href
 
       try {
-        const fileContent = await fs.promises.readFile(filePath, 'utf8')
+        const fileContent = await fs.promises.readFile(filePath, {
+          encoding: 'utf8',
+          signal,
+        })
+        if (signal.aborted) break
         const fileDialect = analyzeFile(uri, fileContent)
         // Bail if the dialect is unsupported
         if (!fileDialect.dialect) {
@@ -218,7 +250,9 @@ export default class Analyzer {
           document: TextDocument.create(uri, 'shell', 1, fileContent),
           uri,
         })
+        filesParsed++
       } catch (error) {
+        if (signal.aborted) break
         const errorMessage = error instanceof Error ? error.message : error
         logger.warn(`BackgroundAnalysis: Failed analyzing ${uri}. Error: ${errorMessage}`)
       }
@@ -226,7 +260,7 @@ export default class Analyzer {
 
     logger.info(`BackgroundAnalysis: Completed after ${getTimePassed()}.`)
     return {
-      filesParsed: filePaths.length,
+      filesParsed,
     }
   }
 
