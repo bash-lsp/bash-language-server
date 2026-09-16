@@ -1,3 +1,5 @@
+import { fileURLToPath, pathToFileURL } from 'node:url'
+
 import * as fs from 'fs'
 import * as path from 'path'
 import * as LSP from 'vscode-languageserver'
@@ -38,7 +40,11 @@ export function getSourceCommands({
 }): SourceCommand[] {
   const sourceCommands: SourceCommand[] = []
 
-  const rootPaths = [path.dirname(fileUri), rootPath].filter(Boolean) as string[]
+  const filePath = fileUri.startsWith('file://') ? fileURLToPath(fileUri) : fileUri
+  const workspacePath = rootPath?.startsWith('file://')
+    ? fileURLToPath(rootPath)
+    : rootPath
+  const rootPaths = [path.dirname(filePath), workspacePath].filter(Boolean) as string[]
   const isBatsFile = fileUri.endsWith('.bats')
 
   TreeSitterUtil.forEach(tree.rootNode, (node) => {
@@ -192,7 +198,7 @@ function resolveSourcedUri({
   if (sourcedPath.startsWith('/')) {
     for (const candidate of sourcedPaths) {
       if (fs.existsSync(candidate)) {
-        return `file://${candidate}`
+        return pathToFileURL(candidate).href
       }
     }
     return null
@@ -201,11 +207,11 @@ function resolveSourcedUri({
   // resolve  relative path
   for (const rootPath of rootPaths) {
     for (const candidate of sourcedPaths) {
-      const potentialPath = path.join(rootPath.replace('file://', ''), candidate)
+      const potentialPath = path.join(rootPath, candidate)
 
       // check if path is a file
       if (fs.existsSync(potentialPath)) {
-        return `file://${potentialPath}`
+        return pathToFileURL(potentialPath).href
       }
     }
   }
