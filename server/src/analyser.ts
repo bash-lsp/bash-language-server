@@ -1,6 +1,5 @@
 import * as fs from 'fs'
 import * as FuzzySearch from 'fuzzy-search'
-import fetch from 'node-fetch'
 import * as url from 'url'
 import { isDeepStrictEqual } from 'util'
 import * as LSP from 'vscode-languageserver/node'
