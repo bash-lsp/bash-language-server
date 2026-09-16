@@ -67,10 +67,21 @@ export function getAllDeclarationsInTree({
   uri: string
 }): LSP.SymbolInformation[] {
   const symbols: LSP.SymbolInformation[] = []
+  const variablesByScope = new Map<number, Set<string>>()
 
   TreeSitterUtil.forEach(tree.rootNode, (node) => {
     const symbol = getDeclarationSymbolFromNode({ node, uri })
     if (symbol) {
+      if (symbol.kind === LSP.SymbolKind.Variable) {
+        const scope =
+          TreeSitterUtil.findParentOfType(node, 'function_definition') || tree.rootNode
+        const variables = variablesByScope.get(scope.id) || new Set<string>()
+        if (variables.has(symbol.name)) {
+          return
+        }
+        variables.add(symbol.name)
+        variablesByScope.set(scope.id, variables)
+      }
       symbols.push(symbol)
     }
   })
