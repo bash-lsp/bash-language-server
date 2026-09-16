@@ -711,7 +711,7 @@ export default class BashServer {
       !isVariable &&
       (ReservedWords.isReservedWord(word) ||
         Builtins.isBuiltin(word) ||
-        (this.executables.isExecutableOnPATH(word) && symbolsMatchingWord.length == 0))
+        (symbolsMatchingWord.length == 0 && (await this.executables.isExecutable(word))))
     ) {
       logger.debug(
         `onHover: getting shell documentation for reserved word or builtin or executable`,

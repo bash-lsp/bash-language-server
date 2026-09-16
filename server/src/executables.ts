@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-import { basename, join } from 'path'
+import { basename, isAbsolute, join } from 'path'
 
 import * as ArrayUtil from './util/array'
 import * as FsUtil from './util/fs'
@@ -38,6 +38,31 @@ export default class Executables {
    */
   public isExecutableOnPATH(executable: string): boolean {
     return this.executables.has(executable)
+  }
+
+  /**
+   * Recognize commands invoked by their absolute path as well as names on PATH.
+   */
+  public async isExecutable(executable: string): Promise<boolean> {
+    // Probing UNC or device paths can trigger network authentication on Windows.
+    if (process.platform === 'win32' && /^(?:[\\/]{2}|[\\/]\?\?[\\/])/.test(executable)) {
+      return false
+    }
+
+    if (!isAbsolute(executable)) {
+      return this.isExecutableOnPATH(executable)
+    }
+
+    try {
+      const stats = await fs.promises.stat(executable)
+      if (!stats.isFile()) {
+        return false
+      }
+      await fs.promises.access(executable, fs.constants.X_OK)
+      return true
+    } catch {
+      return false
+    }
   }
 }
 

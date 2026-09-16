@@ -1,4 +1,6 @@
 /* eslint-disable no-useless-escape */
+import * as ChildProcess from 'child_process'
+
 import * as sh from '../sh'
 
 describe('execShellScript', () => {
@@ -32,6 +34,30 @@ describe('getDocumentation', () => {
     expect(lines[0]).toEqual('NAME')
     expect(lines[1]).toContain('list directory contents')
   })
+
+  it('returns the external manual for an absolute command path', async () => {
+    const result = await sh.getShellDocumentation({ word: '/bin/ls' })
+    expect(result).toContain('list directory contents')
+  })
+
+  it('normalizes absolute paths before checking spaces', async () => {
+    const result = await sh.getShellDocumentation({ word: '/opt/My Tools/ls' })
+    expect(result).toContain('list directory contents')
+  })
+
+  it.each(['ls;printf injected', 'ls&printf injected', "ls'quoted"])(
+    'passes an absolute command basename as one argument: %s',
+    async (commandName) => {
+      const spawn = jest.spyOn(ChildProcess, 'spawn')
+      try {
+        const result = await sh.getShellDocumentation({ word: `/opt/bin/${commandName}` })
+        expect(result).toBeNull()
+        expect(spawn).toHaveBeenCalledWith('man', ['-P', 'cat', '--', commandName])
+      } finally {
+        spawn.mockRestore()
+      }
+    },
+  )
 
   it('skips documentation for some builtins', async () => {
     const result = await sh.getShellDocumentation({ word: 'else' })
