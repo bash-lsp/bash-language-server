@@ -44,8 +44,6 @@ jobs:
           shfmt --version
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Use Node.js 22.x
         uses: actions/setup-node@v7

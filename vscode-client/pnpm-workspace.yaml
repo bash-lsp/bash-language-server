@@ -1,0 +1,10 @@
+packages: []
+
+saveExact: true
+# https://github.com/microsoft/vscode-vsce/issues/421
+nodeLinker: hoisted
+shamefullyHoist: true
+
+# The extension can be released immediately after publishing the server.
+minimumReleaseAgeExclude:
+  - bash-language-server
