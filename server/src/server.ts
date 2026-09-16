@@ -15,6 +15,7 @@ import * as ReservedWords from './reserved-words'
 import { Linter, LintingResult } from './shellcheck'
 import { Formatter } from './shfmt'
 import { SNIPPETS } from './snippets'
+import { completeSourcePath } from './source-completion'
 import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
 import { logger, setLogConnection, setLogLevel } from './util/logger'
@@ -137,7 +138,7 @@ export default class BashServer {
       textDocumentSync: LSP.TextDocumentSyncKind.Full,
       completionProvider: {
         resolveProvider: true,
-        triggerCharacters: ['$', '{', '-'],
+        triggerCharacters: ['$', '{', '-', '/'],
       },
       hoverProvider: true,
       documentHighlightProvider: true,
@@ -483,6 +484,17 @@ export default class BashServer {
   }
 
   private onCompletion(params: LSP.TextDocumentPositionParams): BashCompletionItem[] {
+    const document = this.analyzer.getDocument(params.textDocument.uri)
+    const root = this.analyzer.getRootNode(params.textDocument.uri)
+    if (document && root) {
+      const paths = completeSourcePath({
+        document,
+        root,
+        position: params.position,
+        fileUris: this.workspaceIndex.getFileUris(),
+      })
+      if (paths !== null) return paths
+    }
     const word = this.analyzer.wordAtPointFromTextPosition({
       ...params,
       position: {

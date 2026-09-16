@@ -526,6 +526,10 @@ export default class Analyzer {
     return this.uriToAnalyzedDocument[uri]?.document
   }
 
+  public getRootNode(uri: string): SyntaxNode | undefined {
+    return this.uriToAnalyzedDocument[uri]?.tree.rootNode
+  }
+
   public removeDocument(uri: string): void {
     delete this.uriToAnalyzedDocument[uri]
   }

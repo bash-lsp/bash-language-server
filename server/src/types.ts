@@ -6,6 +6,7 @@ export enum CompletionItemDataType {
   ReservedWord,
   Symbol,
   Snippet,
+  File,
 }
 
 export interface BashCompletionItem extends LSP.CompletionItem {

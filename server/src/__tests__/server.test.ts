@@ -90,6 +90,7 @@ describe('server', () => {
             "$",
             "{",
             "-",
+            "/",
           ],
         },
         "definitionProvider": true,
@@ -423,6 +424,43 @@ describe('server', () => {
   })
 
   describe('onCompletion', () => {
+    it('completes source paths using the catalog updated by file events', async () => {
+      const directory = mkdtempSync(join(tmpdir(), 'bash-lsp-completion-'))
+      const main = join(directory, 'main.sh')
+      const library = join(directory, 'library.sh')
+      try {
+        writeFileSync(main, 'source ')
+        const { connection } = await initializeServer({
+          rootPath: pathToFileURL(directory).href,
+        })
+        const complete = () =>
+          connection.onCompletion.mock.calls[0][0](
+            {
+              textDocument: { uri: pathToFileURL(main).href },
+              position: { line: 0, character: 7 },
+            },
+            {} as any,
+            {} as any,
+          )
+        expect(await complete()).toEqual([])
+        writeFileSync(library, 'greet() { :; }')
+        await connection.onDidChangeWatchedFiles.mock.calls[0][0]({
+          changes: [
+            { uri: pathToFileURL(library).href, type: LSP.FileChangeType.Created },
+          ],
+        })
+        expect(await complete()).toMatchObject([
+          {
+            label: './library.sh',
+            kind: LSP.CompletionItemKind.File,
+            textEdit: { newText: './library.sh' },
+          },
+        ])
+      } finally {
+        rmSync(directory, { recursive: true, force: true })
+      }
+    })
+
     describe.each([false, undefined, true])('snippetSupport=%s', (snippetSupport) => {
       it.each([
         { name: 'all completions', line: 26, character: 0 },
