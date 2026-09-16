@@ -17,7 +17,7 @@ async function findDefinition(source: string, word: string, line: number) {
   return analyzer.findDeclarationLocations({
     uri,
     word,
-    position: { line, character: 1 },
+    position: { line, character: source.split('\n')[line].indexOf(word) + 1 },
   })
 }
 
@@ -55,4 +55,30 @@ describe('forward function definitions', () => {
   it('does not expose variables assigned after their use', async () => {
     expect(await findDefinition('echo "$later"\nlater=value', 'later', 0)).toEqual([])
   })
+})
+
+it('does not resolve a variable expansion to a later function', async () => {
+  const source = 'foo() {\n echo "$bar"\n}\nbar() { :; }'
+  const analyzer = new Analyzer({
+    parser: await initializeParser(),
+    workspaceFolder: null,
+  })
+  analyzer.analyze({ uri, document: TextDocument.create(uri, 'shellscript', 1, source) })
+  expect(
+    analyzer.findDeclarationLocations({
+      uri,
+      word: 'bar',
+      position: { line: 1, character: 9 },
+    }),
+  ).toEqual([])
+})
+
+it('does not resolve a call to a later definition in the same function body', async () => {
+  expect(await findDefinition('foo() {\n bar\n bar() { :; }\n}\nfoo', 'bar', 1)).toEqual(
+    [],
+  )
+})
+
+it('does not expose functions before a top-level call', async () => {
+  expect(await findDefinition('bar\nbar() { :; }', 'bar', 0)).toEqual([])
 })

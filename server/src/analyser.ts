@@ -985,7 +985,9 @@ export default class Analyzer {
               if (symbol.location.range.start.line > position.line) {
                 if (
                   symbol.kind === LSP.SymbolKind.Function &&
-                  node &&
+                  !symbol.containerName &&
+                  node?.type === 'word' &&
+                  node.parent?.type === 'command_name' &&
                   TreeSitterUtil.findParentOfType(node, 'function_definition') &&
                   (!followingFunction ||
                     symbol.location.range.start.line <
