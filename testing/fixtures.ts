@@ -16,6 +16,8 @@ function getDocument(uri: string) {
 type FIXTURE_KEY = keyof typeof FIXTURE_URI
 
 export const FIXTURE_URI = {
+  BATS_SOURCING: `file://${path.join(FIXTURE_FOLDER, 'bats', 'sourcing.bats')}`,
+  BATS_TEST_HELPER: `file://${path.join(FIXTURE_FOLDER, 'bats', 'test_helper.bash')}`,
   COMMENT_DOC: `file://${path.join(FIXTURE_FOLDER, 'comment-doc-on-hover.sh')}`,
   CRASH: `file://${path.join(FIXTURE_FOLDER, 'crash.zsh')}`,
   INSTALL: `file://${path.join(FIXTURE_FOLDER, 'install.sh')}`,
