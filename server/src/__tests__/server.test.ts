@@ -14,11 +14,11 @@ import {
   updateSnapshotUris,
 } from '../../../testing/fixtures'
 import { getMockConnection } from '../../../testing/mocks'
-import Analyzer from '../analyser'
 import LspServer, { getCommandOptions } from '../server'
 import { Linter } from '../shellcheck'
 import { CompletionItemDataType } from '../types'
 import { Logger } from '../util/logger'
+import WorkspaceIndex from '../workspace-index'
 
 // Skip ShellCheck throttle delay in test cases
 jest.spyOn(global, 'setTimeout').mockImplementation((fn: any) => {
@@ -121,6 +121,31 @@ describe('server', () => {
     expect(connection.onWorkspaceSymbol).toHaveBeenCalledTimes(1)
     expect(connection.onPrepareRename).toHaveBeenCalledTimes(1)
     expect(connection.onRenameRequest).toHaveBeenCalledTimes(1)
+    expect(connection.onDidChangeWatchedFiles).toHaveBeenCalledTimes(1)
+  })
+
+  it('registers filesystem notifications and forwards them to the index', async () => {
+    const { connection } = await initializeServer({
+      capabilities: {
+        workspace: { didChangeWatchedFiles: { dynamicRegistration: true } },
+      },
+    })
+    expect(connection.client.register).toHaveBeenCalledWith(
+      LSP.DidChangeWatchedFilesNotification.type,
+      { watchers: [{ globPattern: '**/*' }] },
+    )
+    const update = jest
+      .spyOn(WorkspaceIndex.prototype, 'update')
+      .mockResolvedValue({ filesParsed: 0 })
+    try {
+      const changes: LSP.FileEvent[] = [
+        { uri: FIXTURE_URI.COMMENT_DOC, type: LSP.FileChangeType.Changed },
+      ]
+      await connection.onDidChangeWatchedFiles.mock.calls[0][0]({ changes })
+      expect(update).toHaveBeenCalledWith(changes)
+    } finally {
+      update.mockRestore()
+    }
   })
 
   it('allows for defining workspace configuration', async () => {
@@ -142,10 +167,7 @@ describe('server', () => {
   })
 
   it('uses initialization options to disable background analysis', async () => {
-    const backgroundAnalysis = jest.spyOn(
-      Analyzer.prototype,
-      'initiateBackgroundAnalysis',
-    )
+    const backgroundAnalysis = jest.spyOn(WorkspaceIndex.prototype, 'configure')
     try {
       await initializeServer({ initializationOptions: { backgroundAnalysisMaxFiles: 0 } })
 
@@ -161,10 +183,7 @@ describe('server', () => {
   })
 
   it('prefers workspace configuration over initialization options', async () => {
-    const backgroundAnalysis = jest.spyOn(
-      Analyzer.prototype,
-      'initiateBackgroundAnalysis',
-    )
+    const backgroundAnalysis = jest.spyOn(WorkspaceIndex.prototype, 'configure')
     try {
       await initializeServer({
         capabilities: { workspace: { configuration: true } },
@@ -202,10 +221,7 @@ describe('server', () => {
   )
 
   it('retains initialization options when workspace configuration is unavailable', async () => {
-    const backgroundAnalysis = jest.spyOn(
-      Analyzer.prototype,
-      'initiateBackgroundAnalysis',
-    )
+    const backgroundAnalysis = jest.spyOn(WorkspaceIndex.prototype, 'configure')
     try {
       await initializeServer({
         capabilities: { workspace: { configuration: true } },
@@ -229,10 +245,7 @@ describe('server', () => {
       SHFMT_PATH: 'custom-shfmt',
     }
     const lint = jest.spyOn(Linter.prototype, 'lint')
-    const backgroundAnalysis = jest.spyOn(
-      Analyzer.prototype,
-      'initiateBackgroundAnalysis',
-    )
+    const backgroundAnalysis = jest.spyOn(WorkspaceIndex.prototype, 'configure')
     try {
       const { server } = await initializeServer({
         initializationOptions: {

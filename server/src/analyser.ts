@@ -1,6 +1,5 @@
 import * as fs from 'fs'
 import * as FuzzySearch from 'fuzzy-search'
-import * as url from 'url'
 import { isDeepStrictEqual } from 'util'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
@@ -16,11 +15,9 @@ import {
   getLocalDeclarations,
   GlobalDeclarations,
 } from './util/declarations'
-import { getFilePaths } from './util/fs'
 import { getInputVariableDeclaration, variableNameRange } from './util/input-declarations'
 import { logger } from './util/logger'
 import { isPositionIncludedInRange } from './util/lsp'
-import { analyzeFile } from './util/shebang'
 import * as sourcing from './util/sourcing'
 import * as TreeSitterUtil from './util/tree-sitter'
 
@@ -136,90 +133,6 @@ export default class Analyzer {
     }
 
     return diagnostics
-  }
-
-  /**
-   * Initiates a background analysis of the files in the workspaceFolder to
-   * enable features across files.
-   *
-   * NOTE that when the source aware feature is enabled files are also parsed
-   * when they are found.
-   */
-  public async initiateBackgroundAnalysis({
-    backgroundAnalysisMaxFiles,
-    globPattern,
-  }: {
-    backgroundAnalysisMaxFiles: number
-    globPattern: string
-  }): Promise<{ filesParsed: number }> {
-    const rootPath = this.workspaceFolder
-    if (!rootPath) {
-      return { filesParsed: 0 }
-    }
-
-    if (backgroundAnalysisMaxFiles <= 0) {
-      logger.info(`BackgroundAnalysis: skipping as backgroundAnalysisMaxFiles was 0...`)
-      return { filesParsed: 0 }
-    }
-
-    logger.info(
-      `BackgroundAnalysis: resolving glob "${globPattern}" inside "${rootPath}"...`,
-    )
-
-    const lookupStartTime = Date.now()
-    const getTimePassed = (): string => `${(Date.now() - lookupStartTime) / 1000} seconds`
-
-    let filePaths: string[] = []
-    try {
-      filePaths = await getFilePaths({
-        globPattern,
-        rootPath,
-        maxItems: backgroundAnalysisMaxFiles,
-      })
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : error
-      logger.warn(
-        `BackgroundAnalysis: failed resolved glob "${globPattern}". The experience across files will be degraded. Error: ${errorMessage}`,
-      )
-      return { filesParsed: 0 }
-    }
-
-    logger.info(
-      `BackgroundAnalysis: Glob resolved with ${
-        filePaths.length
-      } files after ${getTimePassed()}`,
-    )
-
-    for (const filePath of filePaths) {
-      const uri = url.pathToFileURL(filePath).href
-
-      try {
-        const fileContent = await fs.promises.readFile(filePath, 'utf8')
-        const fileDialect = analyzeFile(uri, fileContent)
-        // Bail if the dialect is unsupported
-        if (!fileDialect.dialect) {
-          logger.info(
-            `BackgroundAnalysis: Skipping file ${uri} with dialect "${JSON.stringify(
-              fileDialect,
-            )}"`,
-          )
-          continue
-        }
-
-        this.analyze({
-          document: TextDocument.create(uri, 'shell', 1, fileContent),
-          uri,
-        })
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : error
-        logger.warn(`BackgroundAnalysis: Failed analyzing ${uri}. Error: ${errorMessage}`)
-      }
-    }
-
-    logger.info(`BackgroundAnalysis: Completed after ${getTimePassed()}.`)
-    return {
-      filesParsed: filePaths.length,
-    }
   }
 
   /**
@@ -611,6 +524,29 @@ export default class Analyzer {
    */
   public getDocument(uri: string): TextDocument | undefined {
     return this.uriToAnalyzedDocument[uri]?.document
+  }
+
+  public removeDocument(uri: string): void {
+    delete this.uriToAnalyzedDocument[uri]
+  }
+
+  /** Re-resolve cached source paths after the workspace filesystem changes. */
+  public refreshSourceCommands(): string[] {
+    const affected: string[] = []
+    for (const [uri, analyzed] of Object.entries(this.uriToAnalyzedDocument)) {
+      if (!analyzed) continue
+      const commands = sourcing
+        .getSourceCommands({
+          fileUri: uri,
+          rootPath: this.workspaceFolder,
+          tree: analyzed.tree,
+        })
+        .filter((command) => !command.error)
+      if (!isDeepStrictEqual(commands, analyzed.sourceCommands)) affected.push(uri)
+      analyzed.sourceCommands = commands
+      analyzed.sourcedUris = new Set(commands.map((command) => command.uri!))
+    }
+    return affected
   }
 
   // TODO: move somewhere else than the analyzer...
