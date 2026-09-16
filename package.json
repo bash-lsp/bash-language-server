@@ -1,5 +1,6 @@
 {
   "private": true,
+  "packageManager": "pnpm@12.4.1",
   "scripts": {
     "clean": "rm -rf *.log */*.log */out node_modules vscode-client/node_modules server/node_modules",
     "preinstall": "npx only-allow pnpm",
@@ -13,8 +14,8 @@
     "verify": "pnpm lint && pnpm compile && pnpm run test",
     "verify:bail": "pnpm lint:bail && pnpm compile && pnpm test:coverage",
     "reinstall-server": "npm uninstall -g bash-language-server && pnpm compile && npm i -g ./server",
-    "link-server": "npm uninstall -g bash-language-server && pnpm compile && pnpm unlink --dir=vscode-client bash-language-server && cd server && pnpm link . && cd ../vscode-client && pnpm link bash-language-server",
-    "postinstall": "pnpm --dir=vscode-client install --ignore-workspace"
+    "link-server": "pnpm compile && pnpm --dir=vscode-client link ../server",
+    "postinstall": "pnpm --dir=vscode-client install"
   },
   "devDependencies": {
     "@types/jest": "30.0.0",
@@ -35,12 +36,9 @@
     "vscode-languageserver": "8.1.0",
     "vscode-languageserver-textdocument": "1.0.14"
   },
-  "resolutions": {
-    "@types/vscode": "1.106.1"
-  },
   "engines": {
     "node": ">=20",
-    "pnpm": ">=10"
+    "pnpm": "^12.4.1"
   },
   "jest": {
     "preset": "ts-jest",

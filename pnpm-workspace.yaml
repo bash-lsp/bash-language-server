@@ -1,2 +1,20 @@
 packages:
   - 'server'
+
+saveExact: true
+hoist: false
+linkWorkspacePackages: false
+
+overrides:
+  '@types/vscode': 1.106.1
+
+# Already pinned in the pnpm 10 lockfile, but less than a day old at migration.
+minimumReleaseAgeExclude:
+  - '@types/node@22.20.3'
+  - 'baseline-browser-mapping@2.11.24'
+  - 'electron-to-chromium@1.5.430'
+
+# These dependencies use prebuilt binaries; pnpm 10 also skipped their scripts.
+allowBuilds:
+  '@parcel/watcher': false
+  unrs-resolver: false

@@ -15,8 +15,14 @@ convenience - it proxies to the `package.json` files in the `vscode-client` and
 
 This guide presumes you have the following dependencies installed:
 
-- [`pnpm`][pnpm].
+- [`pnpm`][pnpm] (12.4.1, pinned in the root and client `package.json` files).
 - [`node`][node] (v20 or newer)
+
+If you use nvm, select Node.js 22 (matching CI) from the project root:
+
+```
+nvm use
+```
 
 ## Initial setup
 
@@ -55,6 +61,7 @@ the server's Node.js 20 requirement.
 
 The client installs independently from the workspace. When updating its bundled
 server, update both `vscode-client/package.json` and `vscode-client/pnpm-lock.yaml`.
+Each workspace's pnpm settings live in its own `pnpm-workspace.yaml`.
 If dependency overrides are needed, keep npm and pnpm overrides aligned: pnpm
 uses them for installation, and VSCE uses npm to inspect dependencies when
 packaging. Remove each override when the bundled server includes the
