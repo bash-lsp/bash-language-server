@@ -307,7 +307,6 @@ describe('linter', () => {
       sourcePaths: [],
     })
 
-    expect(result.diagnostics).toEqual([])
-    expect(result.codeActions).toEqual({})
+    expect(result).toEqual({ diagnostics: [], codeActions: {} })
   })
 })

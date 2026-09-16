@@ -163,6 +163,10 @@ export default class BashServer {
     })
 
     this.documents.onDidClose((event) => {
+      this.linter?.cancel(event.document.uri)
+      if (currentDocument?.uri === event.document.uri) {
+        currentDocument = null
+      }
       connection.sendDiagnostics({ uri: event.document.uri, diagnostics: [] })
       delete this.uriToCodeActions[event.document.uri]
     })
@@ -180,6 +184,7 @@ export default class BashServer {
     connection.onPrepareRename(this.onPrepareRename.bind(this))
     connection.onRenameRequest(this.onRenameRequest.bind(this))
     connection.onDocumentFormatting(this.onDocumentFormatting.bind(this))
+    connection.onShutdown(() => this.linter?.dispose())
 
     /**
      * The initialized notification is sent from the client to the server after
@@ -273,6 +278,7 @@ export default class BashServer {
           // resetting the canLint flag though.
 
           const { shellcheckPath } = this.config
+          this.linter?.dispose()
           if (!shellcheckPath) {
             logger.info('ShellCheck linting is disabled as "shellcheckPath" was not set')
             this.linter = undefined
@@ -319,20 +325,25 @@ export default class BashServer {
    * Analyze and lint the given document.
    */
   public async analyzeAndLintDocument(document: TextDocument) {
-    const { uri } = document
+    const { uri, version } = document
 
     // Load the tree for the modified contents into the analyzer:
     let diagnostics = this.analyzer.analyze({ uri, document })
 
     // Run ShellCheck diagnostics:
-    if (this.linter) {
+    const { linter } = this
+    if (linter) {
       try {
         const sourceFolders = this.workspaceFolder ? [this.workspaceFolder] : []
-        const { diagnostics: lintDiagnostics, codeActions } = await this.linter.lint(
+        const result = await linter.lint(
           document,
           sourceFolders,
           this.config.shellcheckArguments,
         )
+        if (!result || this.linter !== linter) {
+          return
+        }
+        const { diagnostics: lintDiagnostics, codeActions } = result
         diagnostics = diagnostics.concat(lintDiagnostics)
         this.uriToCodeActions[uri] = codeActions
       } catch (err) {
@@ -340,7 +351,7 @@ export default class BashServer {
       }
     }
 
-    this.connection.sendDiagnostics({ uri, version: document.version, diagnostics })
+    this.connection.sendDiagnostics({ uri, version, diagnostics })
   }
 
   private logRequest({
