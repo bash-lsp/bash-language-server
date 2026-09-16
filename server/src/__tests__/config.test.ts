@@ -13,9 +13,7 @@ describe('ConfigSchema', () => {
           "**/node_modules/**",
           "**/.git/**",
         ],
-        "backgroundAnalysisMaxDirectories": 10000,
         "backgroundAnalysisMaxFiles": 500,
-        "backgroundAnalysisTimeout": 10000,
         "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
@@ -66,9 +64,7 @@ describe('ConfigSchema', () => {
           "**/node_modules/**",
           "**/.git/**",
         ],
-        "backgroundAnalysisMaxDirectories": 10000,
         "backgroundAnalysisMaxFiles": 1,
-        "backgroundAnalysisTimeout": 10000,
         "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "localhost:8080",
         "globPattern": "**/*@(.sh)",
@@ -140,9 +136,7 @@ describe('getConfigFromEnvironmentVariables', () => {
           "**/node_modules/**",
           "**/.git/**",
         ],
-        "backgroundAnalysisMaxDirectories": 10000,
         "backgroundAnalysisMaxFiles": 500,
-        "backgroundAnalysisTimeout": 10000,
         "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
@@ -179,9 +173,7 @@ describe('getConfigFromEnvironmentVariables', () => {
           "**/node_modules/**",
           "**/.git/**",
         ],
-        "backgroundAnalysisMaxDirectories": 10000,
         "backgroundAnalysisMaxFiles": 500,
-        "backgroundAnalysisTimeout": 10000,
         "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "",
         "globPattern": "**/*@(.sh|.inc|.bash|.command)",
@@ -224,9 +216,7 @@ describe('getConfigFromEnvironmentVariables', () => {
           "**/node_modules/**",
           "**/.git/**",
         ],
-        "backgroundAnalysisMaxDirectories": 10000,
         "backgroundAnalysisMaxFiles": 1,
-        "backgroundAnalysisTimeout": 10000,
         "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "localhost:8080",
         "globPattern": "*.*",
@@ -288,14 +278,7 @@ describe('getConfigFromEnvironmentVariables', () => {
   })
 })
 
-it('validates discovery budgets and accepts custom exclusions', () => {
-  expect(ConfigSchema.safeParse({ backgroundAnalysisMaxDirectories: 0 }).success).toBe(
-    false,
-  )
-  expect(ConfigSchema.safeParse({ backgroundAnalysisTimeout: 0 }).success).toBe(false)
-  expect(ConfigSchema.safeParse({ backgroundAnalysisTimeout: 2147483648 }).success).toBe(
-    false,
-  )
+it('accepts custom background exclusions', () => {
   expect(
     ConfigSchema.parse({ backgroundAnalysisIgnore: ['**/build/**'] })
       .backgroundAnalysisIgnore,

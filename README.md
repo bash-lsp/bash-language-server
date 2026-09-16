@@ -188,9 +188,8 @@ Using the built-in `eglot` lsp mode:
 ## Background analysis limits
 
 Background discovery stops after `backgroundAnalysisMaxFiles` matches (default 500),
-`backgroundAnalysisMaxDirectories` directory reads (default 10,000), or
-`backgroundAnalysisTimeout` milliseconds (default 10,000). The directory and time
-limits also apply when a workspace contains few or no shell files. A warning in
+10,000 directory reads, or 10 seconds. The directory and time limits are built in
+and also apply when a workspace contains few or no shell files. A warning in
 Bash IDE's output reports when discovery stops at either limit; workspace symbols
 may then be incomplete. Opening a file or following a source command still allows
 that file to be analyzed.

@@ -161,15 +161,10 @@ export default class Analyzer {
 
   public async initiateBackgroundAnalysis({
     backgroundAnalysisMaxFiles,
-    backgroundAnalysisMaxDirectories = getDefaultConfiguration()
-      .backgroundAnalysisMaxDirectories,
-    backgroundAnalysisTimeout = getDefaultConfiguration().backgroundAnalysisTimeout,
     backgroundAnalysisIgnore = getDefaultConfiguration().backgroundAnalysisIgnore,
     globPattern,
   }: {
     backgroundAnalysisMaxFiles: number
-    backgroundAnalysisMaxDirectories?: number
-    backgroundAnalysisTimeout?: number
     backgroundAnalysisIgnore?: string[]
     globPattern: string
   }): Promise<{ filesParsed: number }> {
@@ -200,13 +195,11 @@ export default class Analyzer {
         globPattern,
         rootPath,
         maxItems: backgroundAnalysisMaxFiles,
-        maxDirectories: backgroundAnalysisMaxDirectories,
-        timeoutMs: backgroundAnalysisTimeout,
         ignore: backgroundAnalysisIgnore,
         signal,
         onLimit: (reason) => {
           logger.warn(
-            `BackgroundAnalysis: stopped discovery at the ${reason} limit; workspace symbols may be incomplete. Adjust backgroundAnalysisMaxDirectories, backgroundAnalysisTimeout, or backgroundAnalysisIgnore.`,
+            `BackgroundAnalysis: stopped discovery at the ${reason} limit; workspace symbols may be incomplete. Exclude large folders with backgroundAnalysisIgnore or narrow globPattern.`,
           )
         },
       })

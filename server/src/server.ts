@@ -279,8 +279,6 @@ export default class BashServer {
       return this.analyzer.initiateBackgroundAnalysis({
         globPattern: this.config.globPattern,
         backgroundAnalysisMaxFiles: this.config.backgroundAnalysisMaxFiles,
-        backgroundAnalysisMaxDirectories: this.config.backgroundAnalysisMaxDirectories,
-        backgroundAnalysisTimeout: this.config.backgroundAnalysisTimeout,
         backgroundAnalysisIgnore: this.config.backgroundAnalysisIgnore,
       })
     }

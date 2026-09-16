@@ -6,6 +6,9 @@ import { fileURLToPath } from 'node:url'
 
 import * as fastGlob from 'fast-glob'
 
+const MAX_DISCOVERY_DIRECTORIES = 10000
+const DISCOVERY_TIMEOUT_MS = 10000
+
 // from https://github.com/sindresorhus/untildify/blob/f85a087418aeaa2beb56fe2684fe3b64fc8c588d/index.js#L11
 export function untildify(pathWithTilde: string): string {
   const homeDirectory = os.homedir()
@@ -160,8 +163,8 @@ export async function getFilePaths({
   globPattern,
   rootPath,
   maxItems,
-  maxDirectories = 10000,
-  timeoutMs = 10000,
+  maxDirectories = MAX_DISCOVERY_DIRECTORIES,
+  timeoutMs = DISCOVERY_TIMEOUT_MS,
   ignore = [],
   signal,
   onLimit,
