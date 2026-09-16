@@ -16,6 +16,14 @@ module.exports = {
     sourceType: 'module',
     project: './tsconfig.eslint.json',
   },
+  overrides: [
+    {
+      files: ['*.js'],
+      parserOptions: {
+        project: null,
+      },
+    },
+  ],
   rules: {
     'prettier/prettier': ['error'],
     '@typescript-eslint/no-unused-vars': [
@@ -24,6 +32,7 @@ module.exports = {
         vars: 'all',
         args: 'none',
         argsIgnorePattern: '^_',
+        caughtErrors: 'none',
         ignoreRestSiblings: true,
       },
     ],
@@ -61,7 +70,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-use-before-define': 'off',
     '@typescript-eslint/prefer-interface': 'off',
-    '@typescript-eslint/no-var-requires': 'off',
+    '@typescript-eslint/no-require-imports': 'off',
     'no-unused-vars': 'off', // replaced by @typescript-eslint/no-unused-vars
   },
   env: {
