@@ -127,9 +127,13 @@ function getSourcedPathInfoFromNode({
       }
 
       // Strip one leading dynamic section.
-      if (argumentNode.type === 'string' && argumentNode.namedChildren.length === 1) {
-        const [variableNode] = argumentNode.namedChildren
-        if (TreeSitterUtil.isExpansion(variableNode)) {
+      if (argumentNode.type === 'string') {
+        const [variableNode, ...suffixNodes] = argumentNode.namedChildren
+        if (
+          variableNode &&
+          TreeSitterUtil.isExpansion(variableNode) &&
+          suffixNodes.every((child) => child.type === 'string_content')
+        ) {
           const stringContents = argumentNode.text.slice(1, -1)
           if (stringContents.startsWith(`${variableNode.text}/`)) {
             return {
@@ -231,11 +235,15 @@ function resolveSourceFromConcatenation(node: SyntaxNode): string | null {
 
   // if the string is unquoted, the first child is the variable, so there's no more text in it.
   if (!TreeSitterUtil.isExpansion(firstNode)) {
-    if (firstNode.namedChildCount > 1) return null // Only one variable is allowed.
-    // Since the string must begin with the variable, the variable must be first child.
-    const variableNode = firstNode.namedChildren[0] // Get the variable (quoted case)
-    // This is command substitution!
-    if (!TreeSitterUtil.isExpansion(variableNode)) return null
+    const [variableNode, ...suffixNodes] = firstNode.namedChildren
+    // Allow static string content after one leading expansion, but no other
+    // variables or command substitutions.
+    if (
+      !variableNode ||
+      !TreeSitterUtil.isExpansion(variableNode) ||
+      suffixNodes.some((child) => child.type !== 'string_content')
+    )
+      return null
     const stringContents = firstNode.text.slice(1, -1)
     // The string doesn't start with the variable!
     if (!stringContents.startsWith(variableNode.text)) return null
