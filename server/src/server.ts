@@ -303,8 +303,6 @@ export default class BashServer {
             this.linter = new Linter({
               executablePath: shellcheckPath,
               externalSources: this.config.shellcheckExternalSources,
-              timeoutMs: this.config.shellcheckTimeout,
-              maxConcurrent: this.config.shellcheckMaxConcurrent,
             })
           }
 

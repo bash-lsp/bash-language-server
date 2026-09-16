@@ -16,6 +16,8 @@ import {
 } from './types'
 
 const DEBOUNCE_MS = 500
+const LINT_TIMEOUT_MS = 10000
+const MAX_CONCURRENT_JOBS = 2
 const KILL_GRACE_MS = 1000
 
 function safeFileURLToPath(uri: string): string | null {
@@ -64,8 +66,8 @@ export class Linter {
     cwd,
     executablePath,
     externalSources = true,
-    timeoutMs = 10000,
-    maxConcurrent = 2,
+    timeoutMs = LINT_TIMEOUT_MS,
+    maxConcurrent = MAX_CONCURRENT_JOBS,
   }: LinterOptions) {
     this._canLint = true
     this.cwd = cwd || process.cwd()

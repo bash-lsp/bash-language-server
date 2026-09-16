@@ -17,9 +17,7 @@ describe('ConfigSchema', () => {
         "logLevel": "info",
         "shellcheckArguments": [],
         "shellcheckExternalSources": true,
-        "shellcheckMaxConcurrent": 2,
         "shellcheckPath": "shellcheck",
-        "shellcheckTimeout": 10000,
         "shfmt": {
           "additionalArguments": [],
           "binaryNextLine": false,
@@ -71,9 +69,7 @@ describe('ConfigSchema', () => {
           "SC2002",
         ],
         "shellcheckExternalSources": true,
-        "shellcheckMaxConcurrent": 2,
         "shellcheckPath": "",
-        "shellcheckTimeout": 10000,
         "shfmt": {
           "additionalArguments": [],
           "binaryNextLine": true,
@@ -98,16 +94,6 @@ describe('ConfigSchema', () => {
     ).toEqual(['-e', 'SC2001', '-e', 'SC2002'])
   })
 })
-it('validates ShellCheck resource limits', () => {
-  expect(ConfigSchema.safeParse({ shellcheckMaxConcurrent: 0 }).success).toBe(false)
-  expect(ConfigSchema.safeParse({ shellcheckMaxConcurrent: 1.5 }).success).toBe(false)
-  expect(ConfigSchema.safeParse({ shellcheckTimeout: 0 }).success).toBe(false)
-  expect(ConfigSchema.safeParse({ shellcheckTimeout: 2147483648 }).success).toBe(false)
-  expect(
-    ConfigSchema.parse({ shellcheckTimeout: 2000, shellcheckMaxConcurrent: 1 }),
-  ).toMatchObject({ shellcheckTimeout: 2000, shellcheckMaxConcurrent: 1 })
-})
-
 describe('InitializationOptionsSchema', () => {
   it('leaves omitted settings absent instead of filling in defaults', () => {
     expect(InitializationOptionsSchema.parse({})).toEqual({})
@@ -146,9 +132,7 @@ describe('getConfigFromEnvironmentVariables', () => {
         "logLevel": "info",
         "shellcheckArguments": [],
         "shellcheckExternalSources": true,
-        "shellcheckMaxConcurrent": 2,
         "shellcheckPath": "shellcheck",
-        "shellcheckTimeout": 10000,
         "shfmt": {
           "additionalArguments": [],
           "binaryNextLine": false,
@@ -181,9 +165,7 @@ describe('getConfigFromEnvironmentVariables', () => {
         "logLevel": "info",
         "shellcheckArguments": [],
         "shellcheckExternalSources": true,
-        "shellcheckMaxConcurrent": 2,
         "shellcheckPath": "",
-        "shellcheckTimeout": 10000,
         "shfmt": {
           "additionalArguments": [],
           "binaryNextLine": false,
@@ -225,9 +207,7 @@ describe('getConfigFromEnvironmentVariables', () => {
           "SC2001",
         ],
         "shellcheckExternalSources": true,
-        "shellcheckMaxConcurrent": 2,
         "shellcheckPath": "/path/to/shellcheck",
-        "shellcheckTimeout": 10000,
         "shfmt": {
           "additionalArguments": [],
           "binaryNextLine": false,

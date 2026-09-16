@@ -203,14 +203,13 @@ the language server config by setting the "Ignore Editorconfig" configuration va
 
 ## ShellCheck resource limits
 
-The server runs at most `shellcheckMaxConcurrent` ShellCheck processes at once
-(default 2), shared across documents. Additional checks wait, and a new edit
-replaces any waiting or running check for that document. Each running check has a
-`shellcheckTimeout` deadline in milliseconds (default 10,000), excluding time spent
-waiting or debouncing. On cancellation or timeout, the server sends SIGTERM,
-followed by SIGKILL after one second if the checker has not exited. A process keeps
-its slot until it exits. Timed-out checks log a warning and do not publish stale
-or partial diagnostics. Increase the deadline if legitimate checks need more time.
+The server runs at most two ShellCheck processes at once, shared across documents.
+Additional checks wait, and a new edit replaces any waiting or running check for
+that document. Each running check has a 10-second deadline, excluding time spent
+waiting or debouncing. These limits are built in. On cancellation or timeout, the
+server sends SIGTERM, followed by SIGKILL after one second if the checker has not
+exited. A process keeps its slot until it exits. Timed-out checks log a warning and
+do not publish stale or partial diagnostics.
 
 On Unix, cancellation also terminates child processes in the checker's process
 group; remaining group members are killed when the canceled wrapper exits.
