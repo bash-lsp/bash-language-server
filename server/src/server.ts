@@ -37,6 +37,7 @@ export default class BashServer {
   private executables: Executables
   private linter?: Linter
   private formatter?: Formatter
+  private initializationOptions?: unknown
   private workspaceFolder: string | null
   private uriToCodeActions: {
     [uri: string]: LintingResult['codeActions'] | undefined
@@ -76,7 +77,7 @@ export default class BashServer {
    */
   public static async initialize(
     connection: LSP.Connection,
-    { rootPath, rootUri, capabilities }: LSP.InitializeParams,
+    { rootPath, rootUri, capabilities, initializationOptions }: LSP.InitializeParams,
   ): // TODO: use workspaceFolders instead of rootPath
   Promise<BashServer> {
     setLogConnection(connection)
@@ -105,6 +106,7 @@ export default class BashServer {
       executables,
       workspaceFolder,
     })
+    server.initializationOptions = initializationOptions
 
     logger.debug('Initialized')
 
@@ -197,12 +199,27 @@ export default class BashServer {
       const { config: environmentConfig, environmentVariablesUsed } =
         config.getConfigFromEnvironmentVariables()
 
+      this.updateConfiguration(environmentConfig)
       if (environmentVariablesUsed.length > 0) {
-        this.updateConfiguration(environmentConfig)
         logger.warn(
           `Environment variable configuration is being deprecated, please use workspace configuration. The following environment variables were used: ${environmentVariablesUsed.join(
             ', ',
           )}`,
+        )
+      }
+
+      const initializationOptions = config.InitializationOptionsSchema.safeParse(
+        this.initializationOptions ?? {},
+      )
+      if (initializationOptions.success) {
+        this.updateConfiguration({
+          ...this.config,
+          ...initializationOptions.data,
+          shfmt: { ...this.config.shfmt, ...initializationOptions.data.shfmt },
+        })
+      } else {
+        logger.warn(
+          `Failed to parse initialization options: ${initializationOptions.error}`,
         )
       }
 

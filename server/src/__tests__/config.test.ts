@@ -1,4 +1,8 @@
-import { ConfigSchema, getConfigFromEnvironmentVariables } from '../config'
+import {
+  ConfigSchema,
+  getConfigFromEnvironmentVariables,
+  InitializationOptionsSchema,
+} from '../config'
 import { LOG_LEVEL_ENV_VAR } from '../util/logger'
 
 describe('ConfigSchema', () => {
@@ -90,6 +94,30 @@ describe('ConfigSchema', () => {
     ).toEqual(['-e', 'SC2001', '-e', 'SC2002'])
   })
 })
+describe('InitializationOptionsSchema', () => {
+  it('leaves omitted settings absent instead of filling in defaults', () => {
+    expect(InitializationOptionsSchema.parse({})).toEqual({})
+    expect(
+      InitializationOptionsSchema.parse({
+        backgroundAnalysisMaxFiles: 0,
+        shfmt: { languageDialect: 'bash' },
+      }),
+    ).toEqual({
+      backgroundAnalysisMaxFiles: 0,
+      shfmt: { languageDialect: 'bash' },
+    })
+  })
+
+  it('ignores unrecognized settings', () => {
+    expect(
+      InitializationOptionsSchema.parse({
+        clientSetting: true,
+        shfmt: { clientSetting: true, path: ' custom-shfmt ' },
+      }),
+    ).toEqual({ shfmt: { path: 'custom-shfmt' } })
+  })
+})
+
 describe('getConfigFromEnvironmentVariables', () => {
   it('returns a default', () => {
     process.env = {}
