@@ -14,6 +14,8 @@ export const ShfmtConfigSchema = z.object({
         argsList = arg.split(' ')
       } else if (Array.isArray(arg)) {
         argsList = arg
+      } else {
+        return arg
       }
 
       return argsList
@@ -82,6 +84,8 @@ export const ConfigSchema = z.object({
         argsList = arg.split(' ')
       } else if (Array.isArray(arg)) {
         argsList = arg
+      } else {
+        return arg
       }
 
       return argsList

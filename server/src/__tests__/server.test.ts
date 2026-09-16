@@ -188,6 +188,8 @@ describe('server', () => {
     { initializationOptions: { shfmt: { languageDialect: 'invalid' } } },
     { initializationOptions: { shellcheckArguments: [1] } },
     { initializationOptions: { shfmt: { additionalArguments: [null] } } },
+    { initializationOptions: { shellcheckArguments: 42 } },
+    { initializationOptions: { shfmt: { additionalArguments: null } } },
   ])(
     'ignores invalid initialization options: $initializationOptions',
     async ({ initializationOptions }) => {
