@@ -149,5 +149,15 @@
   },
   "devDependencies": {
     "@types/vscode": "^1.44.0"
+  },
+  "overrides": {
+    "editorconfig@2.0.0": {
+      "minimatch": "9.0.9"
+    }
+  },
+  "pnpm": {
+    "overrides": {
+      "editorconfig@2.0.0>minimatch": "9.0.9"
+    }
   }
 }

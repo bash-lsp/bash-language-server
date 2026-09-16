@@ -50,6 +50,13 @@ To support a good develop workflow we set up [eslint][eslint], [Prettier][pretti
 
 ## Working on the client
 
+The client installs independently from the workspace. Its `package.json` has
+matching npm and pnpm overrides to patch the `minimatch` version pinned by
+`editorconfig@2.0.0` in the bundled server. Keep both overrides aligned: pnpm uses
+them for installation, and VSCE uses npm to inspect dependencies when packaging.
+They can be removed when the bundled server no longer uses that EditorConfig
+version.
+
 ### Visual Studio Code
 
 Working on the client is simply a matter of starting vscode and using the Debug
