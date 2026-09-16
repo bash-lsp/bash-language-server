@@ -1,3 +1,5 @@
+import { pathToFileURL } from 'node:url'
+
 import * as fs from 'fs'
 import * as os from 'os'
 import { Parser } from 'web-tree-sitter'
@@ -26,6 +28,33 @@ describe('getSourcedUris', () => {
       tree: parser.parse(fileContent)!,
     })
     expect(sourceCommands).toEqual([])
+  })
+
+  it.each(['path', 'URI'])('resolves an encoded workspace %s', (rootType) => {
+    const workspacePath = '/Users/bash/project #? %23 café'
+    const sourcedPath = `${workspacePath}/library #? %23 café.inc`
+    const existsSync = jest
+      .spyOn(fs, 'existsSync')
+      .mockImplementation((filePath) => filePath === sourcedPath)
+
+    try {
+      const sourceCommands = getSourceCommands({
+        fileUri: 'file:///Users/bash/elsewhere/main.sh',
+        rootPath: rootType === 'URI' ? pathToFileURL(workspacePath).href : workspacePath,
+        tree: parser.parse('source "./library #? %23 café.inc"')!,
+      })
+
+      expect(sourceCommands).toEqual([
+        {
+          range: expect.any(Object),
+          uri: pathToFileURL(sourcedPath).href,
+          error: null,
+        },
+      ])
+      expect(existsSync).toHaveBeenCalledWith(sourcedPath)
+    } finally {
+      existsSync.mockRestore()
+    }
   })
 
   it('returns a set of sourced files (but ignores some unhandled cases)', () => {

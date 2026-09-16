@@ -1,5 +1,7 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import * as LSP from 'vscode-languageserver/node'
 import { CodeAction } from 'vscode-languageserver/node'
@@ -693,6 +695,57 @@ describe('server', () => {
   })
 
   describe('onDefinition', () => {
+    it.each(['absolute', 'relative', 'workspace'])(
+      'percent-encodes definitions from a %s source path',
+      async (sourceType) => {
+        const temporaryDirectory = mkdtempSync(join(tmpdir(), 'bash-lsp-uri-'))
+        const workspaceDirectory = join(temporaryDirectory, 'project #? %23 café')
+        const documentDirectory =
+          sourceType === 'workspace'
+            ? join(workspaceDirectory, 'scripts')
+            : workspaceDirectory
+        mkdirSync(documentDirectory, { recursive: true })
+        const sourceName = 'library #? %23 café.inc'
+        const sourcePath = join(workspaceDirectory, sourceName)
+        const sourceUri = pathToFileURL(sourcePath).href
+        const documentPath = join(documentDirectory, 'main.sh')
+        const sourcedPath = sourceType === 'absolute' ? sourcePath : `./${sourceName}`
+
+        try {
+          writeFileSync(sourcePath, 'greet() { echo hello; }\n')
+          writeFileSync(documentPath, `source "${sourcedPath}"\ngreet\n`)
+          const { connection } = await initializeServer({
+            rootPath: pathToFileURL(workspaceDirectory).href,
+          })
+          const onDefinition = connection.onDefinition.mock.calls[0][0]
+
+          for (const line of [0, 1]) {
+            const result = await onDefinition(
+              {
+                textDocument: { uri: pathToFileURL(documentPath).href },
+                position: { line, character: 2 },
+              },
+              {} as any,
+              {} as any,
+            )
+
+            expect(result).toEqual([
+              {
+                uri: sourceUri,
+                range: expect.any(Object),
+              },
+            ])
+            const location = (result as LSP.Location[])[0]
+            expect(fileURLToPath(location.uri)).toBe(sourcePath)
+            expect(new URL(location.uri).hash).toBe('')
+            expect(new URL(location.uri).search).toBe('')
+          }
+        } finally {
+          rmSync(temporaryDirectory, { recursive: true, force: true })
+        }
+      },
+    )
+
     it('responds to onDefinition', async () => {
       const { connection } = await initializeServer()
 
