@@ -164,7 +164,7 @@
   },
   "dependencies": {
     "bash-language-server": "5.7.0",
-    "vscode-languageclient": "8.1.0",
+    "vscode-languageclient": "10.1.1",
     "vscode-languageserver": "8.1.0"
   },
   "devDependencies": {
