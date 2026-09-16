@@ -1,6 +1,10 @@
 import * as LSP from 'vscode-languageserver/node'
 import { Node as SyntaxNode, Tree } from 'web-tree-sitter'
 
+import {
+  getInputVariableDeclaration,
+  getInputVariableDeclarations,
+} from './input-declarations'
 import * as TreeSitterUtil from './tree-sitter'
 import {
   getLocalVariableDeclarations,
@@ -46,6 +50,12 @@ export function getGlobalDeclarations({
 
   TreeSitterUtil.forEach(tree.rootNode, (node) => {
     const followChildren = !GLOBAL_DECLARATION_LEAF_NODE_TYPES.has(node.type)
+
+    if (
+      getInputVariableDeclaration(node) &&
+      TreeSitterUtil.findParentOfType(node, 'subshell')
+    )
+      return false
 
     const symbol = getDeclarationSymbolFromNode({ node, uri })
     if (symbol) {
@@ -116,6 +126,15 @@ export function getLocalDeclarations({
     // NOTE: there is also node.walk
     if (node) {
       for (const childNode of node.children) {
+        for (const input of getInputVariableDeclarations(childNode)) {
+          const symbol = LSP.SymbolInformation.create(
+            input.name,
+            LSP.SymbolKind.Variable,
+            input.range,
+            uri,
+          )
+          ;(declarations[input.name] ??= []).push(symbol)
+        }
         let symbol: LSP.SymbolInformation | null = null
 
         // local variables
@@ -199,12 +218,25 @@ function getAllGlobalVariableDeclarations({
   const localsByFunction = new Map<number, Map<string, number>>()
 
   TreeSitterUtil.forEach(rootNode, (node) => {
+    const input = getInputVariableDeclaration(node)
     if (
-      node.type === 'variable_assignment' &&
+      (input || node.type === 'variable_assignment') &&
       // exclude local variables
       node.parent?.type !== 'declaration_command'
     ) {
-      const symbol = nodeToSymbolInformation({ node, uri })
+      const symbol = input
+        ? getDeclarationSymbolFromNode({ node, uri })
+        : nodeToSymbolInformation({ node, uri })
+      if (
+        input &&
+        TreeSitterUtil.findParentOfType(node, [
+          'subshell',
+          'command_substitution',
+          'process_substitution',
+          'pipeline',
+        ])
+      )
+        return false
       const owner = TreeSitterUtil.findParentOfType(node, 'function_definition')
       if (symbol && owner?.lastNamedChild) {
         let locals = localsByFunction.get(owner.id)
@@ -264,6 +296,14 @@ function getDeclarationSymbolFromNode({
   node: SyntaxNode
   uri: string
 }): LSP.SymbolInformation | null {
+  const input = getInputVariableDeclaration(node)
+  if (input)
+    return LSP.SymbolInformation.create(
+      input.name,
+      LSP.SymbolKind.Variable,
+      input.range,
+      uri,
+    )
   if (TreeSitterUtil.isDefinition(node)) {
     return nodeToSymbolInformation({ node, uri })
   } else if (node.type === 'command' && node.text.startsWith(': ')) {
@@ -404,8 +444,7 @@ export function findDeclarationUsingGlobalSemantics({
 
     if (
       kind === LSP.SymbolKind.Variable &&
-      TreeSitterUtil.isVariableInReadCommand(n) &&
-      n.text === word
+      getInputVariableDeclaration(n)?.name === word
     ) {
       declaration = n
       continueSearching = false

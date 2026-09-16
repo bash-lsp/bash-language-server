@@ -17,6 +17,7 @@ import {
   GlobalDeclarations,
 } from './util/declarations'
 import { getFilePaths } from './util/fs'
+import { getInputVariableDeclaration, variableNameRange } from './util/input-declarations'
 import { logger } from './util/logger'
 import { isPositionIncludedInRange } from './util/lsp'
 import { analyzeFile } from './util/shebang'
@@ -380,7 +381,7 @@ export default class Analyzer {
 
     return {
       declaration: declaration
-        ? LSP.Location.create(otherInfo.currentUri, TreeSitterUtil.range(declaration))
+        ? LSP.Location.create(otherInfo.currentUri, variableNameRange(declaration))
         : null,
       parent: parent
         ? LSP.Location.create(params.uri, TreeSitterUtil.range(parent))
@@ -422,15 +423,20 @@ export default class Analyzer {
     TreeSitterUtil.forEach(tree.rootNode, (n) => {
       let namedNode: SyntaxNode | null = null
 
-      if (TreeSitterUtil.isReference(n)) {
+      if (getInputVariableDeclaration(n)) {
+        namedNode = n
+      } else if (TreeSitterUtil.isReference(n)) {
         // NOTE: a reference can be a command, variable, function, etc.
         namedNode = n.firstNamedChild || n
       } else if (TreeSitterUtil.isDefinition(n)) {
         namedNode = n.firstNamedChild
       }
 
-      if (namedNode && namedNode.text === word) {
-        const range = TreeSitterUtil.range(namedNode)
+      if (
+        namedNode &&
+        (getInputVariableDeclaration(namedNode)?.name ?? namedNode.text) === word
+      ) {
+        const range = variableNameRange(namedNode)
 
         const alreadyInLocations = locations.some((loc) => {
           return isDeepStrictEqual(loc.range, range)
@@ -480,7 +486,7 @@ export default class Analyzer {
 
     const typeOfDescendants =
       kind === LSP.SymbolKind.Variable
-        ? ['variable_name', 'word']
+        ? ['variable_name', 'word', 'string', 'raw_string']
         : ['function_definition', 'command_name']
     const startPosition = start
       ? { row: start.line, column: start.character }
@@ -488,10 +494,8 @@ export default class Analyzer {
 
     const ignoredRanges: LSP.Range[] = []
     const filterVariables = (n: SyntaxNode) => {
-      if (
-        n.text !== word ||
-        (n.type === 'word' && !TreeSitterUtil.isVariableInReadCommand(n))
-      ) {
+      const input = getInputVariableDeclaration(n)
+      if ((input?.name ?? n.text) !== word || (n.type !== 'variable_name' && !input)) {
         return false
       }
 
@@ -533,8 +537,8 @@ export default class Analyzer {
             ['local', 'declare', 'typeset'].includes(
               declarationCommand?.firstChild?.text as any,
             ))) ||
-        // Local variables within `read` command that are typed as `word`
-        (parent.type === 'subshell' && n.type === 'word')
+        // Input destinations belong to their enclosing subshell.
+        (parent.type === 'subshell' && !!input)
       if (isLocal) {
         if (includeDeclaration) {
           ignoredRanges.push(TreeSitterUtil.range(parent))
@@ -580,7 +584,7 @@ export default class Analyzer {
           return TreeSitterUtil.range(n.firstNamedChild)
         }
 
-        return TreeSitterUtil.range(n)
+        return variableNameRange(n)
       })
   }
 
@@ -771,6 +775,13 @@ export default class Analyzer {
    */
   public wordAtPoint(uri: string, line: number, column: number): string | null {
     const node = this.nodeAtPoint(uri, line, column)
+    if (node) {
+      const input =
+        getInputVariableDeclaration(node) ||
+        (node.parent && getInputVariableDeclaration(node.parent))
+      if (input && isPositionIncludedInRange({ line, character: column }, input.range))
+        return input.name
+    }
 
     if (!node || node.childCount > 0 || node.text.trim() === '') {
       return null
@@ -817,10 +828,13 @@ export default class Analyzer {
       }
     }
 
-    if (TreeSitterUtil.isVariableInReadCommand(node)) {
+    const input =
+      getInputVariableDeclaration(node) ||
+      (node.parent && getInputVariableDeclaration(node.parent))
+    if (input && isPositionIncludedInRange(params.position, input.range)) {
       return {
-        word: node.text,
-        range: TreeSitterUtil.range(node),
+        word: input.name,
+        range: input.range,
         kind: LSP.SymbolKind.Variable,
       }
     }
