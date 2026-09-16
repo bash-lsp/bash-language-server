@@ -33,6 +33,11 @@ describe('getDocumentation', () => {
     expect(lines[1]).toContain('list directory contents')
   })
 
+  it('returns the external manual for an absolute command path', async () => {
+    const result = await sh.getShellDocumentation({ word: '/bin/ls' })
+    expect(result).toContain('list directory contents')
+  })
+
   it('skips documentation for some builtins', async () => {
     const result = await sh.getShellDocumentation({ word: 'else' })
     expect(result).toEqual(null)

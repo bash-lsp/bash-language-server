@@ -1,4 +1,5 @@
 import * as ChildProcess from 'child_process'
+import { basename, isAbsolute } from 'path'
 
 import { logger } from './logger'
 import { isWindows } from './platform'
@@ -68,12 +69,15 @@ export async function getShellDocumentationWithoutCache({
     return null
   }
 
+  const absolutePath = isAbsolute(word)
+  const commandName = absolutePath ? basename(word) : word
   const DOCUMENTATION_COMMANDS = [
-    { type: 'help', command: `help ${word} | col -bx` },
+    // An absolute path always invokes an external command, never a shell builtin.
+    ...(!absolutePath ? [{ type: 'help', command: `help ${word} | col -bx` }] : []),
     // We have experimented with setting MANWIDTH to different values for reformatting.
     // The default line width of the terminal works fine for hover, but could be better
     // for completions.
-    { type: 'man', command: `man -P cat ${word} | col -bx` },
+    { type: 'man', command: `man -P cat ${commandName} | col -bx` },
   ]
 
   for (const { type, command } of DOCUMENTATION_COMMANDS) {

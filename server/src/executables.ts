@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-import { basename, join } from 'path'
+import { basename, isAbsolute, join } from 'path'
 
 import * as ArrayUtil from './util/array'
 import * as FsUtil from './util/fs'
@@ -38,6 +38,21 @@ export default class Executables {
    */
   public isExecutableOnPATH(executable: string): boolean {
     return this.executables.has(executable)
+  }
+
+  /**
+   * Recognize commands invoked by their absolute path as well as names on PATH.
+   */
+  public async isExecutable(executable: string): Promise<boolean> {
+    if (!isAbsolute(executable)) {
+      return this.isExecutableOnPATH(executable)
+    }
+
+    try {
+      return isExecutableFile(await fs.promises.stat(executable))
+    } catch {
+      return false
+    }
   }
 }
 
