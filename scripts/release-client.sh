@@ -13,5 +13,5 @@ pnpm verify:bail
 
 cd vscode-client
 
-npx @vscode/vsce@2.26.0 publish --skip-duplicate -p $VSCE_TOKEN 
+npx @vscode/vsce@2.32.0 publish --skip-duplicate -p $VSCE_TOKEN
 tagRelease $tag || echo "Tag update failed, likely already exists"

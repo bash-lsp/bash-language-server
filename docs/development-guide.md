@@ -52,10 +52,11 @@ To support a good develop workflow we set up [eslint][eslint], [Prettier][pretti
 
 The client installs independently from the workspace. Its `package.json` has
 matching npm and pnpm overrides to patch the `minimatch` version pinned by
-`editorconfig@2.0.0` in the bundled server. Keep both overrides aligned: pnpm uses
-them for installation, and VSCE uses npm to inspect dependencies when packaging.
-They can be removed when the bundled server no longer uses that EditorConfig
-version.
+`editorconfig@2.0.0` and align the bundled server's `vscode-languageserver` with
+the client's version. Keep both sets of overrides aligned: pnpm uses them for
+installation, and VSCE uses npm to inspect dependencies when packaging. Remove
+each override when the bundled server includes the corresponding dependency
+update.
 
 ### Visual Studio Code
 
