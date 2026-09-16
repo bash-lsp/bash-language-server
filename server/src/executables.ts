@@ -49,7 +49,12 @@ export default class Executables {
     }
 
     try {
-      return isExecutableFile(await fs.promises.stat(executable))
+      const stats = await fs.promises.stat(executable)
+      if (!stats.isFile()) {
+        return false
+      }
+      await fs.promises.access(executable, fs.constants.X_OK)
+      return true
     } catch {
       return false
     }

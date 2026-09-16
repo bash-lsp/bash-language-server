@@ -91,3 +91,29 @@ describe('symbolic links', () => {
     expect(result.list()).toEqual(['command'])
   })
 })
+
+describe('absolute executable access', () => {
+  it.each([
+    { mode: 0o754, canExecute: false },
+    { mode: 0o645, canExecute: true },
+  ])('uses caller access for mode $mode', async ({ mode, canExecute }) => {
+    const executables = await Executables.fromPath('')
+    const stat = jest.spyOn(fs.promises, 'stat').mockResolvedValue({
+      isFile: () => true,
+      mode,
+    } as fs.Stats)
+    const access = jest.spyOn(fs.promises, 'access')
+    if (canExecute) {
+      access.mockResolvedValue(undefined)
+    } else {
+      access.mockRejectedValue(new Error('EACCES'))
+    }
+    try {
+      expect(await executables.isExecutable('/root-owned-command')).toBe(canExecute)
+      expect(access).toHaveBeenCalledWith('/root-owned-command', fs.constants.X_OK)
+    } finally {
+      stat.mockRestore()
+      access.mockRestore()
+    }
+  })
+})
