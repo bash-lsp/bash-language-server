@@ -78,13 +78,19 @@ export default class Analyzer {
       throw new Error(`Failed to parse ${uri}: no syntax tree returned`)
     }
 
-    const globalDeclarations = getGlobalDeclarations({ tree, uri })
-
-    const sourceCommands = sourcing.getSourceCommands({
-      fileUri: uri,
-      rootPath: this.workspaceFolder,
-      tree,
-    })
+    let globalDeclarations: GlobalDeclarations
+    let sourceCommands: sourcing.SourceCommand[]
+    try {
+      globalDeclarations = getGlobalDeclarations({ tree, uri })
+      sourceCommands = sourcing.getSourceCommands({
+        fileUri: uri,
+        rootPath: this.workspaceFolder,
+        tree,
+      })
+    } catch (error) {
+      tree.delete()
+      throw error
+    }
 
     const sourcedUris = new Set(
       sourceCommands
@@ -92,6 +98,9 @@ export default class Analyzer {
         .filter((uri): uri is string => uri !== null),
     )
 
+    // The AST lives in WebAssembly memory. Waiting for JavaScript finalizers
+    // lets that memory grow substantially during repeated edits.
+    this.uriToAnalyzedDocument[uri]?.tree.delete()
     this.uriToAnalyzedDocument[uri] = {
       document,
       globalDeclarations,
