@@ -11,7 +11,7 @@
     "url": "https://github.com/bash-lsp/bash-language-server"
   },
   "engines": {
-    "vscode": "^1.44.0"
+    "vscode": "^1.90.0"
   },
   "icon": "assets/bash-logo.png",
   "categories": [
@@ -151,25 +151,11 @@
     "vscode:prepublish": "cd .. && pnpm compile"
   },
   "dependencies": {
-    "bash-language-server": "5.4.2",
+    "bash-language-server": "5.7.0",
     "vscode-languageclient": "8.1.0",
     "vscode-languageserver": "8.1.0"
   },
   "devDependencies": {
     "@types/vscode": "^1.44.0"
-  },
-  "overrides": {
-    "bash-language-server": {
-      "vscode-languageserver": "8.1.0"
-    },
-    "editorconfig@2.0.0": {
-      "minimatch": "9.0.9"
-    }
-  },
-  "pnpm": {
-    "overrides": {
-      "bash-language-server>vscode-languageserver": "8.1.0",
-      "editorconfig@2.0.0>minimatch": "9.0.9"
-    }
   }
 }
