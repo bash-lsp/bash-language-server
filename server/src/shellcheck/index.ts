@@ -136,6 +136,7 @@ export class Linter {
       job.timeout = setTimeout(() => {
         Linter.readyJobs.set(job, async () => {
           const deadline = setTimeout(() => {
+            if (job.controller.signal.aborted) return
             logger.warn(`ShellCheck: timed out after ${this.timeoutMs}ms for ${uri}`)
             // Cancel this job, without touching a newer revision of the URI.
             job.controller.abort()
@@ -244,9 +245,10 @@ export class Linter {
     let err = ''
     const proc = new Promise((resolve, reject) => {
       const useProcessGroup = process.platform !== 'win32'
+      // The abort listener below owns termination. Passing signal here as well
+      // would race Node's direct-child kill against process-group cleanup.
       const proc = spawn(this.executablePath, [...args, '-'], {
         cwd: this.cwd,
-        signal,
         detached: useProcessGroup,
       })
       let processError: Error | undefined
@@ -316,6 +318,7 @@ export class Linter {
     let exit
     try {
       exit = await proc
+      signal.throwIfAborted()
     } catch (e) {
       if (signal.aborted && e instanceof Error && e.name === 'AbortError') {
         throw e

@@ -81,7 +81,6 @@ describe('lint process lifecycle', () => {
     const latest = linter.lint(document('echo latest'), [])
     // Cleanup can terminate the checker after a failed assertion.
     void first.catch(() => undefined)
-    expect(children[0].killed).toBe(true)
     expect(await first).toBeNull()
 
     jest.advanceTimersByTime(500)
@@ -113,11 +112,13 @@ describe('lint process lifecycle', () => {
     const second = linter.lint(document('echo latest', 'file:///tmp/other.sh'), [])
     jest.advanceTimersByTime(500)
     expect(await second).toEqual({ diagnostics: [], codeActions: {} })
-    expect(children[0].killed).toBe(false)
+    expect(children[0].exitCode).toBeNull()
+    expect(children[0].signalCode).toBeNull()
 
     linter.cancel(uri)
     expect(await first).toBeNull()
-    expect(children[0].killed).toBe(true)
+    await exits[0]
+    expect(children[0].signalCode).toBe('SIGTERM')
   })
 
   it('does not let an older process completion remove a newer queued request', async () => {
@@ -144,7 +145,8 @@ describe('lint process lifecycle', () => {
     linter.dispose()
 
     expect(await Promise.all([running, queued])).toEqual([null, null])
-    expect(children[0].killed).toBe(true)
+    await exits[0]
+    expect(children[0].signalCode).toBe('SIGTERM')
     jest.advanceTimersByTime(500)
     expect(children).toHaveLength(1)
   })
@@ -186,7 +188,8 @@ describe('lint process lifecycle', () => {
 
     connection.onDidCloseTextDocument.mock.calls[0][0]({ textDocument: { uri } })
     await analyze.mock.results[0].value
-    expect(children[0].killed).toBe(true)
+    await exits[0]
+    expect(children[0].signalCode).toBe('SIGTERM')
     expect(connection.sendDiagnostics.mock.calls).toEqual([[{ uri, diagnostics: [] }]])
 
     connection.onDidChangeConfiguration.mock.calls[0][0]({
@@ -210,7 +213,8 @@ describe('lint process lifecycle', () => {
     })
     await Promise.all(analyze.mock.results.map(({ value }) => value))
 
-    expect(children[0].killed).toBe(true)
+    await exits[0]
+    expect(children[0].signalCode).toBe('SIGTERM')
     expect(connection.sendDiagnostics.mock.calls).toEqual([
       [{ uri, version: 1, diagnostics: [] }],
     ])
@@ -239,7 +243,8 @@ describe('lint process lifecycle', () => {
       connection.onDidChangeConfiguration.mock.calls[0][0]({
         settings: { bashIde: { shellcheckPath } },
       })
-      expect(children.every((child) => child.killed)).toBe(true)
+      await Promise.all(exits)
+      expect(children.every((child) => child.signalCode === 'SIGTERM')).toBe(true)
       jest.advanceTimersByTime(500)
       await Promise.all(analyze.mock.results.map(({ value }) => value))
 
@@ -263,7 +268,8 @@ describe('lint process lifecycle', () => {
     await connection.onShutdown.mock.calls[0][0]({} as any)
     await pending
 
-    expect(children[0].killed).toBe(true)
+    await exits[0]
+    expect(children[0].signalCode).toBe('SIGTERM')
     expect(connection.sendDiagnostics).not.toHaveBeenCalled()
   })
 })

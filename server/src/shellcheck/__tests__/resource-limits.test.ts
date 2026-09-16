@@ -174,6 +174,33 @@ describe('ShellCheck resource limits', () => {
   )
 
   itPosix(
+    'does not report a canceled checker as timed out while waiting for it to exit',
+    async () => {
+      const checker = linter(1, 1000)
+      const warning = jest.spyOn(Logger.prototype, 'warn')
+      const canceled = checker.lint(document('hold ignore-term', 'canceled'), [])
+      jest.advanceTimersByTime(500)
+      await ready[0]
+      jest.advanceTimersByTime(600)
+      checker.cancel('file:///tmp/canceled.sh')
+      expect(await canceled).toBeNull()
+      const next = checker.lint(document('latest', 'next'), [])
+
+      // Its original deadline expires during the cancellation grace period.
+      jest.advanceTimersByTime(500)
+      expect(warning).not.toHaveBeenCalled()
+      expect(children).toHaveLength(1)
+      expect(children[0].signalCode).toBeNull()
+
+      jest.advanceTimersByTime(500)
+      await exits[0]
+      expect(await next).toEqual({ diagnostics: [], codeActions: {} })
+      expect(children[0].signalCode).toBe('SIGKILL')
+      expect(peakRunning).toBe(1)
+    },
+  )
+
+  itPosix(
     'shares slots with a replacement linter until disposed processes exit',
     async () => {
       const oldChecker = linter()
