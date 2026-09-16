@@ -265,6 +265,46 @@ describe('server', () => {
   })
 
   describe('onCompletion', () => {
+    describe.each([false, undefined, true])('snippetSupport=%s', (snippetSupport) => {
+      it.each([
+        { name: 'all completions', line: 26, character: 0 },
+        { name: 'filtered completions', line: 14, character: 2 },
+      ])('honors the client capability for $name', async ({ line, character }) => {
+        const { connection } = await initializeServer({
+          capabilities:
+            snippetSupport === undefined
+              ? {}
+              : {
+                  textDocument: {
+                    completion: { completionItem: { snippetSupport } },
+                  },
+                },
+        })
+
+        const onCompletion = connection.onCompletion.mock.calls[0][0]
+        const result = (await onCompletion(
+          {
+            textDocument: { uri: FIXTURE_URI.INSTALL },
+            position: { line, character },
+          },
+          {} as any,
+          {} as any,
+        )) as LSP.CompletionItem[]
+
+        expect(
+          result.some((item) => item.insertTextFormat === LSP.InsertTextFormat.Snippet),
+        ).toBe(snippetSupport === true)
+        expect(result).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              label: 'if',
+              kind: LSP.CompletionItemKind.Keyword,
+            }),
+          ]),
+        )
+      })
+    })
+
     it('responds to onCompletion with filtered list when word is found', async () => {
       const { connection } = await initializeServer()
 
