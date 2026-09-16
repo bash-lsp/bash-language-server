@@ -85,8 +85,20 @@ function getSourcedPathInfoFromNode({
       commandNameNode.type === 'command_name' &&
       sourcingCommands.includes(commandNameNode.text)
     ) {
+      // && and || wrap the command in (potentially nested) lists. A directive
+      // before the list still belongs to its first command.
+      let directiveTarget = node
+      while (
+        directiveTarget.parent?.type === 'list' &&
+        directiveTarget.parent.firstNamedChild?.id === directiveTarget.id
+      ) {
+        directiveTarget = directiveTarget.parent
+      }
+
       const previousCommentNode =
-        node.previousSibling?.type === 'comment' ? node.previousSibling : null
+        directiveTarget.previousSibling?.type === 'comment'
+          ? directiveTarget.previousSibling
+          : null
 
       if (previousCommentNode?.text.includes('shellcheck')) {
         const directives = parseShellCheckDirective(previousCommentNode.text)

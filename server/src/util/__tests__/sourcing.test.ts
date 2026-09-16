@@ -220,6 +220,60 @@ describe('getSourcedUris', () => {
       ]
     `)
   })
+  it.each([
+    'source "$libFolder/example.sh" || exit 1',
+    '. "$libFolder/example.sh" && echo loaded',
+    'source "$libFolder/example.sh" && echo loaded || exit 1',
+  ])('uses the ShellCheck source directive before %s', (command) => {
+    jest.restoreAllMocks()
+
+    const sourceCommands = getSourceCommands({
+      fileUri,
+      rootPath: REPO_ROOT_FOLDER,
+      tree: parser.parse(
+        `# shellcheck source=./testing/fixtures/issue206.sh\n${command}`,
+      )!,
+    })
+
+    expect(sourceCommands).toEqual([
+      expect.objectContaining({
+        uri: `file://${FIXTURE_FOLDER}issue206.sh`,
+        error: null,
+      }),
+    ])
+  })
+
+  it.each(['source=/dev/null', 'disable=SC1091'])(
+    'honors ShellCheck %s before a source command with error handling',
+    (directive) => {
+      const sourceCommands = getSourceCommands({
+        fileUri,
+        rootPath: REPO_ROOT_FOLDER,
+        tree: parser.parse(`# shellcheck ${directive}\nsource "$X" || exit 1`)!,
+      })
+
+      expect(sourceCommands).toEqual([])
+    },
+  )
+
+  it('does not reuse a source directive for later commands in a list', () => {
+    jest.restoreAllMocks()
+
+    const sourceCommands = getSourceCommands({
+      fileUri,
+      rootPath: REPO_ROOT_FOLDER,
+      tree: parser.parse(`
+        # shellcheck source=./testing/fixtures/issue206.sh
+        source "$X" && source ./testing/fixtures/install.sh
+      `)!,
+    })
+
+    expect(sourceCommands.map(({ uri, error }) => ({ uri, error }))).toEqual([
+      { uri: `file://${FIXTURE_FOLDER}issue206.sh`, error: null },
+      { uri: `file://${FIXTURE_FOLDER}install.sh`, error: null },
+    ])
+  })
+
   it('resolves bats `load` commands in .bats files', () => {
     jest.restoreAllMocks()
 
