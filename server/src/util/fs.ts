@@ -155,6 +155,10 @@ export async function getFilePaths({
   rootPath: string
   maxItems: number
 }): Promise<string[]> {
+  if (maxItems <= 0) {
+    return []
+  }
+
   if (rootPath.startsWith('file://')) {
     rootPath = fileURLToPath(rootPath)
   }
@@ -172,16 +176,13 @@ export async function getFilePaths({
   // and ensure that we stop reading files if the glob returns
   // too many files.
   const files = []
-  let i = 0
   for await (const fileEntry of stream) {
-    if (i >= maxItems) {
+    files.push(fileEntry.toString())
+    if (files.length >= maxItems) {
       // NOTE: Close the stream to stop reading files paths.
       stream.emit('close')
       break
     }
-
-    files.push(fileEntry.toString())
-    i++
   }
 
   return files

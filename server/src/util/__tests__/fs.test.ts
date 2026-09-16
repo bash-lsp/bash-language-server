@@ -135,4 +135,47 @@ describe('getFilePaths', () => {
 
     expect(filePaths).toHaveLength(3)
   })
+
+  it('stops walking once the limit is reached even without another match', async () => {
+    fs.writeFileSync(path.join(rootPath, 'script.sh'), '')
+    let nestedPath = rootPath
+    for (let i = 0; i < 30; i++) {
+      nestedPath = path.join(nestedPath, 'nested')
+      fs.mkdirSync(nestedPath)
+    }
+    fs.writeFileSync(path.join(nestedPath, 'unrelated.txt'), '')
+
+    const readdir = jest.spyOn(fs, 'readdir')
+    try {
+      const filePaths = await getFilePaths({
+        globPattern: '**/*.sh',
+        rootPath,
+        maxItems: 1,
+      })
+
+      expect(relativePaths(filePaths, rootPath)).toEqual(['script.sh'])
+      expect(readdir.mock.calls.map(([directoryPath]) => directoryPath)).not.toContain(
+        nestedPath,
+      )
+    } finally {
+      readdir.mockRestore()
+    }
+  })
+
+  it('does not start walking when the maximum is zero', async () => {
+    fs.writeFileSync(path.join(rootPath, 'script.sh'), '')
+    const readdir = jest.spyOn(fs, 'readdir')
+    try {
+      const filePaths = await getFilePaths({
+        globPattern: '**/*.sh',
+        rootPath,
+        maxItems: 0,
+      })
+
+      expect(filePaths).toEqual([])
+      expect(readdir).not.toHaveBeenCalled()
+    } finally {
+      readdir.mockRestore()
+    }
+  })
 })
