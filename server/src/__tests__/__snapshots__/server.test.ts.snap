@@ -1103,12 +1103,25 @@ exports[`server onRenameRequest Workspace-wide rename returns correct WorkspaceE
         "newText": "newName",
         "range": {
           "end": {
+            "character": 14,
+            "line": 15,
+          },
+          "start": {
+            "character": 4,
+            "line": 15,
+          },
+        },
+      },
+      {
+        "newText": "newName",
+        "range": {
+          "end": {
             "character": 10,
-            "line": 23,
+            "line": 26,
           },
           "start": {
             "character": 0,
-            "line": 23,
+            "line": 26,
           },
         },
       },

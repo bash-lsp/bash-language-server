@@ -7,7 +7,7 @@ on:
 
 permissions:
   id-token: write  # Required for OIDC
-  contents: read
+  contents: write  # Required for release tags and GitHub releases
 
 jobs:
   deploy:
@@ -25,8 +25,12 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          registry-url: https://registry.npmjs.org/
           cache: "pnpm"
+
+      - name: Upgrade npm for trusted publishing
+        run: |
+          npm install --global npm@11
+          npm --version
 
       - name: Configure for pushing git tags
         run: |
@@ -35,9 +39,11 @@ jobs:
 
       - name: Deploy server
         run: bash scripts/release-server.sh
-
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Deploy VS Code extension
         run: bash scripts/release-client.sh
         env:
+          GH_TOKEN: ${{ github.token }}
           VSCE_TOKEN: ${{ secrets.VSCE_PERSONAL_ACCESS_TOKEN }}
