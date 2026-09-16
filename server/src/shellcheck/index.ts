@@ -5,7 +5,6 @@ import { spawn } from 'child_process'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
-import { debounce } from '../util/async'
 import { logger } from '../util/logger'
 import { analyzeFile } from '../util/shebang'
 import { CODE_TO_TAGS, LEVEL_TO_SEVERITY, SHELLCHECK_DIALECTS } from './config'
@@ -41,13 +40,17 @@ export type LintingResult = {
   codeActions: Record<string, LSP.CodeAction | undefined>
 }
 
+type LintJob = {
+  controller: AbortController
+  timeout?: ReturnType<typeof setTimeout>
+  resolve: (result: LintingResult | null) => void
+}
+
 export class Linter {
   private cwd: string
   public executablePath: string
   private externalSources: boolean
-  private uriToDebouncedExecuteLint: {
-    [uri: string]: InstanceType<typeof Linter>['executeLint']
-  }
+  private uriToLintJob = new Map<string, LintJob>()
   private _canLint: boolean
 
   constructor({ cwd, executablePath, externalSources = true }: LinterOptions) {
@@ -55,33 +58,74 @@ export class Linter {
     this.cwd = cwd || process.cwd()
     this.executablePath = executablePath
     this.externalSources = externalSources
-    this.uriToDebouncedExecuteLint = Object.create(null)
   }
 
   public get canLint(): boolean {
     return this._canLint
   }
 
+  public cancel(uri: string): void {
+    const job = this.uriToLintJob.get(uri)
+    if (job) {
+      this.uriToLintJob.delete(uri)
+      clearTimeout(job.timeout)
+      job.controller.abort()
+      job.resolve(null)
+    }
+  }
+
+  public dispose(): void {
+    for (const uri of this.uriToLintJob.keys()) {
+      this.cancel(uri)
+    }
+  }
+
+  /** Returns null when superseded or canceled; callers must not publish that result. */
   public async lint(
     document: TextDocument,
     sourcePaths: string[],
     additionalShellCheckArguments: string[] = [],
-  ): Promise<LintingResult> {
+  ): Promise<LintingResult | null> {
     if (!this._canLint) {
       return { diagnostics: [], codeActions: {} }
     }
 
     const { uri } = document
-    let debouncedExecuteLint = this.uriToDebouncedExecuteLint[uri]
-    if (!debouncedExecuteLint) {
-      debouncedExecuteLint = debounce(this.executeLint.bind(this), DEBOUNCE_MS)
-      this.uriToDebouncedExecuteLint[uri] = debouncedExecuteLint
-    }
+    this.cancel(uri)
 
-    return debouncedExecuteLint(document, sourcePaths, additionalShellCheckArguments)
+    return new Promise((resolve, reject) => {
+      const job: LintJob = { controller: new AbortController(), resolve }
+      this.uriToLintJob.set(uri, job)
+      job.timeout = setTimeout(async () => {
+        try {
+          const result = await this.executeLint(
+            job.controller.signal,
+            document,
+            sourcePaths,
+            additionalShellCheckArguments,
+          )
+          resolve(job.controller.signal.aborted ? null : result)
+        } catch (error) {
+          if (
+            job.controller.signal.aborted &&
+            error instanceof Error &&
+            error.name === 'AbortError'
+          ) {
+            resolve(null)
+          } else {
+            reject(error)
+          }
+        } finally {
+          if (this.uriToLintJob.get(uri) === job) {
+            this.uriToLintJob.delete(uri)
+          }
+        }
+      }, DEBOUNCE_MS)
+    })
   }
 
   private async executeLint(
+    signal: AbortSignal,
     document: TextDocument,
     sourcePaths: string[],
     additionalShellCheckArguments: string[] = [],
@@ -113,6 +157,7 @@ export class Linter {
       : sourcePaths
 
     const result = await this.runShellCheck(
+      signal,
       documentText,
       shellName,
       effectiveSourcePaths,
@@ -123,13 +168,11 @@ export class Linter {
       return { diagnostics: [], codeActions: {} }
     }
 
-    // Clean up the debounced function
-    delete this.uriToDebouncedExecuteLint[document.uri]
-
     return mapShellCheckResult({ uri: document.uri, result })
   }
 
   private async runShellCheck(
+    signal: AbortSignal,
     documentText: string,
     shellName: string | null,
     sourcePaths: string[],
@@ -159,7 +202,7 @@ export class Linter {
     let out = ''
     let err = ''
     const proc = new Promise((resolve, reject) => {
-      const proc = spawn(this.executablePath, [...args, '-'], { cwd: this.cwd })
+      const proc = spawn(this.executablePath, [...args, '-'], { cwd: this.cwd, signal })
       proc.on('error', reject)
       proc.on('close', resolve)
       proc.stdout.on('data', (data) => (out += data))
@@ -180,6 +223,9 @@ export class Linter {
     try {
       exit = await proc
     } catch (e) {
+      if (signal.aborted && e instanceof Error && e.name === 'AbortError') {
+        throw e
+      }
       // TODO: we could do this up front?
       if ((e as any).code === 'ENOENT') {
         // shellcheck path wasn't found, don't try to lint any more:
