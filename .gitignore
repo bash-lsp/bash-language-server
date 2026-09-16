@@ -1,6 +1,7 @@
 # Build output
 vscode-client/out
 server/out
+*.tsbuildinfo
 
 # Linter cache
 coverage/
