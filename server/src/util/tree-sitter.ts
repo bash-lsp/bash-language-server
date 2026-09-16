@@ -43,20 +43,6 @@ export function isReference(n: SyntaxNode): boolean {
   }
 }
 
-export function isVariableInReadCommand(n: SyntaxNode): boolean {
-  if (
-    n.type === 'word' &&
-    n.parent?.type === 'command' &&
-    n.parent.firstChild?.text === 'read' &&
-    !n.text.startsWith('-') &&
-    !/^-.*[dinNptu]$/.test(n.previousSibling?.text ?? '')
-  ) {
-    return true
-  }
-
-  return false
-}
-
 export function isExpansion(n: SyntaxNode): boolean {
   switch (n.type) {
     case 'expansion':

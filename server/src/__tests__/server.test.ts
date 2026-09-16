@@ -1935,9 +1935,7 @@ describe('server', () => {
           [12, 30, { uri: FIXTURE_URI.RENAMING_READ }],
           [13, 10, { uri: FIXTURE_URI.RENAMING_READ }],
           [15, 10, { uri: FIXTURE_URI.RENAMING_READ }],
-          [15, 31, { uri: FIXTURE_URI.RENAMING_READ }],
           [16, 11, { uri: FIXTURE_URI.RENAMING_READ }],
-          [16, 30, { uri: FIXTURE_URI.RENAMING_READ }],
           [17, 23, { uri: FIXTURE_URI.RENAMING_READ }],
           [17, 33, { uri: FIXTURE_URI.RENAMING_READ }],
         )
@@ -1945,6 +1943,14 @@ describe('server', () => {
         for (const r of readvars) {
           expect(readvar).toStrictEqual(r)
         }
+
+        // Option-looking words after the first name are invalid destinations,
+        // not new options; do not rename the words following them.
+        const invalidDestinations = await getRenameRequestResults(
+          [15, 31, { uri: FIXTURE_URI.RENAMING_READ }],
+          [16, 30, { uri: FIXTURE_URI.RENAMING_READ }],
+        )
+        expect(invalidDestinations).toEqual([null, null])
 
         const [readloop, ...readloops] = await getRenameRequestResults(
           [21, 21, { uri: FIXTURE_URI.RENAMING_READ }],
