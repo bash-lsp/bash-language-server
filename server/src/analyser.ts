@@ -976,11 +976,25 @@ export default class Analyzer {
           Object.keys(localDeclarations).map((name) => {
             const symbolsMatchingWord = localDeclarations[name]
 
-            // Find the latest definition
+            // Prefer the latest preceding definition, with the first following
+            // function as a fallback: a function body can call a function that
+            // is declared later in the file.
             let closestSymbol: LSP.SymbolInformation | null = null
+            let followingFunction: LSP.SymbolInformation | null = null
             symbolsMatchingWord.forEach((symbol) => {
-              // Skip if the symbol is defined in the current file after the requested position
               if (symbol.location.range.start.line > position.line) {
+                if (
+                  symbol.kind === LSP.SymbolKind.Function &&
+                  !symbol.containerName &&
+                  node?.type === 'word' &&
+                  node.parent?.type === 'command_name' &&
+                  TreeSitterUtil.findParentOfType(node, 'function_definition') &&
+                  (!followingFunction ||
+                    symbol.location.range.start.line <
+                      followingFunction.location.range.start.line)
+                ) {
+                  followingFunction = symbol
+                }
                 return
               }
 
@@ -992,8 +1006,9 @@ export default class Analyzer {
               }
             })
 
-            if (closestSymbol) {
-              symbols.push(closestSymbol)
+            const symbol = closestSymbol || followingFunction
+            if (symbol) {
+              symbols.push(symbol)
             }
           })
         }
