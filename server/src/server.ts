@@ -208,7 +208,18 @@ export default class BashServer {
         )
       }
 
-      this.updateConfiguration(this.initializationOptions)
+      const { initializationOptions } = this
+      if (typeof initializationOptions === 'object' && initializationOptions !== null) {
+        this.updateConfiguration({
+          ...this.config,
+          ...initializationOptions,
+          ...('shfmt' in initializationOptions &&
+          typeof initializationOptions.shfmt === 'object' &&
+          initializationOptions.shfmt !== null
+            ? { shfmt: { ...this.config.shfmt, ...initializationOptions.shfmt } }
+            : {}),
+        })
+      }
 
       if (hasConfigurationCapability) {
         // Register event for all configuration changes.

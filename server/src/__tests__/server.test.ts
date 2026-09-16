@@ -16,6 +16,7 @@ import {
 import { getMockConnection } from '../../../testing/mocks'
 import Analyzer from '../analyser'
 import LspServer, { getCommandOptions } from '../server'
+import { Linter } from '../shellcheck'
 import { CompletionItemDataType } from '../types'
 import { Logger } from '../util/logger'
 
@@ -202,6 +203,43 @@ describe('server', () => {
         expect.objectContaining({ backgroundAnalysisMaxFiles: 0 }),
       )
     } finally {
+      backgroundAnalysis.mockRestore()
+    }
+  })
+
+  it('preserves environment settings omitted from initialization options', async () => {
+    const environment = process.env
+    process.env = {
+      ...environment,
+      SHELLCHECK_PATH: '',
+      GLOB_PATTERN: '**/*.custom-bash',
+      SHFMT_PATH: 'custom-shfmt',
+    }
+    const lint = jest.spyOn(Linter.prototype, 'lint')
+    const backgroundAnalysis = jest.spyOn(
+      Analyzer.prototype,
+      'initiateBackgroundAnalysis',
+    )
+    try {
+      const { server } = await initializeServer({
+        initializationOptions: {
+          backgroundAnalysisMaxFiles: 0,
+          shfmt: { languageDialect: 'bash' },
+        },
+      })
+      await server.analyzeAndLintDocument(FIXTURE_DOCUMENT.COMMENT_DOC)
+
+      expect(lint).not.toHaveBeenCalled()
+      expect(backgroundAnalysis).toHaveBeenCalledWith({
+        backgroundAnalysisMaxFiles: 0,
+        globPattern: '**/*.custom-bash',
+      })
+      expect(server).toMatchObject({
+        config: { shfmt: { path: 'custom-shfmt', languageDialect: 'bash' } },
+      })
+    } finally {
+      process.env = environment
+      lint.mockRestore()
       backgroundAnalysis.mockRestore()
     }
   })
