@@ -21,6 +21,7 @@ import { uniqueBasedOnHash } from './util/array'
 import { logger, setLogConnection, setLogLevel } from './util/logger'
 import { isPositionIncludedInRange } from './util/lsp'
 import { getShellDocumentation } from './util/sh'
+import WorkspaceIndex from './workspace-index'
 
 const PARAMETER_EXPANSION_PREFIXES = new Set(['$', '${'])
 const CONFIGURATION_SECTION = 'bashIde'
@@ -31,6 +32,7 @@ const CONFIGURATION_SECTION = 'bashIde'
  */
 export default class BashServer {
   private analyzer: Analyzer
+  private workspaceIndex: WorkspaceIndex
   private clientCapabilities: LSP.ClientCapabilities
   private config: config.Config
   private connection: LSP.Connection
@@ -68,6 +70,18 @@ export default class BashServer {
     this.linter = linter
     this.formatter = formatter
     this.workspaceFolder = workspaceFolder
+    this.workspaceIndex = new WorkspaceIndex(
+      analyzer,
+      workspaceFolder,
+      (uri) => !!this.documents.get(uri),
+      async (uris) => {
+        if (!this.config.enableSourceErrorDiagnostics) return
+        for (const uri of uris) {
+          const document = this.documents.get(uri)
+          if (document) await this.analyzeAndLintDocument(document)
+        }
+      },
+    )
     this.config = {} as any // NOTE: configured in updateConfiguration
     this.updateConfiguration(config.getDefaultConfiguration(), true)
   }
@@ -172,6 +186,7 @@ export default class BashServer {
       }
       connection.sendDiagnostics({ uri: event.document.uri, diagnostics: [] })
       delete this.uriToCodeActions[event.document.uri]
+      void this.workspaceIndex.close(event.document.uri)
     })
 
     // Register all the handlers for the LSP events.
@@ -191,6 +206,9 @@ export default class BashServer {
       this.analyzer.cancelBackgroundAnalysis()
       this.linter?.dispose()
     })
+    connection.onDidChangeWatchedFiles(({ changes }) =>
+      this.workspaceIndex.update(changes),
+    )
 
     /**
      * The initialized notification is sent from the client to the server after
@@ -243,6 +261,11 @@ export default class BashServer {
         logger.debug('Configuration loaded from client')
       }
 
+      if (this.clientCapabilities.workspace?.didChangeWatchedFiles?.dynamicRegistration) {
+        await connection.client.register(LSP.DidChangeWatchedFilesNotification.type, {
+          watchers: [{ globPattern: '**/*' }],
+        })
+      }
       initialized = true
       if (currentDocument) {
         // If we already have a document, analyze it now that we're initialized
@@ -276,7 +299,7 @@ export default class BashServer {
   private async startBackgroundAnalysis(): Promise<{ filesParsed: number }> {
     const { workspaceFolder } = this
     if (workspaceFolder) {
-      return this.analyzer.initiateBackgroundAnalysis({
+      return this.workspaceIndex.configure({
         globPattern: this.config.globPattern,
         backgroundAnalysisMaxFiles: this.config.backgroundAnalysisMaxFiles,
         backgroundAnalysisIgnore: this.config.backgroundAnalysisIgnore,

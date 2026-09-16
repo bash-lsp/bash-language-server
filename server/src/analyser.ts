@@ -724,6 +724,30 @@ export default class Analyzer {
     return this.uriToAnalyzedDocument[uri]?.tree.rootNode
   }
 
+  public removeDocument(uri: string): void {
+    this.uriToAnalyzedDocument[uri]?.tree.delete()
+    delete this.uriToAnalyzedDocument[uri]
+  }
+
+  /** Re-resolve cached source paths after the workspace filesystem changes. */
+  public refreshSourceCommands(): string[] {
+    const affected: string[] = []
+    for (const [uri, analyzed] of Object.entries(this.uriToAnalyzedDocument)) {
+      if (!analyzed) continue
+      const commands = sourcing
+        .getSourceCommands({
+          fileUri: uri,
+          rootPath: this.workspaceFolder,
+          tree: analyzed.tree,
+        })
+        .filter((command) => !command.error)
+      if (!isDeepStrictEqual(commands, analyzed.sourceCommands)) affected.push(uri)
+      analyzed.sourceCommands = commands
+      analyzed.sourcedUris = new Set(commands.map((command) => command.uri!))
+    }
+    return affected
+  }
+
   // TODO: move somewhere else than the analyzer...
   public async getExplainshellDocumentation({
     params,
