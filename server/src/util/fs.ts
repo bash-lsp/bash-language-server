@@ -36,6 +36,7 @@ export function untildify(pathWithTilde: string): string {
 function createCycleSafeFileSystemAdapter(
   canReadDirectory: () => boolean,
   isStopped: () => boolean,
+  skipHiddenEntries: boolean,
 ): Partial<fastGlob.FileSystemAdapter> {
   // Symbolic links to directories, by normalized path.
   const symlinkedDirectories = new Set<string>()
@@ -109,6 +110,14 @@ function createCycleSafeFileSystemAdapter(
     }
   }
 
+  const filterEntries = (entries: unknown): unknown => {
+    if (!skipHiddenEntries || !Array.isArray(entries)) return entries
+    return entries.filter((entry) => {
+      const name = typeof entry === 'string' ? entry : entry.name
+      return typeof name !== 'string' || !name.startsWith('.')
+    })
+  }
+
   return {
     readdir: (directoryPath: string, optionsOrCallback: any, callback?: any) => {
       const options =
@@ -132,8 +141,9 @@ function createCycleSafeFileSystemAdapter(
           return
         }
 
-        recordEntries(directoryPath, entries)
-        done(null, entries)
+        const filtered = filterEntries(entries)
+        recordEntries(directoryPath, filtered)
+        done(null, filtered)
       }
 
       if (options == null) {
@@ -147,10 +157,11 @@ function createCycleSafeFileSystemAdapter(
         return []
       }
 
-      const entries =
+      const entries = filterEntries(
         options == null
           ? fs.readdirSync(directoryPath)
-          : fs.readdirSync(directoryPath, options)
+          : fs.readdirSync(directoryPath, options),
+      )
 
       recordEntries(directoryPath, entries)
 
@@ -166,6 +177,7 @@ export async function getFilePaths({
   maxDirectories = MAX_DISCOVERY_DIRECTORIES,
   timeoutMs = DISCOVERY_TIMEOUT_MS,
   ignore = [],
+  skipHiddenEntries = false,
   signal,
   onLimit,
 }: {
@@ -175,6 +187,7 @@ export async function getFilePaths({
   maxDirectories?: number
   timeoutMs?: number
   ignore?: string[]
+  skipHiddenEntries?: boolean
   signal?: AbortSignal
   onLimit?: (reason: 'directories' | 'time') => void
 }): Promise<string[]> {
@@ -228,7 +241,11 @@ export async function getFilePaths({
         onlyFiles: true,
         cwd: rootPath,
         followSymbolicLinks: true,
-        fs: createCycleSafeFileSystemAdapter(canReadDirectory, () => finished),
+        fs: createCycleSafeFileSystemAdapter(
+          canReadDirectory,
+          () => finished,
+          skipHiddenEntries,
+        ),
         suppressErrors: true,
         ignore,
         concurrency: 16,
