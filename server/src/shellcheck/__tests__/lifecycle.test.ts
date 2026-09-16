@@ -216,6 +216,45 @@ describe('lint process lifecycle', () => {
     ])
   })
 
+  it.each(['replacement-shellcheck', ''])(
+    'refreshes every open document when shellcheckPath changes to "%s"',
+    async (shellcheckPath) => {
+      const { connection, server } = await initializeServer()
+      const analyze = jest.spyOn(server, 'analyzeAndLintDocument')
+      const openDocuments = [
+        { uri, languageId: 'shellscript', version: 1, text: 'echo latest' },
+        {
+          uri: 'file:///tmp/other.sh',
+          languageId: 'shellscript',
+          version: 2,
+          text: 'echo latest',
+        },
+      ]
+      for (const textDocument of openDocuments) {
+        connection.onDidOpenTextDocument.mock.calls[0][0]({ textDocument })
+      }
+      jest.advanceTimersByTime(500)
+      expect(children).toHaveLength(2)
+
+      connection.onDidChangeConfiguration.mock.calls[0][0]({
+        settings: { bashIde: { shellcheckPath } },
+      })
+      expect(children.every((child) => child.killed)).toBe(true)
+      jest.advanceTimersByTime(500)
+      await Promise.all(analyze.mock.results.map(({ value }) => value))
+
+      expect(connection.sendDiagnostics).toHaveBeenCalledTimes(2)
+      for (const { uri: documentUri, version } of openDocuments) {
+        expect(connection.sendDiagnostics).toHaveBeenCalledWith({
+          uri: documentUri,
+          version,
+          diagnostics: [],
+        })
+      }
+      expect(children).toHaveLength(shellcheckPath ? 4 : 2)
+    },
+  )
+
   it('cancels active checks on server shutdown', async () => {
     const { connection, server } = await initializeServer()
     const pending = server.analyzeAndLintDocument(document('echo stale'))
