@@ -2,6 +2,10 @@ import * as LSP from 'vscode-languageserver/node'
 import { Node as SyntaxNode, Tree } from 'web-tree-sitter'
 
 import * as TreeSitterUtil from './tree-sitter'
+import {
+  getLocalVariableDeclarations,
+  getUnconditionalLocals,
+} from './variable-declarations'
 
 const TREE_SITTER_TYPE_TO_LSP_KIND: { [type: string]: LSP.SymbolKind | undefined } = {
   // These keys are using underscores as that's the naming convention in tree-sitter.
@@ -116,6 +120,21 @@ export function getLocalDeclarations({
 
         // local variables
         if (childNode.type === 'declaration_command') {
+          const locals = getLocalVariableDeclarations(childNode)
+          for (const local of locals) {
+            const symbol =
+              local.node.parent?.type === 'variable_assignment'
+                ? nodeToSymbolInformation({ node: local.node.parent, uri })!
+                : LSP.SymbolInformation.create(
+                    local.name,
+                    LSP.SymbolKind.Variable,
+                    TreeSitterUtil.range(local.node),
+                    uri,
+                  )
+            ;(declarations[local.name] ??= []).push(symbol)
+          }
+          if (locals.length) continue
+
           const variableAssignmentNode = childNode.children.filter(
             (child) => child.type === 'variable_assignment',
           )[0]
@@ -177,6 +196,7 @@ function getAllGlobalVariableDeclarations({
   rootNode: SyntaxNode
 }) {
   const declarations: Declarations = {}
+  const localsByFunction = new Map<number, Map<string, number>>()
 
   TreeSitterUtil.forEach(rootNode, (node) => {
     if (
@@ -185,6 +205,16 @@ function getAllGlobalVariableDeclarations({
       node.parent?.type !== 'declaration_command'
     ) {
       const symbol = nodeToSymbolInformation({ node, uri })
+      const owner = TreeSitterUtil.findParentOfType(node, 'function_definition')
+      if (symbol && owner?.lastNamedChild) {
+        let locals = localsByFunction.get(owner.id)
+        if (!locals) {
+          locals = getUnconditionalLocals(owner.lastNamedChild)
+          localsByFunction.set(owner.id, locals)
+        }
+        const availableFrom = locals.get(symbol.name)
+        if (availableFrom !== undefined && availableFrom <= node.startIndex) return false
+      }
       if (symbol) {
         if (!declarations[symbol.name]) {
           declarations[symbol.name] = []
@@ -425,18 +455,8 @@ export function findDeclarationUsingLocalSemantics({
       return true
     }
 
-    if (!['local', 'declare', 'typeset'].includes(n.firstChild?.text as any)) {
-      return false
-    }
-
-    for (const v of n.descendantsOfType('variable_name')) {
-      if (
-        v.text !== word ||
-        TreeSitterUtil.findParentOfType(v, ['simple_expansion', 'expansion'])
-      ) {
-        continue
-      }
-
+    for (const { name, node: v } of getLocalVariableDeclarations(n)) {
+      if (name !== word) continue
       if (!isDefinedVariableInExpression(n, v, position)) {
         declaration = v
         continueSearching = false
