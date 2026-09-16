@@ -7,25 +7,51 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    name: verify (${{ matrix.shfmt-version }} shfmt)
+
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [20.x, 22.x]
+        # shfmt occasionally changes its output and its error messages, which
+        # the formatter tests assert on. The archive version lags well behind,
+        # so also test the latest release to catch such changes when they happen
+        # rather than when a user reports them.
+        shfmt-version: [distro, latest]
 
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install shellcheck and shfmt (used for testing)
-        run: sudo apt-get install -y shellcheck shfmt
+      - name: Install shellcheck (used for testing)
+        run: sudo apt-get install -y shellcheck
+
+      - name: Install shfmt from the Ubuntu archive (used for testing)
+        if: matrix.shfmt-version == 'distro'
+        run: sudo apt-get install -y shfmt
+
+      - name: Install the latest shfmt release (used for testing)
+        if: matrix.shfmt-version == 'latest'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=$(gh release view --repo mvdan/sh --json tagName --jq .tagName)
+          sudo curl -fsSL -o /usr/local/bin/shfmt \
+            "https://github.com/mvdan/sh/releases/download/$tag/shfmt_${tag}_linux_amd64"
+          sudo chmod +x /usr/local/bin/shfmt
+
+      - name: Show which shfmt is used
+        run: |
+          command -v shfmt
+          shfmt --version
 
       - uses: pnpm/action-setup@v4
         with:
           version: 10
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 22.x
         uses: actions/setup-node@v7
         with:
           cache: "pnpm"
-          node-version: ${{ matrix.node-version }}
+          node-version: 22.x
 
       - run: pnpm install --frozen-lockfile
 
@@ -34,7 +60,14 @@ jobs:
 
       - name: Publish coverage to codecov.io
         uses: codecov/codecov-action@v7
-        if: success() && matrix.node-version == '22.x'
+        if: success() && matrix.shfmt-version == 'distro'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./codecov.yml
+
+  all-done:
+    needs:
+      - verify
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo "All jobs completed"
