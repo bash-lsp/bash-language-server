@@ -163,7 +163,7 @@
       "vscode-languageserver": "8.1.0"
     },
     "editorconfig@2.0.0": {
-      "minimatch": "9.0.9"
+      "minimatch": "10.2.6"
     }
   },
   "pnpm": {
