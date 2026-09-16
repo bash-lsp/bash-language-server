@@ -48,7 +48,7 @@ async function findExecutablesInPath(path: string): Promise<string[]> {
   path = FsUtil.untildify(path)
 
   try {
-    const pathStats = await fs.promises.lstat(path)
+    const pathStats = await fs.promises.stat(path)
 
     if (pathStats.isDirectory()) {
       const childrenPaths = await fs.promises.readdir(path)
@@ -57,7 +57,7 @@ async function findExecutablesInPath(path: string): Promise<string[]> {
 
       for (const childrenPath of childrenPaths) {
         try {
-          const stats = await fs.promises.lstat(join(path, childrenPath))
+          const stats = await fs.promises.stat(join(path, childrenPath))
           if (isExecutableFile(stats)) {
             files.push(basename(childrenPath))
           }
