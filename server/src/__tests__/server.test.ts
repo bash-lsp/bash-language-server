@@ -14,6 +14,7 @@ import {
   updateSnapshotUris,
 } from '../../../testing/fixtures'
 import { getMockConnection } from '../../../testing/mocks'
+import Analyzer from '../analyser'
 import LspServer, { getCommandOptions } from '../server'
 import { CompletionItemDataType } from '../types'
 import { Logger } from '../util/logger'
@@ -32,10 +33,12 @@ async function initializeServer({
   capabilities,
   configurationObject,
   rootPath,
+  initializationOptions,
 }: {
   capabilities?: LSP.ClientCapabilities
   configurationObject?: unknown
   rootPath?: string
+  initializationOptions?: unknown
 } = {}) {
   const diagnostics: Array<LSP.PublishDiagnosticsParams | undefined> = []
 
@@ -47,6 +50,7 @@ async function initializeServer({
     processId: 42,
     capabilities: capabilities || {},
     workspaceFolders: null,
+    initializationOptions,
   })
 
   if (configurationObject) {
@@ -134,6 +138,72 @@ describe('server', () => {
     expect(Logger.prototype.log).not.toHaveBeenCalledWith(expect.any(Number), [
       expect.stringContaining('updateConfiguration: failed'),
     ])
+  })
+
+  it('uses initialization options to disable background analysis', async () => {
+    const backgroundAnalysis = jest.spyOn(
+      Analyzer.prototype,
+      'initiateBackgroundAnalysis',
+    )
+    try {
+      await initializeServer({ initializationOptions: { backgroundAnalysisMaxFiles: 0 } })
+
+      expect(backgroundAnalysis).toHaveBeenCalledWith(
+        expect.objectContaining({ backgroundAnalysisMaxFiles: 0 }),
+      )
+      await expect(backgroundAnalysis.mock.results[0].value).resolves.toEqual({
+        filesParsed: 0,
+      })
+    } finally {
+      backgroundAnalysis.mockRestore()
+    }
+  })
+
+  it('prefers workspace configuration over initialization options', async () => {
+    const backgroundAnalysis = jest.spyOn(
+      Analyzer.prototype,
+      'initiateBackgroundAnalysis',
+    )
+    try {
+      await initializeServer({
+        capabilities: { workspace: { configuration: true } },
+        initializationOptions: { backgroundAnalysisMaxFiles: 0 },
+        configurationObject: { backgroundAnalysisMaxFiles: 1 },
+      })
+
+      expect(backgroundAnalysis).toHaveBeenCalledWith(
+        expect.objectContaining({ backgroundAnalysisMaxFiles: 1 }),
+      )
+    } finally {
+      backgroundAnalysis.mockRestore()
+    }
+  })
+
+  it('ignores invalid initialization options', async () => {
+    await initializeServer({ initializationOptions: { backgroundAnalysisMaxFiles: -1 } })
+
+    expect(Logger.prototype.log).toHaveBeenCalledWith(expect.any(Number), [
+      expect.stringContaining('updateConfiguration: failed'),
+    ])
+  })
+
+  it('retains initialization options when workspace configuration is unavailable', async () => {
+    const backgroundAnalysis = jest.spyOn(
+      Analyzer.prototype,
+      'initiateBackgroundAnalysis',
+    )
+    try {
+      await initializeServer({
+        capabilities: { workspace: { configuration: true } },
+        initializationOptions: { backgroundAnalysisMaxFiles: 0 },
+      })
+
+      expect(backgroundAnalysis).toHaveBeenCalledWith(
+        expect.objectContaining({ backgroundAnalysisMaxFiles: 0 }),
+      )
+    } finally {
+      backgroundAnalysis.mockRestore()
+    }
   })
 
   it('ignores invalid workspace configuration', async () => {

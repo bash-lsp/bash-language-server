@@ -37,6 +37,7 @@ export default class BashServer {
   private executables: Executables
   private linter?: Linter
   private formatter?: Formatter
+  private initializationOptions?: unknown
   private workspaceFolder: string | null
   private uriToCodeActions: {
     [uri: string]: LintingResult['codeActions'] | undefined
@@ -76,7 +77,7 @@ export default class BashServer {
    */
   public static async initialize(
     connection: LSP.Connection,
-    { rootPath, rootUri, capabilities }: LSP.InitializeParams,
+    { rootPath, rootUri, capabilities, initializationOptions }: LSP.InitializeParams,
   ): // TODO: use workspaceFolders instead of rootPath
   Promise<BashServer> {
     setLogConnection(connection)
@@ -105,6 +106,7 @@ export default class BashServer {
       executables,
       workspaceFolder,
     })
+    server.initializationOptions = initializationOptions
 
     logger.debug('Initialized')
 
@@ -205,6 +207,8 @@ export default class BashServer {
           )}`,
         )
       }
+
+      this.updateConfiguration(this.initializationOptions)
 
       if (hasConfigurationCapability) {
         // Register event for all configuration changes.
