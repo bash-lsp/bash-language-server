@@ -91,7 +91,8 @@ describe('ConfigSchema', () => {
 describe('getConfigFromEnvironmentVariables', () => {
   it('returns a default', () => {
     process.env = {}
-    const { config } = getConfigFromEnvironmentVariables()
+    const { config, environmentVariablesUsed } = getConfigFromEnvironmentVariables()
+    expect(environmentVariablesUsed).toEqual([])
     expect(config).toMatchInlineSnapshot(`
       {
         "backgroundAnalysisMaxFiles": 500,
@@ -117,6 +118,34 @@ describe('getConfigFromEnvironmentVariables', () => {
       }
     `)
   })
+  it('excludes log level and shfmt options from deprecation warnings', () => {
+    process.env = {
+      [LOG_LEVEL_ENV_VAR]: 'debug',
+      SHFMT_PATH: '/path/to/shfmt',
+      SHFMT_CASE_INDENT: 'true',
+    }
+
+    const { environmentVariablesUsed } = getConfigFromEnvironmentVariables()
+    expect(environmentVariablesUsed).toEqual([])
+  })
+
+  it('reports configured scalar options even when their values are falsy', () => {
+    process.env = {
+      BACKGROUND_ANALYSIS_MAX_FILES: '0',
+      INCLUDE_ALL_WORKSPACE_SYMBOLS: 'false',
+      SHELLCHECK_PATH: '',
+      [LOG_LEVEL_ENV_VAR]: 'debug',
+      SHFMT_PATH: '/path/to/shfmt',
+    }
+
+    const { environmentVariablesUsed } = getConfigFromEnvironmentVariables()
+    expect(environmentVariablesUsed).toEqual([
+      'backgroundAnalysisMaxFiles',
+      'includeAllWorkspaceSymbols',
+      'shellcheckPath',
+    ])
+  })
+
   it('preserves an empty string', () => {
     process.env = {
       SHELLCHECK_PATH: '',
