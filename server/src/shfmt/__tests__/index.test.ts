@@ -47,7 +47,7 @@ describe('formatter', () => {
     expect(result).toEqual([])
 
     expect(formatter.canFormat).toBe(false)
-    expect(loggerWarn).toBeCalledWith(
+    expect(loggerWarn).toHaveBeenCalledWith(
       expect.stringContaining(
         'Shfmt: disabling formatting as no executable was found at path',
       ),

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for function-scoped declarations 1`] = `
 {

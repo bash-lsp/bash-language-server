@@ -59,7 +59,7 @@ describe('linter', () => {
     })
 
     expect(linter.canLint).toBe(false)
-    expect(loggerWarn).toBeCalledWith(
+    expect(loggerWarn).toHaveBeenCalledWith(
       expect.stringContaining(
         'ShellCheck: disabling linting as no executable was found at path',
       ),
