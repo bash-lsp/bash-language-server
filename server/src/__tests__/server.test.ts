@@ -255,6 +255,28 @@ describe('server', () => {
     }
   })
 
+  it.each(['debug', 'error'])(
+    'preserves an environment-only log level of %s with unrelated initialization options',
+    async (logLevel) => {
+      const environment = process.env
+      process.env = { PATH: environment.PATH, BASH_IDE_LOG_LEVEL: logLevel }
+      try {
+        const { server } = await initializeServer({
+          initializationOptions: { backgroundAnalysisMaxFiles: 0 },
+        })
+
+        expect(server).toMatchObject({ config: { logLevel } })
+        expect(Logger.prototype.log).not.toHaveBeenCalledWith(expect.any(Number), [
+          expect.stringContaining(
+            'Environment variable configuration is being deprecated',
+          ),
+        ])
+      } finally {
+        process.env = environment
+      }
+    },
+  )
+
   it('ignores invalid workspace configuration', async () => {
     const { connection } = await initializeServer({
       capabilities: {

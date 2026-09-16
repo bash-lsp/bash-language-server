@@ -199,8 +199,8 @@ export default class BashServer {
       const { config: environmentConfig, environmentVariablesUsed } =
         config.getConfigFromEnvironmentVariables()
 
+      this.updateConfiguration(environmentConfig)
       if (environmentVariablesUsed.length > 0) {
-        this.updateConfiguration(environmentConfig)
         logger.warn(
           `Environment variable configuration is being deprecated, please use workspace configuration. The following environment variables were used: ${environmentVariablesUsed.join(
             ', ',
