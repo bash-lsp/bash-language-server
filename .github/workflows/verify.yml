@@ -23,7 +23,7 @@ jobs:
             shfmt: latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install shellcheck (used for testing)
         run: sudo apt-get install -y shellcheck
@@ -52,7 +52,7 @@ jobs:
           version: 10
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           cache: "pnpm"
           node-version: ${{ matrix.node-version }}
@@ -63,7 +63,7 @@ jobs:
         run: pnpm verify:bail
 
       - name: Publish coverage to codecov.io
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         if: success() && matrix.node-version == '22.x' && matrix.shfmt == 'distro'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

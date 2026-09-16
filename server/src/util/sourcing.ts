@@ -10,6 +10,14 @@ import * as TreeSitterUtil from './tree-sitter'
 
 const SOURCING_COMMANDS = ['source', '.']
 
+// Bats (https://bats-core.readthedocs.io) test files pull in helper files using
+// `load`, which behaves like `source` but resolves relative to the directory of
+// the test file and appends ".bash" if the given path does not exist. It is only
+// treated as a sourcing command in .bats files, as `load` is a common enough
+// name for an unrelated command or function elsewhere.
+const BATS_SOURCING_COMMANDS = ['load']
+const BATS_SOURCED_EXTENSION = '.bash'
+
 export type SourceCommand = {
   range: LSP.Range
   uri: string | null // resolved URIs
@@ -31,13 +39,16 @@ export function getSourceCommands({
   const sourceCommands: SourceCommand[] = []
 
   const rootPaths = [path.dirname(fileUri), rootPath].filter(Boolean) as string[]
+  const isBatsFile = fileUri.endsWith('.bats')
 
   TreeSitterUtil.forEach(tree.rootNode, (node) => {
-    const sourcedPathInfo = getSourcedPathInfoFromNode({ node })
+    const sourcedPathInfo = getSourcedPathInfoFromNode({ node, isBatsFile })
 
     if (sourcedPathInfo) {
       const { sourcedPath, parseError } = sourcedPathInfo
-      const uri = sourcedPath ? resolveSourcedUri({ rootPaths, sourcedPath }) : null
+      const uri = sourcedPath
+        ? resolveSourcedUri({ rootPaths, sourcedPath, isBatsFile })
+        : null
 
       sourceCommands.push({
         range: TreeSitterUtil.range(node),
@@ -54,9 +65,15 @@ export function getSourceCommands({
 
 function getSourcedPathInfoFromNode({
   node,
+  isBatsFile,
 }: {
   node: Parser.SyntaxNode
+  isBatsFile: boolean
 }): null | { sourcedPath?: string; parseError?: string } {
+  const sourcingCommands = isBatsFile
+    ? [...SOURCING_COMMANDS, ...BATS_SOURCING_COMMANDS]
+    : SOURCING_COMMANDS
+
   if (node.type === 'command') {
     const [commandNameNode, argumentNode] = node.namedChildren
 
@@ -66,7 +83,7 @@ function getSourcedPathInfoFromNode({
 
     if (
       commandNameNode.type === 'command_name' &&
-      SOURCING_COMMANDS.includes(commandNameNode.text)
+      sourcingCommands.includes(commandNameNode.text)
     ) {
       const previousCommentNode =
         node.previousSibling?.type === 'comment' ? node.previousSibling : null
@@ -148,6 +165,7 @@ function getSourcedPathInfoFromNode({
  * - Converts a relative paths to absolute paths
  * - Converts a tilde path to an absolute path
  * - Resolves the path
+ * - For bats files, retries with a ".bash" suffix, like bats' own `load` does
  *
  * NOTE: for future improvements:
  * "If filename does not contain a slash, file names in PATH are used to find
@@ -156,28 +174,39 @@ function getSourcedPathInfoFromNode({
 function resolveSourcedUri({
   rootPaths,
   sourcedPath,
+  isBatsFile,
 }: {
   rootPaths: string[]
   sourcedPath: string
+  isBatsFile: boolean
 }): string | null {
   if (sourcedPath.startsWith('~')) {
     sourcedPath = untildify(sourcedPath)
   }
 
+  // bats' `load` falls back to appending ".bash" when the given path is not a file
+  const sourcedPaths = isBatsFile
+    ? [sourcedPath, `${sourcedPath}${BATS_SOURCED_EXTENSION}`]
+    : [sourcedPath]
+
   if (sourcedPath.startsWith('/')) {
-    if (fs.existsSync(sourcedPath)) {
-      return `file://${sourcedPath}`
+    for (const candidate of sourcedPaths) {
+      if (fs.existsSync(candidate)) {
+        return `file://${candidate}`
+      }
     }
     return null
   }
 
   // resolve  relative path
   for (const rootPath of rootPaths) {
-    const potentialPath = path.join(rootPath.replace('file://', ''), sourcedPath)
+    for (const candidate of sourcedPaths) {
+      const potentialPath = path.join(rootPath.replace('file://', ''), candidate)
 
-    // check if path is a file
-    if (fs.existsSync(potentialPath)) {
-      return `file://${potentialPath}`
+      // check if path is a file
+      if (fs.existsSync(potentialPath)) {
+        return `file://${potentialPath}`
+      }
     }
   }
 
