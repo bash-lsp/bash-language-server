@@ -12,7 +12,8 @@ import * as config from './config'
 import Executables from './executables'
 import { initializeParser } from './parser'
 import * as ReservedWords from './reserved-words'
-import { Linter, LintingResult } from './shellcheck'
+import { Linter } from './shellcheck'
+import { getCodeActions } from './shellcheck/code-actions'
 import { Formatter } from './shfmt'
 import { SNIPPETS } from './snippets'
 import { BashCompletionItem, CompletionItemDataType } from './types'
@@ -40,7 +41,7 @@ export default class BashServer {
   private initializationOptions?: unknown
   private workspaceFolder: string | null
   private uriToCodeActions: {
-    [uri: string]: LintingResult['codeActions'] | undefined
+    [uri: string]: Record<string, LSP.CodeAction[] | undefined> | undefined
   } = {}
 
   private constructor({
@@ -260,7 +261,6 @@ export default class BashServer {
         logger.debug('Configuration changed')
         this.startBackgroundAnalysis()
         for (const document of this.documents.all()) {
-          this.uriToCodeActions[document.uri] = undefined
           this.analyzeAndLintDocument(document)
         }
       }
@@ -347,6 +347,7 @@ export default class BashServer {
    */
   public async analyzeAndLintDocument(document: TextDocument) {
     const { uri, version } = document
+    delete this.uriToCodeActions[uri]
 
     // Load the tree for the modified contents into the analyzer:
     let diagnostics = this.analyzer.analyze({ uri, document })
@@ -364,9 +365,13 @@ export default class BashServer {
         if (!result || this.linter !== linter) {
           return
         }
-        const { diagnostics: lintDiagnostics, codeActions } = result
+        const { diagnostics: lintDiagnostics } = result
         diagnostics = diagnostics.concat(lintDiagnostics)
-        this.uriToCodeActions[uri] = codeActions
+        this.uriToCodeActions[uri] = getCodeActions({
+          document,
+          rootNode: this.analyzer.getRootNode(uri),
+          result,
+        })
       } catch (err) {
         logger.error(`Error while linting: ${err}`)
       }
@@ -454,9 +459,10 @@ export default class BashServer {
   private async onCodeAction(params: LSP.CodeActionParams): Promise<LSP.CodeAction[]> {
     const codeActionsForUri = this.uriToCodeActions[params.textDocument.uri] || {}
 
-    const codeActions = params.context.diagnostics
-      .map(({ data }) => codeActionsForUri[data?.id])
-      .filter((action): action is LSP.CodeAction => action != null)
+    const codeActions = uniqueBasedOnHash(
+      params.context.diagnostics.flatMap(({ data }) => codeActionsForUri[data?.id] || []),
+      (action) => JSON.stringify([action.title, action.edit]),
+    )
 
     logger.debug(`onCodeAction: found ${codeActions.length} code action(s)`)
 

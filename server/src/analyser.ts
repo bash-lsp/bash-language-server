@@ -720,6 +720,10 @@ export default class Analyzer {
     return this.uriToAnalyzedDocument[uri]?.document
   }
 
+  public getRootNode(uri: string): SyntaxNode | undefined {
+    return this.uriToAnalyzedDocument[uri]?.tree.rootNode
+  }
+
   // TODO: move somewhere else than the analyzer...
   public async getExplainshellDocumentation({
     params,

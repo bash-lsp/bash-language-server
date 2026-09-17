@@ -4,7 +4,6 @@ import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import * as LSP from 'vscode-languageserver/node'
-import { CodeAction } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import {
@@ -376,43 +375,125 @@ describe('server', () => {
         {} as any,
       )
 
-      expect(result).toHaveLength(1)
-      const codeAction = (result as CodeAction[])[0]
-      expect(codeAction.diagnostics).toEqual([fixableDiagnostic])
-      expect(codeAction.diagnostics).toEqual([fixableDiagnostic])
+      expect(updateSnapshotUris(result)).toMatchSnapshot()
+    })
 
+    it('offers suppression without an automatic fix and ignores unknown diagnostics', async () => {
+      const { connection, server } = await initializeServer()
+      const document = TextDocument.create(
+        FIXTURE_URI.COMMENT_DOC,
+        'shellscript',
+        1,
+        '#!/bin/bash\n: before\necho "$foo"',
+      )
+      await server.analyzeAndLintDocument(document)
+      const { diagnostics } = connection.sendDiagnostics.mock.calls[0][0]
+      const diagnostic = diagnostics.find(({ code }) => code === 'SC2154')!
+      const onCodeAction = connection.onCodeAction.mock.calls[0][0]
+      const result = (await onCodeAction(
+        {
+          textDocument: { uri: document.uri },
+          range: diagnostic.range,
+          context: {
+            diagnostics: [
+              diagnostic,
+              { ...diagnostic, data: undefined },
+              { ...diagnostic, data: { id: 'unknown' } },
+            ],
+          },
+        },
+        {} as any,
+        {} as any,
+      )) as LSP.CodeAction[]
+      expect(result.map(({ title }) => title)).toEqual([
+        'Disable ShellCheck rule SC2154 for this command',
+        'Disable ShellCheck rule SC2154 for the entire file',
+      ])
+      for (const action of result) {
+        expect(action.diagnostics).toEqual([diagnostic])
+        const edited = TextDocument.applyEdits(
+          document,
+          action.edit!.changes![document.uri],
+        )
+        expect(edited).toContain('# shellcheck disable=SC2154\n')
+      }
+    })
+
+    it('deduplicates suppressions while preserving distinct fixes and command scopes', async () => {
+      const { connection, server } = await initializeServer()
+      const document = TextDocument.create(
+        FIXTURE_URI.COMMENT_DOC,
+        'shellscript',
+        1,
+        '#!/bin/bash\n: before\necho $foo $bar\necho $baz',
+      )
+      await server.analyzeAndLintDocument(document)
+      const diagnostics = connection.sendDiagnostics.mock.calls[0][0].diagnostics.filter(
+        ({ code }) => code === 'SC2086',
+      )
+      expect(diagnostics).toHaveLength(3)
+      const onCodeAction = connection.onCodeAction.mock.calls[0][0]
+      const result = (await onCodeAction(
+        {
+          textDocument: { uri: document.uri },
+          range: LSP.Range.create(0, 0, 4, 0),
+          context: { diagnostics: [...diagnostics, diagnostics[0]] },
+        },
+        {} as any,
+        {} as any,
+      )) as LSP.CodeAction[]
+      expect(result.filter(({ title }) => title === 'Apply fix for SC2086')).toHaveLength(
+        3,
+      )
       expect(
-        codeAction.edit?.changes && codeAction.edit?.changes[FIXTURE_URI.COMMENT_DOC],
-      ).toMatchInlineSnapshot(`
-        [
+        result.filter(({ title }) => title.endsWith('for this command')),
+      ).toHaveLength(2)
+      expect(
+        result.filter(({ title }) => title.endsWith('for the entire file')),
+      ).toHaveLength(1)
+    })
+
+    it('invalidates previous edits while a changed document is being linted', async () => {
+      const { connection, server } = await initializeServer()
+      const document = TextDocument.create(
+        FIXTURE_URI.COMMENT_DOC,
+        'shellscript',
+        1,
+        '#!/bin/bash\n: before\necho $foo',
+      )
+      await server.analyzeAndLintDocument(document)
+      const { diagnostics } = connection.sendDiagnostics.mock.calls[0][0]
+      let finishLint!: (result: null) => void
+      const lint = jest.spyOn(Linter.prototype, 'lint').mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            finishLint = resolve
+          }),
+      )
+      try {
+        const pending = server.analyzeAndLintDocument(
+          TextDocument.create(
+            document.uri,
+            'shellscript',
+            2,
+            '#!/bin/bash\necho updated',
+          ),
+        )
+        const result = await connection.onCodeAction.mock.calls[0][0](
           {
-            "newText": """,
-            "range": {
-              "end": {
-                "character": 13,
-                "line": 55,
-              },
-              "start": {
-                "character": 13,
-                "line": 55,
-              },
-            },
+            textDocument: { uri: document.uri },
+            range: LSP.Range.create(0, 0, 3, 0),
+            context: { diagnostics },
           },
-          {
-            "newText": """,
-            "range": {
-              "end": {
-                "character": 5,
-                "line": 55,
-              },
-              "start": {
-                "character": 5,
-                "line": 55,
-              },
-            },
-          },
-        ]
-      `)
+          {} as any,
+          {} as any,
+        )
+        expect(result).toEqual([])
+        finishLint(null)
+        await pending
+      } finally {
+        lint.mockRestore()
+      }
     })
   })
 
