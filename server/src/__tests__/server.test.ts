@@ -66,8 +66,13 @@ async function initializeServer({
 
   server.register(connection)
   const onInitialized = connection.onInitialized.mock.calls[0][0]
-  const { backgroundAnalysisCompleted } = (await onInitialized({})) as any
-  await backgroundAnalysisCompleted
+  const backgroundAnalysis = jest.spyOn(server as any, 'startBackgroundAnalysis')
+  try {
+    expect(await onInitialized({})).toBeUndefined()
+    await backgroundAnalysis.mock.results[0].value
+  } finally {
+    backgroundAnalysis.mockRestore()
+  }
 
   return {
     connection,

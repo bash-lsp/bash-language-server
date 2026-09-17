@@ -61,6 +61,8 @@ the server's Node.js 20 requirement.
 
 The client installs independently from the workspace. When updating its bundled
 server, update both `vscode-client/package.json` and `vscode-client/pnpm-lock.yaml`.
+Keep the wrapper's `vscode-languageserver` dependency matched to the bundled server;
+`pnpm link-server` links both together when using the local development server.
 Each workspace's pnpm settings live in its own `pnpm-workspace.yaml`.
 If dependency overrides are needed, keep npm and pnpm overrides aligned: pnpm
 uses them for installation, and VSCE uses npm to inspect dependencies when

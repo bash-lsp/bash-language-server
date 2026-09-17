@@ -16,6 +16,10 @@ it.each(['shutdown', 'configuration change'])(
         signal?.addEventListener('abort', () => resolve([]), { once: true })
       })
     })
+    const backgroundAnalysis = jest.spyOn(
+      Analyzer.prototype,
+      'initiateBackgroundAnalysis',
+    )
     try {
       const connection = getMockConnection()
       const server = await BashServer.initialize(connection, {
@@ -24,8 +28,8 @@ it.each(['shutdown', 'configuration change'])(
         capabilities: {},
       })
       server.register(connection)
-      const { backgroundAnalysisCompleted } =
-        (await connection.onInitialized.mock.calls[0][0]({})) as any
+      expect(await connection.onInitialized.mock.calls[0][0]({})).toBeUndefined()
+      const backgroundAnalysisCompleted = backgroundAnalysis.mock.results[0].value
       expect(signal?.aborted).toBe(false)
       if (event === 'shutdown') {
         await connection.onShutdown.mock.calls[0][0]({} as any)
@@ -38,6 +42,7 @@ it.each(['shutdown', 'configuration change'])(
       await expect(backgroundAnalysisCompleted).resolves.toEqual({ filesParsed: 0 })
     } finally {
       scan.mockRestore()
+      backgroundAnalysis.mockRestore()
     }
   },
 )

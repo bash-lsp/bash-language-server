@@ -42,6 +42,7 @@ export function getMockConnection(): jest.Mocked<LSP.Connection> {
     onDocumentLinks: jest.fn(),
     onDocumentOnTypeFormatting: jest.fn(),
     onDocumentRangeFormatting: jest.fn(),
+    onDocumentRangesFormatting: jest.fn(),
     onDocumentSymbol: jest.fn(),
     onExecuteCommand: jest.fn(),
     onExit: jest.fn(),
@@ -82,6 +83,10 @@ export function getMockConnection(): jest.Mocked<LSP.Connection> {
       showWarningMessage: jest.fn(),
     },
     workspace: {
+      textDocumentContent: {
+        refresh: jest.fn(),
+        on: jest.fn(),
+      },
       applyEdit: jest.fn(),
       connection: {} as any,
       fillServerCapabilities: jest.fn(),

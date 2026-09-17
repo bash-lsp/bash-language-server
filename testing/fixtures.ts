@@ -53,7 +53,7 @@ export const FIXTURE_DOCUMENT: Record<FIXTURE_KEY, TextDocument> = (
 export const REPO_ROOT_FOLDER = path.resolve(path.join(FIXTURE_FOLDER, '../..'))
 
 export function updateSnapshotUris<
-  T extends Record<string, any> | Array<any> | null | undefined,
+  T extends Record<string, any> | Array<any> | null | undefined | void,
 >(data: T): T {
   if (data != null) {
     if (Array.isArray(data)) {

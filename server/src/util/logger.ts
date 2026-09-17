@@ -45,6 +45,7 @@ export class Logger {
     [LSP.MessageType.Warning]: 'WARNING ⛔️',
     [LSP.MessageType.Info]: 'INFO',
     [LSP.MessageType.Log]: 'DEBUG',
+    [LSP.MessageType.Debug]: 'DEBUG',
   }
 
   public log(severity: LSP.MessageType, messageObjects: any[]) {

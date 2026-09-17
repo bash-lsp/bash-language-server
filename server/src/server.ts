@@ -250,7 +250,7 @@ export default class BashServer {
       }
 
       // NOTE: we do not block the server initialization on this background analysis.
-      return { backgroundAnalysisCompleted: this.startBackgroundAnalysis() }
+      void this.startBackgroundAnalysis()
     })
 
     // Respond to changes in the configuration.
