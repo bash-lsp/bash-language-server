@@ -91,3 +91,41 @@ export function parseShellCheckDirective(line: string): Directive[] {
 
   return directives
 }
+
+/** Extend a disable list without rewriting other directives or explanatory comments. */
+export function addDisabledRule(line: string, code: string): string | null {
+  const prefix = line.match(/^[ \t]*#[ \t]*shellcheck[ \t]+/)
+  if (!prefix || line.endsWith('\\')) return null
+
+  // Treat quoted values as a single token, including paths containing spaces or #.
+  const tokens = line
+    .slice(prefix[0].length)
+    .matchAll(/(?:[^\s"'#]+|"[^"]*"|'[^']*')+|#.*/g)
+  for (const token of tokens) {
+    if (token[0].startsWith('#')) break
+    const match = token[0].match(/^disable=(.+)$/)
+    if (!match) continue
+    const values = match[1].split(',')
+    if (
+      !values.every((value) => /^(?:(?:SC)?\d{4}(?:-(?:SC)?\d{4})?|all)$/.test(value))
+    ) {
+      continue
+    }
+    const normalized = values.map((value) => value.replace(/\b(?=\d)/g, 'SC'))
+    const [directive] = parseShellCheckDirective(
+      `# shellcheck disable=${normalized.join(',')}`,
+    )
+    if (directive?.type !== 'disable') continue
+    if (directive.rules.includes(code) || directive.rules.includes('all')) return line
+
+    values.push(code)
+    values.sort(
+      (a, b) =>
+        Number(a.replace(/^SC/, '').split('-')[0]) -
+        Number(b.replace(/^SC/, '').split('-')[0]),
+    )
+    const start = prefix[0].length + token.index! + 'disable='.length
+    return line.slice(0, start) + values.join(',') + line.slice(start + match[1].length)
+  }
+  return null
+}

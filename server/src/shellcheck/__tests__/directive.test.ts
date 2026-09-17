@@ -1,4 +1,48 @@
-import { parseShellCheckDirective } from '../directive'
+import { addDisabledRule, parseShellCheckDirective } from '../directive'
+
+describe('addDisabledRule', () => {
+  it.each([
+    ['# shellcheck disable=SC3000,SC1000', '# shellcheck disable=SC1000,SC2154,SC3000'],
+    [
+      '\t#shellcheck\tdisable=2000,3000 # reason',
+      '\t#shellcheck\tdisable=2000,SC2154,3000 # reason',
+    ],
+    [
+      '# shellcheck disable=SC1000-SC1002 source=/dev/null',
+      '# shellcheck disable=SC1000-SC1002,SC2154 source=/dev/null',
+    ],
+    [
+      '# shellcheck source="path # disable=SC1000" disable=SC2000',
+      '# shellcheck source="path # disable=SC1000" disable=SC2000,SC2154',
+    ],
+    [
+      "# shellcheck source='path disable=SC1000' disable=SC2000",
+      "# shellcheck source='path disable=SC1000' disable=SC2000,SC2154",
+    ],
+  ])('preserves existing text in %s', (line, expected) => {
+    expect(addDisabledRule(line, 'SC2154')).toBe(expected)
+  })
+
+  it.each(['SC2154', '2154', 'SC2000-SC3000', '2000-3000', '2000-SC3000', 'all'])(
+    'does not duplicate a rule covered by %s',
+    (rules) => {
+      const line = `# shellcheck disable=${rules}`
+      expect(addDisabledRule(line, 'SC2154')).toBe(line)
+    },
+  )
+
+  it.each([
+    '# ordinary comment',
+    '# shellcheck source=/dev/null # disable=SC1000',
+    '# shellcheck source="disable=SC1000"',
+    '# shellcheck disable="SC1000"',
+    '# shellcheck disable=SC1000 \\',
+    '# shellcheck disable=1000-999999999999',
+    '# shellcheck disable=invalid',
+  ])('leaves unsupported directives intact: %s', (line) => {
+    expect(addDisabledRule(line, 'SC2154')).toBeNull()
+  })
+})
 
 describe('parseShellCheckDirective', () => {
   it('parses a disable directive', () => {

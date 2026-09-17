@@ -1,5 +1,169 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
+exports[`server onCodeAction responds to onCodeAction 2`] = `
+[
+  {
+    "diagnostics": [
+      {
+        "code": "SC2086",
+        "codeDescription": {
+          "href": "https://www.shellcheck.net/wiki/SC2086",
+        },
+        "data": {
+          "id": "shellcheck|2086|55:5-55:13",
+        },
+        "message": "Double quote to prevent globbing and word splitting.",
+        "range": {
+          "end": {
+            "character": 13,
+            "line": 55,
+          },
+          "start": {
+            "character": 5,
+            "line": 55,
+          },
+        },
+        "severity": 3,
+        "source": "shellcheck",
+        "tags": undefined,
+      },
+    ],
+    "edit": {
+      "changes": {
+        "file://__REPO_ROOT_FOLDER__/testing/fixtures/comment-doc-on-hover.sh": [
+          {
+            "newText": """,
+            "range": {
+              "end": {
+                "character": 13,
+                "line": 55,
+              },
+              "start": {
+                "character": 13,
+                "line": 55,
+              },
+            },
+          },
+          {
+            "newText": """,
+            "range": {
+              "end": {
+                "character": 5,
+                "line": 55,
+              },
+              "start": {
+                "character": 5,
+                "line": 55,
+              },
+            },
+          },
+        ],
+      },
+    },
+    "kind": "quickfix",
+    "title": "Apply fix for SC2086",
+  },
+  {
+    "diagnostics": [
+      {
+        "code": "SC2086",
+        "codeDescription": {
+          "href": "https://www.shellcheck.net/wiki/SC2086",
+        },
+        "data": {
+          "id": "shellcheck|2086|55:5-55:13",
+        },
+        "message": "Double quote to prevent globbing and word splitting.",
+        "range": {
+          "end": {
+            "character": 13,
+            "line": 55,
+          },
+          "start": {
+            "character": 5,
+            "line": 55,
+          },
+        },
+        "severity": 3,
+        "source": "shellcheck",
+        "tags": undefined,
+      },
+    ],
+    "edit": {
+      "changes": {
+        "file://__REPO_ROOT_FOLDER__/testing/fixtures/comment-doc-on-hover.sh": [
+          {
+            "newText": "# shellcheck disable=SC2086
+",
+            "range": {
+              "end": {
+                "character": 0,
+                "line": 55,
+              },
+              "start": {
+                "character": 0,
+                "line": 55,
+              },
+            },
+          },
+        ],
+      },
+    },
+    "kind": "quickfix",
+    "title": "Disable ShellCheck rule SC2086 for this command",
+  },
+  {
+    "diagnostics": [
+      {
+        "code": "SC2086",
+        "codeDescription": {
+          "href": "https://www.shellcheck.net/wiki/SC2086",
+        },
+        "data": {
+          "id": "shellcheck|2086|55:5-55:13",
+        },
+        "message": "Double quote to prevent globbing and word splitting.",
+        "range": {
+          "end": {
+            "character": 13,
+            "line": 55,
+          },
+          "start": {
+            "character": 5,
+            "line": 55,
+          },
+        },
+        "severity": 3,
+        "source": "shellcheck",
+        "tags": undefined,
+      },
+    ],
+    "edit": {
+      "changes": {
+        "file://__REPO_ROOT_FOLDER__/testing/fixtures/comment-doc-on-hover.sh": [
+          {
+            "newText": "# shellcheck disable=SC2086
+",
+            "range": {
+              "end": {
+                "character": 0,
+                "line": 1,
+              },
+              "start": {
+                "character": 0,
+                "line": 1,
+              },
+            },
+          },
+        ],
+      },
+    },
+    "kind": "quickfix",
+    "title": "Disable ShellCheck rule SC2086 for the entire file",
+  },
+]
+`;
+
 exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits for function-scoped declarations 1`] = `
 {
   "changes": {

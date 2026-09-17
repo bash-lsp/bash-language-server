@@ -12,6 +12,7 @@ Documentation around configuration variables can be found in the [config.ts](htt
 - Highlight occurrences
 - Code completion
 - Simple diagnostics reporting
+- ShellCheck quick fixes and actions to disable a rule for a command or the entire file
 - Documentation for symbols on hover
 - Workspace symbols
 - Rename symbol
@@ -29,6 +30,12 @@ As a dependency, we recommend that you first install [shellcheck][shellcheck] to
 https://github.com/koalaman/shellcheck#installing . If `shellcheck` is installed,
 bash-language-server will automatically call it to provide linting and code analysis each time the
 file is updated (with debounce time of 500ms).
+
+ShellCheck diagnostics offer quick fixes to insert `# shellcheck disable=SCxxxx`
+directives. Command-level suppression covers the containing shell command, including
+multiline commands and pipelines. It is offered only when a directive can be placed
+at a valid command boundary. Before the first top-level command, ShellCheck applies
+directives to the entire file, so only the file-level suppression is offered there.
 
 If you want your shell scripts to be formatted consistently, you can install [shfmt][shfmt]. If
 `shfmt` is installed then your documents will be formatted whenever you take the 'format document'
