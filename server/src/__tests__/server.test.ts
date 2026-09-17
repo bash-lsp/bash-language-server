@@ -537,11 +537,16 @@ describe('server', () => {
           )
         expect(await complete()).toEqual([])
         writeFileSync(library, 'greet() { :; }')
-        await connection.onDidChangeWatchedFiles.mock.calls[0][0]({
-          changes: [
-            { uri: pathToFileURL(library).href, type: LSP.FileChangeType.Created },
-          ],
-        })
+        const update = jest.spyOn(WorkspaceIndex.prototype, 'update')
+        expect(
+          connection.onDidChangeWatchedFiles.mock.calls[0][0]({
+            changes: [
+              { uri: pathToFileURL(library).href, type: LSP.FileChangeType.Created },
+            ],
+          }),
+        ).toBeUndefined()
+        await update.mock.results[0].value
+        update.mockRestore()
         expect(await complete()).toMatchObject([
           {
             label: './library.sh',

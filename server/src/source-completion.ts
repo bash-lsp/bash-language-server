@@ -18,7 +18,21 @@ function sourceContext(
 ): Context | null {
   const offset = document.offsetAt(position)
   const text = document.getText()
-  for (const command of root.descendantsOfType('command')) {
+  // Anchor trailing whitespace to the preceding token. Only inspect the cursor's
+  // ancestors (or an unfinished quote's preceding command), not the whole tree.
+  let anchor = offset
+  while (anchor > 0 && /[\t ]/.test(text[anchor - 1])) anchor--
+  const commands: SyntaxNode[] = []
+  for (
+    let node = root.descendantForIndex(Math.max(0, anchor - 1), anchor);
+    node;
+    node = node.parent
+  ) {
+    if (node.type === 'command') commands.push(node)
+    if (node.type === 'ERROR' && node.previousNamedSibling?.type === 'command')
+      commands.push(node.previousNamedSibling)
+  }
+  for (const command of commands) {
     const name = command.childForFieldName('name')
     if (!name || !['source', '.'].includes(name.text)) continue
     const argument = command.childrenForFieldName('argument')[0]
@@ -92,14 +106,14 @@ export function completeSourcePath({
   document: TextDocument
   root: SyntaxNode
   position: LSP.Position
-  fileUris: string[]
+  fileUris: () => string[]
 }): BashCompletionItem[] | null {
   if (!document.uri.startsWith('file:')) return null
   const context = sourceContext(document, root, position)
   if (!context) return null
   const directory = path.dirname(fileURLToPath(document.uri))
   const prefix = context.prefix.replace(/^\.\//, '')
-  return fileUris
+  return fileUris()
     .filter((uri) => uri !== document.uri && uri.startsWith('file:'))
     .flatMap((uri) => {
       const relative = path

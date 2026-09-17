@@ -204,12 +204,12 @@ export default class BashServer {
     connection.onRenameRequest(this.onRenameRequest.bind(this))
     connection.onDocumentFormatting(this.onDocumentFormatting.bind(this))
     connection.onShutdown(() => {
-      this.analyzer.cancelBackgroundAnalysis()
+      this.workspaceIndex.dispose()
       this.linter?.dispose()
     })
-    connection.onDidChangeWatchedFiles(({ changes }) =>
-      this.workspaceIndex.update(changes),
-    )
+    connection.onDidChangeWatchedFiles(({ changes }) => {
+      void this.workspaceIndex.update(changes)
+    })
 
     /**
      * The initialized notification is sent from the client to the server after
@@ -501,7 +501,7 @@ export default class BashServer {
         document,
         root,
         position: params.position,
-        fileUris: this.workspaceIndex.getFileUris(),
+        fileUris: () => this.workspaceIndex.getFileUris(),
       })
       if (paths !== null) return paths
     }

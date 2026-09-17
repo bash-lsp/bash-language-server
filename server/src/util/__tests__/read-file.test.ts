@@ -87,3 +87,24 @@ itPosix(
     await expect(readFileForAnalysis(file)).rejects.toThrow('non-regular')
   },
 )
+
+it('closes a handle whose open finishes after cancellation without reading it', async () => {
+  fs.writeFileSync(file, 'value=old')
+  const handle = await fs.promises.open(file, 'r')
+  let finishOpen!: (value: typeof handle) => void
+  jest.spyOn(fs.promises, 'open').mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finishOpen = resolve
+      }),
+  )
+  const read = jest.spyOn(handle, 'read')
+  const close = jest.spyOn(handle, 'close')
+  const controller = new AbortController()
+  const pending = readFileForAnalysis(file, controller.signal)
+  controller.abort()
+  finishOpen(handle)
+  await expect(pending).rejects.toThrow('aborted')
+  expect(read).not.toHaveBeenCalled()
+  expect(close).toHaveBeenCalledTimes(1)
+})

@@ -1,12 +1,10 @@
 import * as fs from 'fs'
 import * as FuzzySearch from 'fuzzy-search'
-import * as url from 'url'
 import { isDeepStrictEqual } from 'util'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Node as SyntaxNode, Parser, Point, Tree } from 'web-tree-sitter'
 
-import { getDefaultConfiguration } from './config'
 import { flattenArray } from './util/array'
 import {
   FindDeclarationParams,
@@ -17,21 +15,18 @@ import {
   getLocalDeclarations,
   GlobalDeclarations,
 } from './util/declarations'
-import { getFilePaths } from './util/fs'
 import { getInputVariableDeclaration, variableNameRange } from './util/input-declarations'
 import { logger } from './util/logger'
 import { isPositionIncludedInRange } from './util/lsp'
-import { analyzeFile } from './util/shebang'
 import * as sourcing from './util/sourcing'
 import * as TreeSitterUtil from './util/tree-sitter'
-
-const BACKGROUND_ANALYSIS_TIMEOUT_MS = 10000
 
 type AnalyzedDocument = {
   document: TextDocument
   globalDeclarations: GlobalDeclarations
   sourcedUris: Set<string>
   sourceCommands: sourcing.SourceCommand[]
+  hasSourceCommands: boolean
   tree: Tree
 }
 
@@ -40,7 +35,6 @@ type AnalyzedDocument = {
  * tree-sitter to find definitions, reference, etc.
  */
 export default class Analyzer {
-  private backgroundAnalysisController?: AbortController
   private backgroundAnalyzedUris = new Set<string>()
   private enableSourceErrorDiagnostics: boolean
   private includeAllWorkspaceSymbols: boolean
@@ -116,6 +110,7 @@ export default class Analyzer {
       document,
       globalDeclarations,
       sourcedUris,
+      hasSourceCommands: sourceCommands.length > 0,
       sourceCommands: sourceCommands.filter((sourceCommand) => !sourceCommand.error),
       tree,
     }
@@ -158,162 +153,7 @@ export default class Analyzer {
     return diagnostics
   }
 
-  public cancelBackgroundAnalysis(): void {
-    this.backgroundAnalysisController?.abort()
-  }
-
-  /** Discover and analyze workspace files within one elapsed-time budget. */
-  public async initiateBackgroundAnalysis({
-    backgroundAnalysisMaxFiles,
-    backgroundAnalysisIgnore = getDefaultConfiguration().backgroundAnalysisIgnore,
-    globPattern,
-  }: {
-    backgroundAnalysisMaxFiles: number
-    backgroundAnalysisIgnore?: string[]
-    globPattern: string
-  }): Promise<{ filesParsed: number }> {
-    this.cancelBackgroundAnalysis()
-    const controller = new AbortController()
-    this.backgroundAnalysisController = controller
-    const { signal } = controller
-    const rootPath = this.workspaceFolder
-    if (!rootPath) return { filesParsed: 0 }
-
-    if (backgroundAnalysisMaxFiles <= 0) {
-      this.evictBackgroundDocuments(new Set())
-      logger.info(`BackgroundAnalysis: skipping as backgroundAnalysisMaxFiles was 0...`)
-      return { filesParsed: 0 }
-    }
-
-    logger.info(
-      `BackgroundAnalysis: resolving glob "${globPattern}" inside "${rootPath}"...`,
-    )
-
-    const started = Date.now()
-    const deadline = started + BACKGROUND_ANALYSIS_TIMEOUT_MS
-    const expire = () => {
-      if (signal.aborted) return
-      logger.warn(
-        `BackgroundAnalysis: stopped after ${BACKGROUND_ANALYSIS_TIMEOUT_MS}ms; workspace symbols may be incomplete. Exclude large folders with backgroundAnalysisIgnore or narrow globPattern.`,
-      )
-      controller.abort()
-    }
-    const stopped = () => {
-      // Synchronous parsing can delay the timer; check between parses as well.
-      if (Date.now() >= deadline) expire()
-      return signal.aborted
-    }
-    const timer = setTimeout(expire, BACKGROUND_ANALYSIS_TIMEOUT_MS)
-    const getTimePassed = () => `${(Date.now() - started) / 1000} seconds`
-    let filesParsed = 0
-
-    try {
-      // fast-glob traverses hidden directories for globstars even though the
-      // default pattern cannot match their files. Only prune for that pattern:
-      // custom globs may deliberately target hidden directories.
-      let filePaths: string[]
-      try {
-        filePaths = await getFilePaths({
-          globPattern,
-          rootPath,
-          maxItems: backgroundAnalysisMaxFiles,
-          timeoutMs: BACKGROUND_ANALYSIS_TIMEOUT_MS,
-          ignore: backgroundAnalysisIgnore,
-          skipHiddenEntries: globPattern === getDefaultConfiguration().globPattern,
-          signal,
-          onLimit: (reason) => {
-            if (reason === 'time') expire()
-            else
-              logger.warn(
-                `BackgroundAnalysis: stopped discovery at the directories limit; workspace symbols may be incomplete. Exclude large folders with backgroundAnalysisIgnore or narrow globPattern.`,
-              )
-          },
-        })
-      } catch (error) {
-        if (!signal.aborted)
-          logger.warn(
-            `BackgroundAnalysis: failed resolving glob "${globPattern}". The experience across files will be degraded. Error: ${error}`,
-          )
-        return { filesParsed }
-      }
-      if (stopped()) return { filesParsed }
-
-      this.evictBackgroundDocuments(
-        new Set(filePaths.map((p) => url.pathToFileURL(p).href)),
-      )
-      logger.info(
-        `BackgroundAnalysis: Glob resolved with ${
-          filePaths.length
-        } files after ${getTimePassed()}`,
-      )
-
-      for (const filePath of filePaths) {
-        if (stopped()) break
-        const uri = url.pathToFileURL(filePath).href
-        const isOnDemand = () =>
-          this.uriToAnalyzedDocument[uri] && !this.backgroundAnalyzedUris.has(uri)
-        // Do not replace an open document's unsaved contents with its disk copy.
-        if (isOnDemand()) continue
-
-        try {
-          let cancelRead: () => void = () => undefined
-          const canceled = new Promise<undefined>((resolve) => {
-            cancelRead = () => resolve(undefined)
-            signal.addEventListener('abort', cancelRead, { once: true })
-          })
-          let fileContent: string | undefined
-          try {
-            // AbortSignal stops readFile's buffering, but an OS read may still
-            // be pending. Settle the background pass immediately on cancellation.
-            fileContent = await Promise.race([
-              fs.promises.readFile(filePath, { encoding: 'utf8', signal }),
-              canceled,
-            ])
-          } finally {
-            signal.removeEventListener('abort', cancelRead)
-          }
-          if (stopped() || fileContent === undefined) break
-          // The document may have been opened or edited while its read awaited I/O.
-          if (isOnDemand()) continue
-          const fileDialect = analyzeFile(uri, fileContent)
-          if (!fileDialect.dialect) {
-            logger.info(
-              `BackgroundAnalysis: Skipping file ${uri} with dialect "${JSON.stringify(
-                fileDialect,
-              )}"`,
-            )
-            continue
-          }
-
-          this.analyze({
-            document: TextDocument.create(uri, 'shell', 1, fileContent),
-            uri,
-            background: true,
-          })
-          filesParsed++
-        } catch (error) {
-          if (stopped()) break
-          logger.warn(`BackgroundAnalysis: Failed analyzing ${uri}. Error: ${error}`)
-        }
-      }
-      // Rereading background files can remove source relationships. Recompute
-      // the retained dependency graph, without cleanup from a canceled old pass.
-      if (!stopped()) {
-        this.evictBackgroundDocuments(
-          new Set(filePaths.map((p) => url.pathToFileURL(p).href)),
-        )
-      }
-      logger.info(`BackgroundAnalysis: Completed after ${getTimePassed()}.`)
-      return { filesParsed }
-    } finally {
-      clearTimeout(timer)
-      if (this.backgroundAnalysisController === controller) {
-        this.backgroundAnalysisController = undefined
-      }
-    }
-  }
-
-  private evictBackgroundDocuments(keep: Set<string>): void {
+  public evictBackgroundDocuments(keep: Set<string>): void {
     // Preserve dependencies of opened/on-demand documents, even if a previous
     // background scan happened to analyze those dependencies first.
     for (const uri of Object.keys(this.uriToAnalyzedDocument)) {
@@ -323,9 +163,7 @@ export default class Analyzer {
     }
     for (const uri of this.backgroundAnalyzedUris) {
       if (keep.has(uri)) continue
-      this.uriToAnalyzedDocument[uri]?.tree.delete()
-      delete this.uriToAnalyzedDocument[uri]
-      this.backgroundAnalyzedUris.delete(uri)
+      this.removeDocument(uri)
     }
   }
 
@@ -724,7 +562,17 @@ export default class Analyzer {
     return this.uriToAnalyzedDocument[uri]?.tree.rootNode
   }
 
+  public isBackgroundDocument(uri: string): boolean {
+    return this.backgroundAnalyzedUris.has(uri)
+  }
+
+  /** Return a closed editor buffer to background ownership for its disk refresh. */
+  public closeDocument(uri: string): void {
+    if (this.uriToAnalyzedDocument[uri]) this.backgroundAnalyzedUris.add(uri)
+  }
+
   public removeDocument(uri: string): void {
+    this.backgroundAnalyzedUris.delete(uri)
     this.uriToAnalyzedDocument[uri]?.tree.delete()
     delete this.uriToAnalyzedDocument[uri]
   }
@@ -733,7 +581,7 @@ export default class Analyzer {
   public refreshSourceCommands(): string[] {
     const affected: string[] = []
     for (const [uri, analyzed] of Object.entries(this.uriToAnalyzedDocument)) {
-      if (!analyzed) continue
+      if (!analyzed?.hasSourceCommands) continue
       const commands = sourcing
         .getSourceCommands({
           fileUri: uri,

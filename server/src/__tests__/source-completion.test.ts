@@ -28,7 +28,7 @@ function complete(
       document,
       root: tree.rootNode,
       position: document.positionAt(offset),
-      fileUris: files.map((file) => pathToFileURL(file).href),
+      fileUris: () => files.map((file) => pathToFileURL(file).href),
     })
     return { items, document }
   } finally {
@@ -119,4 +119,24 @@ it('does not offer filesystem paths in an untitled document', () => {
   expect(
     complete('source ¦', ['/project/lib.sh'], 'untitled:Untitled-1').items,
   ).toBeNull()
+})
+
+it('does not request the workspace catalog outside a source argument', () => {
+  const text = 'echo value\n'.repeat(1000)
+  const document = TextDocument.create('file:///project/main.sh', 'shellscript', 1, text)
+  const tree = parser.parse(text)!
+  const fileUris = jest.fn(() => ['file:///project/lib.sh'])
+  try {
+    expect(
+      completeSourcePath({
+        document,
+        root: tree.rootNode,
+        position: { line: 999, character: 10 },
+        fileUris,
+      }),
+    ).toBeNull()
+    expect(fileUris).not.toHaveBeenCalled()
+  } finally {
+    tree.delete()
+  }
 })

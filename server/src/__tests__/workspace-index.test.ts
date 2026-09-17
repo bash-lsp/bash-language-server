@@ -296,3 +296,99 @@ it('drops files outside a new glob while retaining an open editor buffer', async
   expect(index.getFileUris()).toEqual([next])
   expect(names()).toEqual(['next', 'old'])
 })
+
+it('does not reread or reparse unchanged files after a creation', async () => {
+  const existing = write('existing.sh', 'existing=value')
+  await index.configure(selection)
+  const previous = analyzer.getDocument(existing)
+  const read = jest.spyOn(disk, 'readFileForAnalysis')
+  const analyze = jest.spyOn(analyzer, 'analyze')
+  const created = write('created.sh', 'created=value')
+  await index.update([{ uri: created, type: LSP.FileChangeType.Created }])
+  expect(analyzer.getDocument(existing)).toBe(previous)
+  expect(read).toHaveBeenCalledTimes(1)
+  expect(analyze).toHaveBeenCalledTimes(1)
+  expect(names()).toEqual(['created', 'existing'])
+})
+
+it('does no disk or source work for changes to uncached files', async () => {
+  write('existing.sh', 'existing=value')
+  await index.configure(selection)
+  const read = jest.spyOn(disk, 'readFileForAnalysis')
+  const sources = jest.spyOn(analyzer, 'refreshSourceCommands')
+  const unrelated = write('notes.txt', 'updated notes')
+  await index.update([{ uri: unrelated, type: LSP.FileChangeType.Changed }])
+  expect(read).not.toHaveBeenCalled()
+  expect(sources).not.toHaveBeenCalled()
+})
+
+it('retains previous analysis when parsing a changed file fails', async () => {
+  const uri = write('existing.sh', 'existing=value')
+  await index.configure(selection)
+  const previous = analyzer.getDocument(uri)
+  jest.spyOn(parser, 'parse').mockImplementationOnce(() => {
+    throw new Error('parse failed')
+  })
+  write('existing.sh', 'updated=value')
+  await index.update([{ uri, type: LSP.FileChangeType.Changed }])
+  expect(analyzer.getDocument(uri)).toBe(previous)
+  expect(names()).toEqual(['existing'])
+})
+
+it('coalesces event bursts without repeatedly parsing the same file', async () => {
+  const uri = write('existing.sh', 'existing=value')
+  await index.configure(selection)
+  const read = jest.spyOn(disk, 'readFileForAnalysis')
+  const analyze = jest.spyOn(analyzer, 'analyze')
+  write('existing.sh', 'updated=value')
+  await Promise.all(
+    Array.from({ length: 100 }, () =>
+      index.update([{ uri, type: LSP.FileChangeType.Changed }]),
+    ),
+  )
+  expect(read).toHaveBeenCalledTimes(1)
+  expect(analyze).toHaveBeenCalledTimes(1)
+  expect(names()).toEqual(['updated'])
+})
+
+it.each(['disabled', 'excluded'])(
+  'evicts a closed editor buffer when background analysis is later %s',
+  async (change) => {
+    const uri = write('open.sh', 'disk=value')
+    await index.configure(selection)
+    opened.add(uri)
+    analyzer.analyze({
+      uri,
+      document: TextDocument.create(uri, 'shellscript', 2, 'editor=value'),
+    })
+    opened.delete(uri)
+    await index.close(uri)
+    expect(analyzer.getDocument(uri)?.getText()).toBe('disk=value')
+    await index.configure({
+      ...selection,
+      ...(change === 'disabled'
+        ? { backgroundAnalysisMaxFiles: 0 }
+        : { backgroundAnalysisIgnore: ['**/open.sh'] }),
+    })
+    expect(analyzer.getDocument(uri)).toBeUndefined()
+    expect(names()).toEqual([])
+  },
+)
+
+it('evicts excluded background dependencies after their last open consumer closes', async () => {
+  const library = write('library.sh', 'library=value')
+  const consumer = write('consumer', 'source ./library.sh')
+  await index.configure(selection)
+  opened.add(consumer)
+  analyzer.analyze({
+    uri: consumer,
+    document: TextDocument.create(consumer, 'shellscript', 1, 'source ./library.sh'),
+  })
+  await index.configure({ ...selection, backgroundAnalysisMaxFiles: 0 })
+  expect(analyzer.getDocument(library)).toBeDefined()
+  opened.delete(consumer)
+  await index.close(consumer)
+  expect(analyzer.getDocument(consumer)).toBeUndefined()
+  expect(analyzer.getDocument(library)).toBeUndefined()
+  expect(names()).toEqual([])
+})

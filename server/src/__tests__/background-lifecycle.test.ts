@@ -1,10 +1,10 @@
-import * as fs from 'node:fs'
-
 import { getMockConnection } from '../../../testing/mocks'
 import Analyzer from '../analyser'
 import { initializeParser } from '../parser'
 import BashServer from '../server'
 import * as fsUtil from '../util/fs'
+import * as disk from '../util/read-file'
+import WorkspaceIndex from '../workspace-index'
 
 it.each(['shutdown', 'configuration change'])(
   'cancels pending discovery on %s',
@@ -16,10 +16,7 @@ it.each(['shutdown', 'configuration change'])(
         signal?.addEventListener('abort', () => resolve([]), { once: true })
       })
     })
-    const backgroundAnalysis = jest.spyOn(
-      Analyzer.prototype,
-      'initiateBackgroundAnalysis',
-    )
+    const backgroundAnalysis = jest.spyOn(WorkspaceIndex.prototype, 'configure')
     try {
       const connection = getMockConnection()
       const server = await BashServer.initialize(connection, {
@@ -50,23 +47,29 @@ it.each(['shutdown', 'configuration change'])(
 it('does not analyze a file whose read finishes after cancellation', async () => {
   const parser = await initializeParser()
   const analyzer = new Analyzer({ parser, workspaceFolder: '/tmp' })
+  const index = new WorkspaceIndex(analyzer, '/tmp')
   const scan = jest.spyOn(fsUtil, 'getFilePaths').mockResolvedValue(['/tmp/stale.sh'])
   let completeRead: (text: string) => void = () => undefined
-  const read = jest.spyOn(fs.promises, 'readFile').mockImplementation(
+  let readStarted!: () => void
+  const reading = new Promise<void>((resolve) => {
+    readStarted = resolve
+  })
+  const read = jest.spyOn(disk, 'readFileForAnalysis').mockImplementation(
     () =>
       new Promise((resolve) => {
         completeRead = resolve as typeof completeRead
+        readStarted()
       }),
   )
   const analyze = jest.spyOn(analyzer, 'analyze')
   try {
-    const pending = analyzer.initiateBackgroundAnalysis({
+    const pending = index.configure({
       globPattern: '**/*.sh',
       backgroundAnalysisMaxFiles: 500,
     })
-    await Promise.resolve()
+    await reading
     expect(read).toHaveBeenCalled()
-    analyzer.cancelBackgroundAnalysis()
+    index.dispose()
     completeRead('stale=1')
     await expect(pending).resolves.toEqual({ filesParsed: 0 })
     expect(analyze).not.toHaveBeenCalled()
