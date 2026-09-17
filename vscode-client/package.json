@@ -48,6 +48,17 @@
           "default": "",
           "description": "Configure explainshell server endpoint in order to get hover documentation on flags and options."
         },
+        "bashIde.backgroundAnalysisIgnore": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/node_modules/**",
+            "**/.git/**"
+          ],
+          "description": "Glob patterns excluded from background file discovery. Open files and sourced files can still be analyzed on demand."
+        },
         "bashIde.globPattern": {
           "type": "string",
           "default": "**/*@(.sh|.inc|.bash|.command)",

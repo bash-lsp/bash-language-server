@@ -9,6 +9,10 @@ describe('ConfigSchema', () => {
   it('returns a default', () => {
     expect(ConfigSchema.parse({})).toMatchInlineSnapshot(`
       {
+        "backgroundAnalysisIgnore": [
+          "**/node_modules/**",
+          "**/.git/**",
+        ],
         "backgroundAnalysisMaxFiles": 500,
         "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "",
@@ -56,6 +60,10 @@ describe('ConfigSchema', () => {
       }),
     ).toMatchInlineSnapshot(`
       {
+        "backgroundAnalysisIgnore": [
+          "**/node_modules/**",
+          "**/.git/**",
+        ],
         "backgroundAnalysisMaxFiles": 1,
         "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "localhost:8080",
@@ -124,6 +132,10 @@ describe('getConfigFromEnvironmentVariables', () => {
     const { config } = getConfigFromEnvironmentVariables()
     expect(config).toMatchInlineSnapshot(`
       {
+        "backgroundAnalysisIgnore": [
+          "**/node_modules/**",
+          "**/.git/**",
+        ],
         "backgroundAnalysisMaxFiles": 500,
         "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "",
@@ -157,6 +169,10 @@ describe('getConfigFromEnvironmentVariables', () => {
     const { config } = getConfigFromEnvironmentVariables()
     expect(config).toMatchInlineSnapshot(`
       {
+        "backgroundAnalysisIgnore": [
+          "**/node_modules/**",
+          "**/.git/**",
+        ],
         "backgroundAnalysisMaxFiles": 500,
         "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "",
@@ -196,6 +212,10 @@ describe('getConfigFromEnvironmentVariables', () => {
     const { config } = getConfigFromEnvironmentVariables()
     expect(config).toMatchInlineSnapshot(`
       {
+        "backgroundAnalysisIgnore": [
+          "**/node_modules/**",
+          "**/.git/**",
+        ],
         "backgroundAnalysisMaxFiles": 1,
         "enableSourceErrorDiagnostics": false,
         "explainshellEndpoint": "localhost:8080",
@@ -256,4 +276,11 @@ describe('getConfigFromEnvironmentVariables', () => {
     result = getConfigFromEnvironmentVariables().config.includeAllWorkspaceSymbols
     expect(result).toEqual(false)
   })
+})
+
+it('accepts custom background exclusions', () => {
+  expect(
+    ConfigSchema.parse({ backgroundAnalysisIgnore: ['**/build/**'] })
+      .backgroundAnalysisIgnore,
+  ).toEqual(['**/build/**'])
 })

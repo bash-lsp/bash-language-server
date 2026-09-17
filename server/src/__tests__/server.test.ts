@@ -247,10 +247,12 @@ describe('server', () => {
       await server.analyzeAndLintDocument(FIXTURE_DOCUMENT.COMMENT_DOC)
 
       expect(lint).not.toHaveBeenCalled()
-      expect(backgroundAnalysis).toHaveBeenCalledWith({
-        backgroundAnalysisMaxFiles: 0,
-        globPattern: '**/*.custom-bash',
-      })
+      expect(backgroundAnalysis).toHaveBeenCalledWith(
+        expect.objectContaining({
+          backgroundAnalysisMaxFiles: 0,
+          globPattern: '**/*.custom-bash',
+        }),
+      )
       expect(server).toMatchObject({
         config: { shfmt: { path: 'custom-shfmt', languageDialect: 'bash' } },
       })

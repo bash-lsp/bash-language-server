@@ -186,7 +186,10 @@ export default class BashServer {
     connection.onPrepareRename(this.onPrepareRename.bind(this))
     connection.onRenameRequest(this.onRenameRequest.bind(this))
     connection.onDocumentFormatting(this.onDocumentFormatting.bind(this))
-    connection.onShutdown(() => this.linter?.dispose())
+    connection.onShutdown(() => {
+      this.analyzer.cancelBackgroundAnalysis()
+      this.linter?.dispose()
+    })
 
     /**
      * The initialized notification is sent from the client to the server after
@@ -276,6 +279,7 @@ export default class BashServer {
       return this.analyzer.initiateBackgroundAnalysis({
         globPattern: this.config.globPattern,
         backgroundAnalysisMaxFiles: this.config.backgroundAnalysisMaxFiles,
+        backgroundAnalysisIgnore: this.config.backgroundAnalysisIgnore,
       })
     }
 

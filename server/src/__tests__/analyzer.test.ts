@@ -922,7 +922,7 @@ describe('initiateBackgroundAnalysis', () => {
     ])
 
     // Intro, stats on glob, one file skipped due to shebang, and outro
-    expect(filesParsed).toEqual(FIXTURE_FILES_MATCHING_GLOB)
+    expect(filesParsed).toEqual(FIXTURE_FILES_MATCHING_GLOB - 1)
 
     expect(loggerInfo).toHaveBeenNthCalledWith(
       1,
