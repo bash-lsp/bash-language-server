@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import * as LSP from 'vscode-languageserver/node'
 import { CodeAction } from 'vscode-languageserver/node'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import {
   FIXTURE_DOCUMENT,
@@ -1749,6 +1750,28 @@ describe('server', () => {
   })
 
   describe('onRenameRequest', () => {
+    it('does not start a rename at an input declared later on the same line', async () => {
+      const { connection, server } = await initializeServer({
+        initializationOptions: { backgroundAnalysisMaxFiles: 0, shellcheckPath: '' },
+      })
+      const uri = 'file:///input-order.sh'
+      const source = 'echo "$name"; read name; echo "$name"'
+      const document = TextDocument.create(uri, 'shellscript', 1, source)
+      await server.analyzeAndLintDocument(document)
+      const edit = (await connection.onRenameRequest.mock.calls[0][0](
+        {
+          textDocument: { uri },
+          position: document.positionAt(source.indexOf('$name') + 1),
+          newName: 'renamed',
+        },
+        {} as any,
+        {} as any,
+      )) as LSP.WorkspaceEdit
+      expect(TextDocument.applyEdits(document, edit.changes![uri])).toBe(
+        'echo "$renamed"; read renamed; echo "$renamed"',
+      )
+    })
+
     async function getRenameRequestResult(
       line: LSP.uinteger,
       character: LSP.uinteger,
@@ -1941,9 +1964,7 @@ describe('server', () => {
           [12, 30, { uri: FIXTURE_URI.RENAMING_READ }],
           [13, 10, { uri: FIXTURE_URI.RENAMING_READ }],
           [15, 10, { uri: FIXTURE_URI.RENAMING_READ }],
-          [15, 31, { uri: FIXTURE_URI.RENAMING_READ }],
           [16, 11, { uri: FIXTURE_URI.RENAMING_READ }],
-          [16, 30, { uri: FIXTURE_URI.RENAMING_READ }],
           [17, 23, { uri: FIXTURE_URI.RENAMING_READ }],
           [17, 33, { uri: FIXTURE_URI.RENAMING_READ }],
         )
@@ -1951,6 +1972,14 @@ describe('server', () => {
         for (const r of readvars) {
           expect(readvar).toStrictEqual(r)
         }
+
+        // Option-looking words after the first name are invalid destinations,
+        // not new options; do not rename the words following them.
+        const invalidDestinations = await getRenameRequestResults(
+          [15, 31, { uri: FIXTURE_URI.RENAMING_READ }],
+          [16, 30, { uri: FIXTURE_URI.RENAMING_READ }],
+        )
+        expect(invalidDestinations).toEqual([null, null])
 
         const [readloop, ...readloops] = await getRenameRequestResults(
           [21, 21, { uri: FIXTURE_URI.RENAMING_READ }],

@@ -744,37 +744,11 @@ exports[`server onRenameRequest File-wide rename returns correct WorkspaceEdits 
         "newText": "newName",
         "range": {
           "end": {
-            "character": 32,
-            "line": 15,
-          },
-          "start": {
-            "character": 25,
-            "line": 15,
-          },
-        },
-      },
-      {
-        "newText": "newName",
-        "range": {
-          "end": {
             "character": 15,
             "line": 16,
           },
           "start": {
             "character": 8,
-            "line": 16,
-          },
-        },
-      },
-      {
-        "newText": "newName",
-        "range": {
-          "end": {
-            "character": 34,
-            "line": 16,
-          },
-          "start": {
-            "character": 27,
             "line": 16,
           },
         },
