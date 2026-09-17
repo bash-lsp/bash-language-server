@@ -20,10 +20,14 @@ import { Linter } from '../shellcheck'
 import { CompletionItemDataType } from '../types'
 import { Logger } from '../util/logger'
 
-// Skip ShellCheck throttle delay in test cases
-jest.spyOn(global, 'setTimeout').mockImplementation((fn: any) => {
-  fn()
-  return 0 as any
+// Skip only the ShellCheck debounce, preserving resource-limit timers.
+const realSetTimeout = global.setTimeout
+jest.spyOn(global, 'setTimeout').mockImplementation((fn: any, ms?: number) => {
+  if (ms === 500) {
+    fn()
+    return 0 as any
+  }
+  return realSetTimeout(fn, ms)
 })
 
 jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {

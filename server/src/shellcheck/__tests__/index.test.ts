@@ -35,7 +35,7 @@ async function getLintingResult({
     executablePath,
   })
   const promise = linter.lint(document, sourcePaths, additionalShellCheckArguments)
-  jest.runAllTimers()
+  jest.advanceTimersByTime(500)
   const result = await promise
   return [result, linter]
 }

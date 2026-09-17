@@ -16,6 +16,9 @@ import {
 } from './types'
 
 const DEBOUNCE_MS = 500
+const LINT_TIMEOUT_MS = 10000
+const MAX_CONCURRENT_JOBS = 2
+const KILL_GRACE_MS = 1000
 
 function safeFileURLToPath(uri: string): string | null {
   try {
@@ -33,6 +36,8 @@ type LinterOptions = {
   executablePath: string
   cwd?: string
   externalSources?: boolean
+  timeoutMs?: number
+  maxConcurrent?: number
 }
 
 export type LintingResult = {
@@ -44,20 +49,45 @@ type LintJob = {
   controller: AbortController
   timeout?: ReturnType<typeof setTimeout>
   resolve: (result: LintingResult | null) => void
+  maxConcurrent: number
 }
 
 export class Linter {
+  private disposed = false
+  private timeoutMs: number
+  private maxConcurrent: number
   private cwd: string
   public executablePath: string
   private externalSources: boolean
   private uriToLintJob = new Map<string, LintJob>()
   private _canLint: boolean
 
-  constructor({ cwd, executablePath, externalSources = true }: LinterOptions) {
+  constructor({
+    cwd,
+    executablePath,
+    externalSources = true,
+    timeoutMs = LINT_TIMEOUT_MS,
+    maxConcurrent = MAX_CONCURRENT_JOBS,
+  }: LinterOptions) {
     this._canLint = true
     this.cwd = cwd || process.cwd()
     this.executablePath = executablePath
     this.externalSources = externalSources
+    this.timeoutMs = timeoutMs
+    this.maxConcurrent = maxConcurrent
+  }
+
+  // Share slots across linter replacements during configuration changes.
+  private static runningJobs = 0
+  private static readyJobs = new Map<LintJob, () => void>()
+
+  private static drainQueue(): void {
+    for (const [job, run] of Linter.readyJobs) {
+      if (Linter.runningJobs >= job.maxConcurrent) continue
+      Linter.readyJobs.delete(job)
+      Linter.runningJobs++
+      run()
+    }
   }
 
   public get canLint(): boolean {
@@ -68,6 +98,7 @@ export class Linter {
     const job = this.uriToLintJob.get(uri)
     if (job) {
       this.uriToLintJob.delete(uri)
+      Linter.readyJobs.delete(job)
       clearTimeout(job.timeout)
       job.controller.abort()
       job.resolve(null)
@@ -75,6 +106,7 @@ export class Linter {
   }
 
   public dispose(): void {
+    this.disposed = true
     for (const uri of this.uriToLintJob.keys()) {
       this.cancel(uri)
     }
@@ -86,6 +118,7 @@ export class Linter {
     sourcePaths: string[],
     additionalShellCheckArguments: string[] = [],
   ): Promise<LintingResult | null> {
+    if (this.disposed) return null
     if (!this._canLint) {
       return { diagnostics: [], codeActions: {} }
     }
@@ -94,32 +127,41 @@ export class Linter {
     this.cancel(uri)
 
     return new Promise((resolve, reject) => {
-      const job: LintJob = { controller: new AbortController(), resolve }
+      const job: LintJob = {
+        controller: new AbortController(),
+        resolve,
+        maxConcurrent: this.maxConcurrent,
+      }
       this.uriToLintJob.set(uri, job)
-      job.timeout = setTimeout(async () => {
-        try {
-          const result = await this.executeLint(
-            job.controller.signal,
-            document,
-            sourcePaths,
-            additionalShellCheckArguments,
-          )
-          resolve(job.controller.signal.aborted ? null : result)
-        } catch (error) {
-          if (
-            job.controller.signal.aborted &&
-            error instanceof Error &&
-            error.name === 'AbortError'
-          ) {
-            resolve(null)
-          } else {
-            reject(error)
+      job.timeout = setTimeout(() => {
+        Linter.readyJobs.set(job, async () => {
+          const deadline = setTimeout(() => {
+            if (job.controller.signal.aborted) return
+            logger.warn(`ShellCheck: timed out after ${this.timeoutMs}ms for ${uri}`)
+            // Cancel this job, without touching a newer revision of the URI.
+            job.controller.abort()
+            job.resolve(null)
+          }, this.timeoutMs)
+          try {
+            const result = await this.executeLint(
+              job.controller.signal,
+              document,
+              sourcePaths,
+              additionalShellCheckArguments,
+            )
+            resolve(job.controller.signal.aborted ? null : result)
+          } catch (error) {
+            if (job.controller.signal.aborted) resolve(null)
+            else reject(error)
+          } finally {
+            clearTimeout(deadline)
+            if (this.uriToLintJob.get(uri) === job) this.uriToLintJob.delete(uri)
+            // executeLint waits for the child's close event, including after abort.
+            Linter.runningJobs--
+            Linter.drainQueue()
           }
-        } finally {
-          if (this.uriToLintJob.get(uri) === job) {
-            this.uriToLintJob.delete(uri)
-          }
-        }
+        })
+        Linter.drainQueue()
       }, DEBOUNCE_MS)
     })
   }
@@ -202,9 +244,63 @@ export class Linter {
     let out = ''
     let err = ''
     const proc = new Promise((resolve, reject) => {
-      const proc = spawn(this.executablePath, [...args, '-'], { cwd: this.cwd, signal })
-      proc.on('error', reject)
-      proc.on('close', resolve)
+      const useProcessGroup = process.platform !== 'win32'
+      // The abort listener below owns termination. Passing signal here as well
+      // would race Node's direct-child kill against process-group cleanup.
+      const proc = spawn(this.executablePath, [...args, '-'], {
+        cwd: this.cwd,
+        detached: useProcessGroup,
+      })
+      let processError: Error | undefined
+      let killTimer: ReturnType<typeof setTimeout> | undefined
+      let escalated = false
+      const kill = (killSignal: NodeJS.Signals) => {
+        if (useProcessGroup && proc.pid) {
+          try {
+            // Include children of custom wrappers, even if the wrapper already exited.
+            process.kill(-proc.pid, killSignal)
+          } catch (error) {
+            if ((error as NodeJS.ErrnoException).code !== 'ESRCH') {
+              logger.warn(`ShellCheck: failed to terminate process group: ${error}`)
+              proc.kill(killSignal)
+            }
+          }
+        } else {
+          proc.kill(killSignal)
+        }
+      }
+      const closeInheritedPipes = () => {
+        // An escaped descendant can keep pipes open after the direct child exits.
+        // Only release those pipes after escalation and the direct child's exit.
+        if (escalated && (proc.exitCode !== null || proc.signalCode !== null)) {
+          proc.stdin.destroy()
+          proc.stdout.destroy()
+          proc.stderr.destroy()
+        }
+      }
+      const forceKill = () => {
+        kill('SIGTERM')
+        killTimer = setTimeout(() => {
+          escalated = true
+          kill('SIGKILL')
+          closeInheritedPipes()
+        }, KILL_GRACE_MS)
+      }
+      signal.addEventListener('abort', forceKill, { once: true })
+      if (signal.aborted) forceKill()
+      proc.on('exit', closeInheritedPipes)
+      proc.on('error', (error) => {
+        processError = error
+      })
+      proc.on('close', (code) => {
+        // Descendants with separate output streams do not keep `close` pending.
+        // Once the canceled wrapper exits, kill any remaining group members.
+        if (signal.aborted && useProcessGroup) kill('SIGKILL')
+        clearTimeout(killTimer)
+        signal.removeEventListener('abort', forceKill)
+        if (processError) reject(processError)
+        else resolve(code)
+      })
       proc.stdout.on('data', (data) => (out += data))
       proc.stderr.on('data', (data) => (err += data))
       proc.stdin.on('error', () => {
@@ -222,6 +318,7 @@ export class Linter {
     let exit
     try {
       exit = await proc
+      signal.throwIfAborted()
     } catch (e) {
       if (signal.aborted && e instanceof Error && e.name === 'AbortError') {
         throw e
