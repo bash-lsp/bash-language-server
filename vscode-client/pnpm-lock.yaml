@@ -177,8 +177,8 @@ importers:
         version: 8.1.0
     devDependencies:
       '@types/vscode':
-        specifier: ^1.44.0
-        version: 1.138.0
+        specifier: 1.90.0
+        version: 1.90.0
 
 packages:
 
@@ -200,8 +200,8 @@ packages:
   '@one-ini/wasm@0.2.1':
     resolution: {integrity: sha512-TUqERXGNTifZ9y2g3wPxQrw3HpHv/02DsW3D90T9x0hhonrL1ZqpSmNrU2XkoIq0fP1N6gZfVQzy2Fw1ZvGBNg==}
 
-  '@types/vscode@1.138.0':
-    resolution: {integrity: sha512-DhlvrucJa8n6EHst7qQcXOcjLKs/VRTQy55plLO+RN74jonYsr/t9dd66zBnAyz1tpDig0okQAxuoPHpVNje2g==}
+  '@types/vscode@1.90.0':
+    resolution: {integrity: sha512-oT+ZJL7qHS9Z8bs0+WKf/kQ27qWYR3trsXpq46YDjFqBsMLG4ygGGjPaJ2tyrH0wJzjOEmDyg9PDJBBhWg9pkQ==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -365,7 +365,7 @@ snapshots:
 
   '@one-ini/wasm@0.2.1': {}
 
-  '@types/vscode@1.138.0': {}
+  '@types/vscode@1.90.0': {}
 
   balanced-match@1.0.2: {}
 

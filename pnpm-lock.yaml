@@ -163,7 +163,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@types/vscode': 1.138.0
+  '@types/vscode': 1.90.0
 
 importers:
 
