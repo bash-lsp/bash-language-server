@@ -17,7 +17,8 @@
 | Area | Location and responsibility |
 | --- | --- |
 | LSP server | `server/src/server.ts`: request handlers, document events, configuration, diagnostics |
-| Analysis | `server/src/analyser.ts`: parsed documents, symbol lookup, sourcing, background analysis |
+| Analysis | `server/src/analyser.ts`: parsed documents, symbol lookup, sourcing |
+| Workspace index | `server/src/workspace-index.ts`: file discovery, watched changes, background budgets |
 | Parser | `server/src/parser.ts`: loads the bundled `server/tree-sitter-bash.wasm` |
 | Shell semantics | `server/src/util/`: declaration, scope, sourcing, syntax-tree and LSP helpers |
 | External tools | `server/src/shellcheck/` and `server/src/shfmt/` |
@@ -92,3 +93,12 @@
 - Keep fixes focused on the requested behavior. Suggest broader restructuring
   separately unless it is necessary for the change; reserve a full structural
   audit for an explicitly requested deep review.
+
+## Pull request descriptions
+
+- Aim for 100 words or fewer: explain the user-visible problem and resulting
+  behavior in one short paragraph, then give the relevant validation and issue links.
+- Include limitations or tradeoffs only when they affect review or use.
+- Describe the final diff. Omit work logs, rebase history, commit inventories,
+  line counts, exhaustive test lists and claims about the review process.
+- Expand only when the change needs more context for a reviewer to assess it.
