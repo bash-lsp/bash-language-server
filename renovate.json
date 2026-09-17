@@ -4,6 +4,11 @@
     {
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true
+    },
+    {
+      "description": "Keep VS Code API typings aligned with the minimum supported editor version",
+      "matchPackageNames": ["@types/vscode"],
+      "allowedVersions": "~1.90.0"
     }
   ],
   "ignoreDeps": ["bash-language-server"]

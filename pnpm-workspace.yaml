@@ -6,7 +6,7 @@ hoist: false
 linkWorkspacePackages: false
 
 overrides:
-  '@types/vscode': 1.138.0
+  '@types/vscode': 1.90.0
 
 # Already pinned in the pnpm 10 lockfile, but less than a day old at migration.
 minimumReleaseAgeExclude:

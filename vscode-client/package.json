@@ -168,6 +168,6 @@
     "vscode-languageserver": "8.1.0"
   },
   "devDependencies": {
-    "@types/vscode": "^1.44.0"
+    "@types/vscode": "1.90.0"
   }
 }
