@@ -173,8 +173,8 @@ importers:
         specifier: 10.1.1
         version: 10.1.1
       vscode-languageserver:
-        specifier: 8.1.0
-        version: 8.1.0
+        specifier: 10.1.1
+        version: 10.1.1
     devDependencies:
       '@types/vscode':
         specifier: 1.90.0
@@ -325,6 +325,10 @@ packages:
   vscode-languageserver-types@3.18.3:
     resolution: {integrity: sha512-XIlzJ7Qp/jzSI1ds7/FwPAWrPeTZA7pAtlW4hdJ1J6xXWJL6dR9QYnDhJOdLzdKhUQ5Mm6mvUMw+3DcOQQasPw==}
 
+  vscode-languageserver@10.1.1:
+    resolution: {integrity: sha512-/cG04Fiq99rEtoDrfPpv0k6NyUFlck5GNtZLQZv1rxkBkc/4FrJNvEKTN5k1Si3O1hRguP++ciYlX9cdjdYxFQ==}
+    hasBin: true
+
   vscode-languageserver@8.1.0:
     resolution: {integrity: sha512-eUt8f1z2N2IEUDBsKaNapkz7jl5QpskN2Y0G01T/ItMxBxw1fJwvtySGB9QMecatne8jFIWJGWI61dWjyTLQsw==}
     hasBin: true
@@ -472,6 +476,10 @@ snapshots:
   vscode-languageserver-types@3.17.3: {}
 
   vscode-languageserver-types@3.18.3: {}
+
+  vscode-languageserver@10.1.1:
+    dependencies:
+      vscode-languageserver-protocol: 3.18.3
 
   vscode-languageserver@8.1.0:
     dependencies:
