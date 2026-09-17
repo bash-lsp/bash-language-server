@@ -5,7 +5,8 @@
     "strict": true,
     "target": "es6",
     "module": "commonjs",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
+    "types": ["node", "jest"],
     "declaration": true,
     "lib": [
       "es2016"

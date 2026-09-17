@@ -20,6 +20,7 @@
   "devDependencies": {
     "@types/jest": "30.0.0",
     "@types/node": "22.20.3",
+    "@typescript/native": "npm:typescript@7.0.2",
     "@typescript-eslint/eslint-plugin": "8.70.0",
     "@typescript-eslint/parser": "8.70.0",
     "cross-spawn": ">=7.0.5",
@@ -32,7 +33,7 @@
     "jest": "30.5.1",
     "prettier": "2.8.8",
     "ts-jest": "29.4.12",
-    "typescript": "5.9.3",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
     "vscode-languageserver": "8.1.0",
     "vscode-languageserver-textdocument": "1.0.14"
   },

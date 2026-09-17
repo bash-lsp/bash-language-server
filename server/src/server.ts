@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process'
 import * as path from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
 
-import * as TurndownService from 'turndown'
+import TurndownService from 'turndown'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 

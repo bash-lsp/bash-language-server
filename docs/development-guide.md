@@ -47,6 +47,11 @@ below.
 
 ## Development Tools
 
+The `tsc` command uses TypeScript 7 through the `@typescript/native` package alias.
+Jest and ESLint still require the JavaScript compiler API, so `typescript` aliases
+`@typescript/typescript6` for those tools. Keep both dependencies when updating
+the compiler; replacing the API alias with TypeScript 7 breaks the test tooling.
+
 To support a good develop workflow we set up [eslint][eslint], [Prettier][prettier] and integration tests using [Jest][jest]:
 
     pnpm verify  # (runs lint, prettier and tests)
