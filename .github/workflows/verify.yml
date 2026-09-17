@@ -56,13 +56,6 @@ jobs:
       - name: Verify changes
         run: pnpm verify:bail
 
-      - name: Publish coverage to codecov.io
-        uses: codecov/codecov-action@v7
-        if: success() && matrix.shfmt-version == 'distro'
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./codecov.yml
-
   all-done:
     needs:
       - verify
