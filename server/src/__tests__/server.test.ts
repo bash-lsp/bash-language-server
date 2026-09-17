@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import * as LSP from 'vscode-languageserver/node'
 import { CodeAction } from 'vscode-languageserver/node'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import {
   FIXTURE_DOCUMENT,
@@ -1743,6 +1744,28 @@ describe('server', () => {
   })
 
   describe('onRenameRequest', () => {
+    it('does not start a rename at an input declared later on the same line', async () => {
+      const { connection, server } = await initializeServer({
+        initializationOptions: { backgroundAnalysisMaxFiles: 0, shellcheckPath: '' },
+      })
+      const uri = 'file:///input-order.sh'
+      const source = 'echo "$name"; read name; echo "$name"'
+      const document = TextDocument.create(uri, 'shellscript', 1, source)
+      await server.analyzeAndLintDocument(document)
+      const edit = (await connection.onRenameRequest.mock.calls[0][0](
+        {
+          textDocument: { uri },
+          position: document.positionAt(source.indexOf('$name') + 1),
+          newName: 'renamed',
+        },
+        {} as any,
+        {} as any,
+      )) as LSP.WorkspaceEdit
+      expect(TextDocument.applyEdits(document, edit.changes![uri])).toBe(
+        'echo "$renamed"; read renamed; echo "$renamed"',
+      )
+    })
+
     async function getRenameRequestResult(
       line: LSP.uinteger,
       character: LSP.uinteger,

@@ -446,6 +446,13 @@ export function findDeclarationUsingGlobalSemantics({
       kind === LSP.SymbolKind.Variable &&
       getInputVariableDeclaration(n)?.name === word
     ) {
+      // A later input on the same line cannot declare an earlier reference.
+      if (
+        uri === currentUri &&
+        n.startPosition.row === position.line &&
+        n.startPosition.column > position.character
+      )
+        return false
       declaration = n
       continueSearching = false
       return false

@@ -1017,7 +1017,12 @@ export default class Analyzer {
             let closestSymbol: LSP.SymbolInformation | null = null
             let followingFunction: LSP.SymbolInformation | null = null
             symbolsMatchingWord.forEach((symbol) => {
-              if (symbol.location.range.start.line > position.line) {
+              if (
+                symbol.location.range.start.line > position.line ||
+                (symbol.kind === LSP.SymbolKind.Variable &&
+                  symbol.location.range.start.line === position.line &&
+                  symbol.location.range.start.character > position.character)
+              ) {
                 if (
                   symbol.kind === LSP.SymbolKind.Function &&
                   !symbol.containerName &&

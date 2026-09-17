@@ -109,6 +109,40 @@ it('keeps input assignments to a proven local inside its function', () => {
   ).toEqual(LSP.Range.create(1, 7, 1, 11))
 })
 
+it.each(['read name', 'mapfile "name"', "readarray 'name'"])(
+  'does not bind an earlier same-line reference to a later input: %s',
+  (command) => {
+    const source = `echo "$name"; ${command}; echo "$name"`
+    const { analyzer, document } = analyze(source)
+    const lookup = (offset: number) =>
+      analyzer.findOriginalDeclaration({
+        uri,
+        word: 'name',
+        kind: LSP.SymbolKind.Variable,
+        position: document.positionAt(offset),
+      }).declaration
+    const before = document.positionAt(source.indexOf('$name') + 1)
+    expect(lookup(source.indexOf('$name') + 1)).toBeNull()
+    expect(
+      analyzer.findDeclarationLocations({ uri, word: 'name', position: before }),
+    ).toEqual([])
+    const start = source.indexOf(command) + command.indexOf('name')
+    const expected = LSP.Location.create(
+      uri,
+      LSP.Range.create(document.positionAt(start), document.positionAt(start + 4)),
+    )
+    expect(lookup(start)).toEqual(expected)
+    expect(lookup(source.lastIndexOf('$name') + 1)).toEqual(expected)
+    expect(
+      analyzer.findDeclarationLocations({
+        uri,
+        word: 'name',
+        position: document.positionAt(source.lastIndexOf('$name') + 1),
+      }),
+    ).toEqual([expected])
+  },
+)
+
 it.each([
   'printf x | mapfile name',
   'echo "$(read name)"',
