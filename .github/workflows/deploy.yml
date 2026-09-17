@@ -19,7 +19,7 @@ jobs:
         run: sudo apt-get install -y shellcheck shfmt
 
       # Uses the exact pnpm version pinned in package.json's packageManager field.
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - uses: actions/setup-node@v7
         with:
