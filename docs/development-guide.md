@@ -56,7 +56,7 @@ To support a good develop workflow we set up [eslint][eslint], [Prettier][pretti
 
 ## Working on the client
 
-The extension requires VS Code 1.90 or newer, whose bundled Node.js runtime meets
+The extension requires VS Code 1.91 or newer, whose bundled Node.js runtime meets
 the server's Node.js 20 requirement.
 
 The client installs independently from the workspace. When updating its bundled
