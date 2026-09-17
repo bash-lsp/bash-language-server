@@ -261,7 +261,6 @@ export default class BashServer {
         logger.debug('Configuration changed')
         this.startBackgroundAnalysis()
         for (const document of this.documents.all()) {
-          this.uriToCodeActions[document.uri] = undefined
           this.analyzeAndLintDocument(document)
         }
       }

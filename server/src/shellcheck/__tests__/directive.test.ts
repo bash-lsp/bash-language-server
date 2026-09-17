@@ -32,6 +32,27 @@ describe('addDisabledRule', () => {
   )
 
   it.each([
+    ['SC1000-SC9999', 'SC1000', 'SC1000-SC9999'],
+    ['SC1000-SC9999', 'SC9999', 'SC1000-SC9999'],
+    ['SC2154-SC2154', 'SC2154', 'SC2154-SC2154'],
+    ['SC2000-SC3000', 'SC1999', 'SC1999,SC2000-SC3000'],
+    ['SC2000-SC3000', 'SC3001', 'SC2000-SC3000,SC3001'],
+    ['SC3000-SC2000', 'SC2154', 'SC2154,SC3000-SC2000'],
+    ['0999-SC1001', 'SC1000', '0999-SC1001'],
+    ['0000-0002', 'SC1', '0000-0002'],
+    ['0000-0002', 'SC0001', '0000-0002,SC0001'],
+    ['0001', 'SC0001', '0001'],
+    ['0001', 'SC1', '0001,SC1'],
+  ])(
+    'preserves range and code spelling behavior for %s and %s',
+    (rules, code, expected) => {
+      expect(addDisabledRule(`# shellcheck disable=${rules}`, code)).toBe(
+        `# shellcheck disable=${expected}`,
+      )
+    },
+  )
+
+  it.each([
     '# ordinary comment',
     '# shellcheck source=/dev/null # disable=SC1000',
     '# shellcheck source="disable=SC1000"',

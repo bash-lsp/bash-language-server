@@ -111,12 +111,18 @@ export function addDisabledRule(line: string, code: string): string | null {
     ) {
       continue
     }
-    const normalized = values.map((value) => value.replace(/\b(?=\d)/g, 'SC'))
-    const [directive] = parseShellCheckDirective(
-      `# shellcheck disable=${normalized.join(',')}`,
-    )
-    if (directive?.type !== 'disable') continue
-    if (directive.rules.includes(code) || directive.rules.includes('all')) return line
+    const numericCode = Number(code.slice(2))
+    const covered = values.some((value) => {
+      if (value === 'all') return true
+      const [start, end] = value.replace(/SC/g, '').split('-')
+      // Single codes preserve their spelling; ranges contain canonical numeric codes.
+      return end === undefined
+        ? `SC${start}` === code
+        : code === `SC${numericCode}` &&
+            Number(start) <= numericCode &&
+            numericCode <= Number(end)
+    })
+    if (covered) return line
 
     values.push(code)
     values.sort(
