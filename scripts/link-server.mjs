@@ -1,12 +1,15 @@
 import { mkdirSync, rmSync, symlinkSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 
-const linkPath = resolve('vscode-client/node_modules/bash-language-server')
+// The wrapper's Connection types must match the server it loads.
+const links = {
+  'bash-language-server': 'server',
+  'vscode-languageserver': 'server/node_modules/vscode-languageserver',
+}
 
-mkdirSync(dirname(linkPath), { recursive: true })
-rmSync(linkPath, { recursive: true, force: true })
-symlinkSync(
-  resolve('server'),
-  linkPath,
-  process.platform === 'win32' ? 'junction' : 'dir',
-)
+for (const [name, target] of Object.entries(links)) {
+  const linkPath = resolve('vscode-client/node_modules', name)
+  mkdirSync(dirname(linkPath), { recursive: true })
+  rmSync(linkPath, { recursive: true, force: true })
+  symlinkSync(resolve(target), linkPath, process.platform === 'win32' ? 'junction' : 'dir')
+}
