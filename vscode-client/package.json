@@ -12,7 +12,7 @@
     "url": "https://github.com/bash-lsp/bash-language-server"
   },
   "engines": {
-    "vscode": "^1.90.0"
+    "vscode": "^1.91.0"
   },
   "icon": "assets/bash-logo.png",
   "categories": [
@@ -164,7 +164,7 @@
   },
   "dependencies": {
     "bash-language-server": "5.7.0",
-    "vscode-languageclient": "8.1.0",
+    "vscode-languageclient": "10.1.1",
     "vscode-languageserver": "8.1.0"
   },
   "devDependencies": {

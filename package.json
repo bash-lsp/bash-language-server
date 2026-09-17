@@ -8,7 +8,7 @@
     "watch": "tsc -b -w",
     "lint": "pnpm lint:bail --fix",
     "lint:bail": "eslint . --ext js,ts,tsx --cache",
-    "test": "jest --runInBand",
+    "test": "tsc --noEmit -p tsconfig.eslint.json && jest --runInBand",
     "test:coverage": "pnpm run test --coverage",
     "test:watch": "pnpm run test --watch",
     "verify": "pnpm lint && pnpm compile && pnpm run test",
