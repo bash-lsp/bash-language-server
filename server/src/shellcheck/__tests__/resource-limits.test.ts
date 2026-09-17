@@ -1,4 +1,4 @@
-import * as childProcess from 'node:child_process'
+import childProcess from 'node:child_process'
 
 import { TextDocument } from 'vscode-languageserver-textdocument'
 

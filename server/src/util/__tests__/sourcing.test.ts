@@ -1,7 +1,7 @@
 import { pathToFileURL } from 'node:url'
 
-import * as fs from 'fs'
-import * as os from 'os'
+import fs from 'fs'
+import os from 'os'
 import { Parser } from 'web-tree-sitter'
 
 import { FIXTURE_FOLDER, REPO_ROOT_FOLDER } from '../../../../testing/fixtures'

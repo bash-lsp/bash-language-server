@@ -1,4 +1,4 @@
-import * as fs from 'fs'
+import fs from 'fs'
 
 import { initializeParser } from '../../parser'
 import { getSourceCommands } from '../sourcing'

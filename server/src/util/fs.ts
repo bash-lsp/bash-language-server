@@ -4,7 +4,7 @@ import * as path from 'node:path'
 import { Readable } from 'node:stream'
 import { fileURLToPath } from 'node:url'
 
-import * as fastGlob from 'fast-glob'
+import fastGlob from 'fast-glob'
 
 const MAX_DISCOVERY_DIRECTORIES = 10000
 const DISCOVERY_TIMEOUT_MS = 10000

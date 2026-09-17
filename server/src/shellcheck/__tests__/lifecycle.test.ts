@@ -1,4 +1,4 @@
-import * as childProcess from 'child_process'
+import childProcess from 'child_process'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { getMockConnection } from '../../../../testing/mocks'

@@ -1,5 +1,5 @@
 /* eslint-disable no-useless-escape */
-import * as ChildProcess from 'child_process'
+import ChildProcess from 'child_process'
 
 import * as sh from '../sh'
 
