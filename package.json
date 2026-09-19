@@ -29,7 +29,7 @@
     "eslint-plugin-prettier": "4.2.5",
     "eslint-plugin-simple-import-sort": "14.0.0",
     "eslint-plugin-sort-class-members": "1.22.1",
-    "jest": "30.5.1",
+    "jest": "30.5.2",
     "prettier": "2.8.8",
     "ts-jest": "29.4.12",
     "typescript": "5.9.3",
