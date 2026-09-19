@@ -5,7 +5,7 @@
   "description": "A language server for Bash",
   "author": "Mads Hartmann",
   "license": "MIT",
-  "version": "1.43.1",
+  "version": "1.43.2",
   "publisher": "mads-hartmann",
   "repository": {
     "type": "git",
@@ -163,9 +163,9 @@
     "vscode:prepublish": "cd .. && pnpm compile"
   },
   "dependencies": {
-    "bash-language-server": "5.7.0",
+    "bash-language-server": "5.8.1",
     "vscode-languageclient": "10.1.1",
-    "vscode-languageserver": "8.1.0"
+    "vscode-languageserver": "10.1.1"
   },
   "devDependencies": {
     "@types/vscode": "1.90.0"
