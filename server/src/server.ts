@@ -1000,6 +1000,12 @@ function getMarkdownContent(documentation: string, language?: string): LSP.Marku
 }
 
 export function getCommandOptions(name: string, word: string): string[] {
+  // bash-completion may execute the command with --help. Only accept plain
+  // command names, never paths or shell syntax taken from the document.
+  if (!/^[A-Za-z0-9_]/.test(name) || /[^A-Za-z0-9_.+-]/.test(name)) {
+    return []
+  }
+
   const options = spawnSync(path.join(__dirname, './get-options.sh'), [name, word])
 
   if (options.status !== 0) {
