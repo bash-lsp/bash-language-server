@@ -32,7 +32,7 @@ it.each(['shutdown', 'configuration change'])(
       if (event === 'shutdown') {
         await connection.onShutdown.mock.calls[0][0]({} as any)
       } else {
-        connection.onDidChangeConfiguration.mock.calls[0][0]({
+        await connection.onDidChangeConfiguration.mock.calls[0][0]({
           settings: { bashIde: { backgroundAnalysisMaxFiles: 0 } },
         })
       }

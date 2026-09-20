@@ -1,4 +1,5 @@
 import BashLanguageServer from 'bash-language-server'
+import { inspect } from 'node:util'
 import {
   createConnection,
   InitializeParams,
@@ -21,7 +22,9 @@ connection.listen()
 // Don't die on unhandled Promise rejections
 process.on('unhandledRejection', (reason, p) => {
   const stack = reason instanceof Error ? reason.stack : reason
-  connection.console.error(`Unhandled Rejection at promise: ${p}, reason: ${stack}`)
+  connection.console.error(
+    `Unhandled Rejection at promise: ${inspect(p)}, reason: ${String(stack)}`,
+  )
 })
 
 process.on('SIGPIPE', () => {

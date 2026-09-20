@@ -232,7 +232,9 @@ export default class Analyzer {
       } catch (error) {
         if (!signal.aborted)
           logger.warn(
-            `BackgroundAnalysis: failed resolving glob "${globPattern}". The experience across files will be degraded. Error: ${error}`,
+            `BackgroundAnalysis: failed resolving glob "${globPattern}". The experience across files will be degraded. Error: ${String(
+              error,
+            )}`,
           )
         return { filesParsed }
       }
@@ -293,7 +295,9 @@ export default class Analyzer {
           filesParsed++
         } catch (error) {
           if (stopped()) break
-          logger.warn(`BackgroundAnalysis: Failed analyzing ${uri}. Error: ${error}`)
+          logger.warn(
+            `BackgroundAnalysis: Failed analyzing ${uri}. Error: ${String(error)}`,
+          )
         }
       }
       // Rereading background files can remove source relationships. Recompute
@@ -1067,7 +1071,7 @@ export default class Analyzer {
             uri,
           })
         } catch (err) {
-          logger.warn(`Error while analyzing file ${uri}: ${err}`)
+          logger.warn(`Error while analyzing file ${uri}: ${String(err)}`)
           return false
         }
       }

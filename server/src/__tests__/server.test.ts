@@ -308,7 +308,9 @@ describe('server', () => {
 
     const onDidChangeConfiguration = connection.onDidChangeConfiguration.mock.calls[0][0]
 
-    onDidChangeConfiguration({ settings: { bashIde: { explainshellEndpoint: 42 } } })
+    await onDidChangeConfiguration({
+      settings: { bashIde: { explainshellEndpoint: 42 } },
+    })
 
     expect(connection.workspace.getConfiguration).toHaveBeenCalled()
     expect(Logger.prototype.log).toHaveBeenCalledWith(expect.any(Number), [

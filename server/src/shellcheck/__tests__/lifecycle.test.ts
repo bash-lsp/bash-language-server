@@ -25,7 +25,7 @@ async function initializeServer() {
     workspaceFolders: null,
   })
   server.register(connection)
-  connection.onDidChangeConfiguration.mock.calls[0][0]({
+  await connection.onDidChangeConfiguration.mock.calls[0][0]({
     settings: { bashIde: { shellcheckPath: 'controlled-shellcheck' } },
   })
   await connection.onInitialized.mock.calls[0][0]({})
@@ -186,18 +186,18 @@ describe('lint process lifecycle', () => {
   it('cancels on close without republishing diagnostics or relinting a closed document', async () => {
     const { connection, server } = await initializeServer()
     const analyze = vi.spyOn(server, 'analyzeAndLintDocument')
-    connection.onDidOpenTextDocument.mock.calls[0][0]({
+    await connection.onDidOpenTextDocument.mock.calls[0][0]({
       textDocument: { uri, languageId: 'shellscript', version: 1, text: 'echo stale' },
     })
     vi.advanceTimersByTime(500)
 
-    connection.onDidCloseTextDocument.mock.calls[0][0]({ textDocument: { uri } })
+    await connection.onDidCloseTextDocument.mock.calls[0][0]({ textDocument: { uri } })
     await analyze.mock.results[0].value
     await exits[0]
     expect(children[0].signalCode).toBe('SIGTERM')
     expect(connection.sendDiagnostics.mock.calls).toEqual([[{ uri, diagnostics: [] }]])
 
-    connection.onDidChangeConfiguration.mock.calls[0][0]({
+    await connection.onDidChangeConfiguration.mock.calls[0][0]({
       settings: { bashIde: { shellcheckPath: 'another-shellcheck' } },
     })
     vi.advanceTimersByTime(500)
@@ -208,12 +208,12 @@ describe('lint process lifecycle', () => {
   it('cancels the old checker when configuration disables linting', async () => {
     const { connection, server } = await initializeServer()
     const analyze = vi.spyOn(server, 'analyzeAndLintDocument')
-    connection.onDidOpenTextDocument.mock.calls[0][0]({
+    await connection.onDidOpenTextDocument.mock.calls[0][0]({
       textDocument: { uri, languageId: 'shellscript', version: 1, text: 'echo stale' },
     })
     vi.advanceTimersByTime(500)
 
-    connection.onDidChangeConfiguration.mock.calls[0][0]({
+    await connection.onDidChangeConfiguration.mock.calls[0][0]({
       settings: { bashIde: { shellcheckPath: '' } },
     })
     await Promise.all(analyze.mock.results.map(({ value }) => value))
@@ -240,12 +240,12 @@ describe('lint process lifecycle', () => {
         },
       ]
       for (const textDocument of openDocuments) {
-        connection.onDidOpenTextDocument.mock.calls[0][0]({ textDocument })
+        await connection.onDidOpenTextDocument.mock.calls[0][0]({ textDocument })
       }
       vi.advanceTimersByTime(500)
       expect(children).toHaveLength(2)
 
-      connection.onDidChangeConfiguration.mock.calls[0][0]({
+      await connection.onDidChangeConfiguration.mock.calls[0][0]({
         settings: { bashIde: { shellcheckPath } },
       })
       await Promise.all(exits)
