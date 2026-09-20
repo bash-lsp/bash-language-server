@@ -1,6 +1,6 @@
 {
   "private": true,
-  "packageManager": "pnpm@12.4.2",
+  "packageManager": "pnpm@12.5.1",
   "scripts": {
     "clean": "rm -rf *.log */*.log */out node_modules vscode-client/node_modules server/node_modules",
     "preinstall": "npx only-allow pnpm",
