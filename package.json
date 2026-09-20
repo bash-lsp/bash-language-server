@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@types/jest": "30.0.0",
-    "@types/node": "22.20.3",
+    "@types/node": "22.20.4",
     "@typescript-eslint/eslint-plugin": "8.70.0",
     "@typescript-eslint/parser": "8.70.0",
     "cross-spawn": ">=7.0.5",
