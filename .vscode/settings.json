@@ -8,6 +8,6 @@
 	"typescript.tsdk": "./node_modules/typescript/lib",
 	"typescript.tsc.autoDetect": "off",
 	"editor.codeActionsOnSave": {
-		"source.fixAll.eslint": "explicit"
+		"source.fixAll.oxc": "explicit"
 	}
 }

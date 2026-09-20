@@ -1,7 +1,12 @@
+import { expect, it, vi } from 'vitest'
 import * as fs from 'fs'
 
 import { initializeParser } from '../../parser'
 import { getSourceCommands } from '../sourcing'
+
+vi.mock('fs', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('fs')>()),
+}))
 
 it.each([
   '"${PROJECT_DIR}/libs/lib.sh"',
@@ -10,7 +15,7 @@ it.each([
   '"$PROJECT_DIR"/libs/lib.sh',
 ])('resolves a leading dynamic directory with a static suffix: %s', async (argument) => {
   const parser = await initializeParser()
-  const exists = jest
+  const exists = vi
     .spyOn(fs, 'existsSync')
     .mockImplementation((filePath) => filePath === '/project/libs/lib.sh')
   try {

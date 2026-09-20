@@ -1,0 +1,49 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "rules": {
+    "no-console": "error",
+    "prefer-destructuring": [
+      "error",
+      {
+        "array": false,
+        "object": true
+      }
+    ],
+    "prefer-const": "error",
+    "prefer-template": "error",
+    "object-shorthand": "error",
+    "no-unused-vars": [
+      "error",
+      {
+        "vars": "all",
+        "args": "none",
+        "argsIgnorePattern": "^_",
+        "caughtErrors": "none",
+        "ignoreRestSiblings": true
+      }
+    ],
+    "no-array-constructor": "error",
+    "no-var": "error",
+    "prefer-rest-params": "error",
+    "prefer-spread": "error",
+    "no-case-declarations": "error",
+    "no-empty": "error",
+    "no-fallthrough": "error",
+    "no-inner-declarations": "error",
+    "no-prototype-builtins": "error",
+    "no-regex-spaces": "error",
+    "typescript/ban-ts-comment": "error",
+    "typescript/no-empty-object-type": "error",
+    "typescript/no-namespace": "error",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-function-type": "error"
+  },
+  "ignorePatterns": ["**/out/**", "**/node_modules/**", "coverage/**", ".context/**"]
+}

@@ -1,3 +1,4 @@
+import { expect, it } from 'vitest'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import Analyzer from '../analyser'

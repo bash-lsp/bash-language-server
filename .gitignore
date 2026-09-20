@@ -3,10 +3,8 @@ vscode-client/out
 server/out
 *.tsbuildinfo
 
-# Linter cache
+# Test coverage
 coverage/
-.eslintcache/
-.eslintcache
 
 # OS related
 .DS_Store

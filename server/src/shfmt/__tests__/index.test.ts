@@ -1,3 +1,4 @@
+import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { FormattingOptions } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
@@ -6,10 +7,10 @@ import { ShfmtConfig } from '../../config'
 import { Logger } from '../../util/logger'
 import { Formatter } from '../index'
 
-jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {
+vi.spyOn(Logger.prototype, 'log').mockImplementation(() => {
   // noop
 })
-const loggerWarn = jest.spyOn(Logger.prototype, 'warn')
+const loggerWarn = vi.spyOn(Logger.prototype, 'warn')
 
 const FIXTURE_DOCUMENT_URI = `file://${FIXTURE_FOLDER}/foo.sh`
 function textToDoc(txt: string) {

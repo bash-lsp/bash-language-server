@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as childProcess from 'node:child_process'
 import {
   existsSync,
@@ -13,6 +14,10 @@ import { tmpdir } from 'node:os'
 import * as path from 'node:path'
 
 import { getCommandOptions } from '../server'
+
+vi.mock('node:child_process', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('node:child_process')>()),
+}))
 
 const INVALID_COMMAND_NAMES = [
   '',
@@ -39,10 +44,10 @@ const INVALID_COMMAND_NAMES = [
 ]
 
 describe('getCommandOptions', () => {
-  afterEach(() => jest.restoreAllMocks())
+  afterEach(() => vi.restoreAllMocks())
 
   it.each(INVALID_COMMAND_NAMES)('rejects %j before spawning a helper', (name) => {
-    const spawn = jest.spyOn(childProcess, 'spawnSync').mockReturnValue({
+    const spawn = vi.spyOn(childProcess, 'spawnSync').mockReturnValue({
       status: 0,
       stdout: Buffer.from('--help\t'),
     } as any)
@@ -54,7 +59,7 @@ describe('getCommandOptions', () => {
   it.each(['cat', 'git', 'python3.12', '7z', '_tool', 'my-tool', 'g++'])(
     'preserves option completion for %j',
     (name) => {
-      const spawn = jest.spyOn(childProcess, 'spawnSync').mockReturnValue({
+      const spawn = vi.spyOn(childProcess, 'spawnSync').mockReturnValue({
         status: 0,
         stdout: Buffer.from('--help\t--version\t'),
       } as any)

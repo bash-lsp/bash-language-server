@@ -17,4 +17,3 @@ minimumReleaseAgeExclude:
 # These dependencies use prebuilt binaries; pnpm 10 also skipped their scripts.
 allowBuilds:
   '@parcel/watcher': false
-  unrs-resolver: false

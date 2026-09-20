@@ -1,3 +1,4 @@
+import { expect, it, vi, type Mock } from 'vitest'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { getMockConnection } from '../../../testing/mocks'
@@ -12,15 +13,15 @@ it.each(
 )(
   'treats %s assignments and expansions as variables (explainshell: %s)',
   async (word, useExplainshell) => {
-    const documentation = jest
+    const documentation = vi
       .spyOn(sh, 'getShellDocumentation')
       .mockResolvedValue('command documentation')
-    const explainshellDocumentation = jest
+    const explainshellDocumentation = vi
       .spyOn(Analyzer.prototype, 'getExplainshellDocumentation')
       .mockResolvedValue({ helpHTML: 'command documentation' })
     try {
       const connection = getMockConnection()
-      const getConfiguration = connection.workspace.getConfiguration as jest.Mock
+      const getConfiguration = connection.workspace.getConfiguration as Mock
       getConfiguration.mockResolvedValue({
         shellcheckPath: '',
         explainshellEndpoint: useExplainshell ? 'http://localhost:5000' : '',

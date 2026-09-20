@@ -1,3 +1,4 @@
+import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { pathToFileURL } from 'node:url'
 
 import * as fs from 'fs'
@@ -8,6 +9,13 @@ import { FIXTURE_FOLDER, REPO_ROOT_FOLDER } from '../../../../testing/fixtures'
 import { initializeParser } from '../../parser'
 import { getSourceCommands } from '../sourcing'
 
+vi.mock('fs', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('fs')>()),
+}))
+vi.mock('os', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('os')>()),
+}))
+
 const fileDirectory = '/Users/bash'
 const fileUri = `${fileDirectory}/file.sh`
 
@@ -17,7 +25,7 @@ beforeAll(async () => {
 })
 
 // mock os.homedir() to return a fixed path
-jest.spyOn(os, 'homedir').mockImplementation(() => '/Users/bash-user')
+vi.spyOn(os, 'homedir').mockImplementation(() => '/Users/bash-user')
 
 describe('getSourcedUris', () => {
   it('returns an empty set if no files were sourced', () => {
@@ -33,7 +41,7 @@ describe('getSourcedUris', () => {
   it.each(['path', 'URI'])('resolves an encoded workspace %s', (rootType) => {
     const workspacePath = '/Users/bash/project #? %23 café'
     const sourcedPath = `${workspacePath}/library #? %23 café.inc`
-    const existsSync = jest
+    const existsSync = vi
       .spyOn(fs, 'existsSync')
       .mockImplementation((filePath) => filePath === sourcedPath)
 
@@ -58,7 +66,7 @@ describe('getSourcedUris', () => {
   })
 
   it('returns a set of sourced files (but ignores some unhandled cases)', () => {
-    jest.spyOn(fs, 'existsSync').mockImplementation(() => true)
+    vi.spyOn(fs, 'existsSync').mockImplementation(() => true)
 
     const fileContent = `
       source file-in-path.sh # does not contain a slash (i.e. is maybe somewhere on the path)
@@ -186,7 +194,7 @@ describe('getSourcedUris', () => {
   })
 
   it('returns a set of sourced files and parses ShellCheck directives', () => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
 
     const fileContent = `
       . ./scripts/release-client.sh
@@ -254,7 +262,7 @@ describe('getSourcedUris', () => {
     '. "$libFolder/example.sh" && echo loaded',
     'source "$libFolder/example.sh" && echo loaded || exit 1',
   ])('uses the ShellCheck source directive before %s', (command) => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
 
     const sourceCommands = getSourceCommands({
       fileUri,
@@ -286,7 +294,7 @@ describe('getSourcedUris', () => {
   )
 
   it('does not reuse a source directive for later commands in a list', () => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
 
     const sourceCommands = getSourceCommands({
       fileUri,
@@ -304,7 +312,7 @@ describe('getSourcedUris', () => {
   })
 
   it('resolves bats `load` commands in .bats files', () => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
 
     const fileContent = `
       load test_helper # bats appends the .bash extension
@@ -357,7 +365,7 @@ describe('getSourcedUris', () => {
   })
 
   it('does not treat `load` as a sourcing command outside of .bats files', () => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
 
     const fileContent = `
       load test_helper

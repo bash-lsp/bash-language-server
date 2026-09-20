@@ -6,7 +6,7 @@
     "target": "es6",
     "module": "Node16",
     "moduleResolution": "Node16",
-    "esModuleInterop": false,
+    "esModuleInterop": true,
     "isolatedModules": true,
     "declaration": true,
     "lib": [
@@ -24,7 +24,6 @@
     "**/__tests__/*",
     "vscode-client/out",
     "server/out",
-    "server/setupJest.ts",
     "testing"
   ],
   "references": [

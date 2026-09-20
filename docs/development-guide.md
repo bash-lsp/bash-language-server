@@ -15,8 +15,8 @@ convenience - it proxies to the `package.json` files in the `vscode-client` and
 
 This guide presumes you have the following dependencies installed:
 
-- [`pnpm`][pnpm] (12.4.1, pinned in the root and client `package.json` files).
-- [`node`][node] (v20 or newer)
+- [`pnpm`][pnpm] (use the version pinned in the root and client `package.json` files).
+- [`node`][node] (v22.12 or newer for development; the server supports v20 or newer)
 
 If you use nvm, select Node.js 22 (matching CI) from the project root:
 
@@ -47,12 +47,30 @@ below.
 
 ## Development Tools
 
-To support a good develop workflow we set up [eslint][eslint], [Prettier][prettier] and integration tests using [Jest][jest]:
+Development uses [Oxlint][oxlint], [Prettier][prettier], and integration tests using [Vitest][vitest]:
 
-    pnpm verify  # (runs lint, prettier and tests)
-    pnpm lint
+    pnpm verify       # fixes lint/formatting, compiles, type-checks, and runs tests
+    pnpm verify:bail  # checks lint/formatting, compiles, and runs tests with coverage
+    pnpm lint         # fixes lint and formatting
+    pnpm lint:bail    # checks lint and formatting without rewriting files
     pnpm test
     pnpm test:coverage
+    pnpm test:watch
+
+Run a specific test file or filter by test name:
+
+```sh
+pnpm test server/src/__tests__/input-declarations.test.ts
+pnpm test server/src/__tests__/server.test.ts -t 'rename'
+```
+
+Tests and test helpers are type-checked using `tsconfig.test.json`. Vitest runs
+files sequentially so subprocess and filesystem integration tests stay isolated.
+Coverage reports are written to `coverage/` in HTML and LCOV formats.
+
+Install the recommended Oxc VS Code extension for lint diagnostics and fixes on
+save. Prettier runs separately as part of the lint commands. The former custom
+import and class-member ordering rules are no longer enforced.
 
 ## Working on the client
 
@@ -125,8 +143,8 @@ To analyze the performance of the extension or server using the Chrome inspector
 
 [lsp]: https://microsoft.github.io/language-server-protocol/
 [ide-bash]: https://github.com/bash-lsp/ide-bash
-[jest]: https://facebook.github.io/jest/
+[vitest]: https://vitest.dev/
 [prettier]: https://prettier.io/
-[eslint]: https://eslint.org/
+[oxlint]: https://oxc.rs/docs/guide/usage/linter/
 [pnpm]: https://pnpm.io/installation
 [node]: https://nodejs.org/en/download/

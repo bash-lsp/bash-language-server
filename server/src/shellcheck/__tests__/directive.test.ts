@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest'
 import { addDisabledRule, parseShellCheckDirective } from '../directive'
 
 describe('addDisabledRule', () => {

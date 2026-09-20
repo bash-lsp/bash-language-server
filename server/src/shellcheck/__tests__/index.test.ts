@@ -1,3 +1,4 @@
+import { describe, expect, it, vi } from 'vitest'
 import * as path from 'path'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
@@ -5,12 +6,12 @@ import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../../testing/fixtures'
 import { Logger } from '../../util/logger'
 import { Linter } from '../index'
 
-jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {
+vi.spyOn(Logger.prototype, 'log').mockImplementation(() => {
   // noop
 })
-const loggerWarn = jest.spyOn(Logger.prototype, 'warn')
+const loggerWarn = vi.spyOn(Logger.prototype, 'warn')
 
-jest.useFakeTimers()
+vi.useFakeTimers()
 
 const FIXTURE_DOCUMENT_URI = `file://${FIXTURE_FOLDER}/foo.sh`
 function textToDoc(txt: string) {
@@ -35,7 +36,7 @@ async function getLintingResult({
     executablePath,
   })
   const promise = linter.lint(document, sourcePaths, additionalShellCheckArguments)
-  jest.advanceTimersByTime(500)
+  vi.advanceTimersByTime(500)
   const result = await promise
   return [result, linter]
 }
@@ -202,7 +203,7 @@ describe('linter', () => {
       linter.lint(FIXTURE_DOCUMENT.SHELLCHECK_SOURCE, []),
     )
 
-    jest.runOnlyPendingTimers()
+    vi.runOnlyPendingTimers()
 
     const result = await promises[promises.length - 1]
     expect(result).toEqual({

@@ -1,3 +1,4 @@
+import { describe, expect, it, vi } from 'vitest'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -22,7 +23,7 @@ import { Logger } from '../util/logger'
 
 // Skip only the ShellCheck debounce, preserving resource-limit timers.
 const realSetTimeout = global.setTimeout
-jest.spyOn(global, 'setTimeout').mockImplementation((fn: any, ms?: number) => {
+vi.spyOn(global, 'setTimeout').mockImplementation((fn: any, ms?: number) => {
   if (ms === 500) {
     fn()
     return 0 as any
@@ -30,7 +31,7 @@ jest.spyOn(global, 'setTimeout').mockImplementation((fn: any, ms?: number) => {
   return realSetTimeout(fn, ms)
 })
 
-jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {
+vi.spyOn(Logger.prototype, 'log').mockImplementation(() => {
   // noop
 })
 
@@ -65,7 +66,7 @@ async function initializeServer({
 
   server.register(connection)
   const onInitialized = connection.onInitialized.mock.calls[0][0]
-  const backgroundAnalysis = jest.spyOn(server as any, 'startBackgroundAnalysis')
+  const backgroundAnalysis = vi.spyOn(server as any, 'startBackgroundAnalysis')
   try {
     expect(await onInitialized({})).toBeUndefined()
     await backgroundAnalysis.mock.results[0].value
@@ -151,10 +152,7 @@ describe('server', () => {
   })
 
   it('uses initialization options to disable background analysis', async () => {
-    const backgroundAnalysis = jest.spyOn(
-      Analyzer.prototype,
-      'initiateBackgroundAnalysis',
-    )
+    const backgroundAnalysis = vi.spyOn(Analyzer.prototype, 'initiateBackgroundAnalysis')
     try {
       await initializeServer({ initializationOptions: { backgroundAnalysisMaxFiles: 0 } })
 
@@ -170,10 +168,7 @@ describe('server', () => {
   })
 
   it('prefers workspace configuration over initialization options', async () => {
-    const backgroundAnalysis = jest.spyOn(
-      Analyzer.prototype,
-      'initiateBackgroundAnalysis',
-    )
+    const backgroundAnalysis = vi.spyOn(Analyzer.prototype, 'initiateBackgroundAnalysis')
     try {
       await initializeServer({
         capabilities: { workspace: { configuration: true } },
@@ -211,10 +206,7 @@ describe('server', () => {
   )
 
   it('retains initialization options when workspace configuration is unavailable', async () => {
-    const backgroundAnalysis = jest.spyOn(
-      Analyzer.prototype,
-      'initiateBackgroundAnalysis',
-    )
+    const backgroundAnalysis = vi.spyOn(Analyzer.prototype, 'initiateBackgroundAnalysis')
     try {
       await initializeServer({
         capabilities: { workspace: { configuration: true } },
@@ -237,11 +229,8 @@ describe('server', () => {
       GLOB_PATTERN: '**/*.custom-bash',
       SHFMT_PATH: 'custom-shfmt',
     }
-    const lint = jest.spyOn(Linter.prototype, 'lint')
-    const backgroundAnalysis = jest.spyOn(
-      Analyzer.prototype,
-      'initiateBackgroundAnalysis',
-    )
+    const lint = vi.spyOn(Linter.prototype, 'lint')
+    const backgroundAnalysis = vi.spyOn(Analyzer.prototype, 'initiateBackgroundAnalysis')
     try {
       const { server } = await initializeServer({
         initializationOptions: {
@@ -469,7 +458,7 @@ describe('server', () => {
       await server.analyzeAndLintDocument(document)
       const { diagnostics } = connection.sendDiagnostics.mock.calls[0][0]
       let finishLint!: (result: null) => void
-      const lint = jest.spyOn(Linter.prototype, 'lint').mockImplementation(
+      const lint = vi.spyOn(Linter.prototype, 'lint').mockImplementation(
         () =>
           new Promise((resolve) => {
             finishLint = resolve
@@ -583,7 +572,7 @@ describe('server', () => {
     it('responds to onCompletion with options list when command name is found', async () => {
       if (getCommandOptions('find', '-').length === 0) {
         // This might not work on all systems
-        // eslint-disable-next-line no-console
+        // oxlint-disable-next-line no-console
         console.warn('Skipping onCompletion test as getCommandOptions failed')
         return
       }

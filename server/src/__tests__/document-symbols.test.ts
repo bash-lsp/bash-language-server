@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 

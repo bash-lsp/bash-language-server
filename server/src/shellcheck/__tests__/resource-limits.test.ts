@@ -1,9 +1,14 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as childProcess from 'node:child_process'
 
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { Logger } from '../../util/logger'
 import { Linter } from '../index'
+
+vi.mock('node:child_process', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('node:child_process')>()),
+}))
 
 const { spawn } = childProcess
 // Windows does not support ignoring SIGTERM or Unix process groups.
@@ -21,15 +26,15 @@ describe('ShellCheck resource limits', () => {
   let running: number
 
   beforeEach(() => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
     children = []
     descendants = []
     ready = []
     exits = []
     linters = []
     peakRunning = running = 0
-    jest.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined)
-    jest.spyOn(childProcess, 'spawn').mockImplementation((_command, _args, options) => {
+    vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined)
+    vi.spyOn(childProcess, 'spawn').mockImplementation((_command, _args, options) => {
       const child = spawn(
         process.execPath,
         [
@@ -77,7 +82,7 @@ describe('ShellCheck resource limits', () => {
           }),
         ),
       )
-      jest.spyOn(child.stdin!, 'end')
+      vi.spyOn(child.stdin!, 'end')
       return child
     })
   })
@@ -95,9 +100,9 @@ describe('ShellCheck resource limits', () => {
       if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL')
     }
     await Promise.all(exits)
-    await jest.advanceTimersByTimeAsync(0)
-    jest.restoreAllMocks()
-    jest.useRealTimers()
+    await vi.advanceTimersByTimeAsync(0)
+    vi.restoreAllMocks()
+    vi.useRealTimers()
   })
 
   function linter(maxConcurrent = 1, timeoutMs = 10000) {
@@ -115,7 +120,7 @@ describe('ShellCheck resource limits', () => {
     const first = checker.lint(document('hold', 'first'), [])
     const second = checker.lint(document('hold', 'second'), [])
     const third = checker.lint(document('latest', 'third'), [])
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     expect(children).toHaveLength(2)
     await Promise.all(ready)
 
@@ -131,12 +136,12 @@ describe('ShellCheck resource limits', () => {
   it('replaces queued revisions without ever spawning the obsolete checker', async () => {
     const checker = linter()
     const runningJob = checker.lint(document('hold', 'running'), [])
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     await ready[0]
     const obsolete = checker.lint(document('obsolete', 'queued'), [])
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     const latest = checker.lint(document('latest', 'queued'), [])
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     expect(await obsolete).toBeNull()
     expect(children).toHaveLength(1)
 
@@ -152,12 +157,12 @@ describe('ShellCheck resource limits', () => {
     'times out and force-kills an uncooperative checker before reusing its slot',
     async () => {
       const checker = linter(1, 1000)
-      const warning = jest.spyOn(Logger.prototype, 'warn')
+      const warning = vi.spyOn(Logger.prototype, 'warn')
       const expired = checker.lint(document('hold ignore-term', 'expired'), [])
-      jest.advanceTimersByTime(500)
+      vi.advanceTimersByTime(500)
       await ready[0]
       const next = checker.lint(document('latest', 'next'), [])
-      jest.advanceTimersByTime(1000)
+      vi.advanceTimersByTime(1000)
       expect(await expired).toBeNull()
       expect(warning).toHaveBeenCalledWith(
         expect.stringContaining('timed out after 1000ms'),
@@ -165,7 +170,7 @@ describe('ShellCheck resource limits', () => {
       expect(children).toHaveLength(1)
       expect(children[0].signalCode).toBeNull()
 
-      jest.advanceTimersByTime(1000)
+      vi.advanceTimersByTime(1000)
       await exits[0]
       expect(await next).toEqual({ diagnostics: [], codeActions: {} })
       expect(children[0].signalCode).toBe('SIGKILL')
@@ -177,22 +182,22 @@ describe('ShellCheck resource limits', () => {
     'does not report a canceled checker as timed out while waiting for it to exit',
     async () => {
       const checker = linter(1, 1000)
-      const warning = jest.spyOn(Logger.prototype, 'warn')
+      const warning = vi.spyOn(Logger.prototype, 'warn')
       const canceled = checker.lint(document('hold ignore-term', 'canceled'), [])
-      jest.advanceTimersByTime(500)
+      vi.advanceTimersByTime(500)
       await ready[0]
-      jest.advanceTimersByTime(600)
+      vi.advanceTimersByTime(600)
       checker.cancel('file:///tmp/canceled.sh')
       expect(await canceled).toBeNull()
       const next = checker.lint(document('latest', 'next'), [])
 
       // Its original deadline expires during the cancellation grace period.
-      jest.advanceTimersByTime(500)
+      vi.advanceTimersByTime(500)
       expect(warning).not.toHaveBeenCalled()
       expect(children).toHaveLength(1)
       expect(children[0].signalCode).toBeNull()
 
-      jest.advanceTimersByTime(500)
+      vi.advanceTimersByTime(500)
       await exits[0]
       expect(await next).toEqual({ diagnostics: [], codeActions: {} })
       expect(children[0].signalCode).toBe('SIGKILL')
@@ -205,16 +210,16 @@ describe('ShellCheck resource limits', () => {
     async () => {
       const oldChecker = linter()
       const old = oldChecker.lint(document('hold ignore-term', 'old'), [])
-      jest.advanceTimersByTime(500)
+      vi.advanceTimersByTime(500)
       await ready[0]
       oldChecker.dispose()
       expect(await old).toBeNull()
 
       const newChecker = linter()
       const next = newChecker.lint(document('latest', 'new'), [])
-      jest.advanceTimersByTime(500)
+      vi.advanceTimersByTime(500)
       expect(children).toHaveLength(1)
-      jest.advanceTimersByTime(500)
+      vi.advanceTimersByTime(500)
       await exits[0]
       expect(await next).toEqual({ diagnostics: [], codeActions: {} })
       expect(children[0].signalCode).toBe('SIGKILL')
@@ -227,17 +232,17 @@ describe('ShellCheck resource limits', () => {
     async (text) => {
       const checker = linter(1, 1000)
       const expired = checker.lint(document(text, 'wrapper'), [])
-      jest.advanceTimersByTime(500)
+      vi.advanceTimersByTime(500)
       await ready[0]
       expect(descendants).toHaveLength(1)
       const wrapperExit = new Promise((resolve) => children[0].once('exit', resolve))
       const next = checker.lint(document('latest', 'next'), [])
 
-      jest.advanceTimersByTime(1000)
+      vi.advanceTimersByTime(1000)
       expect(await expired).toBeNull()
       await wrapperExit
       expect(children).toHaveLength(1)
-      jest.advanceTimersByTime(1000)
+      vi.advanceTimersByTime(1000)
       await exits[0]
       expect(await next).toEqual({ diagnostics: [], codeActions: {} })
       expect(children).toHaveLength(2)
@@ -250,10 +255,10 @@ describe('ShellCheck resource limits', () => {
     async () => {
       const checker = linter(1, 1000)
       const expired = checker.lint(document('wrapper separate-output', 'wrapper'), [])
-      jest.advanceTimersByTime(500)
+      vi.advanceTimersByTime(500)
       await ready[0]
       const next = checker.lint(document('latest', 'next'), [])
-      jest.advanceTimersByTime(1000)
+      vi.advanceTimersByTime(1000)
       expect(await expired).toBeNull()
       await exits[0]
       expect(await next).toEqual({ diagnostics: [], codeActions: {} })
@@ -280,7 +285,7 @@ describe('ShellCheck resource limits', () => {
     const checker = linter()
     const active = checker.lint(document('hold', 'active'), [])
     const queued = checker.lint(document('latest', 'queued'), [])
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     await ready[0]
     checker.dispose()
     expect(await Promise.all([active, queued])).toEqual([null, null])

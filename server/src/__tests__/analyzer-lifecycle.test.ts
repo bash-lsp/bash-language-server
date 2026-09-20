@@ -1,3 +1,12 @@
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type MockInstance,
+} from 'vitest'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Parser, Tree } from 'web-tree-sitter'
 
@@ -10,15 +19,15 @@ describe('analyzer tree ownership', () => {
   let parser: Parser
   let analyzer: Analyzer
   let trees: Tree[]
-  let deleted: jest.SpiedFunction<Tree['delete']>
+  let deleted: MockInstance<Tree['delete']>
 
   beforeEach(async () => {
     parser = await initializeParser()
     analyzer = new Analyzer({ parser, workspaceFolder: null })
     trees = []
-    deleted = jest.spyOn(Tree.prototype, 'delete')
+    deleted = vi.spyOn(Tree.prototype, 'delete')
     const parse = parser.parse.bind(parser)
-    jest.spyOn(parser, 'parse').mockImplementation((...args) => {
+    vi.spyOn(parser, 'parse').mockImplementation((...args) => {
       const tree = parse(...args)
       if (tree) trees.push(tree)
       return tree
@@ -33,7 +42,7 @@ describe('analyzer tree ownership', () => {
       if (!freedTrees.has(tree)) tree.delete()
     }
     parser.delete()
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   function analyze(text: string, version = 1) {
@@ -56,7 +65,7 @@ describe('analyzer tree ownership', () => {
 
   it('frees an uncached tree if analysis fails and preserves the previous document', () => {
     analyze('original=ok')
-    jest.spyOn(sourcing, 'getSourceCommands').mockImplementationOnce(() => {
+    vi.spyOn(sourcing, 'getSourceCommands').mockImplementationOnce(() => {
       throw new Error('source analysis failed')
     })
 
@@ -77,7 +86,7 @@ describe('analyzer tree ownership', () => {
 
   it('preserves the cached tree when the parser returns no replacement', () => {
     analyze('original=ok')
-    jest.spyOn(parser, 'parse').mockReturnValueOnce(null)
+    vi.spyOn(parser, 'parse').mockReturnValueOnce(null)
 
     expect(() => analyze('replacement=ok', 2)).toThrow('no syntax tree returned')
     expect(deleted).not.toHaveBeenCalled()
