@@ -24,7 +24,7 @@
     "vscode-languageserver": "10.1.1",
     "vscode-languageserver-textdocument": "1.0.14",
     "web-tree-sitter": "0.27.0",
-    "zod": "3.25.76"
+    "zod": "4.6.5"
   },
   "scripts": {
     "prepublishOnly": "cd ../ && pnpm compile && cp README.md server/"

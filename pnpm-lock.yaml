@@ -163,7 +163,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@types/vscode': 1.90.0
+  '@types/vscode': 1.91.0
 
 importers:
 
@@ -176,7 +176,7 @@ importers:
         specifier: 5.0.1
         version: 5.0.1(vitest@5.0.1)
       cross-spawn:
-        specifier: '>=7.0.5'
+        specifier: 7.0.6
         version: 7.0.6
       oxlint:
         specifier: 1.83.0
@@ -185,8 +185,8 @@ importers:
         specifier: 2.8.8
         version: 2.8.8
       typescript:
-        specifier: 5.9.3
-        version: 5.9.3
+        specifier: 6.0.3
+        version: 6.0.3
       vitest:
         specifier: 5.0.1
         version: 5.0.1(@types/node@22.20.4)(@vitest/coverage-v8@5.0.1)(vite@8.3.0(@types/node@22.20.4))
@@ -221,8 +221,8 @@ importers:
         specifier: 0.27.0
         version: 0.27.0
       zod:
-        specifier: 3.25.76
-        version: 3.25.76
+        specifier: 4.6.5
+        version: 4.6.5
     devDependencies:
       '@types/fuzzy-search':
         specifier: 2.1.5
@@ -864,8 +864,8 @@ packages:
     resolution: {integrity: sha512-I8yFsfRzmzK0WV1pNNOA4A7y4RDfFxPRxb3t+e3ui14qSGOxGtiSP6GjeX+Y6CHb7HYaFj7ECUD7VE5kQMZWGQ==}
     engines: {node: '>=18', npm: '>=9'}
 
-  typescript@5.9.3:
-    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+  typescript@6.0.3:
+    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -986,8 +986,8 @@ packages:
     engines: {node: '>=8'}
     hasBin: true
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+  zod@4.6.5:
+    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
 
 snapshots:
 
@@ -1447,7 +1447,7 @@ snapshots:
     dependencies:
       '@mixmark-io/domino': 2.2.0
 
-  typescript@5.9.3: {}
+  typescript@6.0.3: {}
 
   undici-types@6.21.0: {}
 
@@ -1510,4 +1510,4 @@ snapshots:
       siginfo: 2.0.0
       stackback: 0.0.2
 
-  zod@3.25.76: {}
+  zod@4.6.5: {}

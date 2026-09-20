@@ -48,6 +48,9 @@
 
 ## Implementing changes
 
+- Keep changes to `docs/development-guide.md` minimal: update it only when setup,
+  commands, or development workflows change. Put dependency upgrade notes and
+  implementation details in the PR description instead.
 - Keep shell semantics in the existing analysis and utility layers. Reuse shared
   declaration and sourcing helpers instead of adding separate interpretations in
   individual LSP handlers.
