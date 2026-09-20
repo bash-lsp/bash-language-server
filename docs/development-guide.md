@@ -72,6 +72,28 @@ Install the recommended Oxc VS Code extension for lint diagnostics and fixes on
 save. Prettier runs separately as part of the lint commands. The former custom
 import and class-member ordering rules are no longer enforced.
 
+### Dependency compatibility
+
+The [TypeScript 6 migration notes][typescript-6] require explicit ambient types and
+CommonJS interoperability; `tsconfig.json` lists Node types, and callable CommonJS
+packages use default imports. Vitest APIs are imported explicitly in tests.
+
+Keep `@types/node` on the Node 22 line used in development and CI, and
+`@types/vscode` aligned with the extension's minimum VS Code version (1.91).
+
+The [Zod 4 migration guide][zod-4] changes default handling. The nested shfmt
+configuration uses `prefault` so its defaults are parsed, and initialization
+options remove defaults before becoming optional so omitted settings preserve
+environment configuration.
+
+The release script uses [VSCE 4][vsce-4], which requires Node 22. To verify extension
+packaging locally without publishing:
+
+```sh
+cd vscode-client
+npx @vscode/vsce@4.0.0 package --out /tmp/bash-ide.vsix
+```
+
 ## Working on the client
 
 The extension requires VS Code 1.91 or newer, whose bundled Node.js runtime meets
@@ -148,3 +170,6 @@ To analyze the performance of the extension or server using the Chrome inspector
 [oxlint]: https://oxc.rs/docs/guide/usage/linter/
 [pnpm]: https://pnpm.io/installation
 [node]: https://nodejs.org/en/download/
+[typescript-6]: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-6-0.html
+[zod-4]: https://zod.dev/v4/changelog
+[vsce-4]: https://github.com/microsoft/vscode-vsce/releases/tag/v4.0.0

@@ -102,13 +102,24 @@ export const ConfigSchema = z.object({
   // Controls the executable used for ShellCheck linting information. An empty string will disable linting.
   shellcheckPath: z.string().trim().default('shellcheck'),
 
-  shfmt: ShfmtConfigSchema.default({}),
+  shfmt: ShfmtConfigSchema.prefault({}),
 })
 
 // Initialization options override only supplied settings, preserving environment defaults.
-export const InitializationOptionsSchema = ConfigSchema.partial().extend({
-  shfmt: ShfmtConfigSchema.partial().optional(),
+export const InitializationOptionsSchema = partialWithoutDefaults(ConfigSchema).extend({
+  shfmt: partialWithoutDefaults(ShfmtConfigSchema).optional(),
 })
+
+// Zod 4 applies defaults even inside optional fields. Initialization options must
+// only include supplied settings so they do not overwrite environment defaults.
+function partialWithoutDefaults<T extends Record<string, z.ZodDefault | z.ZodPrefault>>(
+  schema: z.ZodObject<T>,
+) {
+  const shape = Object.fromEntries(
+    Object.entries(schema.shape).map(([key, value]) => [key, value.unwrap()]),
+  ) as { [K in keyof T]: ReturnType<T[K]['unwrap']> }
+  return z.object(shape).partial()
+}
 
 export type ShfmtConfig = z.infer<typeof ShfmtConfigSchema>
 export type Config = z.infer<typeof ConfigSchema>
