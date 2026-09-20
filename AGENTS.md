@@ -27,11 +27,11 @@
 
 ## Validation
 
-- During development, run the relevant Jest file or test name. For example:
+- During development, run the relevant Vitest file or test name. For example:
 
   ```sh
-  pnpm test --runTestsByPath server/src/__tests__/input-declarations.test.ts
-  pnpm test --runTestsByPath server/src/__tests__/server.test.ts -t 'rename'
+  pnpm test server/src/__tests__/input-declarations.test.ts
+  pnpm test server/src/__tests__/server.test.ts -t 'rename'
   ```
 
 - For code or dependency changes, run `pnpm verify:bail` before handoff. This is

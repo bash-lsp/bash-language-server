@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowSyntheticDefaultImports": true,
+    "types": [
+      "node"
+    ],
+    "noEmit": true
+  },
+  "include": [
+    "server/src/**/*.ts",
+    "testing/**/*.ts",
+    "vscode-client/src/**/*.ts",
+    "vscode-client/__tests__/**/*.ts",
+    "vitest.config.mts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/out/**"
+  ]
+}

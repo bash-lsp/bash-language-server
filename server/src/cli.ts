@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* eslint-disable no-console */
+/* oxlint-disable no-console */
 import * as LSP from 'vscode-languageserver/node'
 
 import BashServer from './server'

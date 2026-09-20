@@ -1,8 +1,13 @@
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
 
 import Executables from '../executables'
+
+vi.mock('node:path', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('node:path')>()),
+}))
 
 let executables: Executables
 
@@ -98,11 +103,11 @@ describe('absolute executable access', () => {
     { mode: 0o645, canExecute: true },
   ])('uses caller access for mode $mode', async ({ mode, canExecute }) => {
     const executables = await Executables.fromPath('')
-    const stat = jest.spyOn(fs.promises, 'stat').mockResolvedValue({
+    const stat = vi.spyOn(fs.promises, 'stat').mockResolvedValue({
       isFile: () => true,
       mode,
     } as fs.Stats)
-    const access = jest.spyOn(fs.promises, 'access')
+    const access = vi.spyOn(fs.promises, 'access')
     if (canExecute) {
       access.mockResolvedValue(undefined)
     } else {
@@ -130,13 +135,13 @@ describe('Windows absolute executable access', () => {
   ])('does not probe network or device paths: %s', async (command) => {
     const platform = Object.getOwnPropertyDescriptor(process, 'platform')!
     Object.defineProperty(process, 'platform', { value: 'win32' })
-    const isAbsolute = jest
+    const isAbsolute = vi
       .spyOn(path, 'isAbsolute')
       .mockImplementation(path.win32.isAbsolute)
-    const stat = jest.spyOn(fs.promises, 'stat').mockResolvedValue({
+    const stat = vi.spyOn(fs.promises, 'stat').mockResolvedValue({
       isFile: () => true,
     } as fs.Stats)
-    const access = jest.spyOn(fs.promises, 'access').mockResolvedValue(undefined)
+    const access = vi.spyOn(fs.promises, 'access').mockResolvedValue(undefined)
     try {
       expect(await executables.isExecutable(command)).toBe(false)
       expect(stat).not.toHaveBeenCalled()
@@ -152,13 +157,13 @@ describe('Windows absolute executable access', () => {
   it('still checks ordinary local Windows paths', async () => {
     const platform = Object.getOwnPropertyDescriptor(process, 'platform')!
     Object.defineProperty(process, 'platform', { value: 'win32' })
-    const isAbsolute = jest
+    const isAbsolute = vi
       .spyOn(path, 'isAbsolute')
       .mockImplementation(path.win32.isAbsolute)
-    const stat = jest.spyOn(fs.promises, 'stat').mockResolvedValue({
+    const stat = vi.spyOn(fs.promises, 'stat').mockResolvedValue({
       isFile: () => true,
     } as fs.Stats)
-    const access = jest.spyOn(fs.promises, 'access').mockResolvedValue(undefined)
+    const access = vi.spyOn(fs.promises, 'access').mockResolvedValue(undefined)
     const command = String.raw`C:\tools\command`
     try {
       expect(await executables.isExecutable(command)).toBe(true)

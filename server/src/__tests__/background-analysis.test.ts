@@ -1,3 +1,12 @@
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type MockInstance,
+} from 'vitest'
 import * as fs from 'node:fs'
 import * as os from 'node:os'
 import * as path from 'node:path'
@@ -12,26 +21,30 @@ import { initializeParser } from '../parser'
 import * as fsUtil from '../util/fs'
 import { Logger } from '../util/logger'
 
+vi.mock('node:fs', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('node:fs')>()),
+}))
+
 describe('background analysis ownership and budgets', () => {
   let root: string
   let parser: Parser
   let analyzer: Analyzer
   let trees: Tree[]
-  let deleted: jest.SpiedFunction<Tree['delete']>
+  let deleted: MockInstance<Tree['delete']>
 
   beforeEach(async () => {
     root = fs.mkdtempSync(path.join(os.tmpdir(), 'bash-background-'))
     parser = await initializeParser()
     analyzer = new Analyzer({ parser, workspaceFolder: root })
     trees = []
-    deleted = jest.spyOn(Tree.prototype, 'delete')
+    deleted = vi.spyOn(Tree.prototype, 'delete')
     const parse = parser.parse.bind(parser)
-    jest.spyOn(parser, 'parse').mockImplementation((...args) => {
+    vi.spyOn(parser, 'parse').mockImplementation((...args) => {
       const tree = parse(...args)
       if (tree) trees.push(tree)
       return tree
     })
-    jest.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined)
+    vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined)
   })
 
   afterEach(() => {
@@ -39,8 +52,8 @@ describe('background analysis ownership and budgets', () => {
     const freed = new Set(deleted.mock.contexts)
     for (const tree of trees) if (!freed.has(tree)) tree.delete()
     parser.delete()
-    jest.restoreAllMocks()
-    jest.useRealTimers()
+    vi.restoreAllMocks()
+    vi.useRealTimers()
     fs.rmSync(root, { recursive: true, force: true })
   })
 
@@ -144,8 +157,7 @@ describe('background analysis ownership and budgets', () => {
     const uri = write('current.sh', 'current_value=1')
     const discover = fsUtil.getFilePaths
     let completeDiscovery: (files: string[]) => void = () => undefined
-    jest
-      .spyOn(fsUtil, 'getFilePaths')
+    vi.spyOn(fsUtil, 'getFilePaths')
       .mockImplementationOnce(
         () =>
           new Promise((resolve) => {
@@ -164,7 +176,7 @@ describe('background analysis ownership and budgets', () => {
   it('prunes hidden directories for the default glob and preserves explicit hidden globs', async () => {
     const hidden = write('.cache/nested/hidden.sh', 'hidden_value=1')
     write('visible.sh', 'visible_value=1')
-    const readdir = jest.spyOn(fs, 'readdir')
+    const readdir = vi.spyOn(fs, 'readdir')
     await expect(scan()).resolves.toEqual({ filesParsed: 1 })
     expect(readdir.mock.calls.map(([directory]) => directory)).not.toContain(
       path.join(root, '.cache'),
@@ -179,9 +191,9 @@ describe('background analysis ownership and budgets', () => {
 
   it('does not overwrite a document opened while its background read is pending', async () => {
     const uri = write('script.sh', 'disk_value=1')
-    jest.spyOn(fsUtil, 'getFilePaths').mockResolvedValue([path.join(root, 'script.sh')])
+    vi.spyOn(fsUtil, 'getFilePaths').mockResolvedValue([path.join(root, 'script.sh')])
     let completeRead: (text: string) => void = () => undefined
-    const read = jest.spyOn(fs.promises, 'readFile').mockImplementation(
+    const read = vi.spyOn(fs.promises, 'readFile').mockImplementation(
       () =>
         new Promise((resolve) => {
           completeRead = resolve as typeof completeRead
@@ -197,32 +209,32 @@ describe('background analysis ownership and budgets', () => {
   })
 
   it('uses the remaining total budget for reads and settles without waiting for late I/O', async () => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
     let signal: AbortSignal | undefined
-    jest.spyOn(fsUtil, 'getFilePaths').mockImplementation((options) => {
+    vi.spyOn(fsUtil, 'getFilePaths').mockImplementation((options) => {
       ;({ signal } = options)
       return new Promise((resolve) =>
         setTimeout(() => resolve([path.join(root, 'late.sh')]), 8000),
       )
     })
     let completeRead: (text: string) => void = () => undefined
-    const read = jest.spyOn(fs.promises, 'readFile').mockImplementation(
+    const read = vi.spyOn(fs.promises, 'readFile').mockImplementation(
       () =>
         new Promise((resolve) => {
           completeRead = resolve as typeof completeRead
         }),
     )
-    const warning = jest.spyOn(Logger.prototype, 'warn')
+    const warning = vi.spyOn(Logger.prototype, 'warn')
     const pending = scan()
-    await jest.advanceTimersByTimeAsync(8000)
+    await vi.advanceTimersByTimeAsync(8000)
     expect(read).toHaveBeenCalled()
-    await jest.advanceTimersByTimeAsync(1999)
+    await vi.advanceTimersByTimeAsync(1999)
     expect(signal?.aborted).toBe(false)
-    await jest.advanceTimersByTimeAsync(1)
+    await vi.advanceTimersByTimeAsync(1)
     await expect(pending).resolves.toEqual({ filesParsed: 0 })
     expect(signal?.aborted).toBe(true)
     expect(warning).toHaveBeenCalledWith(expect.stringContaining('stopped after 10000ms'))
-    expect(jest.getTimerCount()).toBe(0)
+    expect(vi.getTimerCount()).toBe(0)
 
     completeRead('late_value=1')
     await Promise.resolve()
@@ -230,21 +242,22 @@ describe('background analysis ownership and budgets', () => {
   })
 
   it('checks elapsed time between parses even if synchronous work delays the timer', async () => {
-    jest.useFakeTimers()
-    jest
-      .spyOn(fsUtil, 'getFilePaths')
-      .mockResolvedValue([path.join(root, 'first.sh'), path.join(root, 'second.sh')])
-    const read = jest.spyOn(fs.promises, 'readFile').mockResolvedValue('value=1')
+    vi.useFakeTimers()
+    vi.spyOn(fsUtil, 'getFilePaths').mockResolvedValue([
+      path.join(root, 'first.sh'),
+      path.join(root, 'second.sh'),
+    ])
+    const read = vi.spyOn(fs.promises, 'readFile').mockResolvedValue('value=1')
     const analyze = analyzer.analyze.bind(analyzer)
-    jest.spyOn(analyzer, 'analyze').mockImplementation((options) => {
+    vi.spyOn(analyzer, 'analyze').mockImplementation((options) => {
       const result = analyze(options)
-      jest.setSystemTime(Date.now() + 10001)
+      vi.setSystemTime(Date.now() + 10001)
       return result
     })
-    const warning = jest.spyOn(Logger.prototype, 'warn')
+    const warning = vi.spyOn(Logger.prototype, 'warn')
     await expect(scan()).resolves.toEqual({ filesParsed: 1 })
     expect(read).toHaveBeenCalledTimes(1)
     expect(warning).toHaveBeenCalledWith(expect.stringContaining('stopped after 10000ms'))
-    expect(jest.getTimerCount()).toBe(0)
+    expect(vi.getTimerCount()).toBe(0)
   })
 })

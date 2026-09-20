@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createServer, Server } from 'node:http'
 import { AddressInfo } from 'node:net'
 

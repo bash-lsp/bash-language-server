@@ -1,3 +1,4 @@
+import { expect, it, vi } from 'vitest'
 import { mkdtemp, rm, symlink } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -9,7 +10,7 @@ import LspServer from '../server'
 import * as sh from '../util/sh'
 
 it('looks up documentation for commands invoked by absolute path', async () => {
-  const documentation = jest
+  const documentation = vi
     .spyOn(sh, 'getShellDocumentation')
     .mockResolvedValue('test manual')
   try {

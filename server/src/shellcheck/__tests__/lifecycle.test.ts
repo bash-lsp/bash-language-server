@@ -1,9 +1,14 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as childProcess from 'child_process'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { getMockConnection } from '../../../../testing/mocks'
 import BashServer from '../../server'
 import { Linter } from '../index'
+
+vi.mock('node:child_process', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('node:child_process')>()),
+}))
 
 const { spawn } = childProcess
 const uri = 'file:///tmp/lint-lifecycle.sh'
@@ -32,10 +37,10 @@ describe('lint process lifecycle', () => {
   let exits: Promise<void>[]
 
   beforeEach(() => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
     children = []
     exits = []
-    jest.spyOn(childProcess, 'spawn').mockImplementation((_command, _args, options) => {
+    vi.spyOn(childProcess, 'spawn').mockImplementation((_command, _args, options) => {
       // A controlled slow checker: stale inputs keep running until canceled.
       const child = spawn(
         process.execPath,
@@ -68,14 +73,14 @@ describe('lint process lifecycle', () => {
       }
     }
     await Promise.all(exits)
-    jest.restoreAllMocks()
-    jest.useRealTimers()
+    vi.restoreAllMocks()
+    vi.useRealTimers()
   })
 
   it('cancels a running process when the same document changes after the debounce', async () => {
     const linter = new Linter({ executablePath: 'controlled-shellcheck' })
     const first = linter.lint(document('echo stale'), [])
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     expect(children).toHaveLength(1)
 
     const latest = linter.lint(document('echo latest'), [])
@@ -83,7 +88,7 @@ describe('lint process lifecycle', () => {
     void first.catch(() => undefined)
     expect(await first).toBeNull()
 
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     expect(await latest).toEqual({ diagnostics: [], codeActions: {} })
     expect(children).toHaveLength(2)
     await exits[0]
@@ -96,7 +101,7 @@ describe('lint process lifecycle', () => {
       linter.lint(document('echo latest'), []),
     )
 
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     expect(await Promise.all(requests)).toEqual([
       ...Array(9).fill(null),
       { diagnostics: [], codeActions: {} },
@@ -107,10 +112,10 @@ describe('lint process lifecycle', () => {
   it('does not cancel a different document', async () => {
     const linter = new Linter({ executablePath: 'controlled-shellcheck' })
     const first = linter.lint(document('echo stale'), [])
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
 
     const second = linter.lint(document('echo latest', 'file:///tmp/other.sh'), [])
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     expect(await second).toEqual({ diagnostics: [], codeActions: {} })
     expect(children[0].exitCode).toBeNull()
     expect(children[0].signalCode).toBeNull()
@@ -124,14 +129,14 @@ describe('lint process lifecycle', () => {
   it('does not let an older process completion remove a newer queued request', async () => {
     const linter = new Linter({ executablePath: 'controlled-shellcheck' })
     const first = linter.lint(document('echo stale'), [])
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     const second = linter.lint(document('echo stale again'), [])
     expect(await first).toBeNull()
     await exits[0]
 
     const latest = linter.lint(document('echo latest'), [])
     expect(await second).toBeNull()
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     expect(await latest).toEqual({ diagnostics: [], codeActions: {} })
     expect(children).toHaveLength(2)
   })
@@ -139,7 +144,7 @@ describe('lint process lifecycle', () => {
   it('disposes running and queued requests', async () => {
     const linter = new Linter({ executablePath: 'controlled-shellcheck' })
     const running = linter.lint(document('echo stale'), [])
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     const queued = linter.lint(document('echo latest', 'file:///tmp/other.sh'), [])
 
     linter.dispose()
@@ -147,30 +152,30 @@ describe('lint process lifecycle', () => {
     expect(await Promise.all([running, queued])).toEqual([null, null])
     await exits[0]
     expect(children[0].signalCode).toBe('SIGTERM')
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     expect(children).toHaveLength(1)
   })
 
   it('preserves checker errors and permits subsequent requests', async () => {
     const linter = new Linter({ executablePath: 'controlled-shellcheck' })
     const invalid = linter.lint(document('echo invalid'), [])
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     await expect(invalid).rejects.toThrow('ShellCheck: json parse failed')
 
     const latest = linter.lint(document('echo latest'), [])
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     expect(await latest).toEqual({ diagnostics: [], codeActions: {} })
   })
 
   it('publishes diagnostics only for the latest document revision', async () => {
     const { connection, server } = await initializeServer()
     const first = server.analyzeAndLintDocument(document('echo stale'))
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
 
     const latest = server.analyzeAndLintDocument(
       TextDocument.create(uri, 'shellscript', 2, 'echo latest'),
     )
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     await Promise.all([first, latest])
 
     expect(connection.sendDiagnostics.mock.calls).toEqual([
@@ -180,11 +185,11 @@ describe('lint process lifecycle', () => {
 
   it('cancels on close without republishing diagnostics or relinting a closed document', async () => {
     const { connection, server } = await initializeServer()
-    const analyze = jest.spyOn(server, 'analyzeAndLintDocument')
+    const analyze = vi.spyOn(server, 'analyzeAndLintDocument')
     connection.onDidOpenTextDocument.mock.calls[0][0]({
       textDocument: { uri, languageId: 'shellscript', version: 1, text: 'echo stale' },
     })
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
 
     connection.onDidCloseTextDocument.mock.calls[0][0]({ textDocument: { uri } })
     await analyze.mock.results[0].value
@@ -195,18 +200,18 @@ describe('lint process lifecycle', () => {
     connection.onDidChangeConfiguration.mock.calls[0][0]({
       settings: { bashIde: { shellcheckPath: 'another-shellcheck' } },
     })
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
     expect(analyze).toHaveBeenCalledTimes(1)
     expect(children).toHaveLength(1)
   })
 
   it('cancels the old checker when configuration disables linting', async () => {
     const { connection, server } = await initializeServer()
-    const analyze = jest.spyOn(server, 'analyzeAndLintDocument')
+    const analyze = vi.spyOn(server, 'analyzeAndLintDocument')
     connection.onDidOpenTextDocument.mock.calls[0][0]({
       textDocument: { uri, languageId: 'shellscript', version: 1, text: 'echo stale' },
     })
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
 
     connection.onDidChangeConfiguration.mock.calls[0][0]({
       settings: { bashIde: { shellcheckPath: '' } },
@@ -224,7 +229,7 @@ describe('lint process lifecycle', () => {
     'refreshes every open document when shellcheckPath changes to "%s"',
     async (shellcheckPath) => {
       const { connection, server } = await initializeServer()
-      const analyze = jest.spyOn(server, 'analyzeAndLintDocument')
+      const analyze = vi.spyOn(server, 'analyzeAndLintDocument')
       const openDocuments = [
         { uri, languageId: 'shellscript', version: 1, text: 'echo latest' },
         {
@@ -237,7 +242,7 @@ describe('lint process lifecycle', () => {
       for (const textDocument of openDocuments) {
         connection.onDidOpenTextDocument.mock.calls[0][0]({ textDocument })
       }
-      jest.advanceTimersByTime(500)
+      vi.advanceTimersByTime(500)
       expect(children).toHaveLength(2)
 
       connection.onDidChangeConfiguration.mock.calls[0][0]({
@@ -245,7 +250,7 @@ describe('lint process lifecycle', () => {
       })
       await Promise.all(exits)
       expect(children.every((child) => child.signalCode === 'SIGTERM')).toBe(true)
-      jest.advanceTimersByTime(500)
+      vi.advanceTimersByTime(500)
       await Promise.all(analyze.mock.results.map(({ value }) => value))
 
       expect(connection.sendDiagnostics).toHaveBeenCalledTimes(2)
@@ -263,7 +268,7 @@ describe('lint process lifecycle', () => {
   it('cancels active checks on server shutdown', async () => {
     const { connection, server } = await initializeServer()
     const pending = server.analyzeAndLintDocument(document('echo stale'))
-    jest.advanceTimersByTime(500)
+    vi.advanceTimersByTime(500)
 
     await connection.onShutdown.mock.calls[0][0]({} as any)
     await pending

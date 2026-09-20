@@ -1,3 +1,4 @@
+import { afterAll, beforeAll, expect, it } from 'vitest'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Parser } from 'web-tree-sitter'

@@ -1,3 +1,4 @@
+import { expect, it, vi } from 'vitest'
 import * as fs from 'node:fs'
 
 import { getMockConnection } from '../../../testing/mocks'
@@ -10,16 +11,13 @@ it.each(['shutdown', 'configuration change'])(
   'cancels pending discovery on %s',
   async (event) => {
     let signal: AbortSignal | undefined
-    const scan = jest.spyOn(fsUtil, 'getFilePaths').mockImplementation((options) => {
+    const scan = vi.spyOn(fsUtil, 'getFilePaths').mockImplementation((options) => {
       ;({ signal } = options)
       return new Promise((resolve) => {
         signal?.addEventListener('abort', () => resolve([]), { once: true })
       })
     })
-    const backgroundAnalysis = jest.spyOn(
-      Analyzer.prototype,
-      'initiateBackgroundAnalysis',
-    )
+    const backgroundAnalysis = vi.spyOn(Analyzer.prototype, 'initiateBackgroundAnalysis')
     try {
       const connection = getMockConnection()
       const server = await BashServer.initialize(connection, {
@@ -50,15 +48,15 @@ it.each(['shutdown', 'configuration change'])(
 it('does not analyze a file whose read finishes after cancellation', async () => {
   const parser = await initializeParser()
   const analyzer = new Analyzer({ parser, workspaceFolder: '/tmp' })
-  const scan = jest.spyOn(fsUtil, 'getFilePaths').mockResolvedValue(['/tmp/stale.sh'])
+  const scan = vi.spyOn(fsUtil, 'getFilePaths').mockResolvedValue(['/tmp/stale.sh'])
   let completeRead: (text: string) => void = () => undefined
-  const read = jest.spyOn(fs.promises, 'readFile').mockImplementation(
+  const read = vi.spyOn(fs.promises, 'readFile').mockImplementation(
     () =>
       new Promise((resolve) => {
         completeRead = resolve as typeof completeRead
       }),
   )
-  const analyze = jest.spyOn(analyzer, 'analyze')
+  const analyze = vi.spyOn(analyzer, 'analyze')
   try {
     const pending = analyzer.initiateBackgroundAnalysis({
       globPattern: '**/*.sh',

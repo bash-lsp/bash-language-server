@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest'
 const packageJson = require('../package.json')
 import { getDefaultConfiguration } from '../../server/src/config'
 import { LOG_LEVELS } from '../../server/src/util/logger'

@@ -6,74 +6,33 @@
     "preinstall": "npx only-allow pnpm",
     "compile": "tsc -b && cp server/src/get-options.sh server/out/",
     "watch": "tsc -b -w",
-    "lint": "pnpm lint:bail --fix",
-    "lint:bail": "eslint . --ext js,ts,tsx --cache",
-    "test": "tsc --noEmit -p tsconfig.eslint.json && jest --runInBand",
+    "lint": "oxlint --fix --deny-warnings && pnpm format",
+    "lint:bail": "oxlint --deny-warnings && pnpm format:check",
+    "test": "pnpm typecheck && vitest run",
     "test:coverage": "pnpm run test --coverage",
-    "test:watch": "pnpm run test --watch",
+    "test:watch": "pnpm typecheck && vitest --watch",
     "verify": "pnpm lint && pnpm compile && pnpm run test",
     "verify:bail": "pnpm lint:bail && pnpm compile && pnpm test:coverage",
     "reinstall-server": "npm uninstall -g bash-language-server && pnpm compile && npm i -g ./server",
     "link-server": "pnpm compile && node scripts/link-server.mjs",
-    "postinstall": "pnpm --dir=vscode-client install"
+    "postinstall": "pnpm --dir=vscode-client install",
+    "format": "prettier --write \"**/*.{js,ts,tsx,mts}\"",
+    "format:check": "prettier --check \"**/*.{js,ts,tsx,mts}\"",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json"
   },
   "devDependencies": {
-    "@types/jest": "30.0.0",
     "@types/node": "22.20.4",
-    "@typescript-eslint/eslint-plugin": "8.70.0",
-    "@typescript-eslint/parser": "8.70.0",
+    "@vitest/coverage-v8": "5.0.1",
     "cross-spawn": ">=7.0.5",
-    "eslint": "8.57.1",
-    "eslint-config-prettier": "10.1.8",
-    "eslint-plugin-jest": "29.16.6",
-    "eslint-plugin-prettier": "4.2.5",
-    "eslint-plugin-simple-import-sort": "14.0.0",
-    "eslint-plugin-sort-class-members": "1.22.1",
-    "jest": "30.5.2",
+    "oxlint": "1.83.0",
     "prettier": "2.8.8",
-    "ts-jest": "29.4.12",
     "typescript": "5.9.3",
+    "vitest": "5.0.1",
     "vscode-languageserver": "10.1.1",
     "vscode-languageserver-textdocument": "1.0.14"
   },
   "engines": {
-    "node": ">=20",
+    "node": ">=22.12.0",
     "pnpm": "^12.4.1"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node",
-    "clearMocks": true,
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "node",
-      "ts"
-    ],
-    "modulePathIgnorePatterns": [
-      "<rootDir>/server/out",
-      "<rootDir>/vscode-client/out"
-    ],
-    "transform": {
-      "\\.ts$": [
-        "ts-jest",
-        {
-          "tsconfig": "./server/tsconfig.json"
-        }
-      ]
-    },
-    "testMatch": [
-      "<rootDir>/**/__tests__/*.ts"
-    ],
-    "collectCoverageFrom": [
-      "**/*.ts",
-      "!**/__test__/*",
-      "!testing/*"
-    ],
-    "coverageReporters": [
-      "text-summary",
-      "lcov",
-      "html"
-    ]
   }
 }

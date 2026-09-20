@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process'
 import * as path from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
 
-import * as TurndownService from 'turndown'
+import TurndownService from 'turndown'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
@@ -992,7 +992,7 @@ function symbolKindToDescription(s: LSP.SymbolKind): string {
 function getMarkdownContent(documentation: string, language?: string): LSP.MarkupContent {
   return {
     value: language
-      ? // eslint-disable-next-line prefer-template
+      ? // oxlint-disable-next-line prefer-template
         ['``` ' + language, documentation, '```'].join('\n')
       : documentation,
     kind: LSP.MarkupKind.Markdown,

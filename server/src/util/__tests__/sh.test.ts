@@ -1,7 +1,12 @@
-/* eslint-disable no-useless-escape */
+import { describe, expect, it, vi } from 'vitest'
+/* oxlint-disable no-useless-escape */
 import * as ChildProcess from 'child_process'
 
 import * as sh from '../sh'
+
+vi.mock('child_process', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('child_process')>()),
+}))
 
 describe('execShellScript', () => {
   it('resolves if childprocess sends close signal', async () => {
@@ -48,7 +53,7 @@ describe('getDocumentation', () => {
   it.each(['ls;printf injected', 'ls&printf injected', "ls'quoted"])(
     'passes an absolute command basename as one argument: %s',
     async (commandName) => {
-      const spawn = jest.spyOn(ChildProcess, 'spawn')
+      const spawn = vi.spyOn(ChildProcess, 'spawn')
       try {
         const result = await sh.getShellDocumentation({ word: `/opt/bin/${commandName}` })
         expect(result).toBeNull()
@@ -538,7 +543,7 @@ BSD                             April 12, 2003                             BSD`)
 
 describe('memorize', () => {
   it('memorizes a function', async () => {
-    const fnRaw = jest.fn(async (args) => args)
+    const fnRaw = vi.fn(async (args) => args)
     const arg1 = { one: '1' }
     const arg2 = { another: { word: 'word' } }
     const fnMemorized = sh.memorize(fnRaw)

@@ -1,8 +1,13 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as fs from 'node:fs'
 import * as os from 'node:os'
 import * as path from 'node:path'
 
 import { getFilePaths } from '../fs'
+
+vi.mock('node:fs', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('node:fs')>()),
+}))
 
 const symlinkType = process.platform === 'win32' ? 'junction' : 'dir'
 
@@ -145,7 +150,7 @@ describe('getFilePaths', () => {
     }
     fs.writeFileSync(path.join(nestedPath, 'unrelated.txt'), '')
 
-    const readdir = jest.spyOn(fs, 'readdir')
+    const readdir = vi.spyOn(fs, 'readdir')
     try {
       const filePaths = await getFilePaths({
         globPattern: '**/*.sh',
@@ -164,7 +169,7 @@ describe('getFilePaths', () => {
 
   it('does not start walking when the maximum is zero', async () => {
     fs.writeFileSync(path.join(rootPath, 'script.sh'), '')
-    const readdir = jest.spyOn(fs, 'readdir')
+    const readdir = vi.spyOn(fs, 'readdir')
     try {
       const filePaths = await getFilePaths({
         globPattern: '**/*.sh',
@@ -182,8 +187,8 @@ describe('getFilePaths', () => {
     for (let i = 0; i < 40; i++) {
       fs.mkdirSync(path.join(rootPath, `directory-${i}`, 'nested'), { recursive: true })
     }
-    const readdir = jest.spyOn(fs, 'readdir')
-    const onLimit = jest.fn()
+    const readdir = vi.spyOn(fs, 'readdir')
+    const onLimit = vi.fn()
     try {
       const files = await getFilePaths({
         rootPath,
@@ -205,7 +210,7 @@ describe('getFilePaths', () => {
       fs.mkdirSync(path.join(rootPath, folder))
       fs.writeFileSync(path.join(rootPath, folder, 'script.sh'), '')
     }
-    const readdir = jest.spyOn(fs, 'readdir')
+    const readdir = vi.spyOn(fs, 'readdir')
     try {
       const files = await getFilePaths({
         rootPath,
@@ -225,7 +230,7 @@ describe('getFilePaths', () => {
   it('does no filesystem work when already canceled', async () => {
     const controller = new AbortController()
     controller.abort()
-    const readdir = jest.spyOn(fs, 'readdir')
+    const readdir = vi.spyOn(fs, 'readdir')
     try {
       await expect(
         getFilePaths({
@@ -249,13 +254,13 @@ describe('getFilePaths', () => {
         readStarted = resolve
       })
       let completeRead: (() => void) | undefined
-      const readdir = jest.spyOn(fs, 'readdir').mockImplementation((...args: any[]) => {
+      const readdir = vi.spyOn(fs, 'readdir').mockImplementation((...args: any[]) => {
         const callback = args[args.length - 1]
         completeRead = () => callback(null, [])
         readStarted()
       })
       const controller = new AbortController()
-      const onLimit = jest.fn()
+      const onLimit = vi.fn()
       try {
         const pending = getFilePaths({
           rootPath,
@@ -287,11 +292,11 @@ describe('getFilePaths', () => {
     const started = new Promise<void>((resolve) => {
       readStarted = resolve
     })
-    const readdir = jest.spyOn(fs, 'readdir').mockImplementation((...args: any[]) => {
+    const readdir = vi.spyOn(fs, 'readdir').mockImplementation((...args: any[]) => {
       releaseRead = () => args[args.length - 1](null, entries)
       readStarted()
     })
-    const inspectEntries = entries.map((entry) => jest.spyOn(entry, 'isSymbolicLink'))
+    const inspectEntries = entries.map((entry) => vi.spyOn(entry, 'isSymbolicLink'))
     const controller = new AbortController()
     try {
       const pending = getFilePaths({

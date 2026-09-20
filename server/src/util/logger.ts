@@ -54,7 +54,7 @@ export class Logger {
     }
 
     if (!_connection) {
-      // eslint-disable-next-line no-console
+      // oxlint-disable-next-line no-console
       console.warn(`The logger's LSP Connection is not set. Dropping messages`)
       return
     }
@@ -114,7 +114,7 @@ export function getLogLevelFromEnvironment(): LSP.MessageType {
     if (logLevel) {
       return logLevel
     }
-    // eslint-disable-next-line no-console
+    // oxlint-disable-next-line no-console
     console.warn(
       `Invalid ${LOG_LEVEL_ENV_VAR} "${logLevelFromEnvironment}", expected one of: ${Object.keys(
         LOG_LEVELS_TO_MESSAGE_TYPES,

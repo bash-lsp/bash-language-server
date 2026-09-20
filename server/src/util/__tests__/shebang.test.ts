@@ -1,3 +1,4 @@
+import { describe, expect, it, test } from 'vitest'
 import { FIXTURE_DOCUMENT } from '../../../../testing/fixtures'
 import { analyzeFile } from '../shebang'
 

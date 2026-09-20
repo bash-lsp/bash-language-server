@@ -1,3 +1,4 @@
+import { describe, expect, it, vi } from 'vitest'
 import { pathToFileURL } from 'node:url'
 
 import { Parser } from 'web-tree-sitter'
@@ -22,11 +23,11 @@ const FIXTURE_FILES_MATCHING_GLOB = 21
 
 const defaultConfig = getDefaultConfiguration()
 
-jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {
+vi.spyOn(Logger.prototype, 'log').mockImplementation(() => {
   // noop
 })
-const loggerInfo = jest.spyOn(Logger.prototype, 'info')
-const loggerWarn = jest.spyOn(Logger.prototype, 'warn')
+const loggerInfo = vi.spyOn(Logger.prototype, 'info')
+const loggerWarn = vi.spyOn(Logger.prototype, 'warn')
 
 async function getAnalyzer({
   enableSourceErrorDiagnostics = false,
@@ -59,7 +60,7 @@ async function getAnalyzer({
 describe('analyze', () => {
   it('reports a failed parse before analyzing a missing tree', async () => {
     const analyzer = await getAnalyzer({})
-    const parse = jest.spyOn(Parser.prototype, 'parse').mockReturnValueOnce(null)
+    const parse = vi.spyOn(Parser.prototype, 'parse').mockReturnValueOnce(null)
     try {
       expect(() =>
         analyzer.analyze({
@@ -902,7 +903,7 @@ describe('commentsAbove', () => {
 
 describe('initiateBackgroundAnalysis', () => {
   it('finds bash files', async () => {
-    jest.spyOn(Date, 'now').mockImplementation(() => 0)
+    vi.spyOn(Date, 'now').mockImplementation(() => 0)
 
     const analyzer = await getAnalyzer({})
 
@@ -931,9 +932,9 @@ describe('initiateBackgroundAnalysis', () => {
   })
 
   it('handles glob errors', async () => {
-    jest
-      .spyOn(fsUtil, 'getFilePaths')
-      .mockImplementation(() => Promise.reject(new Error('BOOM')))
+    vi.spyOn(fsUtil, 'getFilePaths').mockImplementation(() =>
+      Promise.reject(new Error('BOOM')),
+    )
 
     const analyzer = await getAnalyzer({})
 
@@ -947,7 +948,7 @@ describe('initiateBackgroundAnalysis', () => {
   })
 
   it('allows skipping the analysis', async () => {
-    jest.spyOn(Date, 'now').mockImplementation(() => 0)
+    vi.spyOn(Date, 'now').mockImplementation(() => 0)
 
     const analyzer = await getAnalyzer({})
 

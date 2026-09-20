@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`findReferences returns a list of locations if parameter is found 1`] = `
+exports[`findReferences > returns a list of locations if parameter is found 1`] = `
 [
   {
     "range": {
@@ -57,7 +57,7 @@ exports[`findReferences returns a list of locations if parameter is found 1`] = 
 ]
 `;
 
-exports[`getDeclarationsForUri issue 101 1`] = `
+exports[`getDeclarationsForUri > issue 101 1`] = `
 [
   {
     "kind": 12,
@@ -133,7 +133,7 @@ exports[`getDeclarationsForUri issue 101 1`] = `
 ]
 `;
 
-exports[`getDeclarationsForUri returns a list of SymbolInformation if uri is found 1`] = `
+exports[`getDeclarationsForUri > returns a list of SymbolInformation if uri is found 1`] = `
 [
   {
     "kind": 13,
