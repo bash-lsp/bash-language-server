@@ -11,10 +11,14 @@ import { getDefaultConfiguration } from '../config'
 import { initializeParser } from '../parser'
 import * as fsUtil from '../util/fs'
 import { Logger } from '../util/logger'
+import * as disk from '../util/read-file'
+import WorkspaceIndex from '../workspace-index'
 
 describe('background analysis ownership and budgets', () => {
   let root: string
   let parser: Parser
+  let index: WorkspaceIndex
+  const opened = new Set<string>()
   let analyzer: Analyzer
   let trees: Tree[]
   let deleted: jest.SpiedFunction<Tree['delete']>
@@ -23,6 +27,7 @@ describe('background analysis ownership and budgets', () => {
     root = fs.mkdtempSync(path.join(os.tmpdir(), 'bash-background-'))
     parser = await initializeParser()
     analyzer = new Analyzer({ parser, workspaceFolder: root })
+    index = new WorkspaceIndex(analyzer, root, (uri) => opened.has(uri))
     trees = []
     deleted = jest.spyOn(Tree.prototype, 'delete')
     const parse = parser.parse.bind(parser)
@@ -35,7 +40,8 @@ describe('background analysis ownership and budgets', () => {
   })
 
   afterEach(() => {
-    analyzer.cancelBackgroundAnalysis()
+    index.dispose()
+    opened.clear()
     const freed = new Set(deleted.mock.contexts)
     for (const tree of trees) if (!freed.has(tree)) tree.delete()
     parser.delete()
@@ -51,10 +57,8 @@ describe('background analysis ownership and budgets', () => {
     return pathToFileURL(file).href
   }
 
-  function scan(
-    options: Partial<Parameters<Analyzer['initiateBackgroundAnalysis']>[0]> = {},
-  ) {
-    return analyzer.initiateBackgroundAnalysis({
+  function scan(options: Partial<Parameters<WorkspaceIndex['configure']>[0]> = {}) {
+    return index.configure({
       globPattern: getDefaultConfiguration().globPattern,
       backgroundAnalysisMaxFiles: 500,
       ...options,
@@ -62,6 +66,7 @@ describe('background analysis ownership and budgets', () => {
   }
 
   function open(uri: string, text: string) {
+    opened.add(uri)
     analyzer.analyze({ uri, document: TextDocument.create(uri, 'shell', 2, text) })
   }
 
@@ -155,9 +160,10 @@ describe('background analysis ownership and budgets', () => {
       .mockImplementation(discover)
 
     const previous = scan()
+    await Promise.resolve()
     await scan()
     completeDiscovery([])
-    await expect(previous).resolves.toEqual({ filesParsed: 0 })
+    await expect(previous).resolves.toEqual({ filesParsed: 1 })
     expect(analyzer.getDocument(uri)?.getText()).toBe('current_value=1')
   })
 
@@ -181,14 +187,19 @@ describe('background analysis ownership and budgets', () => {
     const uri = write('script.sh', 'disk_value=1')
     jest.spyOn(fsUtil, 'getFilePaths').mockResolvedValue([path.join(root, 'script.sh')])
     let completeRead: (text: string) => void = () => undefined
-    const read = jest.spyOn(fs.promises, 'readFile').mockImplementation(
+    let readStarted!: () => void
+    const reading = new Promise<void>((resolve) => {
+      readStarted = resolve
+    })
+    const read = jest.spyOn(disk, 'readFileForAnalysis').mockImplementation(
       () =>
         new Promise((resolve) => {
           completeRead = resolve as typeof completeRead
+          readStarted()
         }),
     )
     const pending = scan()
-    await Promise.resolve()
+    await reading
     expect(read).toHaveBeenCalled()
     open(uri, 'unsaved_value=2')
     completeRead('disk_value=1')
@@ -206,7 +217,7 @@ describe('background analysis ownership and budgets', () => {
       )
     })
     let completeRead: (text: string) => void = () => undefined
-    const read = jest.spyOn(fs.promises, 'readFile').mockImplementation(
+    const read = jest.spyOn(disk, 'readFileForAnalysis').mockImplementation(
       () =>
         new Promise((resolve) => {
           completeRead = resolve as typeof completeRead
@@ -234,7 +245,7 @@ describe('background analysis ownership and budgets', () => {
     jest
       .spyOn(fsUtil, 'getFilePaths')
       .mockResolvedValue([path.join(root, 'first.sh'), path.join(root, 'second.sh')])
-    const read = jest.spyOn(fs.promises, 'readFile').mockResolvedValue('value=1')
+    const read = jest.spyOn(disk, 'readFileForAnalysis').mockResolvedValue('value=1')
     const analyze = analyzer.analyze.bind(analyzer)
     jest.spyOn(analyzer, 'analyze').mockImplementation((options) => {
       const result = analyze(options)

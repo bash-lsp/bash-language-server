@@ -14,6 +14,7 @@ import { getDefaultConfiguration } from '../config'
 import { initializeParser } from '../parser'
 import * as fsUtil from '../util/fs'
 import { Logger } from '../util/logger'
+import WorkspaceIndex from '../workspace-index'
 
 const CURRENT_URI = 'dummy-uri.sh'
 
@@ -48,7 +49,7 @@ async function getAnalyzer({
     workspaceFolder,
   })
   if (runBackgroundAnalysis) {
-    await analyzer.initiateBackgroundAnalysis({
+    await new WorkspaceIndex(analyzer, workspaceFolder).configure({
       backgroundAnalysisMaxFiles: defaultConfig.backgroundAnalysisMaxFiles,
       globPattern: defaultConfig.globPattern,
     })
@@ -906,7 +907,7 @@ describe('initiateBackgroundAnalysis', () => {
 
     const analyzer = await getAnalyzer({})
 
-    const { filesParsed } = await analyzer.initiateBackgroundAnalysis({
+    const { filesParsed } = await new WorkspaceIndex(analyzer, FIXTURE_FOLDER).configure({
       backgroundAnalysisMaxFiles: defaultConfig.backgroundAnalysisMaxFiles,
       globPattern: defaultConfig.globPattern,
     })
@@ -937,7 +938,7 @@ describe('initiateBackgroundAnalysis', () => {
 
     const analyzer = await getAnalyzer({})
 
-    const { filesParsed } = await analyzer.initiateBackgroundAnalysis({
+    const { filesParsed } = await new WorkspaceIndex(analyzer, FIXTURE_FOLDER).configure({
       backgroundAnalysisMaxFiles: defaultConfig.backgroundAnalysisMaxFiles,
       globPattern: defaultConfig.globPattern,
     })
@@ -951,7 +952,7 @@ describe('initiateBackgroundAnalysis', () => {
 
     const analyzer = await getAnalyzer({})
 
-    const { filesParsed } = await analyzer.initiateBackgroundAnalysis({
+    const { filesParsed } = await new WorkspaceIndex(analyzer, FIXTURE_FOLDER).configure({
       backgroundAnalysisMaxFiles: 0,
       globPattern: defaultConfig.globPattern,
     })
