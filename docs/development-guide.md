@@ -53,7 +53,6 @@ Development uses [Oxlint][oxlint], [Prettier][prettier], and integration tests u
     pnpm verify:bail  # checks lint/formatting, compiles, and runs tests with coverage
     pnpm lint         # fixes lint and formatting, and checks types
     pnpm lint:bail    # checks lint, formatting, and types without rewriting files
-    pnpm typecheck    # checks lint and types through Oxlint without emitting files
     pnpm test
     pnpm test:coverage
     pnpm test:watch
@@ -65,9 +64,10 @@ pnpm test server/src/__tests__/input-declarations.test.ts
 pnpm test server/src/__tests__/server.test.ts -t 'rename'
 ```
 
-The lint commands and `pnpm typecheck` run [type-aware rules and TypeScript
-compiler diagnostics through Oxlint][oxlint-types]. `pnpm compile` and `pnpm watch`
-still use `tsc` to emit JavaScript and declarations.
+The lint commands run [type-aware rules and TypeScript compiler diagnostics
+through Oxlint][oxlint-types]. Test commands run Vitest without repeating lint or
+type checks. `pnpm compile` and `pnpm watch` still use `tsc` to emit JavaScript and
+declarations.
 
 Tests and test helpers are type-checked using `tsconfig.test.json`. Vitest runs
 files sequentially so subprocess and filesystem integration tests stay isolated.
