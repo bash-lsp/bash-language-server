@@ -206,8 +206,8 @@ importers:
         specifier: 3.3.3
         version: 3.3.3
       fuzzy-search:
-        specifier: 3.2.1
-        version: 3.2.1
+        specifier: 3.3.0
+        version: 3.3.0
       turndown:
         specifier: 7.2.4
         version: 7.2.4
@@ -636,8 +636,8 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
-  fuzzy-search@3.2.1:
-    resolution: {integrity: sha512-vAcPiyomt1ioKAsAL2uxSABHJ4Ju/e4UeDM+g1OlR0vV4YhLGMNsdLNvZTpEDY4JCSt0E4hASCNM5t2ETtsbyg==}
+  fuzzy-search@3.3.0:
+    resolution: {integrity: sha512-08Kc92wGgey2LeTcN0dG8zB+tzSgwujLEYRr3UstbkcxIZC7x9X7BjnIXCz2tAzcCqe6PRubmKr06WxAgA/U8Q==}
 
   glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
@@ -1253,7 +1253,7 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  fuzzy-search@3.2.1: {}
+  fuzzy-search@3.3.0: {}
 
   glob-parent@5.1.2:
     dependencies:
