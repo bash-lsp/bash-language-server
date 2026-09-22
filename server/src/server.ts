@@ -161,7 +161,7 @@ export default class BashServer {
       // when the text document first opened or when its content has changed.
       currentDocument = document
       if (initialized) {
-        this.analyzeAndLintDocument(document)
+        void this.analyzeAndLintDocument(document)
       }
     })
 
@@ -170,7 +170,7 @@ export default class BashServer {
       if (currentDocument?.uri === event.document.uri) {
         currentDocument = null
       }
-      connection.sendDiagnostics({ uri: event.document.uri, diagnostics: [] })
+      void connection.sendDiagnostics({ uri: event.document.uri, diagnostics: [] })
       delete this.uriToCodeActions[event.document.uri]
     })
 
@@ -230,7 +230,7 @@ export default class BashServer {
       if (hasConfigurationCapability) {
         // Register event for all configuration changes.
         if (canDynamicallyRegisterConfigurationChangeNotification) {
-          connection.client.register(LSP.DidChangeConfigurationNotification.type, {
+          void connection.client.register(LSP.DidChangeConfigurationNotification.type, {
             section: CONFIGURATION_SECTION,
           })
         }
@@ -247,7 +247,7 @@ export default class BashServer {
       if (currentDocument) {
         // If we already have a document, analyze it now that we're initialized
         // and the linter is ready.
-        this.analyzeAndLintDocument(currentDocument)
+        void this.analyzeAndLintDocument(currentDocument)
       }
 
       // NOTE: we do not block the server initialization on this background analysis.
@@ -259,9 +259,9 @@ export default class BashServer {
       const configChanged = this.updateConfiguration(settings[CONFIGURATION_SECTION])
       if (configChanged && initialized) {
         logger.debug('Configuration changed')
-        this.startBackgroundAnalysis()
+        void this.startBackgroundAnalysis()
         for (const document of this.documents.all()) {
-          this.analyzeAndLintDocument(document)
+          void this.analyzeAndLintDocument(document)
         }
       }
     })
@@ -335,7 +335,7 @@ export default class BashServer {
           return true
         }
       } catch (err) {
-        logger.warn(`updateConfiguration: failed with ${err}`)
+        logger.warn(`updateConfiguration: failed with ${String(err)}`)
       }
     }
 
@@ -373,11 +373,11 @@ export default class BashServer {
           result,
         })
       } catch (err) {
-        logger.error(`Error while linting: ${err}`)
+        logger.error(`Error while linting: ${String(err)}`)
       }
     }
 
-    this.connection.sendDiagnostics({ uri, version, diagnostics })
+    await this.connection.sendDiagnostics({ uri, version, diagnostics })
   }
 
   private logRequest({
@@ -724,7 +724,7 @@ export default class BashServer {
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : error
-        logger.warn(`getExplainshellDocumentation exception: ${errorMessage}`)
+        logger.warn(`getExplainshellDocumentation exception: ${String(errorMessage)}`)
       }
     }
 
@@ -886,7 +886,7 @@ export default class BashServer {
 
         return await this.formatter.format(document, params.options, this.config.shfmt)
       } catch (err) {
-        logger.error(`Error while formatting: ${err}`)
+        logger.error(`Error while formatting: ${String(err)}`)
       }
     }
 

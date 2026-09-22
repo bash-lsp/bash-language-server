@@ -1,5 +1,9 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "options": {
+    "typeAware": true,
+    "typeCheck": true
+  },
   "categories": {
     "correctness": "error"
   },
@@ -45,5 +49,14 @@
     "typescript/no-unnecessary-type-constraint": "error",
     "typescript/no-unsafe-function-type": "error"
   },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts"],
+      "rules": {
+        // Vitest assertions inspect mock methods without calling them.
+        "typescript/unbound-method": "off"
+      }
+    }
+  ],
   "ignorePatterns": ["**/out/**", "**/node_modules/**", "coverage/**", ".context/**"]
 }

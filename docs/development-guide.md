@@ -51,8 +51,8 @@ Development uses [Oxlint][oxlint], [Prettier][prettier], and integration tests u
 
     pnpm verify       # fixes lint/formatting, compiles, type-checks, and runs tests
     pnpm verify:bail  # checks lint/formatting, compiles, and runs tests with coverage
-    pnpm lint         # fixes lint and formatting
-    pnpm lint:bail    # checks lint and formatting without rewriting files
+    pnpm lint         # fixes lint and formatting, and checks types
+    pnpm lint:bail    # checks lint, formatting, and types without rewriting files
     pnpm test
     pnpm test:coverage
     pnpm test:watch
@@ -63,6 +63,11 @@ Run a specific test file or filter by test name:
 pnpm test server/src/__tests__/input-declarations.test.ts
 pnpm test server/src/__tests__/server.test.ts -t 'rename'
 ```
+
+The lint commands run [type-aware rules and TypeScript compiler diagnostics
+through Oxlint][oxlint-types]. Test commands run Vitest without repeating lint or
+type checks. `pnpm compile` and `pnpm watch` still use `tsc` to emit JavaScript and
+declarations.
 
 Tests and test helpers are type-checked using `tsconfig.test.json`. Vitest runs
 files sequentially so subprocess and filesystem integration tests stay isolated.
@@ -146,5 +151,6 @@ To analyze the performance of the extension or server using the Chrome inspector
 [vitest]: https://vitest.dev/
 [prettier]: https://prettier.io/
 [oxlint]: https://oxc.rs/docs/guide/usage/linter/
+[oxlint-types]: https://oxc.rs/docs/guide/usage/linter/type-aware.html
 [pnpm]: https://pnpm.io/installation
 [node]: https://nodejs.org/en/download/

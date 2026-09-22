@@ -78,7 +78,7 @@ export class Logger {
     const time = new Date().toISOString().substring(11, 23)
     const message = `${time} ${level} ${prefix}${formattedMessage}`
 
-    _connection.sendNotification(LSP.LogMessageNotification.type, {
+    void _connection.sendNotification(LSP.LogMessageNotification.type, {
       type: severity,
       message,
     })

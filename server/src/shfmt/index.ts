@@ -149,7 +149,7 @@ export class Formatter {
 
     let out = ''
     let err = ''
-    const proc = new Promise((resolve, reject) => {
+    const proc = new Promise<number | null>((resolve, reject) => {
       const proc = spawn(this.executablePath, [...args, '-'], { cwd: this.cwd })
       proc.on('error', reject)
       proc.on('close', resolve)
@@ -176,7 +176,7 @@ export class Formatter {
         this._canFormat = false
         return ''
       }
-      throw new Error(`Shfmt: child process error: ${e}`)
+      throw new Error(`Shfmt: child process error: ${String(e)}`)
     }
 
     if (exit != 0) {

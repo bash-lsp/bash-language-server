@@ -243,7 +243,7 @@ export class Linter {
 
     let out = ''
     let err = ''
-    const proc = new Promise((resolve, reject) => {
+    const proc = new Promise<number | null>((resolve, reject) => {
       const useProcessGroup = process.platform !== 'win32'
       // The abort listener below owns termination. Passing signal here as well
       // would race Node's direct-child kill against process-group cleanup.
@@ -261,7 +261,9 @@ export class Linter {
             process.kill(-proc.pid, killSignal)
           } catch (error) {
             if ((error as NodeJS.ErrnoException).code !== 'ESRCH') {
-              logger.warn(`ShellCheck: failed to terminate process group: ${error}`)
+              logger.warn(
+                `ShellCheck: failed to terminate process group: ${String(error)}`,
+              )
               proc.kill(killSignal)
             }
           }
@@ -333,7 +335,7 @@ export class Linter {
         return { comments: [] }
       }
       throw new Error(
-        `ShellCheck: failed with code ${exit}: ${e}\nout:\n${out}\nerr:\n${err}`,
+        `ShellCheck: failed with code ${exit}: ${String(e)}\nout:\n${out}\nerr:\n${err}`,
       )
     }
 
@@ -342,7 +344,9 @@ export class Linter {
       raw = JSON.parse(out)
     } catch (e) {
       throw new Error(
-        `ShellCheck: json parse failed with error ${e}\nout:\n${out}\nerr:\n${err}`,
+        `ShellCheck: json parse failed with error ${String(
+          e,
+        )}\nout:\n${out}\nerr:\n${err}`,
       )
     }
 

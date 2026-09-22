@@ -29,6 +29,7 @@
   ],
   "references": [
     { "path": "./vscode-client" },
-    { "path": "./server" }
+    { "path": "./server" },
+    { "path": "./tsconfig.test.json" }
   ]
 }
