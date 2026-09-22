@@ -3,9 +3,6 @@ vscode-client/out
 server/out
 *.tsbuildinfo
 
-# Test coverage
-coverage/
-
 # OS related
 .DS_Store
 *.log

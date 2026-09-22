@@ -45,5 +45,5 @@
     "typescript/no-unnecessary-type-constraint": "error",
     "typescript/no-unsafe-function-type": "error"
   },
-  "ignorePatterns": ["**/out/**", "**/node_modules/**", "coverage/**", ".context/**"]
+  "ignorePatterns": ["**/out/**", "**/node_modules/**", ".context/**"]
 }

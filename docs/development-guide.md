@@ -50,11 +50,10 @@ below.
 Development uses [Oxlint][oxlint], [Prettier][prettier], and integration tests using [Vitest][vitest]:
 
     pnpm verify       # fixes lint/formatting, compiles, type-checks, and runs tests
-    pnpm verify:bail  # checks lint/formatting, compiles, and runs tests with coverage
+    pnpm verify:bail  # checks lint/formatting, compiles, and runs tests
     pnpm lint         # fixes lint and formatting
     pnpm lint:bail    # checks lint and formatting without rewriting files
     pnpm test
-    pnpm test:coverage
     pnpm test:watch
 
 Run a specific test file or filter by test name:
@@ -65,8 +64,7 @@ pnpm test server/src/__tests__/server.test.ts -t 'rename'
 ```
 
 Tests and test helpers are type-checked using `tsconfig.test.json`. Vitest runs
-files sequentially so subprocess and filesystem integration tests stay isolated.
-Coverage reports are written to `coverage/` in HTML and LCOV formats.
+files in parallel with per-file isolation.
 
 Install the recommended Oxc VS Code extension for lint diagnostics and fixes on
 save. Prettier runs separately as part of the lint commands. The former custom
