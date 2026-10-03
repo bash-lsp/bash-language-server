@@ -151,6 +151,11 @@
           "default": false,
           "description": "Simplify code before formatting."
         },
+        "bashIde.shfmt.minify": {
+          "type": "boolean",
+          "default": false,
+          "description": "Minify code to reduce its size. Implies simplification."
+        },
         "bashIde.shfmt.spaceRedirects": {
           "type": "boolean",
           "default": false,
