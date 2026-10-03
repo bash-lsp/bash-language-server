@@ -78,7 +78,7 @@ export class Formatter {
       args.push(`--filename=${filepathMatch[1]}`)
 
       if (!lspShfmtConfig?.ignoreEditorconfig) {
-        const editorconfigProperties = await editorconfig.parse(filepath)
+        const editorconfigProperties = await editorconfig.parse(filepath, { unset: true })
         logger.debug(
           `Shfmt: found .editorconfig properties: ${JSON.stringify(
             editorconfigProperties,

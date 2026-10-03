@@ -710,6 +710,8 @@ describe('formatter', () => {
   describe('EditorConfig simplify and minify formatting', () => {
     const input =
       '# comment\nif [[ "$value" == "value" ]]; then\n    echo "matched"\nfi\n'
+    const formatted =
+      '# comment\nif [[ "$value" == "value" ]]; then\n  echo "matched"\nfi\n'
     const simplified =
       '# comment\nif [[ $value == "value" ]]; then\n  echo "matched"\nfi\n'
     const minified = 'if [[ $value == "value" ]];then\necho "matched"\nfi\n'
@@ -718,6 +720,8 @@ describe('formatter', () => {
       ['simplify-true.sh', simplified],
       ['minify-true.sh', minified],
       ['minify-without-simplify.sh', minified],
+      ['unset/simplify-true.sh', formatted],
+      ['unset/minify-true.sh', formatted],
     ])('formats %s using EditorConfig', async (filename, expected) => {
       const [result] = await getFormattingResult({
         document: TextDocument.create(
@@ -787,6 +791,7 @@ describe('formatter', () => {
         ['minify-false.sh', []],
         ['both-true.sh', ['-s', '-mn']],
         ['minify-without-simplify.sh', ['-mn']],
+        ['unset/minify-without-simplify.sh', []],
       ])(
         'uses %s instead of language-server settings and preserves additional arguments and editor indentation',
         async (filename, flags) => {
@@ -807,6 +812,37 @@ describe('formatter', () => {
             ...flags,
           ])
           expect(shfmtConfig.additionalArguments).toEqual(['-i=8', '-ci'])
+        },
+      )
+
+      it.each([
+        'simplify-true.sh',
+        'minify-true.sh',
+        'both-true.sh',
+        'other-properties.sh',
+      ])(
+        'uses language-server settings when %s unsets all EditorConfig shfmt properties',
+        async (filename) => {
+          const filepath = `${SIMPLIFY_MINIFY_FIXTURE}/unset/${filename}`
+
+          // @ts-expect-error Testing a private method
+          const args = await formatter.getShfmtArguments(
+            `file://${filepath}`,
+            formatOptions,
+            shfmtConfig,
+          )
+
+          expect(args).toEqual([
+            '-i=8',
+            '-ci',
+            `--filename=${filepath}`,
+            '-i=2',
+            '-bn',
+            '-fn',
+            '-s',
+            '-mn',
+            '-ln=auto',
+          ])
         },
       )
 
