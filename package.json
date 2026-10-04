@@ -20,7 +20,7 @@
     "format:check": "prettier --check \"**/*.{js,ts,tsx,mts}\""
   },
   "devDependencies": {
-    "@types/node": "22.20.4",
+    "@types/node": "22.20.5",
     "@vitest/coverage-v8": "5.0.2",
     "cross-spawn": "7.0.6",
     "oxlint": "1.86.0",
