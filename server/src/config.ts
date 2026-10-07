@@ -45,6 +45,9 @@ export const ShfmtConfigSchema = z.object({
   // Simplify code before formatting.
   simplifyCode: z.boolean().default(false),
 
+  // Minify code to reduce its size. Implies simplification.
+  minify: z.boolean().default(false),
+
   // Follow redirection operators with a space.
   spaceRedirects: z.boolean().default(false),
 })
@@ -147,6 +150,7 @@ export function getConfigFromEnvironmentVariables(): {
       funcNextLine: toBoolean(process.env.SHFMT_FUNC_NEXT_LINE),
       keepPadding: toBoolean(process.env.SHFMT_KEEP_PADDING),
       simplifyCode: toBoolean(process.env.SHFMT_SIMPLIFY_CODE),
+      minify: toBoolean(process.env.SHFMT_MINIFY),
       spaceRedirects: toBoolean(process.env.SHFMT_SPACE_REDIRECTS),
     },
   }
