@@ -23,7 +23,7 @@
     "turndown": "7.2.4",
     "vscode-languageserver": "10.1.1",
     "vscode-languageserver-textdocument": "1.0.15",
-    "web-tree-sitter": "0.27.0",
+    "web-tree-sitter": "0.27.1",
     "zod": "4.6.5"
   },
   "scripts": {
