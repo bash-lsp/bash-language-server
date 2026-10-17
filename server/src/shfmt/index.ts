@@ -78,7 +78,7 @@ export class Formatter {
       args.push(`--filename=${filepathMatch[1]}`)
 
       if (!lspShfmtConfig?.ignoreEditorconfig) {
-        const editorconfigProperties = await editorconfig.parse(filepath)
+        const editorconfigProperties = await editorconfig.parse(filepath, { unset: true })
         logger.debug(
           `Shfmt: found .editorconfig properties: ${JSON.stringify(
             editorconfigProperties,
@@ -90,7 +90,8 @@ export class Formatter {
         editorconfigShfmtConfig.caseIndent = editorconfigProperties.switch_case_indent
         editorconfigShfmtConfig.funcNextLine = editorconfigProperties.function_next_line
         editorconfigShfmtConfig.keepPadding = editorconfigProperties.keep_padding
-        // --simplify is not supported via .editorconfig
+        editorconfigShfmtConfig.simplifyCode = editorconfigProperties.simplify
+        editorconfigShfmtConfig.minify = editorconfigProperties.minify
         editorconfigShfmtConfig.spaceRedirects = editorconfigProperties.space_redirects
         editorconfigShfmtConfig.languageDialect = editorconfigProperties.shell_variant
 
@@ -102,6 +103,8 @@ export class Formatter {
           editorconfigShfmtConfig.caseIndent !== undefined ||
           editorconfigShfmtConfig.funcNextLine !== undefined ||
           editorconfigShfmtConfig.keepPadding !== undefined ||
+          editorconfigShfmtConfig.simplifyCode !== undefined ||
+          editorconfigShfmtConfig.minify !== undefined ||
           editorconfigShfmtConfig.spaceRedirects !== undefined ||
           editorconfigShfmtConfig.languageDialect !== undefined
         ) {
@@ -131,6 +134,7 @@ export class Formatter {
     if (activeShfmtConfig?.funcNextLine) args.push('-fn') // --func-next-line
     if (activeShfmtConfig?.keepPadding) args.push('-kp') // --keep-padding
     if (activeShfmtConfig?.simplifyCode) args.push('-s') // --simplify
+    if (activeShfmtConfig?.minify) args.push('-mn') // --minify (implies --simplify)
     if (activeShfmtConfig?.spaceRedirects) args.push('-sr') // --space-redirects
     if (activeShfmtConfig?.languageDialect)
       args.push(`-ln=${activeShfmtConfig.languageDialect}`) // --language-dialect

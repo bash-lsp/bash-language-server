@@ -1,0 +1,25 @@
+root = true
+
+[*]
+indent_style = space
+indent_size = 8
+
+[simplify-true.sh]
+simplify = true
+
+[simplify-false.sh]
+simplify = false
+
+[minify-true.sh]
+minify = true
+
+[minify-false.sh]
+minify = false
+
+[both-true.sh]
+simplify = true
+minify = true
+
+[minify-without-simplify.sh]
+simplify = false
+minify = true
