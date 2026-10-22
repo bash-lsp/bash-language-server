@@ -1,0 +1,16 @@
+[simplify-true.sh]
+simplify = unset
+
+[minify-true.sh]
+minify = unset
+
+[both-true.sh]
+simplify = unset
+minify = unset
+
+[minify-without-simplify.sh]
+minify = unset
+
+[other-properties.sh]
+binary_next_line = unset
+shell_variant = unset

@@ -31,6 +31,7 @@ describe('ConfigSchema', () => {
           "ignoreEditorconfig": false,
           "keepPadding": false,
           "languageDialect": "auto",
+          "minify": false,
           "path": "shfmt",
           "simplifyCode": false,
           "spaceRedirects": false,
@@ -54,6 +55,7 @@ describe('ConfigSchema', () => {
           ignoreEditorconfig: true,
           keepPadding: true,
           languageDialect: 'posix',
+          minify: true,
           path: 'myshfmt',
           simplifyCode: true,
           spaceRedirects: true,
@@ -87,6 +89,7 @@ describe('ConfigSchema', () => {
           "ignoreEditorconfig": true,
           "keepPadding": true,
           "languageDialect": "posix",
+          "minify": true,
           "path": "myshfmt",
           "simplifyCode": true,
           "spaceRedirects": true,
@@ -104,7 +107,7 @@ describe('ConfigSchema', () => {
   })
 })
 describe('InitializationOptionsSchema', () => {
-  it('leaves omitted settings absent instead of filling in defaults', () => {
+  it('only includes supplied settings without filling in defaults', () => {
     expect(InitializationOptionsSchema.parse({})).toEqual({})
     expect(
       InitializationOptionsSchema.parse({
@@ -114,6 +117,9 @@ describe('InitializationOptionsSchema', () => {
     ).toEqual({
       backgroundAnalysisMaxFiles: 0,
       shfmt: { languageDialect: 'bash' },
+    })
+    expect(InitializationOptionsSchema.parse({ shfmt: { minify: false } })).toEqual({
+      shfmt: { minify: false },
     })
   })
 
@@ -154,6 +160,7 @@ describe('getConfigFromEnvironmentVariables', () => {
           "ignoreEditorconfig": false,
           "keepPadding": false,
           "languageDialect": "auto",
+          "minify": false,
           "path": "shfmt",
           "simplifyCode": false,
           "spaceRedirects": false,
@@ -191,6 +198,7 @@ describe('getConfigFromEnvironmentVariables', () => {
           "ignoreEditorconfig": false,
           "keepPadding": false,
           "languageDialect": "auto",
+          "minify": false,
           "path": "",
           "simplifyCode": false,
           "spaceRedirects": false,
@@ -205,6 +213,7 @@ describe('getConfigFromEnvironmentVariables', () => {
       SHELLCHECK_ARGUMENTS: '-e SC2001',
       SHFMT_PATH: '/path/to/shfmt',
       SHFMT_CASE_INDENT: 'true',
+      SHFMT_MINIFY: 'true',
       EXPLAINSHELL_ENDPOINT: 'localhost:8080',
       GLOB_PATTERN: '*.*',
       BACKGROUND_ANALYSIS_MAX_FILES: '1',
@@ -237,6 +246,7 @@ describe('getConfigFromEnvironmentVariables', () => {
           "ignoreEditorconfig": false,
           "keepPadding": false,
           "languageDialect": "auto",
+          "minify": true,
           "path": "/path/to/shfmt",
           "simplifyCode": false,
           "spaceRedirects": false,

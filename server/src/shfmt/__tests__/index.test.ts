@@ -13,6 +13,7 @@ vi.spyOn(Logger.prototype, 'log').mockImplementation(() => {
 const loggerWarn = vi.spyOn(Logger.prototype, 'warn')
 
 const FIXTURE_DOCUMENT_URI = `file://${FIXTURE_FOLDER}/foo.sh`
+const SIMPLIFY_MINIFY_FIXTURE = `${FIXTURE_FOLDER}/shfmt-editorconfig/simplify-minify`
 function textToDoc(txt: string) {
   return TextDocument.create(FIXTURE_DOCUMENT_URI, 'bar', 0, txt)
 }
@@ -29,6 +30,7 @@ function makeShfmtConfig(cfg: Partial<ShfmtConfig>): ShfmtConfig {
     funcNextLine: cfg.funcNextLine ?? false,
     keepPadding: cfg.keepPadding ?? false,
     simplifyCode: cfg.simplifyCode ?? false,
+    minify: cfg.minify ?? false,
     spaceRedirects: cfg.spaceRedirects ?? false,
   }
 }
@@ -691,6 +693,52 @@ describe('formatter', () => {
     )
   })
 
+  it('minifies and simplifies code when the language-server minify setting is true', async () => {
+    const [result] = await getFormattingResult({
+      document: textToDoc(
+        '# comment\nif [[ "$value" == "value" ]]; then\n  echo "matched"\nfi\n',
+      ),
+      shfmtConfig: makeShfmtConfig({ minify: true, simplifyCode: false }),
+    })
+
+    expect(result).toHaveLength(1)
+    expect(result[0].newText).toEqual(
+      'if [[ $value == "value" ]];then\necho "matched"\nfi\n',
+    )
+  })
+
+  describe('EditorConfig simplify and minify formatting', () => {
+    const input =
+      '# comment\nif [[ "$value" == "value" ]]; then\n    echo "matched"\nfi\n'
+    const formatted =
+      '# comment\nif [[ "$value" == "value" ]]; then\n  echo "matched"\nfi\n'
+    const simplified =
+      '# comment\nif [[ $value == "value" ]]; then\n  echo "matched"\nfi\n'
+    const minified = 'if [[ $value == "value" ]];then\necho "matched"\nfi\n'
+
+    it.each([
+      ['simplify-true.sh', simplified],
+      ['minify-true.sh', minified],
+      ['minify-without-simplify.sh', minified],
+      ['unset/simplify-true.sh', formatted],
+      ['unset/minify-true.sh', formatted],
+    ])('formats %s using EditorConfig', async (filename, expected) => {
+      const [result] = await getFormattingResult({
+        document: TextDocument.create(
+          `file://${SIMPLIFY_MINIFY_FIXTURE}/${filename}`,
+          'shellscript',
+          0,
+          input,
+        ),
+        formatOptions: { tabSize: 2, insertSpaces: true },
+        shfmtConfig: makeShfmtConfig({}),
+      })
+
+      expect(result).toHaveLength(1)
+      expect(result[0].newText).toEqual(expected)
+    })
+  })
+
   describe('getShfmtArguments()', () => {
     const lspShfmtConfig = makeShfmtConfig({
       binaryNextLine: true,
@@ -725,6 +773,106 @@ describe('formatter', () => {
         '-ln=auto',
       ])
       expect(secondArgs).toEqual(firstArgs)
+    })
+
+    describe('EditorConfig simplify and minify arguments', () => {
+      const shfmtConfig = makeShfmtConfig({
+        binaryNextLine: true,
+        funcNextLine: true,
+        simplifyCode: true,
+        minify: true,
+        additionalArguments: ['-i=8', '-ci'],
+      })
+
+      it.each([
+        ['simplify-true.sh', ['-s']],
+        ['simplify-false.sh', []],
+        ['minify-true.sh', ['-mn']],
+        ['minify-false.sh', []],
+        ['both-true.sh', ['-s', '-mn']],
+        ['minify-without-simplify.sh', ['-mn']],
+        ['unset/minify-without-simplify.sh', []],
+      ])(
+        'uses %s instead of language-server settings and preserves additional arguments and editor indentation',
+        async (filename, flags) => {
+          const filepath = `${SIMPLIFY_MINIFY_FIXTURE}/${filename}`
+
+          // @ts-expect-error Testing a private method
+          const args = await formatter.getShfmtArguments(
+            `file://${filepath}`,
+            formatOptions,
+            shfmtConfig,
+          )
+
+          expect(args).toEqual([
+            '-i=8',
+            '-ci',
+            `--filename=${filepath}`,
+            '-i=2',
+            ...flags,
+          ])
+          expect(shfmtConfig.additionalArguments).toEqual(['-i=8', '-ci'])
+        },
+      )
+
+      it.each([
+        'simplify-true.sh',
+        'minify-true.sh',
+        'both-true.sh',
+        'other-properties.sh',
+      ])(
+        'uses language-server settings when %s unsets all EditorConfig shfmt properties',
+        async (filename) => {
+          const filepath = `${SIMPLIFY_MINIFY_FIXTURE}/unset/${filename}`
+
+          // @ts-expect-error Testing a private method
+          const args = await formatter.getShfmtArguments(
+            `file://${filepath}`,
+            formatOptions,
+            shfmtConfig,
+          )
+
+          expect(args).toEqual([
+            '-i=8',
+            '-ci',
+            `--filename=${filepath}`,
+            '-i=2',
+            '-bn',
+            '-fn',
+            '-s',
+            '-mn',
+            '-ln=auto',
+          ])
+        },
+      )
+
+      it.each([
+        ['both-true.sh', false, []],
+        ['minify-false.sh', true, ['-mn']],
+      ])(
+        'uses language-server minify settings when ignoring %s',
+        async (filename, minify, flags) => {
+          const filepath = `${SIMPLIFY_MINIFY_FIXTURE}/${filename}`
+
+          // @ts-expect-error Testing a private method
+          const args = await formatter.getShfmtArguments(
+            `file://${filepath}`,
+            formatOptions,
+            { ...shfmtConfig, simplifyCode: false, minify, ignoreEditorconfig: true },
+          )
+
+          expect(args).toEqual([
+            '-i=8',
+            '-ci',
+            `--filename=${filepath}`,
+            '-i=2',
+            '-bn',
+            '-fn',
+            ...flags,
+            '-ln=auto',
+          ])
+        },
+      )
     })
 
     describe('when the document URI is not a filepath', () => {
