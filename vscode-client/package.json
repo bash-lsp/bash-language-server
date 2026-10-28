@@ -1,6 +1,6 @@
 {
   "name": "bash-ide-vscode",
-  "packageManager": "pnpm@12.15.0",
+  "packageManager": "pnpm@12.16.1",
   "displayName": "Bash IDE",
   "description": "A language server for Bash",
   "author": "Mads Hartmann",
