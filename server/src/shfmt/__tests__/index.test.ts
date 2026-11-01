@@ -897,15 +897,15 @@ describe('formatter', () => {
 
       it('should use language server config', () => {
         expect(shfmtArgs).toEqual(expect.arrayContaining(lspShfmtArgs))
-        expect(shfmtArgs.length).toEqual(6) // indentation + filename
+        expect(shfmtArgs.length).toEqual(5) // indentation + language dialect
       })
 
       it('should use indentation config from the editor', () => {
         expect(shfmtArgs).toContain('-i=2')
       })
 
-      it('should include the filename argument', () => {
-        expect(shfmtArgs).toContain(`--filename=${filepath}`)
+      it('should not include the filename argument', () => {
+        expect(shfmtArgs).not.toContain(`--filename=${filepath}`)
       })
     })
   })
