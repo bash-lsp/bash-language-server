@@ -23,7 +23,7 @@
     "@types/node": "22.20.5",
     "@vitest/coverage-v8": "5.1.0",
     "cross-spawn": "7.0.6",
-    "oxlint": "1.91.0",
+    "oxlint": "1.93.0",
     "oxlint-tsgolint": "7.0.2006",
     "prettier": "2.8.8",
     "typescript": "6.0.3",
