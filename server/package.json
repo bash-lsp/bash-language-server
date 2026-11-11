@@ -17,7 +17,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "editorconfig": "3.0.2",
+    "editorconfig": "4.0.0",
     "fast-glob": "3.3.3",
     "fuzzy-search": "3.3.0",
     "turndown": "7.2.5",
