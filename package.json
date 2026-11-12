@@ -24,7 +24,7 @@
     "@vitest/coverage-v8": "5.1.0",
     "cross-spawn": "7.0.6",
     "oxlint": "1.91.0",
-    "oxlint-tsgolint": "7.0.2006",
+    "oxlint-tsgolint": "7.0.2007",
     "prettier": "2.8.8",
     "typescript": "6.0.3",
     "vitest": "5.1.0",
