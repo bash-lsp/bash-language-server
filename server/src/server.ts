@@ -578,6 +578,14 @@ export default class BashServer {
       )
 
       if (commandName) {
+        // The text of the word before the cursor, which the edit will replace
+        const textBeforeCursor =
+          this.analyzer.getDocument(params.textDocument.uri)?.getText({
+            start: { line: params.position.line, character: 0 },
+            end: params.position,
+          }) ?? ''
+        const typedWord = /\S*$/.exec(textBeforeCursor)?.[0] ?? word
+
         optionsCompletions = getCommandOptions(commandName, word).map((option) => ({
           label: option,
           kind: LSP.CompletionItemKind.Constant,
@@ -585,10 +593,12 @@ export default class BashServer {
             type: CompletionItemDataType.Symbol,
           },
           textEdit: {
-            newText: option.slice(word.length),
+            // Replace the typed prefix (including the leading hyphens) with the
+            // full option so that clients filter and apply it consistently.
+            newText: option,
             range: {
               start: {
-                character: params.position.character,
+                character: params.position.character - typedWord.length,
                 line: params.position.line,
               },
               end: {
